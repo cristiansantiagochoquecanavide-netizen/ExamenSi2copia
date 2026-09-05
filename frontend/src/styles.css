@@ -1,0 +1,50 @@
+/* =========================================================
+   ATELIER NOIR ? DESIGN SYSTEM BASE TOKENS (UI-UX-WEB)
+   ========================================================= */
+
+:root {
+  --color-canvas: #000000;
+  --color-surface: #131313;
+  --color-surface-dim: #111111;
+  --color-surface-bright: #1f1f1f;
+  --color-surface-container: #1a1a1a;
+  --color-on-surface: #e2e2e2;
+  --color-on-surface-muted: #8e9192;
+  
+  --color-primary: #ffffff;
+  --color-on-primary: #111111;
+  --color-gold: #d4af37;
+  --color-gold-muted: #af8d11;
+
+  --border-hairline: 1px solid rgba(255, 255, 255, 0.15);
+  --border-radius-sharp: 0px; /* Estricto 0px border-radius */
+
+  --font-serif: 'Bodoni Moda', serif;
+  --font-sans: 'Inter', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border-radius: 0 !important; /* Regla inquebrantable de forma */
+}
+
+body.atelier-noir-theme {
+  background-color: var(--color-canvas);
+  color: var(--color-on-surface);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, .editorial-heading {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+button, input, select, textarea {
+  font-family: var(--font-sans);
+}

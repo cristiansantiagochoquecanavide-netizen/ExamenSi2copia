@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-surface-variant": "#c4c7c8",
+          "on-secondary-fixed-variant": "#574500",
+          "tertiary-container": "#e5e2e1",
+          "on-secondary-fixed": "#241a00",
+          "primary": "#ffffff",
+          "on-secondary": "#3c2f00",
+          "error-container": "#93000a",
+          "tertiary": "#ffffff",
+          "inverse-on-surface": "#303030",
+          "outline-variant": "#444748",
+          "primary-fixed": "#e2e2e2",
+          "surface-container": "#1f1f1f",
+          "on-tertiary-fixed-variant": "#474746",
+          "surface-dim": "#131313",
+          "surface-variant": "#353535",
+          "surface-bright": "#393939",
+          "inverse-surface": "#e2e2e2",
+          "tertiary-fixed": "#e5e2e1",
+          "on-primary-fixed-variant": "#454747",
+          "background": "#131313",
+          "on-error": "#690005",
+          "on-tertiary": "#313030",
+          "on-surface": "#e2e2e2",
+          "on-background": "#e2e2e2",
+          "secondary-fixed-dim": "#e9c349",
+          "inverse-primary": "#5d5f5f",
+          "primary-fixed-dim": "#c6c6c7",
+          "on-tertiary-fixed": "#1c1b1b",
+          "outline": "#8e9192",
+          "secondary": "#e9c349",
+          "primary-container": "#e2e2e2",
+          "secondary-fixed": "#ffe088",
+          "surface-container-lowest": "#0e0e0e",
+          "surface-container-highest": "#353535",
+          "surface": "#131313",
+          "surface-container-high": "#2a2a2a",
+          "on-tertiary-container": "#656464",
+          "on-secondary-container": "#342800",
+          "on-error-container": "#ffdad6",
+          "secondary-container": "#af8d11",
+          "on-primary-fixed": "#1a1c1c",
+          "surface-tint": "#c6c6c7",
+          "on-primary-container": "#636565",
+          "surface-container-low": "#1b1b1b",
+          "on-primary": "#2f3131",
+          "tertiary-fixed-dim": "#c8c6c5",
+          "error": "#ffb4ab"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "space-2xl": "12rem",
+          "space-3xs": "0.25rem",
+          "space-lg": "4rem",
+          "space-sm": "1.5rem",
+          "grid-margin": "4rem",
+          "space-xl": "8rem",
+          "space-md": "2rem",
+          "space-2xs": "0.5rem",
+          "grid-gutter": "2rem",
+          "space-xs": "1rem"
+        },
+        "fontFamily": {
+          "label-md": [
+            "Inter"
+          ],
+          "headline-md": [
+            "Bodoni Moda"
+          ],
+          "headline-xl": [
+            "Bodoni Moda"
+          ],
+          "headline-lg": [
+            "Bodoni Moda"
+          ],
+          "body-lg": [
+            "Inter"
+          ],
+          "body-md": [
+            "Inter"
+          ],
+          "headline-sm": [
+            "Bodoni Moda"
+          ]
+        },
+        "fontSize": {
+          "label-md": [
+            "12px",
+            {
+              "lineHeight": "1.5",
+              "letterSpacing": "0.08em",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-md": [
+            "28px",
+            {
+              "lineHeight": "1.3",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-xl": [
+            "56px",
+            {
+              "lineHeight": "1.1",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-lg": [
+            "40px",
+            {
+              "lineHeight": "1.2",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "400"
+            }
+          ],
+          "body-lg": [
+            "16px",
+            {
+              "lineHeight": "1.6",
+              "letterSpacing": "0.01em",
+              "fontWeight": "300"
+            }
+          ],
+          "body-md": [
+            "14px",
+            {
+              "lineHeight": "1.6",
+              "letterSpacing": "0.01em",
+              "fontWeight": "300"
+            }
+          ],
+          "headline-sm": [
+            "20px",
+            {
+              "lineHeight": "1.4",
+              "fontWeight": "400"
+            }
+          ]
+        }
+      },
+    },
+  }
+</script></head><body class="bg-surface font-body-md text-on-surface"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex flex-col pt-space-md pb-space-md"><div class="px-space-md mb-space-lg flex items-center gap-space-xs"><img alt="Aura Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPJAuuugp3HowSEYDYhoT22lTBLm_XI9M3Hwzf-MZM-pTud53N7_znuX2X43lVuJ9lcqWbpsb-s47SLlyrEWLl8nvyOjaRp-tCa2hHCP-fPodw6-0CScFgop4Ecfa2lp-2pjSAghXhYpCzSCXVgHhS9tJmbt5k0YiFuRSpIk-h0LkVU0WYsZxNNzZKW-gfS5zIOIsmdk5p2s_Fd8XgcFH1xnTxyElJ1T_q4Iy8ODqpF-73cfH7vA_7Yw"/><span class="font-headline-sm uppercase text-primary">Atelier Admin</span></div><nav class="flex-1 px-space-xs flex flex-col gap-space-3xs" data-active-classes="bg-surface-container-high text-primary font-medium"><a aria-current="page" class="flex items-center px-space-xs py-space-xs rounded transition-all bg-surface-container-high text-primary font-medium" data-path="overview" href="#"><span class="material-symbols-outlined mr-space-xs text-[20px]">grid_view</span>Overview</a><a class="flex items-center px-space-xs py-space-xs rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="inventory" href="#"><span class="material-symbols-outlined mr-space-xs text-[20px]">inventory_2</span>Inventory</a><a class="flex items-center px-space-xs py-space-xs rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="orders" href="#"><span class="material-symbols-outlined mr-space-xs text-[20px]">receipt_long</span>Orders</a><a class="flex items-center px-space-xs py-space-xs rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="analytics" href="#"><span class="material-symbols-outlined mr-space-xs text-[20px]">monitoring</span>Analytics</a><a class="flex items-center px-space-xs py-space-xs rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="settings" href="#"><span class="material-symbols-outlined mr-space-xs text-[20px]">settings</span>Settings</a></nav></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-20 bg-surface/80 backdrop-blur-xl z-40 flex items-center justify-between px-space-lg"><div class="flex items-center gap-space-xs"></div><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-on-surface-variant cursor-pointer">search</span><span class="material-symbols-outlined text-on-surface-variant cursor-pointer">notifications</span><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="relative pt-20 bg-surface min-h-screen p-space-lg"><div class="flex flex-col w-full text-on-surface">
+<!-- Top Banner / Headline Area -->
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-space-lg gap-space-sm">
+<div>
+<div class="flex items-center gap-space-2xs mb-space-3xs">
+<span class="text-label-md uppercase text-outline">Atelier Control Center</span>
+<span class="text-label-md text-outline">/</span>
+<span class="text-label-md uppercase text-secondary">Global Operations</span>
+</div>
+<h1 class="font-headline-xl text-primary">Overview Dashboard</h1>
+</div>
+<div class="flex items-center gap-space-xs">
+<div class="flex items-center bg-surface-container-low px-space-xs py-space-2xs rounded">
+<span class="material-symbols-outlined text-[16px] mr-space-3xs text-secondary">calendar_today</span>
+<span class="text-body-md text-on-surface-variant">Real-Time: Active Session</span>
+</div>
+<button class="bg-primary text-on-primary px-space-sm py-space-2xs text-body-md font-medium hover:bg-transparent hover:text-primary hover:border-primary border border-transparent transition-all">
+        Export Report
+      </button>
+</div>
+</div>
+<!-- Key Metric Cards Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-grid-gutter mb-space-lg">
+<!-- Card 1 -->
+<div class="bg-surface-container-low p-space-md flex flex-col justify-between relative overflow-hidden group hover:bg-surface-container transition-all">
+<div class="absolute top-0 left-0 w-full h-[2px] bg-secondary"></div>
+<div class="flex justify-between items-start mb-space-sm">
+<span class="text-label-md uppercase text-on-surface-variant">Total Revenue</span>
+<span class="material-symbols-outlined text-secondary">trending_up</span>
+</div>
+<div>
+<div class="font-headline-lg text-primary mb-space-3xs">$148,245</div>
+<div class="flex items-center text-body-md text-secondary">
+<span>+12.4%</span>
+<span class="text-on-surface-variant ml-space-3xs font-light">vs previous period</span>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-low p-space-md flex flex-col justify-between relative overflow-hidden group hover:bg-surface-container transition-all">
+<div class="absolute top-0 left-0 w-full h-[2px] bg-primary"></div>
+<div class="flex justify-between items-start mb-space-sm">
+<span class="text-label-md uppercase text-on-surface-variant">Active Orders</span>
+<span class="material-symbols-outlined text-primary">receipt_long</span>
+</div>
+<div>
+<div class="font-headline-lg text-primary mb-space-3xs">342</div>
+<div class="flex items-center text-body-md text-on-surface-variant">
+<span class="inline-block w-2 h-2 rounded-full bg-secondary mr-space-3xs"></span>
+<span>18 fulfillment in progress</span>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-low p-space-md flex flex-col justify-between relative overflow-hidden group hover:bg-surface-container transition-all">
+<div class="absolute top-0 left-0 w-full h-[2px] bg-primary"></div>
+<div class="flex justify-between items-start mb-space-sm">
+<span class="text-label-md uppercase text-on-surface-variant">Conversion Rate</span>
+<span class="material-symbols-outlined text-primary">analytics</span>
+</div>
+<div>
+<div class="font-headline-lg text-primary mb-space-3xs">3.8%</div>
+<div class="flex items-center text-body-md text-secondary">
+<span>+0.6%</span>
+<span class="text-on-surface-variant ml-space-3xs font-light">optimized flow</span>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-container-low p-space-md flex flex-col justify-between relative overflow-hidden group hover:bg-surface-container transition-all">
+<div class="absolute top-0 left-0 w-full h-[2px] bg-primary"></div>
+<div class="flex justify-between items-start mb-space-sm">
+<span class="text-label-md uppercase text-on-surface-variant">Avg. Order Value</span>
+<span class="material-symbols-outlined text-primary">payments</span>
+</div>
+<div>
+<div class="font-headline-lg text-primary mb-space-3xs">$320</div>
+<div class="flex items-center text-body-md text-on-surface-variant">
+<span>Global curation average</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Grid: Chart & Inventory Alerts -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-grid-gutter mb-space-lg">
+<!-- Sales Trend Line Chart (8 Cols) -->
+<div class="lg:col-span-8 bg-surface-container-low p-space-md flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-md">
+<div>
+<h2 class="font-headline-md text-primary">Sales Velocity Trend</h2>
+<p class="text-body-md text-on-surface-variant">Hourly revenue accumulation across digital flagships</p>
+</div>
+<div class="flex gap-space-xs">
+<button class="px-space-xs py-space-3xs text-label-md uppercase bg-surface-container text-primary">24H</button>
+<button class="px-space-xs py-space-3xs text-label-md uppercase text-on-surface-variant hover:text-primary">7D</button>
+<button class="px-space-xs py-space-3xs text-label-md uppercase text-on-surface-variant hover:text-primary">30D</button>
+</div>
+</div>
+<!-- Simulated SVG Line Chart -->
+<div class="w-full h-64 relative flex items-end">
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 800 200">
+<!-- Background Grid Lines -->
+<line stroke="rgba(255,255,255,0.06)" stroke-width="1" x1="0" x2="800" y1="0" y2="0"></line>
+<line stroke="rgba(255,255,255,0.06)" stroke-width="1" x1="0" x2="800" y1="50" y2="50"></line>
+<line stroke="rgba(255,255,255,0.06)" stroke-width="1" x1="0" x2="800" y1="100" y2="100"></line>
+<line stroke="rgba(255,255,255,0.06)" stroke-width="1" x1="0" x2="800" y1="150" y2="150"></line>
+<line stroke="rgba(255,255,255,0.06)" stroke-width="1" x1="0" x2="800" y1="200" y2="200"></line>
+<!-- Gradient Area under curve -->
+<defs>
+<lineargradient id="chartGrad" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#ffffff" stop-opacity="0.15"></stop>
+<stop offset="100%" stop-color="#ffffff" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<path d="M0,160 Q100,120 200,130 T400,70 T600,90 T800,20 L800,200 L0,200 Z" fill="url(#chartGrad)"></path>
+<!-- Line Path -->
+<path d="M0,160 Q100,120 200,130 T400,70 T600,90 T800,20" fill="none" stroke="#ffffff" stroke-width="2"></path>
+<!-- Data Points -->
+<circle cx="200" cy="130" fill="#e9c349" r="4"></circle>
+<circle cx="400" cy="70" fill="#ffffff" r="4"></circle>
+<circle cx="600" cy="90" fill="#ffffff" r="4"></circle>
+<circle cx="800" cy="20" fill="#e9c349" r="4"></circle>
+</svg>
+<!-- Tooltip overlay mock -->
+<div class="absolute top-12 left-1/2 -translate-x-1/2 bg-surface border border-outline-variant px-space-xs py-space-3xs text-body-md pointer-events-none shadow-xl">
+<span class="text-secondary font-medium">Peak: $14,250</span> / 14:00 GMT
+        </div>
+</div>
+<div class="flex justify-between mt-space-sm text-label-md text-outline uppercase">
+<span>00:00</span>
+<span>04:00</span>
+<span>08:00</span>
+<span>12:00</span>
+<span>16:00</span>
+<span>20:00</span>
+<span>24:00</span>
+</div>
+</div>
+<!-- Quick Inventory Alerts (4 Cols) -->
+<div class="lg:col-span-4 bg-surface-container-low p-space-md flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-sm">
+<h2 class="font-headline-md text-primary">Inventory Alerts</h2>
+<span class="text-label-md uppercase text-secondary font-medium">3 Critical</span>
+</div>
+<p class="text-body-md text-on-surface-variant mb-space-md">Real-time stock thresholds across global atelier fulfillment hubs.</p>
+<div class="flex flex-col gap-space-xs">
+<!-- Alert Item 1 -->
+<div class="p-space-xs bg-surface-container flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<div class="w-10 h-10 bg-surface-container-high overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A minimalist black silk evening dress hanging against a dark textured concrete wall with subtle rim lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5E-eDUs-jU-R5UTFgfii07_6tOucA9CjsxlP9SV2FUrYeVUJc6mBZlyE6alUEDbqMUKZn-oAmJ6acwdsh4Crk10YVMC8iLLqs1NY57Pw1Cgjor93MeecGyhFEpUhTLwVFOjLPgV9lMsi4YHLUSabwSuiw4Wm0UtGDrmnTy42Ywxxt3k53Gi0pMjT9iGeQn2h4ieKzrxsHfwyibCfOGV4VXCpZxuTEosLpbmLvG5tMKTQ8sPiq6nI75w"/>
+</div>
+<div>
+<div class="text-body-md font-medium text-primary">Silk Georgette Gown</div>
+<div class="text-label-md text-secondary">Only 2 left in Paris</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary text-[18px]">warning</span>
+</div>
+<!-- Alert Item 2 -->
+<div class="p-space-xs bg-surface-container flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<div class="w-10 h-10 bg-surface-container-high overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="An artisanal structured leather handbag in deep charcoal with matte hardware displayed on a minimalist pedestal." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgfJJ943qGu2DzTYoGQurwjUn9PZmZxiJtcdw6Z0FpS8I0ch0D1y2sDHqcKSzFWi_KYlHYn2MDNkW8SjLzw5wsG86nJ-p2FOHFmuAw7bkLNgOrlvBe0p_C_bo0FxN-Xdm3Ujv40vY1OxmZJDXVDSqdw2PIp7SqCHttB6fWVNzSug6jc1z052ykVFXRUf4RgilUElnzHIbcO9HEaHfURmExTEpbMm_G6n5YhafeB_A3L2Nj9gDMMVWueQ"/>
+</div>
+<div>
+<div class="text-body-md font-medium text-primary">Structured Tote (Noir)</div>
+<div class="text-label-md text-secondary">Backorder Risk (Milan)</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary text-[18px]">warning</span>
+</div>
+<!-- Alert Item 3 -->
+<div class="p-space-xs bg-surface-container flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<div class="w-10 h-10 bg-surface-container-high overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Handcrafted minimalist sterling silver cuff bracelet reflecting sharp architectural studio lights." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDr_9w_x10n3ZwVcm1J1mJDOaU4SWpb2ZHYfsVgNQH85aDhyFFFJJRUNe9a8FSksN7TbhDbN_Li4mzXARMv23dFcdzfApAwQ_bYXjlS-Sd0nia4Z4R4B9eQT28ICPYmg2bu34FCkU_ZzaoNOfGqHRpef--XaH2tl1qN7AArByARZ4yBfX-L4egEhgZiujbDPloEMYXOx0da5d6dKPwIwESTHPPsVg_-dJV_SnRmlXLOROE3pO43o9vt6Q"/>
+</div>
+<div>
+<div class="text-body-md font-medium text-primary">Architectural Cuff</div>
+<div class="text-label-md text-primary">Low Stock (Tokyo)</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px]">info</span>
+</div>
+</div>
+</div>
+<button class="w-full mt-space-md bg-transparent border border-outline-variant text-on-surface py-space-2xs text-body-md hover:bg-surface-container hover:text-primary transition-all">
+        Manage Full Inventory Matrix
+      </button>
+</div>
+</div>
+<!-- Recent High-Value Orders Table -->
+<div class="bg-surface-container-low p-space-md">
+<div class="flex flex-col md:flex-row md:items-center justify-between mb-space-md gap-space-xs">
+<div>
+<h2 class="font-headline-md text-primary">Recent High-Value Orders</h2>
+<p class="text-body-md text-on-surface-variant">Transactions exceeding $1,000 requiring expedited white-glove dispatch.</p>
+</div>
+<div class="flex items-center gap-space-xs">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-space-2xs top-1/2 -translate-y-1/2 text-[16px] text-outline">search</span>
+<input class="bg-surface-container text-on-surface text-body-md pl-8 pr-space-xs py-space-2xs focus:outline-none focus:ring-1 focus:ring-primary w-64" placeholder="Filter orders..." type="text"/>
+</div>
+</div>
+</div>
+<!-- Table Container -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant/30 text-label-md uppercase text-outline">
+<th class="py-space-xs px-space-2xs">Order ID</th>
+<th class="py-space-xs px-space-2xs">Client</th>
+<th class="py-space-xs px-space-2xs">Item(s)</th>
+<th class="py-space-xs px-space-2xs">Location</th>
+<th class="py-space-xs px-space-2xs text-right">Amount</th>
+<th class="py-space-xs px-space-2xs text-center">Status</th>
+</tr>
+</thead>
+<tbody class="text-body-md">
+<tr class="hover:bg-surface-container transition-all border-b border-outline-variant/10">
+<td class="py-space-xs px-space-2xs font-mono text-secondary">#AT-9842</td>
+<td class="py-space-xs px-space-2xs font-medium text-primary">Helena Vance</td>
+<td class="py-space-xs px-space-2xs text-on-surface-variant">Cashmere Trench Coat (1)</td>
+<td class="py-space-xs px-space-2xs text-on-surface-variant">Paris, FR</td>
+<td class="py-space-xs px-space-2xs text-right font-medium text-primary">$3,450.00</td>
+<td class="py-space-xs px-space-2xs text-center">
+<span class="px-space-2xs py-1 text-label-md uppercase bg-surface-container text-secondary">Dispatched</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container transition-all border-b border-outline-variant/10">
+<td class="py-space-xs px-space-2xs font-mono text-secondary">#AT-9841</td>
+<td class="py-space-xs px-space-2xs font-medium text-primary">Julian Sterling</td>
+<td class="py-space-xs px-space-2xs text-on-surface-variant">Tailored Wool Blazer, Silk Shirt</td>
+<td class="py-space-xs px-space-2xs text-on-surface-variant">New York, US</td>
+<td class="py-space-xs px-space-2xs text-right font-medium text-primary">$2,890.00</td>
+<td class="py-space-xs px-space-2xs text-center">
+<span class="px-space-2xs py-1 text-label-md uppercase bg-surface-container text-primary">Processing</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container transition-all border-b border-outline-variant/10">
+<td class="py-space-xs px-space-2xs font-mono text-secondary">#AT-9839</td>
+<td class="py-space-xs px-space-2xs font-medium text-primary">Camille Laurent</td>
+<td class="py-space-xs px-space-2xs text-on-surface-variant">Structured Leather Tote</td>
+<td class="py-space-xs px-space-2xs text-on-surface-variant">Geneva, CH</td>
+<td class="py-space-xs px-space-2xs text-right font-medium text-primary">$1,850.00</td>
+<td class="py-space-xs px-space-2xs text-center">
+<span class="px-space-2xs py-1 text-label-md uppercase bg-surface-container text-secondary">Delivered</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container transition-all">
+<td class="py-space-xs px-space-2xs font-mono text-secondary">#AT-9835</td>
+<td class="py-space-xs px-space-2xs font-medium text-primary">Aethelgard Co.</td>
+<td class="py-space-xs px-space-2xs text-on-surface-variant">Architectural Silver Cuff (3)</td>
+<td class="py-space-xs px-space-2xs text-on-surface-variant">Tokyo, JP</td>
+<td class="py-space-xs px-space-2xs text-right font-medium text-primary">$1,420.00</td>
+<td class="py-space-xs px-space-2xs text-center">
+<span class="px-space-2xs py-1 text-label-md uppercase bg-surface-container text-primary">Packing</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="flex items-center justify-between mt-space-md pt-space-xs border-t border-outline-variant/10">
+<span class="text-label-md text-outline">Showing 4 of 342 active orders</span>
+<button class="text-label-md uppercase text-primary hover:text-secondary transition-all flex items-center gap-space-3xs">
+        View All Orders <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div></main></div></body></html>

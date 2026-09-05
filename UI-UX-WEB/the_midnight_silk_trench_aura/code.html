@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-surface-variant": "#c4c7c8",
+          "on-secondary-fixed-variant": "#574500",
+          "tertiary-container": "#e5e2e1",
+          "on-secondary-fixed": "#241a00",
+          "primary": "#ffffff",
+          "on-secondary": "#3c2f00",
+          "error-container": "#93000a",
+          "tertiary": "#ffffff",
+          "inverse-on-surface": "#303030",
+          "outline-variant": "#444748",
+          "primary-fixed": "#e2e2e2",
+          "surface-container": "#1f1f1f",
+          "on-tertiary-fixed-variant": "#474746",
+          "surface-dim": "#131313",
+          "surface-variant": "#353535",
+          "surface-bright": "#393939",
+          "inverse-surface": "#e2e2e2",
+          "tertiary-fixed": "#e5e2e1",
+          "on-primary-fixed-variant": "#454747",
+          "background": "#131313",
+          "on-error": "#690005",
+          "on-tertiary": "#313030",
+          "on-surface": "#e2e2e2",
+          "on-background": "#e2e2e2",
+          "secondary-fixed-dim": "#e9c349",
+          "inverse-primary": "#5d5f5f",
+          "primary-fixed-dim": "#c6c6c7",
+          "on-tertiary-fixed": "#1c1b1b",
+          "outline": "#8e9192",
+          "secondary": "#e9c349",
+          "primary-container": "#e2e2e2",
+          "secondary-fixed": "#ffe088",
+          "surface-container-lowest": "#0e0e0e",
+          "surface-container-highest": "#353535",
+          "surface": "#131313",
+          "surface-container-high": "#2a2a2a",
+          "on-tertiary-container": "#656464",
+          "on-secondary-container": "#342800",
+          "on-error-container": "#ffdad6",
+          "secondary-container": "#af8d11",
+          "on-primary-fixed": "#1a1c1c",
+          "surface-tint": "#c6c6c7",
+          "on-primary-container": "#636565",
+          "surface-container-low": "#1b1b1b",
+          "on-primary": "#2f3131",
+          "tertiary-fixed-dim": "#c8c6c5",
+          "error": "#ffb4ab"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "space-2xl": "12rem",
+          "space-3xs": "0.25rem",
+          "space-lg": "4rem",
+          "space-sm": "1.5rem",
+          "grid-margin": "4rem",
+          "space-xl": "8rem",
+          "space-md": "2rem",
+          "space-2xs": "0.5rem",
+          "grid-gutter": "2rem",
+          "space-xs": "1rem"
+        },
+        "fontFamily": {
+          "label-md": [
+            "Inter"
+          ],
+          "headline-md": [
+            "Bodoni Moda"
+          ],
+          "headline-xl": [
+            "Bodoni Moda"
+          ],
+          "headline-lg": [
+            "Bodoni Moda"
+          ],
+          "body-lg": [
+            "Inter"
+          ],
+          "body-md": [
+            "Inter"
+          ],
+          "headline-sm": [
+            "Bodoni Moda"
+          ]
+        },
+        "fontSize": {
+          "label-md": [
+            "12px",
+            {
+              "lineHeight": "1.5",
+              "letterSpacing": "0.08em",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-md": [
+            "28px",
+            {
+              "lineHeight": "1.3",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-xl": [
+            "56px",
+            {
+              "lineHeight": "1.1",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-lg": [
+            "40px",
+            {
+              "lineHeight": "1.2",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "400"
+            }
+          ],
+          "body-lg": [
+            "16px",
+            {
+              "lineHeight": "1.6",
+              "letterSpacing": "0.01em",
+              "fontWeight": "300"
+            }
+          ],
+          "body-md": [
+            "14px",
+            {
+              "lineHeight": "1.6",
+              "letterSpacing": "0.01em",
+              "fontWeight": "300"
+            }
+          ],
+          "headline-sm": [
+            "20px",
+            {
+              "lineHeight": "1.4",
+              "fontWeight": "400"
+            }
+          ]
+        }
+      },
+    },
+  }
+</script></head><body class="bg-surface font-body-md text-on-surface"><header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl"><div class="h-20 w-full px-grid-margin flex items-center justify-between"><div class="flex items-center gap-space-md"><img alt="Aura Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPJAuuugp3HowSEYDYhoT22lTBLm_XI9M3Hwzf-MZM-pTud53N7_znuX2X43lVuJ9lcqWbpsb-s47SLlyrEWLl8nvyOjaRp-tCa2hHCP-fPodw6-0CScFgop4Ecfa2lp-2pjSAghXhYpCzSCXVgHhS9tJmbt5k0YiFuRSpIk-h0LkVU0WYsZxNNzZKW-gfS5zIOIsmdk5p2s_Fd8XgcFH1xnTxyElJ1T_q4Iy8ODqpF-73cfH7vA_7Yw"/><span class="font-headline-sm uppercase tracking-widest text-primary">AURA</span></div><nav class="hidden md:flex items-center gap-space-lg" data-active-classes="text-primary font-semibold"><a class="font-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="home" href="#">Home</a><a aria-current="page" class="transition-colors text-primary font-semibold" data-path="collections" href="#">Collections</a><a class="font-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="new-arrivals" href="#">New Arrivals</a><a class="font-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="cart" href="#">Cart</a></nav><div class="flex items-center gap-space-xs"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-20 bg-surface"><div class="flex flex-col w-full bg-surface text-on-surface">
+<div class="w-full px-grid-margin py-space-sm flex items-center justify-between">
+<div class="flex items-center gap-space-xs font-label-md uppercase tracking-widest text-on-surface-variant">
+<span>Collections</span>
+<span>/</span>
+<span>Outerwear</span>
+<span>/</span>
+<span class="text-primary">The Midnight Silk Trench</span>
+</div>
+<div class="font-label-md uppercase tracking-widest text-on-surface-variant">
+      Ref. 8923-MLT
+    </div>
+</div>
+<section class="w-full px-grid-margin pb-space-xl grid grid-cols-1 lg:grid-cols-12 gap-grid-gutter items-start">
+<div class="lg:col-span-7 flex flex-col gap-space-md">
+<div class="w-full aspect-[4/5] bg-surface-container overflow-hidden relative group">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="High fashion editorial shot of a tall model wearing The Midnight Silk Trench coat in Obsidian black, walking down a rain-slicked minimal concrete alley in Paris at dusk, dramatic moody lighting, razor-sharp focus, luxury lookbook photography style." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA0E7a22Emzj2lsDWhqHcgWXID6xz9XrQEPGUYJ9G0WoEHQawehXXB5J9FC5ceHRBx9sSdpwFFUSD6eSl1LZN4JiEXpsTrcBjUhxSfgD4V6EjRN38FDbuPJSQuWhlLTTdsVYdHELt0UhXTpDrFwNJhs0oT4cLTImv_TqHTTeVl-xLv6zKISHZq_1Cmgqmc8XNXmlxvBkteptMfL1f3_yZLo_uRmj0l2qDqaUhJgsxpq7mbg0lsOVOkf9A')"></div>
+<div class="absolute bottom-4 left-4 bg-surface/80 backdrop-blur-md px-space-xs py-space-3xs font-label-md uppercase tracking-widest text-primary">
+          01 / 04 — Editorial View
+        </div>
+</div>
+<div class="grid grid-cols-2 gap-grid-gutter">
+<div class="w-full aspect-[3/4] bg-surface-container overflow-hidden relative group">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="Close up detail shot of the Mulberry Silk fabric texture and hand-stitched lapel of The Midnight Silk Trench coat, dramatic side lighting highlighting the deep black sheen." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAA-LPZqVqFLenm6TEiwck1OLyCyOS8xVmIqaWhj7XKfTVCXwjAbMFVd1kuLIpefGwRaV3psHu2OlRIs5WW-PTbKdCGWFFuaQbe0LNcvr1i4i2w6vR0xDkVM21oQBmvOcQJ9ZNPySXiz-nVpvGFI2px9BNK36ninKJ3uoMwjmTf56X4V5Sw4mFVdPnCqMlATGVwJGXziIObgGsYR5gsPG_1afqvMK8xKliUgG7J5M5SQ8hyWdaVxRxKkg')"></div>
+<div class="absolute bottom-4 left-4 bg-surface/80 backdrop-blur-md px-space-xs py-space-3xs font-label-md uppercase tracking-widest text-primary">
+            02 / Detail
+          </div>
+</div>
+<div class="w-full aspect-[3/4] bg-surface-container overflow-hidden relative group">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="Rear view of The Midnight Silk Trench coat draped gracefully over a minimalist architectural chair, showing the dramatic length and fluid movement of pure Mulberry Silk." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA2dn5NoheAhw1u3n-WtnvnP4YucOCoo-kkW3qPZw9BlsMxHm0pzqQ97QmThE01VXRV6UWMD-2fh6JhIw-vwusmFkPvZfDg0aojryOFdVZ5brUqBD2WsL6bOLgKR6GTYdraM36KkVGZWPhQKDJYmUfFdRTOGWt9-JQRBFgREYV3MJWbkBbo5JLtABqMhAzMF5lh4aawC4xsOHocvC0dkOVCiklM-j1dOoioe6X9kaLcTPVO8-PqrbXbow')"></div>
+<div class="absolute bottom-4 left-4 bg-surface/80 backdrop-blur-md px-space-xs py-space-3xs font-label-md uppercase tracking-widest text-primary">
+            03 / Silhouette
+          </div>
+</div>
+</div>
+</div>
+<div class="lg:col-span-5 lg:sticky lg:top-28 flex flex-col gap-space-md">
+<div class="flex flex-col gap-space-3xs">
+<span class="font-label-md text-secondary uppercase tracking-widest">Atelier Exclusive</span>
+<h1 class="font-headline-lg text-primary">The Midnight Silk Trench</h1>
+<p class="font-headline-sm text-on-surface-variant">$2,450.00 USD</p>
+</div>
+<div class="w-full h-px bg-outline-variant/30 my-space-3xs"></div>
+<div class="flex flex-col gap-space-xs">
+<span class="font-label-md uppercase tracking-widest text-on-surface-variant">Color: <span class="text-primary font-semibold" id="selected-color">Obsidian</span></span>
+<div class="flex items-center gap-space-xs">
+<button aria-label="Obsidian" class="color-btn w-8 h-8 rounded-full bg-[#111111] border-2 border-primary ring-2 ring-primary ring-offset-2 ring-offset-surface transition-all" onclick="setColor('Obsidian', this)"></button>
+<button aria-label="Chalk" class="color-btn w-8 h-8 rounded-full bg-[#e2e2e2] border-2 border-transparent transition-all" onclick="setColor('Chalk', this)"></button>
+<button aria-label="Slate" class="color-btn w-8 h-8 rounded-full bg-[#444748] border-2 border-transparent transition-all" onclick="setColor('Slate', this)"></button>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs mt-space-2xs">
+<div class="flex justify-between items-center">
+<span class="font-label-md uppercase tracking-widest text-on-surface-variant">Select Size</span>
+<span class="font-label-md uppercase tracking-widest text-secondary cursor-pointer hover:underline">Size Guide</span>
+</div>
+<div class="grid grid-cols-4 gap-space-3xs">
+<button class="size-btn py-space-xs font-label-md uppercase tracking-widest border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary transition-all" onclick="setSize('XS', this)">XS</button>
+<button class="size-btn py-space-xs font-label-md uppercase tracking-widest border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary transition-all" onclick="setSize('S', this)">S</button>
+<button class="size-btn py-space-xs font-label-md uppercase tracking-widest border border-primary text-primary bg-surface-container transition-all" onclick="setSize('M', this)">M</button>
+<button class="size-btn py-space-xs font-label-md uppercase tracking-widest border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary transition-all" onclick="setSize('L', this)">L</button>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs mt-space-sm">
+<button class="w-full h-12 bg-primary text-on-primary font-label-md uppercase tracking-widest font-semibold hover:bg-transparent hover:text-primary hover:border hover:border-primary transition-all flex items-center justify-center gap-space-2xs" onclick="addToCart()">
+<span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+<span>Add to Cart</span>
+</button>
+<div class="flex items-center justify-center gap-space-2xs py-space-3xs text-on-surface-variant font-body-md">
+<span class="material-symbols-outlined text-[16px]">local_shipping</span>
+<span>Complimentary global shipping &amp; signature packaging</span>
+</div>
+</div>
+<div class="w-full h-px bg-outline-variant/30 my-space-3xs"></div>
+<div class="flex flex-col gap-space-xs">
+<h3 class="font-headline-sm text-primary">The Architecture of Elegance</h3>
+<p class="font-body-md text-on-surface-variant">
+          Cut from an exceptionally dense 22-momme 100% Mulberry silk, this trench coat offers a fluid, liquid drape combined with structural authority. Featuring classic double-breasted closure, horn buttons hand-carved in Milan, and an oversized self-tie belt. Designed for an effortless, sweeping silhouette.
+        </p>
+</div>
+<div class="flex flex-col gap-space-2xs">
+<div class="flex justify-between py-space-3xs border-b border-outline-variant/20 font-body-md">
+<span class="text-on-surface-variant">Material</span>
+<span class="text-primary font-semibold">100% Mulberry Silk (22-Momme)</span>
+</div>
+<div class="flex justify-between py-space-3xs border-b border-outline-variant/20 font-body-md">
+<span class="text-on-surface-variant">Origin</span>
+<span class="text-primary font-semibold">Crafted in Milan, Italy</span>
+</div>
+<div class="flex justify-between py-space-3xs border-b border-outline-variant/20 font-body-md">
+<span class="text-on-surface-variant">Care</span>
+<span class="text-primary font-semibold">Specialist Dry Clean Only</span>
+</div>
+</div>
+</div>
+</section>
+<section class="w-full bg-surface-container-lowest py-space-xl px-grid-margin">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-space-lg gap-space-sm">
+<div class="flex flex-col gap-space-3xs">
+<span class="font-label-md uppercase tracking-widest text-secondary">Curated Ensemble</span>
+<h2 class="font-headline-lg text-primary">Complete The Look</h2>
+</div>
+<span class="font-label-md uppercase tracking-widest text-on-surface-variant border-b border-primary pb-1 cursor-pointer hover:text-primary transition-colors">Explore Collection</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-grid-gutter">
+<div class="flex flex-col gap-space-xs group cursor-pointer">
+<div class="w-full aspect-[3/4] bg-surface-container overflow-hidden relative">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="High fashion studio product shot of wide-leg tailored wool trousers in deep obsidian black against a stark neutral background." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCSkUcl3XgpU84UEFuVCkZisFDoI5qW7_Ct_9DQMsB-DGXbJuOyzI5J6M-nqy2hIIromMsghnEmosTBGyH7gtZWEECcq_ndH6kkVN-YUR7JuG43OLxPuqC9grOkmrM2cQIBKd6r7bsfx-9hmsGMQhe7P4v4746p6r7JG0ujsXkPCAfEIxu0EC-iW0FPURQn1MZUkDpgUqncuCy-i_XFAdSgrMoSvY0cUhDZjzBH_EPilvkz9voKX_x4IA')"></div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-headline-sm text-primary">Sartorial Wool Trousers</h4>
+<p class="font-body-md text-on-surface-variant">Obsidian</p>
+</div>
+<span class="font-body-md text-primary">$890</span>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs group cursor-pointer">
+<div class="w-full aspect-[3/4] bg-surface-container overflow-hidden relative">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="Close up editorial shot of a minimalist structured leather handbag in matte black calfskin with architectural gold hardware." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC9tc1JXE2FeGfPKbTSBlukzR241YYEZdDVZw9OR15RtYti0qxaET0YxWgT1pgTRpfg_uQTHrhoSGWWTdFVKgJIwV_AfcCK0Z00uCKXLdr0VojyhhqgsHKcPbAX0TPqbEfy5dd_mmoOHJpU6hMwtRY8zk2tm2QSzWMsp0DomT1pmKMgm79CIztTnFzjCIVQrB47GfMEoJVAuZZ_CV7tXtxn6aEbctMms7hVFb4tSTVolElKtxiYJzGWww')"></div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-headline-sm text-primary">The Structured Clutch</h4>
+<p class="font-body-md text-on-surface-variant">Matte Black</p>
+</div>
+<span class="font-body-md text-primary">$1,250</span>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs group cursor-pointer">
+<div class="w-full aspect-[3/4] bg-surface-container overflow-hidden relative">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="Editorial footwear shot of sharp pointed-toe leather stiletto boots in polished black calfskin." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBfrwwry5B9Gc_qzY6qvN87fsiVsOPzKbPFOpBPGdse8z4xaYoGIdfLqvAcc-3BLASjw6P9E74otHv6fvkHkkKc_A07qaiMogd5gWjEq3wEbW9p0sl64nIrdplZ_9tO4RIcc4vOiF7ZDnrxLfFhLDMZ1awTnD9Dzs4Gi-WxkM64Ms0KkSpQA6DflRVUP641ZhQ6p5rhpyhCjUBwp6rm5rIdKqu3rrX40GnkMJduOTwYawisREINn1dulA')"></div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-headline-sm text-primary">Pointed Stiletto Boot</h4>
+<p class="font-body-md text-on-surface-variant">Polished Noir</p>
+</div>
+<span class="font-body-md text-primary">$1,100</span>
+</div>
+</div>
+</div>
+</section>
+<script>
+    function setColor(colorName, el) {
+      document.getElementById('selected-color').innerText = colorName;
+      document.querySelectorAll('.color-btn').forEach(btn => {
+        btn.classList.remove('border-primary', 'ring-2', 'ring-primary', 'ring-offset-2', 'ring-offset-surface');
+        btn.classList.add('border-transparent');
+      });
+      el.classList.remove('border-transparent');
+      el.classList.add('border-primary', 'ring-2', 'ring-primary', 'ring-offset-2', 'ring-offset-surface');
+    }
+
+    function setSize(sizeName, el) {
+      document.querySelectorAll('.size-btn').forEach(btn => {
+        btn.classList.remove('border-primary', 'text-primary', 'bg-surface-container');
+        btn.classList.add('border-outline-variant', 'text-on-surface-variant');
+      });
+      el.classList.remove('border-outline-variant', 'text-on-surface-variant');
+      el.classList.add('border-primary', 'text-primary', 'bg-surface-container');
+    }
+
+    function addToCart() {
+      const btn = event.currentTarget;
+      const originalContent = btn.innerHTML;
+      btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">check</span><span>Added to Cart</span>';
+      btn.classList.add('bg-secondary', 'text-on-secondary');
+      setTimeout(() => {
+        btn.innerHTML = originalContent;
+        btn.classList.remove('bg-secondary', 'text-on-secondary');
+      }, 2000);
+    }
+  </script>
+</div></main><footer class="w-full bg-surface-container-lowest py-space-xl px-grid-margin"><div class="flex flex-col md:flex-row justify-between items-start gap-space-lg"><div class="flex flex-col gap-space-2xs"><span class="font-headline-sm text-primary">AURA ATELIER</span><p class="font-body-md text-on-surface-variant">Paris / Milan / Tokyo</p></div><div class="flex gap-space-lg font-body-md text-on-surface-variant"><span>Privacy Policy</span><span>Terms of Service</span><span>Client Services</span></div></div></footer></body></html>

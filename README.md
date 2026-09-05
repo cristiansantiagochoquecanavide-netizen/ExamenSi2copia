@@ -42,20 +42,45 @@ El proyecto está diseñado bajo una arquitectura modular y escalable, utilizand
 
 ---
 
-## 🏗️ Estructura del Repositorio (Propuesta)
+## 🏗️ Estructura del Repositorio
 
 ```text
 Proyecto/
-├── backend/          # API REST desarrollada en FastAPI (Python)
-├── frontend/         # Plataforma Web desarrollada en Angular
-├── mobile/           # Aplicación Móvil desarrollada en Flutter (Dart)
-├── docs/             # Documentación UML, PUDS y especificaciones
-└── README.md         # Documentación general del repositorio
+├── backend/                  # Monolito Modular en FastAPI (Python)
+│   └── app/
+│       ├── core/             # Base de datos, seguridad JWT, configuración base
+│       └── domains/          # Dominios de Negocio Aislados
+│           ├── usuarios/     # Auth, roles, usuarios, clientes, personal
+│           ├── catalogo/     # Prendas, categorías, temporadas, colecciones
+│           ├── inventario/   # Sucursales, stock, tallas, colores, proveedores
+│           ├── reservas/     # Reservas en tienda, vestidores físicos, agendas
+│           ├── ventas_pagos/ # POS, órdenes e-commerce, carrito, pasarelas
+│           └── ia_asistente/ # Recomendador de prendas, chatbot, voz
+├── frontend/                 # Aplicación Web en Angular (Atelier Noir UI)
+├── movil/                    # Aplicación Móvil en Flutter (AR Fitting Room)
+├── docs/                     # Documentación PUDS, modelos UML 2.5+
+├── UI-UX-WEB/                # Stitch UI Web (Atelier Noir / Aura Storefront & Admin)
+├── UI-UX-MOVIL/              # Stitch UI Móvil (Atelier Noir / AR Fitting Room)
+└── README.md
 ```
+
+---
+
+## 🏛️ Regla Arquitectónica Estricta: Monolito Modular en FastAPI (RNF06)
+
+Para garantizar la mantenibilidad y desacoplamiento, el backend debe respetar 3 reglas inquebrantables:
+1. **Agrupación por Dominios de Negocio**: Prohibido el esquema plano o archivos gigantes. Módulos padre divididos por capacidades de negocio.
+2. **Submódulos Aislados (`APIRouter`)**: Cada funcionalidad dentro del dominio se expone mediante su propio `APIRouter` independiente.
+3. **Encapsulamiento Interno (Patrón de Capas)**: Cada submódulo implementa estrictamente 4 capas:
+   - `models/`: Entidades ORM (SQLAlchemy 2.0).
+   - `schemas/`: Contratos de entrada y salida (Pydantic v2).
+   - `services/`: Lógica de negocio pura, reglas transaccionales e integraciones.
+   - `routers/`: Controladores de endpoints y dependencias FastAPI.
 
 ---
 
 ## ⚙️ Reglas de Desarrollo & Despliegue
 
-- ⚠️ **Frameworks restringidos**: Queda strictly prohibido el uso de CMS o frameworks e-commerce preconstruidos (PrestaShop, Shopify, Magento, WooCommerce).
+- ⚠️ **Frameworks restringidos**: Queda estrictamente prohibido el uso de CMS o frameworks e-commerce preconstruidos (PrestaShop, Shopify, Magento, WooCommerce).
 - ☁️ **Entorno de Despliegue**: Despliegue obligatorio en servicios en la nube (Cloud Platform), no localhost.
+- 🎨 **Línea Visual**: Estricta adherencia a la guía de diseño **Atelier Noir** (Dark luxury, 0px border-radius, Bodoni Moda + Inter).

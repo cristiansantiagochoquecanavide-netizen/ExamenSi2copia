@@ -1,0 +1,46 @@
+name: fashionstore_mobile
+description: "FashionStore Mobile - Plataforma de Comercio Electronico con Vestidor Virtual AR e IA (Atelier Noir)"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Declarative Routing
+  go_router: ^14.2.0
+
+  # State Management
+  flutter_bloc: ^8.1.6
+  equatable: ^2.0.5
+
+  # Network & API
+  dio: ^5.4.3+1
+
+  # Local Storage
+  flutter_secure_storage: ^9.2.2
+  shared_preferences: ^2.2.3
+
+  # Fonts & UI (Atelier Noir)
+  google_fonts: ^6.2.1
+  flutter_svg: ^2.0.10+1
+
+  # Formatting
+  intl: ^0.19.0
+
+  # AR & Camera integration baseline
+  camera: ^0.10.5+9
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/

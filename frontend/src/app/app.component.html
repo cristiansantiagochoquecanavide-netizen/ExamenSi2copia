@@ -1,0 +1,37 @@
+<div class="app-layout">
+  <header class="navbar">
+    <div class="brand-zone">
+      <a routerLink="/catalogo" class="logo-link">
+        <span class="logo-serif">FASHIONSTORE</span>
+        <span class="logo-badge">ATELIER NOIR</span>
+      </a>
+    </div>
+
+    <nav class="nav-links">
+      <a routerLink="/catalogo" routerLinkActive="active">Catálogo</a>
+      <a routerLink="/reservas" routerLinkActive="active">Reservas</a>
+      <a routerLink="/ventas" routerLinkActive="active">Ventas / POS</a>
+      <a routerLink="/inventario" routerLinkActive="active">Inventario</a>
+      <a routerLink="/ia-asistente" routerLinkActive="active">IA Asistente</a>
+      <a routerLink="/usuarios" routerLinkActive="active">Usuarios</a>
+    </nav>
+
+    <div class="user-auth-zone">
+      @if (authService.isAuthenticated()) {
+        <div class="user-profile-box">
+          <span class="user-role-badge">{{ authService.currentUser()?.rol?.nombre || 'AUTENTICADO' }}</span>
+          <span class="user-name">{{ authService.currentUser()?.nombre }}</span>
+          <button type="button" class="btn-logout" (click)="logout()">Salir</button>
+        </div>
+      } @else {
+        <a routerLink="/login" class="btn-login-nav">
+          <span class="login-dot">&bull;</span> Iniciar Sesión
+        </a>
+      }
+    </div>
+  </header>
+
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

@@ -1,0 +1,1 @@
+"""Dominio de Inventario Omnicanal."""

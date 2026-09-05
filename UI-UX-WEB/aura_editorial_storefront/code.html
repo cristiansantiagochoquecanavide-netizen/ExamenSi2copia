@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-surface-variant": "#c4c7c8",
+          "on-secondary-fixed-variant": "#574500",
+          "tertiary-container": "#e5e2e1",
+          "on-secondary-fixed": "#241a00",
+          "primary": "#ffffff",
+          "on-secondary": "#3c2f00",
+          "error-container": "#93000a",
+          "tertiary": "#ffffff",
+          "inverse-on-surface": "#303030",
+          "outline-variant": "#444748",
+          "primary-fixed": "#e2e2e2",
+          "surface-container": "#1f1f1f",
+          "on-tertiary-fixed-variant": "#474746",
+          "surface-dim": "#131313",
+          "surface-variant": "#353535",
+          "surface-bright": "#393939",
+          "inverse-surface": "#e2e2e2",
+          "tertiary-fixed": "#e5e2e1",
+          "on-primary-fixed-variant": "#454747",
+          "background": "#131313",
+          "on-error": "#690005",
+          "on-tertiary": "#313030",
+          "on-surface": "#e2e2e2",
+          "on-background": "#e2e2e2",
+          "secondary-fixed-dim": "#e9c349",
+          "inverse-primary": "#5d5f5f",
+          "primary-fixed-dim": "#c6c6c7",
+          "on-tertiary-fixed": "#1c1b1b",
+          "outline": "#8e9192",
+          "secondary": "#e9c349",
+          "primary-container": "#e2e2e2",
+          "secondary-fixed": "#ffe088",
+          "surface-container-lowest": "#0e0e0e",
+          "surface-container-highest": "#353535",
+          "surface": "#131313",
+          "surface-container-high": "#2a2a2a",
+          "on-tertiary-container": "#656464",
+          "on-secondary-container": "#342800",
+          "on-error-container": "#ffdad6",
+          "secondary-container": "#af8d11",
+          "on-primary-fixed": "#1a1c1c",
+          "surface-tint": "#c6c6c7",
+          "on-primary-container": "#636565",
+          "surface-container-low": "#1b1b1b",
+          "on-primary": "#2f3131",
+          "tertiary-fixed-dim": "#c8c6c5",
+          "error": "#ffb4ab"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "space-2xl": "12rem",
+          "space-3xs": "0.25rem",
+          "space-lg": "4rem",
+          "space-sm": "1.5rem",
+          "grid-margin": "4rem",
+          "space-xl": "8rem",
+          "space-md": "2rem",
+          "space-2xs": "0.5rem",
+          "grid-gutter": "2rem",
+          "space-xs": "1rem"
+        },
+        "fontFamily": {
+          "label-md": [
+            "Inter"
+          ],
+          "headline-md": [
+            "Bodoni Moda"
+          ],
+          "headline-xl": [
+            "Bodoni Moda"
+          ],
+          "headline-lg": [
+            "Bodoni Moda"
+          ],
+          "body-lg": [
+            "Inter"
+          ],
+          "body-md": [
+            "Inter"
+          ],
+          "headline-sm": [
+            "Bodoni Moda"
+          ]
+        },
+        "fontSize": {
+          "label-md": [
+            "12px",
+            {
+              "lineHeight": "1.5",
+              "letterSpacing": "0.08em",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-md": [
+            "28px",
+            {
+              "lineHeight": "1.3",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-xl": [
+            "56px",
+            {
+              "lineHeight": "1.1",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-lg": [
+            "40px",
+            {
+              "lineHeight": "1.2",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "400"
+            }
+          ],
+          "body-lg": [
+            "16px",
+            {
+              "lineHeight": "1.6",
+              "letterSpacing": "0.01em",
+              "fontWeight": "300"
+            }
+          ],
+          "body-md": [
+            "14px",
+            {
+              "lineHeight": "1.6",
+              "letterSpacing": "0.01em",
+              "fontWeight": "300"
+            }
+          ],
+          "headline-sm": [
+            "20px",
+            {
+              "lineHeight": "1.4",
+              "fontWeight": "400"
+            }
+          ]
+        }
+      },
+    },
+  }
+</script></head><body class="bg-surface font-body-md text-on-surface"><header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl"><div class="h-20 w-full px-grid-margin flex items-center justify-between"><div class="flex items-center gap-space-md"><img alt="Aura Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPJAuuugp3HowSEYDYhoT22lTBLm_XI9M3Hwzf-MZM-pTud53N7_znuX2X43lVuJ9lcqWbpsb-s47SLlyrEWLl8nvyOjaRp-tCa2hHCP-fPodw6-0CScFgop4Ecfa2lp-2pjSAghXhYpCzSCXVgHhS9tJmbt5k0YiFuRSpIk-h0LkVU0WYsZxNNzZKW-gfS5zIOIsmdk5p2s_Fd8XgcFH1xnTxyElJ1T_q4Iy8ODqpF-73cfH7vA_7Yw"/><span class="font-headline-sm uppercase tracking-widest text-primary">AURA</span></div><nav class="hidden md:flex items-center gap-space-lg" data-active-classes="text-primary font-semibold"><a aria-current="page" class="transition-colors text-primary font-semibold" data-path="home" href="#">Home</a><a class="font-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="collections" href="#">Collections</a><a class="font-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="new-arrivals" href="#">New Arrivals</a><a class="font-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="cart" href="#">Cart</a></nav><div class="flex items-center gap-space-xs"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-20 bg-surface"><div class="flex flex-col w-full bg-[#000000] text-on-surface">
+<!-- Immersive Hero Banner -->
+<section class="relative w-full h-[870px] flex items-center justify-center overflow-hidden">
+<div class="absolute inset-0 z-0 opacity-60">
+<div class="absolute inset-0 bg-gradient-to-t from-[#000000] via-transparent to-transparent z-10"></div>
+<div class="absolute inset-0 bg-gradient-to-r from-[#000000]/80 via-transparent to-[#000000]/80 z-10"></div>
+<div class="w-full h-full bg-cover bg-center scale-105 transition-transform duration-1000 ease-out" data-alt="High-contrast monochrome fashion photography of a model wearing a sweeping silk gown against a stark concrete brutalist architectural background in Paris, dramatic lighting, deep shadows, cinematic noir aesthetic, luxury editorial style." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCkD4uo8hzezpRcp1XYETd0oHe1Rv1w-_wXAdPV-579VE_b3a_PWZZHL1TQhsqBxMf8EBDsvNEZb-N7yk_ZdFVyZjvfm4Y2zntbthV3S9OeqyO2E9h_ss-jiBDt5UsBbq4ccjESQ_SIPvDDV26O0I5RNYiWtxBToVQcOg3bjULT7wr3y3PHSTGvhwAcCoIsm91QVaG6Sx5HV33eQTXjS4kVGsWSsEw7GSvXM4YmGHR7LE_6KfeOkPsf2A')"></div>
+</div>
+<div class="relative z-20 flex flex-col items-center text-center px-4 max-w-5xl mx-auto mt-12">
+<span class="font-label-md uppercase tracking-[0.3em] text-on-surface-variant mb-space-xs">Autumn / Winter Atelier</span>
+<h1 class="font-headline-xl text-primary mb-space-md tracking-tight">SILHOUETTE OF THE NIGHT</h1>
+<p class="font-body-lg text-on-surface-variant max-w-xl mb-space-lg font-light">An exploration of stark contrast, fluid motion, and absolute architectural precision in monochrome.</p>
+<div class="flex items-center gap-space-sm">
+<a class="px-space-md py-4 bg-primary text-on-primary font-label-md uppercase tracking-widest transition-all duration-300 hover:bg-transparent hover:text-primary border border-primary" href="#collection">Explore Collection</a>
+<a class="px-space-md py-4 bg-transparent text-primary font-label-md uppercase tracking-widest transition-all duration-300 hover:bg-[#1a1a1a] border border-primary/40" href="#lookbook">View Lookbook</a>
+</div>
+</div>
+<div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 animate-bounce">
+<span class="font-label-md text-[10px] uppercase tracking-widest text-on-surface-variant">Scroll</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">arrow_downward</span>
+</div>
+</section>
+<!-- Editorial Brand Statement -->
+<section class="w-full py-space-xl px-grid-margin bg-[#000000] flex flex-col md:flex-row justify-between items-start gap-space-lg" id="lookbook">
+<div class="max-w-xl">
+<span class="font-label-md uppercase tracking-widest text-secondary mb-space-2xs block">The Philosophy</span>
+<h2 class="font-headline-lg text-primary">Form follows shadow. Material defines presence.</h2>
+</div>
+<div class="max-w-md">
+<p class="font-body-lg text-on-surface-variant font-light">Every piece in this collection is constructed by master tailors across our Parisian and Milanese workshops. We utilize only the deepest black wools, raw silks, and supple calfskins to craft garments that command silence.</p>
+</div>
+</section>
+<!-- Minimalist Grid of Luxury Fashion Items -->
+<section class="w-full pb-space-2xl px-grid-margin bg-[#000000]" id="collection">
+<div class="flex flex-col md:flex-row justify-between items-end mb-space-lg gap-space-xs">
+<div>
+<span class="font-label-md uppercase tracking-widest text-on-surface-variant block mb-space-3xs">Curated Selection</span>
+<h2 class="font-headline-md text-primary">New Arrivals &amp; Masterpieces</h2>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="px-4 py-2 bg-primary text-on-primary font-label-md uppercase tracking-wider">All</button>
+<button class="px-4 py-2 bg-[#121212] text-on-surface-variant hover:text-primary font-label-md uppercase tracking-wider transition-colors">Silk</button>
+<button class="px-4 py-2 bg-[#121212] text-on-surface-variant hover:text-primary font-label-md uppercase tracking-wider transition-colors">Outerwear</button>
+<button class="px-4 py-2 bg-[#121212] text-on-surface-variant hover:text-primary font-label-md uppercase tracking-wider transition-colors">Leather</button>
+</div>
+</div>
+<!-- Product Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-grid-gutter">
+<!-- Product Item 1 -->
+<div class="group flex flex-col bg-[#121212] overflow-hidden transition-all duration-500 hover:-translate-y-1">
+<div class="relative w-full aspect-[3/4] overflow-hidden bg-surface-container">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="Close up monochrome editorial photography of a fluid black silk evening dress draped on a minimalist mannequin, dramatic side lighting highlighting the fabric sheen and sharp seams, dark atmospheric studio background." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAuo1a1QeQXYIGJ4cX9D4neGknVsN3XVTWt8cdJYKb2-N6l4jICz5_WQVRkr_-mtUTMRpPNEKt0ASLDkxP5O4DrPpHyY18rr4yCQknj53d_FP-w3ZrZEE2oaLPMP6OyZ-2kvlDN2BgG9wUvjpehdJKnPYurcK3zoFN7hpVk-Ae6r6CDhdKDpXMmS5kWZO4Kra2Yb9R8n8nzkl83iev3B0qVXWg6e8jyuTlgW7WR0VxySmggbZ7HM4_ddw')"></div>
+<div class="absolute top-4 right-4 bg-[#000000]/80 backdrop-blur-md px-3 py-1">
+<span class="font-label-md text-[10px] text-primary uppercase tracking-widest">New</span>
+</div>
+<button class="absolute bottom-4 left-4 right-4 py-3 bg-primary text-on-primary font-label-md uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300">Quick View</button>
+</div>
+<div class="p-space-md flex flex-col flex-grow justify-between">
+<div>
+<div class="flex justify-between items-start mb-space-3xs">
+<span class="font-label-md text-on-surface-variant uppercase tracking-wider">Silk Dress</span>
+<span class="font-body-md text-primary font-normal">$2,450</span>
+</div>
+<h3 class="font-headline-sm text-primary mb-space-2xs">The Obsidian Bias Gown</h3>
+</div>
+<p class="font-body-md text-on-surface-variant font-light text-xs">Heavyweight sandwashed silk satin cut on the absolute bias.</p>
+</div>
+</div>
+<!-- Product Item 2 -->
+<div class="group flex flex-col bg-[#121212] overflow-hidden transition-all duration-500 hover:-translate-y-1">
+<div class="relative w-full aspect-[3/4] overflow-hidden bg-surface-container">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="High fashion editorial shot of a structured black wool tailored overcoat worn by a model, sharp architectural lapels, dramatic chiaroscuro lighting, minimalist industrial backdrop." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCt0STizCMD6MapyPSWRKWlw9upstR8A-8_ak0nfNExMtP_C8H7LXKjKHcaRYV8b_sz6UnsmMuMaZjZ-gxAjvPm-vaC7fEGK2wg6GJaRD33xjUxjAa9zJlPupnHLlJCrC-EMPYdfFqFoXwzvXn5nSYfo0qqBf6lcQa3ZjJjDcFXzEvE8XXYBXHeNbzCf7oYIJ_75eSCr6_wO9F4XevmludbdLMDaxbftCYGX6B65RFZYzNZSKU4qR2zKw')"></div>
+<div class="absolute top-4 right-4 bg-[#000000]/80 backdrop-blur-md px-3 py-1">
+<span class="font-label-md text-[10px] text-primary uppercase tracking-widest">Limited</span>
+</div>
+<button class="absolute bottom-4 left-4 right-4 py-3 bg-primary text-on-primary font-label-md uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300">Quick View</button>
+</div>
+<div class="p-space-md flex flex-col flex-grow justify-between">
+<div>
+<div class="flex justify-between items-start mb-space-3xs">
+<span class="font-label-md text-on-surface-variant uppercase tracking-wider">Tailored Outerwear</span>
+<span class="font-body-md text-primary font-normal">$3,800</span>
+</div>
+<h3 class="font-headline-sm text-primary mb-space-2xs">Architectural Cashmere Coat</h3>
+</div>
+<p class="font-body-md text-on-surface-variant font-light text-xs">Double-faced virgin wool and cashmere blend with structured shoulders.</p>
+</div>
+</div>
+<!-- Product Item 3 -->
+<div class="group flex flex-col bg-[#121212] overflow-hidden transition-all duration-500 hover:-translate-y-1">
+<div class="relative w-full aspect-[3/4] overflow-hidden bg-surface-container">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="Monochrome product photography of an immaculate matte black Italian leather structured tote bag resting on a polished concrete pedestal, stark shadows, ultra-luxury aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD83bdPdKvF_4JTd8xV2zgGRdR5T02thwvAFG_8SX_C1gGc4a-iZPHtQiQ94OZXuKbqdtkacUaMHt8apa0sdBpmfssf_QRgvCYf1r03Kjj9mcOeJ-Qi1vzNfX3EQvfLc9OOSVHOhlbs38gROH2PDLn2-tBeJNRTcW8315sPdKLIq0TFXb3I6UrZxoacsEIzl7RB1aX3wlD_eipim5pBYTwUfi9pHdDXCyW5445pmXHASby-8nbXEwXfCg')"></div>
+<button class="absolute bottom-4 left-4 right-4 py-3 bg-primary text-on-primary font-label-md uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300">Quick View</button>
+</div>
+<div class="p-space-md flex flex-col flex-grow justify-between">
+<div>
+<div class="flex justify-between items-start mb-space-3xs">
+<span class="font-label-md text-on-surface-variant uppercase tracking-wider">Leather Accessory</span>
+<span class="font-body-md text-primary font-normal">$1,950</span>
+</div>
+<h3 class="font-headline-sm text-primary mb-space-2xs">The Monolith Tote</h3>
+</div>
+<p class="font-body-md text-on-surface-variant font-light text-xs">Full-grain calfskin with hand-painted edges and brushed metal hardware.</p>
+</div>
+</div>
+<!-- Product Item 4 -->
+<div class="group flex flex-col bg-[#121212] overflow-hidden transition-all duration-500 hover:-translate-y-1">
+<div class="relative w-full aspect-[3/4] overflow-hidden bg-surface-container">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="Minimalist editorial shot of a pleated black silk georgette midi skirt in motion against a dark moody backdrop, frozen in high shutter speed, elegant drape." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAWLyixTL3NLfr1ryHnN9zfPoWWFbfaBj9WgFI-krqoD9pIcwyudPatfKeGx34po3kzIJaV6zx1_Jhp7UliS5_cCioviRYI7-0JUXrsM7AWcYBrTPDPNQzQxIwoSLFUc7P1mIsymbI3jUZzEz-lhbnqI_CeeXL-JdNZEnbnuAVzZ9RW9C0U8ZjTmw0EcYjCZ495CthWGwthJ7J9Z8W6ihssNS6qgqeu_KCxxByj3UP3FrFG7XMe9lD9dA')"></div>
+<button class="absolute bottom-4 left-4 right-4 py-3 bg-primary text-on-primary font-label-md uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300">Quick View</button>
+</div>
+<div class="p-space-md flex flex-col flex-grow justify-between">
+<div>
+<div class="flex justify-between items-start mb-space-3xs">
+<span class="font-label-md text-on-surface-variant uppercase tracking-wider">Silk Skirt</span>
+<span class="font-body-md text-primary font-normal">$1,400</span>
+</div>
+<h3 class="font-headline-sm text-primary mb-space-2xs">Umbra Pleated Midi</h3>
+</div>
+<p class="font-body-md text-on-surface-variant font-light text-xs">Micro-pleated silk georgette with an invisible side zip construction.</p>
+</div>
+</div>
+<!-- Product Item 5 -->
+<div class="group flex flex-col bg-[#121212] overflow-hidden transition-all duration-500 hover:-translate-y-1">
+<div class="relative w-full aspect-[3/4] overflow-hidden bg-surface-container">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="Monochrome closeup of a tailored black wool tuxedo blazer with satin lapels, impeccably styled on a mannequin in a dark minimalist atelier." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBktxAxvUQCNimAez0RSpRanDR7pFUW64d8xbcbEoGvUUc1azBdQmt9TY1jaF1XFHockXVvr671cnd7isYkVoAfYlDxjU0Qrvi6gj9tQqzeFsmRuePWvT4cG7mhQ5s0q2FTyKeSnM9XNxovnln1cYJjGckHJz3eo0ukEUVw1YDcALXTP8hguLX-0k_Pc2KRt0_56QO4Yu05NX0DrS31RkIIA8vsPB-4s4PStmcrgx47UyJlbJ1JS7Cbpw')"></div>
+<div class="absolute top-4 right-4 bg-[#000000]/80 backdrop-blur-md px-3 py-1">
+<span class="font-label-md text-[10px] text-primary uppercase tracking-widest">Exclusive</span>
+</div>
+<button class="absolute bottom-4 left-4 right-4 py-3 bg-primary text-on-primary font-label-md uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300">Quick View</button>
+</div>
+<div class="p-space-md flex flex-col flex-grow justify-between">
+<div>
+<div class="flex justify-between items-start mb-space-3xs">
+<span class="font-label-md text-on-surface-variant uppercase tracking-wider">Tailoring</span>
+<span class="font-body-md text-primary font-normal">$3,200</span>
+</div>
+<h3 class="font-headline-sm text-primary mb-space-2xs">Nocturne Tuxedo Jacket</h3>
+</div>
+<p class="font-body-md text-on-surface-variant font-light text-xs">Italian wool twill with silk duchess satin peaked lapels.</p>
+</div>
+</div>
+<!-- Product Item 6 -->
+<div class="group flex flex-col bg-[#121212] overflow-hidden transition-all duration-500 hover:-translate-y-1">
+<div class="relative w-full aspect-[3/4] overflow-hidden bg-surface-container">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="Studio fashion shot of supple black leather ankle boots with pointed toes and sculptural heels, photographed against a stark black background with dramatic overhead light." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBiqzWuu7q_DJAJFGcPb4_GRg6G9oZJ6udy0OliVSAvliPs4WQZ0mqi7GUkgwYHvlvUFwwDz-i_ChtaFSih9WQQQrwniyp9pZySahSUO2Ug-j8jhZQkAgFYjmKoC4qE-LnXNCvnnm_pwz5ViJ8R0JhSVTGCowL6ZXt0pIi4YzGEo5mqYc_cs92UJ_UtdMWi2REudMlZw_w8LOvORt6-tJ53YBHDnl0SUikbEgBoKVNAiNYhGnaC-mDUSQ')"></div>
+<button class="absolute bottom-4 left-4 right-4 py-3 bg-primary text-on-primary font-label-md uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300">Quick View</button>
+</div>
+<div class="p-space-md flex flex-col flex-grow justify-between">
+<div>
+<div class="flex justify-between items-start mb-space-3xs">
+<span class="font-label-md text-on-surface-variant uppercase tracking-wider">Footwear</span>
+<span class="font-body-md text-primary font-normal">$1,250</span>
+</div>
+<h3 class="font-headline-sm text-primary mb-space-2xs">Eclipse Leather Boot</h3>
+</div>
+<p class="font-body-md text-on-surface-variant font-light text-xs">Hand-waxed calf leather with a stacked heel and concealed elastic gusset.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Editorial Spotlight Section -->
+<section class="w-full py-space-xl bg-[#121212] relative overflow-hidden">
+<div class="max-w-7xl mx-auto px-grid-margin grid grid-cols-1 lg:grid-cols-2 gap-space-lg items-center">
+<div class="flex flex-col gap-space-sm">
+<span class="font-label-md uppercase tracking-widest text-on-surface-variant">Atelier Craftsmanship</span>
+<h2 class="font-headline-lg text-primary">The Art of Shadow and Stitch</h2>
+<p class="font-body-lg text-on-surface-variant font-light">Each garment undergoes up to 40 hours of meticulous hand-finishing by master artisans in our Milan atelier. We believe true luxury lies in the unseen details—fully canvassed constructions, hand-rolled hems, and linings of pure silk.</p>
+<div class="pt-space-xs">
+<a class="inline-block px-space-md py-4 bg-transparent text-primary font-label-md uppercase tracking-widest border border-primary hover:bg-primary hover:text-on-primary transition-all duration-300" href="#">Discover Our Process</a>
+</div>
+</div>
+<div class="relative w-full aspect-[4/3] overflow-hidden">
+<div class="w-full h-full bg-cover bg-center" data-alt="Monochrome macro photography of an artisan's hands meticulously hand-stitching silk fabric with black thread in a sunlit Milan atelier, highly detailed textures." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAo6YgOgM11PNC88Db_smyye1oKxnDm5yBWWluCzYHeJvrowiOa3wzG_lqAu36PLSQcYqxsCYIHNj5m8HWJCb43lFM-pN8PPbehwL4o6ewDPr1ON7Mp2KiKgiasB_8R13h76I_8kdiD4F-cGLsmmc5SKdnaQcWHA8VGm-YloVdv6q7y-sDM9Pg2HTuI-nmm8PLjjYmgcUefNvkWaAdoogJsBY9jK-XSoGAJgDLo6j-bHg8ffhhy9Msomw')"></div>
+</div>
+</div>
+</section>
+<!-- Newsletter / Private Client Access -->
+<section class="w-full py-space-2xl px-grid-margin bg-[#000000] text-center flex flex-col items-center">
+<span class="font-label-md uppercase tracking-[0.3em] text-on-surface-variant mb-space-xs">Private Client Access</span>
+<h2 class="font-headline-lg text-primary mb-space-xs max-w-2xl">Join the Aura Inner Circle</h2>
+<p class="font-body-lg text-on-surface-variant mb-space-lg max-w-md font-light">Receive private invitations to seasonal salon presentations and bespoke collection previews.</p>
+<div class="flex flex-col sm:flex-row w-full max-w-md gap-space-xs">
+<input class="flex-grow px-space-sm py-4 bg-[#121212] text-primary placeholder-[#666666] border border-[#353535] focus:border-primary outline-none font-body-md" placeholder="Enter your email address" type="email"/>
+<button class="px-space-md py-4 bg-primary text-on-primary font-label-md uppercase tracking-widest hover:bg-transparent hover:text-primary hover:border hover:border-primary transition-all duration-300">Subscribe</button>
+</div>
+</section>
+</div></main><footer class="w-full bg-surface-container-lowest py-space-xl px-grid-margin"><div class="flex flex-col md:flex-row justify-between items-start gap-space-lg"><div class="flex flex-col gap-space-2xs"><span class="font-headline-sm text-primary">AURA ATELIER</span><p class="font-body-md text-on-surface-variant">Paris / Milan / Tokyo</p></div><div class="flex gap-space-lg font-body-md text-on-surface-variant"><span>Privacy Policy</span><span>Terms of Service</span><span>Client Services</span></div></div></footer></body></html>
