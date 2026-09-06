@@ -1,6 +1,6 @@
 import asyncio
 from datetime import datetime, date, timezone
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import async_session_factory, engine
@@ -212,6 +212,86 @@ async def run_seed():
             session.add(s_lpz)
             await session.flush()
             enc2_user.sucursal_id = s_lpz.id
+
+        # 4.1 USUARIOS DE PRUEBA POR ROL PARA DEMO / EVALUACIÓN
+        print("--> 4.1 Creando Credenciales de Prueba por Rol...")
+        demo_users_data = [
+            {
+                "email": "AdminFashion@gmail.com",
+                "password": "Admin123",
+                "nombre": "Admin",
+                "apellido": "Fashion",
+                "ci_nit": "1001001",
+                "telefono": "+591 70000010",
+                "direccion": "Oficina Central, Equipetrol",
+                "tipo_usuario": "PERSONAL",
+                "rol": "ADMINISTRADOR",
+                "sucursal_id": None
+            },
+            {
+                "email": "EncargadoSucursal@gmail.com",
+                "password": "Encargado123",
+                "nombre": "Encargado",
+                "apellido": "Sucursal",
+                "ci_nit": "2002002",
+                "telefono": "+591 70000020",
+                "direccion": "Av. San Martin #450",
+                "tipo_usuario": "PERSONAL",
+                "rol": "ENCARGADO_SUCURSAL",
+                "sucursal_id": s_scz.id
+            },
+            {
+                "email": "CajeroFashion@gmail.com",
+                "password": "Cajero123",
+                "nombre": "Cajero",
+                "apellido": "Fashion",
+                "ci_nit": "3003003",
+                "telefono": "+591 70000030",
+                "direccion": "Av. San Martin #450, Modulo Caja",
+                "tipo_usuario": "PERSONAL",
+                "rol": "CAJERO",
+                "sucursal_id": s_scz.id
+            },
+            {
+                "email": "ClienteFashion@gmail.com",
+                "password": "Cliente123",
+                "nombre": "Cliente",
+                "apellido": "Fashion",
+                "ci_nit": "4004004",
+                "telefono": "+591 70000040",
+                "direccion": "Condominio La Riviera #12B",
+                "tipo_usuario": "CLIENTE",
+                "rol": "CLIENTE",
+                "sucursal_id": None
+            }
+        ]
+
+        for u_data in demo_users_data:
+            u_exists = (await session.execute(
+                select(Usuario).where(func.lower(Usuario.email) == u_data["email"].lower())
+            )).scalar_one_or_none()
+            if not u_exists:
+                u_obj = Usuario(
+                    email=u_data["email"],
+                    password_hash=hash_password(u_data["password"]),
+                    nombre=u_data["nombre"],
+                    apellido=u_data["apellido"],
+                    ci_nit=u_data["ci_nit"],
+                    telefono=u_data["telefono"],
+                    direccion=u_data["direccion"],
+                    tipo_usuario=u_data["tipo_usuario"],
+                    estado="ACTIVO",
+                    rol_id=roles_map[u_data["rol"]].id,
+                    sucursal_id=u_data["sucursal_id"]
+                )
+                session.add(u_obj)
+            else:
+                u_exists.password_hash = hash_password(u_data["password"])
+                u_exists.rol_id = roles_map[u_data["rol"]].id
+                u_exists.estado = "ACTIVO"
+                if u_data["sucursal_id"]:
+                    u_exists.sucursal_id = u_data["sucursal_id"]
+        await session.flush()
 
         # 5. PARAMETROS DE MODA (CU5)
         print("--> 5. Creando Parametros de Moda (Categorias, Tallas, Colores, Temporada)...")

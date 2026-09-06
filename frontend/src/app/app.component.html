@@ -8,12 +8,12 @@
     </div>
 
     <nav class="nav-links">
-      <a routerLink="/catalogo" routerLinkActive="active">Catálogo</a>
-      <a routerLink="/reservas" routerLinkActive="active">Reservas</a>
-      <a routerLink="/ventas" routerLinkActive="active">Ventas / POS</a>
-      <a routerLink="/inventario" routerLinkActive="active">Inventario</a>
-      <a routerLink="/ia-asistente" routerLinkActive="active">IA Asistente</a>
-      <a routerLink="/usuarios" routerLinkActive="active">Usuarios</a>
+      <a routerLink="/catalogo" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Catálogo &amp; AR</a>
+      <a routerLink="/catalogo/parametros" routerLinkActive="active">Parámetros Moda</a>
+      <a routerLink="/inventario" routerLinkActive="active">Sucursales</a>
+      <a routerLink="/usuarios/gestion" routerLinkActive="active">Personal &amp; Clientes</a>
+      <a routerLink="/usuarios/roles" routerLinkActive="active">Roles / RBAC</a>
+      <a routerLink="/usuarios/auditoria" routerLinkActive="active">Auditoría</a>
     </nav>
 
     <div class="user-auth-zone">

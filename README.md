@@ -22,6 +22,22 @@ El proyecto está diseñado bajo una arquitectura modular y escalable, utilizand
 
 ---
 
+## 🔑 Credenciales de Acceso para Evaluación (Web & Móvil)
+
+El backend de FastAPI opera como una **API REST unificada con autenticación JWT**, por lo que **todas las credenciales funcionan indistintamente tanto en la plataforma Web como en la Aplicación Móvil (o navegadores móviles)**.
+
+| Rol | Correo Electrónico | Contraseña | Alcance y Vistas en el Sistema |
+| :--- | :--- | :--- | :--- |
+| **Administrador** | `AdminFashion@gmail.com` | `Admin123` | **Control total**: Matriz de Roles y Permisos RBAC (CU2), Personal y Clientes (CU3), Tiendas/Sucursales (CU4), Parámetros de Moda (CU5), Catálogo y AR (CU6) y Bitácora de Auditoría (CU7). |
+| **Encargado de Sucursal** | `EncargadoSucursal@gmail.com` | `Encargado123` | **Operativo de Sucursal**: Gestión de stock local (Sucursal Equipetrol), catálogo de prendas, capacidad de probadores y reservas físicas. |
+| **Cajero** | `CajeroFashion@gmail.com` | `Cajero123` | **Punto de Venta**: Consulta de inventario, registro de ventas presenciales POS y cobros en tienda. |
+| **Cliente** | `ClienteFashion@gmail.com` | `Cliente123` | **Perfil Principal Móvil / E-commerce**: Exploración de colecciones Atelier Noir, vestidor virtual en Realidad Aumentada (AR con modelos 3D `.glb`/`.usdz`), solicitud de reservas y compras. |
+
+> 📱 **Conectividad Móvil (Red Local WiFi):**  
+> Para interactuar desde un dispositivo móvil físico conectado a la misma red WiFi, reemplace `localhost` por la dirección IP local de su equipo anfitrión (ejemplo: `http://192.168.1.15:8000/api/v1`). La interfaz Web cuenta adicionalmente con botones de autocompletado rápido en `/login` para alternar entre roles con un solo clic.
+
+---
+
 ## 📌 Características Principales
 
 - **Gestión Multi-sucursal e Inventario Integrado**: Control unificado de existencias (disponible, reservado, vendido, agotado) en tiempo real por sucursal, ciudad, color y talla.

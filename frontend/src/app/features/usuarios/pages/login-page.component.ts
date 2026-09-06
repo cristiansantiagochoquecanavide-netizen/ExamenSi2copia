@@ -1,4 +1,4 @@
-﻿import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -23,12 +23,15 @@ import { AuthService } from '../../../core/services/auth.service';
           <!-- Quick Demo Access Bar -->
           <div class="demo-credential-box">
             <div class="demo-info">
-              <span class="demo-badge">DEMO CU1</span>
-              <span class="demo-text">admin&#64;fashionstore.com &bull; admin123</span>
+              <span class="demo-badge">ACCESO RÁPIDO POR ROL</span>
+              <span class="demo-text">Probá las vistas web/móvil según cada rol:</span>
             </div>
-            <button type="button" class="btn-demo-autofill" (click)="fillAdminCredentials()">
-              Autocompletar
-            </button>
+            <div class="demo-role-buttons">
+              <button type="button" class="btn-role-chip" (click)="fillRole('ADMIN')">Admin</button>
+              <button type="button" class="btn-role-chip" (click)="fillRole('ENCARGADO')">Encargado</button>
+              <button type="button" class="btn-role-chip" (click)="fillRole('CAJERO')">Cajero</button>
+              <button type="button" class="btn-role-chip" (click)="fillRole('CLIENTE')">Cliente</button>
+            </div>
           </div>
 
           <!-- Error Alert -->
@@ -182,21 +185,29 @@ import { AuthService } from '../../../core/services/auth.service';
       font-family: monospace;
     }
 
-    .btn-demo-autofill {
-      background: transparent;
-      border: 1px solid var(--color-gold);
+    .demo-role-buttons {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-role-chip {
+      background: #000000;
+      border: 1px solid rgba(212, 175, 55, 0.4);
       color: var(--color-gold);
-      font-size: 0.65rem;
-      letter-spacing: 0.1em;
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      padding: 4px 10px;
+      padding: 5px 9px;
       cursor: pointer;
+      border-radius: 0;
       transition: all 0.2s ease;
     }
 
-    .btn-demo-autofill:hover {
+    .btn-role-chip:hover {
       background: var(--color-gold);
       color: #000000;
+      border-color: var(--color-gold);
     }
 
     .alert-error {
@@ -323,9 +334,20 @@ export class LoginPageComponent {
   readonly isLoading = signal(false);
   readonly errorMessage = signal<string | null>(null);
 
-  fillAdminCredentials(): void {
-    this.email = 'admin@fashionstore.com';
-    this.password = 'admin123';
+  fillRole(role: 'ADMIN' | 'ENCARGADO' | 'CAJERO' | 'CLIENTE'): void {
+    if (role === 'ADMIN') {
+      this.email = 'AdminFashion@gmail.com';
+      this.password = 'Admin123';
+    } else if (role === 'ENCARGADO') {
+      this.email = 'EncargadoSucursal@gmail.com';
+      this.password = 'Encargado123';
+    } else if (role === 'CAJERO') {
+      this.email = 'CajeroFashion@gmail.com';
+      this.password = 'Cajero123';
+    } else {
+      this.email = 'ClienteFashion@gmail.com';
+      this.password = 'Cliente123';
+    }
     this.errorMessage.set(null);
   }
 

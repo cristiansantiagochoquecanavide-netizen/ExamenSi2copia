@@ -2,7 +2,19 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CatalogoService } from '../services/catalogo.service';
-import { Prenda, PrendaMultimedia } from '../models/catalogo.models';
+import { InventarioService } from '../../inventario/services/inventario.service';
+import {
+  Prenda,
+  PrendaCreate,
+  PrendaMultimedia,
+  PrendaMultimediaCreate,
+  Categoria,
+  Temporada,
+  Talla,
+  Color,
+  AjusteInventarioRequest
+} from '../models/catalogo.models';
+import { Sucursal } from '../../inventario/models/inventario.models';
 
 @Component({
   selector: 'app-catalogo-page',
@@ -15,11 +27,11 @@ import { Prenda, PrendaMultimedia } from '../models/catalogo.models';
         <div class="hero-content">
           <div class="editorial-eyebrow">
             <span class="gold-dot">&bull;</span>
-            <span>TEMPORADA SS-2026 &bull; COLECCIÓN PERMANENTE</span>
+            <span>CATÁLOGO DIGITAL CON AR &bull; CASO DE USO #6 (CU6)</span>
           </div>
-          <h1 class="hero-title">Atelier Noir</h1>
+          <h1 class="hero-title">Atelier Noir &bull; Colección</h1>
           <p class="hero-description">
-            Sastrería contemporánea, siluetas desestructuradas y tecnología de Realidad Aumentada (AR) para probadores virtuales.
+            Sastrería contemporánea, siluetas desestructuradas y tecnología de Realidad Aumentada (AR) con modelos 3D (.glb / .usdz) para probadores virtuales y control de inventario por sucursal.
           </p>
         </div>
 
@@ -64,21 +76,37 @@ import { Prenda, PrendaMultimedia } from '../models/catalogo.models';
         </div>
       </section>
 
-      <!-- Status Bar -->
+      <!-- Status Bar & Actions -->
       <div class="status-strip">
         <div class="status-left">
           <span class="status-pulse"></span>
-          <span class="status-label">FASTAPI POSTGRESQL &bull; CU6 CATÁLOGO CON AR &bull; ONLINE</span>
+          <span class="status-label">FASTAPI &bull; CU6 CATÁLOGO CON AR &bull; SINCRONIZADO</span>
         </div>
-        <button type="button" class="btn-refresh" (click)="loadPrendas()" [disabled]="isLoading()">
-          &#x21bb; Actualizar
-        </button>
+        <div class="action-buttons-group">
+          <button type="button" class="btn-action-gold" (click)="openCreatePrendaModal()">
+            + REGISTRAR PRENDA (CU6)
+          </button>
+          <button type="button" class="btn-action-outline" (click)="openAjusteModal()">
+            AJUSTAR STOCK SUCURSAL
+          </button>
+          <button type="button" class="btn-refresh" (click)="loadPrendas()" [disabled]="isLoading()">
+            &#x21bb; Actualizar
+          </button>
+        </div>
       </div>
+
+      <!-- Feedback Banner -->
+      @if (feedbackMsg()) {
+        <div class="feedback-banner" [class.error]="feedbackIsError()">
+          <span>{{ feedbackMsg() }}</span>
+          <button type="button" class="btn-close-banner" (click)="feedbackMsg.set(null)">&times;</button>
+        </div>
+      }
 
       <!-- Loading State -->
       @if (isLoading()) {
         <div class="loading-grid">
-          @for (i of [1, 2]; track i) {
+          @for (i of [1, 2, 3]; track i) {
             <div class="skeleton-card">
               <div class="skeleton-img"></div>
               <div class="skeleton-line title"></div>
@@ -172,7 +200,7 @@ import { Prenda, PrendaMultimedia } from '../models/catalogo.models';
         }
       }
 
-      <!-- Modal de Detalle y Modelos 3D (AR) -->
+      <!-- ================= MODAL DETALLE & AR (CU6) ================= -->
       @if (selectedPrenda(); as prenda) {
         <div class="modal-backdrop" (click)="closeDetail()">
           <div class="modal-container" (click)="$event.stopPropagation()">
@@ -187,6 +215,25 @@ import { Prenda, PrendaMultimedia } from '../models/catalogo.models';
             <div class="modal-body">
               <div class="modal-media-column">
                 <img [src]="getPortadaUrl(prenda)" [alt]="prenda.nombre" class="modal-main-img" />
+                
+                <div class="multimedia-add-box">
+                  <span class="add-box-title">+ Vincular Nuevo Archivo AR</span>
+                  <div class="add-box-row">
+                    <select [(ngModel)]="nuevoMultimedia.tipo">
+                      <option value="MODELO_3D_GLB">Modelo .GLB (Android/Web)</option>
+                      <option value="MODELO_3D_USDZ">Modelo .USDZ (iOS AR)</option>
+                      <option value="IMAGEN">Imagen de Galería</option>
+                    </select>
+                    <input 
+                      type="text" 
+                      [(ngModel)]="nuevoMultimedia.url" 
+                      placeholder="https://...modelo.glb"
+                    />
+                    <button type="button" class="btn-attach" (click)="attachMultimedia(prenda.id)">
+                      Adjuntar
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div class="modal-info-column">
@@ -200,7 +247,7 @@ import { Prenda, PrendaMultimedia } from '../models/catalogo.models';
                 <!-- Modelos 3D y AR vinculados -->
                 <div class="ar-section">
                   <h4 class="ar-section-title">&diams; ACTIVOS DE REALIDAD AUMENTADA (AR)</h4>
-                  <p class="ar-note">Modelos 3D generados para visualización inmersiva en navegadores y probador virtual móvil:</p>
+                  <p class="ar-note">Formatos optimizados para Probador Virtual Móvil y Visualización Web:</p>
                   
                   <div class="ar-models-list">
                     @for (media of get3DModels(prenda); track media.id) {
@@ -210,16 +257,18 @@ import { Prenda, PrendaMultimedia } from '../models/catalogo.models';
                           <span class="ar-model-type">{{ media.tipo === 'MODELO_3D_GLB' ? 'Web / Android (SceneViewer)' : 'iOS (Quick Look)' }}</span>
                         </div>
                         <a [href]="media.url" target="_blank" rel="noopener noreferrer" class="ar-link">
-                          Descargar / Inspeccionar &rarr;
+                          Inspeccionar Modelo 3D &rarr;
                         </a>
                       </div>
+                    } @empty {
+                      <div class="no-models-notice">No se han adjuntado modelos 3D todavía para esta pieza.</div>
                     }
                   </div>
                 </div>
 
                 <!-- Variantes de Talla y Color -->
                 <div class="variants-section">
-                  <h4 class="section-subtitle">VARIANTES DISPONIBLES EN STOCK (CU6):</h4>
+                  <h4 class="section-subtitle">VARIANTES DISPONIBLES EN STOCK:</h4>
                   <div class="variants-table-mini">
                     @for (v of prenda.variantes; track v.id) {
                       <div class="variant-pill">
@@ -227,6 +276,7 @@ import { Prenda, PrendaMultimedia } from '../models/catalogo.models';
                         <span class="v-color" [style.color]="v.color?.codigo_hex || '#fff'">
                           &bull; {{ v.color?.nombre || 'Color' }}
                         </span>
+                        <span class="v-sku">SKU: {{ v.sku_variante }}</span>
                       </div>
                     }
                   </div>
@@ -234,7 +284,7 @@ import { Prenda, PrendaMultimedia } from '../models/catalogo.models';
 
                 <div class="modal-actions">
                   <button type="button" class="btn-reserve-lead" (click)="closeDetail()">
-                    CONFIRMAR SELECCIÓN
+                    CERRAR FICHA TÉCNICA
                   </button>
                 </div>
               </div>
@@ -242,19 +292,180 @@ import { Prenda, PrendaMultimedia } from '../models/catalogo.models';
           </div>
         </div>
       }
+
+      <!-- ================= MODAL REGISTRAR PRENDA (CU6) ================= -->
+      @if (showCreateModal()) {
+        <div class="modal-backdrop" (click)="showCreateModal.set(false)">
+          <div class="modal-dialog-large" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3 class="modal-title">Registrar Nueva Prenda en Catálogo (CU6)</h3>
+              <button type="button" class="modal-close" (click)="showCreateModal.set(false)">&times;</button>
+            </div>
+            <form (ngSubmit)="savePrenda()" class="modal-form-body">
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label>SKU Maestro *</label>
+                  <input type="text" [(ngModel)]="nuevaPrenda.sku" name="sku" placeholder="Ej. PRD-TRENCH-NOIR" required />
+                </div>
+                <div class="form-group">
+                  <label>Nombre de la Prenda *</label>
+                  <input type="text" [(ngModel)]="nuevaPrenda.nombre" name="nombre" placeholder="Ej. The Midnight Trench Coat" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Descripción Editorial *</label>
+                <textarea [(ngModel)]="nuevaPrenda.descripcion" name="descripcion" rows="2" placeholder="Corte desestructurado, lana virgen italiana con forro de seda..." required></textarea>
+              </div>
+
+              <div class="form-row-3">
+                <div class="form-group">
+                  <label>Precio Base ($ USD) *</label>
+                  <input type="number" step="0.01" [(ngModel)]="nuevaPrenda.precio_base" name="precio_base" required />
+                </div>
+                <div class="form-group">
+                  <label>Categoría *</label>
+                  <select [(ngModel)]="nuevaPrenda.categoria_id" name="categoria_id" required>
+                    @for (cat of categorias(); track cat.id) {
+                      <option [value]="cat.id">{{ cat.nombre }} ({{ cat.sector }})</option>
+                    }
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Temporada *</label>
+                  <select [(ngModel)]="nuevaPrenda.temporada_id" name="temporada_id" required>
+                    @for (temp of temporadas(); track temp.id) {
+                      <option [value]="temp.id">{{ temp.nombre }} ({{ temp.codigo }})</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label>Talla Inicial de Muestra</label>
+                  <select [(ngModel)]="varianteInicialTallaId" name="varianteTalla">
+                    @for (t of tallas(); track t.id) {
+                      <option [value]="t.id">{{ t.codigo }} - {{ t.descripcion }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Color Inicial de Muestra</label>
+                  <select [(ngModel)]="varianteInicialColorId" name="varianteColor">
+                    @for (c of colores(); track c.id) {
+                      <option [value]="c.id">{{ c.nombre }} ({{ c.codigo_hex }})</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <!-- Media AR Inputs -->
+              <div class="ar-inputs-box">
+                <span class="ar-box-title">Activos Multimedia y Modelos 3D (AR):</span>
+                <div class="form-group">
+                  <label>URL Imagen de Portada</label>
+                  <input type="text" [(ngModel)]="urlPortada" name="urlPortada" placeholder="https://images.unsplash.com/..." />
+                </div>
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label>Modelo 3D .GLB (Android / Web AR)</label>
+                    <input type="text" [(ngModel)]="urlGlb" name="urlGlb" placeholder="https://models.ateliernoir.com/trench.glb" />
+                  </div>
+                  <div class="form-group">
+                    <label>Modelo 3D .USDZ (Apple Quick Look AR)</label>
+                    <input type="text" [(ngModel)]="urlUsdz" name="urlUsdz" placeholder="https://models.ateliernoir.com/trench.usdz" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="modal-actions-footer">
+                <button type="button" class="btn-cancel" (click)="showCreateModal.set(false)">Cancelar</button>
+                <button type="submit" class="btn-submit" [disabled]="!nuevaPrenda.sku || !nuevaPrenda.nombre">
+                  Registrar Prenda
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      }
+
+      <!-- ================= MODAL AJUSTE DE INVENTARIO (CU6) ================= -->
+      @if (showAjusteModal()) {
+        <div class="modal-backdrop" (click)="showAjusteModal.set(false)">
+          <div class="modal-dialog" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3 class="modal-title">Ajuste de Inventario por Sucursal (CU6)</h3>
+              <button type="button" class="modal-close" (click)="showAjusteModal.set(false)">&times;</button>
+            </div>
+            <form (ngSubmit)="saveAjuste()" class="modal-body">
+              <div class="form-group">
+                <label>Sucursal Destino *</label>
+                <select [(ngModel)]="nuevoAjuste.sucursal_id" name="sucursal_id" required>
+                  @for (suc of sucursales(); track suc.id) {
+                    <option [value]="suc.id">{{ suc.nombre }} - {{ suc.ciudad?.nombre || 'Sucursal' }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Variante de Prenda *</label>
+                <select [(ngModel)]="nuevoAjuste.variante_id" name="variante_id" required>
+                  @for (p of prendas(); track p.id) {
+                    @for (v of p.variantes; track v.id) {
+                      <option [value]="v.id">
+                        {{ p.nombre }} &bull; Talla {{ v.talla?.codigo }} / {{ v.color?.nombre }} (SKU: {{ v.sku_variante }})
+                      </option>
+                    }
+                  }
+                </select>
+              </div>
+
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label>Tipo de Movimiento *</label>
+                  <select [(ngModel)]="nuevoAjuste.tipo_movimiento" name="tipo_movimiento" required>
+                    <option value="INGRESO_INICIAL">INGRESO INICIAL</option>
+                    <option value="AJUSTE_POSITIVO">AJUSTE POSITIVO (+)</option>
+                    <option value="AJUSTE_NEGATIVO">AJUSTE NEGATIVO (-)</option>
+                    <option value="DEVOLUCION">DEVOLUCIÓN A STOCK</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Cantidad de Unidades *</label>
+                  <input type="number" min="1" [(ngModel)]="nuevoAjuste.cantidad" name="cantidad" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Motivo o Justificación del Movimiento *</label>
+                <input type="text" [(ngModel)]="nuevoAjuste.motivo" name="motivo" placeholder="Ej. Recepción de lote central SS26" required />
+              </div>
+
+              <div class="modal-actions-footer">
+                <button type="button" class="btn-cancel" (click)="showAjusteModal.set(false)">Cancelar</button>
+                <button type="submit" class="btn-submit" [disabled]="nuevoAjuste.cantidad <= 0 || !nuevoAjuste.motivo">
+                  Aplicar Ajuste de Stock
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      }
+
     </div>
   `,
   styles: [`
     .catalogo-container {
       max-width: 1400px;
       margin: 0 auto;
-      padding-bottom: 4rem;
+      padding: 2.5rem 3rem 4rem 3rem;
+      color: #ffffff;
     }
 
-    /* Editorial Hero */
     .editorial-hero {
-      padding: 2rem 0 3rem 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0 0 2.5rem 0;
+      border-bottom: 1px solid #222222;
       margin-bottom: 2rem;
     }
 
@@ -262,115 +473,107 @@ import { Prenda, PrendaMultimedia } from '../models/catalogo.models';
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       letter-spacing: 0.25em;
-      color: var(--color-gold);
-      font-weight: 500;
+      color: #d4af37;
+      text-transform: uppercase;
       margin-bottom: 0.75rem;
     }
 
     .gold-dot {
-      color: var(--color-gold);
-      font-size: 1.2rem;
-      line-height: 0;
+      color: #d4af37;
     }
 
     .hero-title {
-      font-family: var(--font-serif);
-      font-size: 3.5rem;
+      font-family: 'Bodoni Moda', serif;
+      font-size: 2.75rem;
       font-weight: 400;
-      letter-spacing: 0.02em;
-      color: var(--color-primary);
-      text-transform: uppercase;
-      margin-bottom: 1rem;
+      letter-spacing: 0.05em;
+      margin: 0 0 0.75rem 0;
     }
 
     .hero-description {
-      font-size: 1.05rem;
-      color: var(--color-on-surface-muted);
-      max-width: 700px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      color: #888888;
+      max-width: 800px;
       line-height: 1.6;
+      margin-bottom: 2rem;
     }
 
-    /* Filters Bar */
     .filter-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 2.5rem;
-      flex-wrap: wrap;
       gap: 1.5rem;
+      flex-wrap: wrap;
     }
 
     .filter-chips {
       display: flex;
       gap: 0.5rem;
-      flex-wrap: wrap;
     }
 
     .chip {
       background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: var(--color-on-surface-muted);
-      padding: 0.6rem 1.2rem;
-      font-size: 0.75rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
+      border: 1px solid #2a2a2a;
+      border-radius: 0;
+      color: #777777;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
     .chip:hover {
-      border-color: var(--color-primary);
-      color: var(--color-primary);
+      border-color: #555555;
+      color: #cccccc;
     }
 
     .chip.active {
-      background: var(--color-primary);
-      border-color: var(--color-primary);
-      color: #000000;
-      font-weight: 600;
+      background: #111111;
+      border-color: #d4af37;
+      color: #d4af37;
     }
 
     .search-box {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      background: #0d0d0d;
+      border: 1px solid #222222;
+      padding: 0.25rem 0.75rem;
     }
 
     .search-input {
-      background: #0e0e0e;
-      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: transparent;
+      border: none;
       color: #ffffff;
-      padding: 0.6rem 1.2rem;
+      padding: 0.5rem;
       font-size: 0.85rem;
-      min-width: 260px;
-      transition: border-color 0.2s ease;
-    }
-
-    .search-input:focus {
       outline: none;
-      border-color: var(--color-gold);
+      min-width: 240px;
     }
 
     .search-badge {
       font-size: 0.7rem;
-      letter-spacing: 0.15em;
-      color: var(--color-gold);
-      border: 1px solid rgba(212, 175, 55, 0.4);
-      padding: 0.55rem 0.8rem;
-      white-space: nowrap;
+      color: #777777;
+      letter-spacing: 0.1em;
+      padding-left: 0.5rem;
+      border-left: 1px solid #222222;
     }
 
-    /* Status Strip */
     .status-strip {
       display: flex;
       justify-content: space-between;
       align-items: center;
       background: #0d0d0d;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 0.6rem 1.2rem;
-      margin-bottom: 2.5rem;
+      border: 1px solid #222222;
+      padding: 0.85rem 1.25rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
 
     .status-left {
@@ -382,174 +585,247 @@ import { Prenda, PrendaMultimedia } from '../models/catalogo.models';
     .status-pulse {
       width: 8px;
       height: 8px;
-      border-radius: 50% !important;
-      background-color: #10b981;
-      box-shadow: 0 0 8px #10b981;
+      border-radius: 50%;
+      background: #00cc66;
+      box-shadow: 0 0 8px rgba(0, 204, 102, 0.6);
     }
 
     .status-label {
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       letter-spacing: 0.15em;
       color: #aaaaaa;
-      font-family: monospace;
+    }
+
+    .action-buttons-group {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .btn-action-gold {
+      background: #d4af37;
+      border: 1px solid #d4af37;
+      color: #000000;
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      cursor: pointer;
+      border-radius: 0;
+      transition: all 0.2s ease;
+    }
+
+    .btn-action-gold:hover {
+      background: #b89628;
+    }
+
+    .btn-action-outline {
+      background: transparent;
+      border: 1px solid #d4af37;
+      color: #d4af37;
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      cursor: pointer;
+      border-radius: 0;
+      transition: all 0.2s ease;
+    }
+
+    .btn-action-outline:hover {
+      background: rgba(212, 175, 55, 0.1);
     }
 
     .btn-refresh {
       background: transparent;
-      border: none;
-      color: var(--color-gold);
+      border: 1px solid #333333;
+      color: #888888;
+      padding: 0.5rem 0.85rem;
       font-size: 0.75rem;
-      letter-spacing: 0.1em;
       cursor: pointer;
-      text-transform: uppercase;
-      transition: color 0.2s ease;
+      border-radius: 0;
     }
 
     .btn-refresh:hover {
       color: #ffffff;
+      border-color: #555555;
+    }
+
+    .feedback-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #002b11;
+      border: 1px solid #00aa44;
+      color: #7affaa;
+      padding: 0.85rem 1.25rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+    }
+
+    .feedback-banner.error {
+      background: #2b0000;
+      border-color: #aa0000;
+      color: #ff7a7a;
+    }
+
+    .btn-close-banner {
+      background: transparent;
+      border: none;
+      color: inherit;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    .alert-box {
+      background: #240b0b;
+      border: 1px solid #771111;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .alert-title {
+      font-weight: 700;
+      color: #ff6666;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .alert-desc {
+      font-size: 0.85rem;
+      color: #cccccc;
+      margin-bottom: 1rem;
+    }
+
+    .btn-retry {
+      background: transparent;
+      border: 1px solid #ff6666;
+      color: #ff6666;
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+      cursor: pointer;
     }
 
     /* Products Grid */
     .products-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-      gap: 2.5rem;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
     }
 
     .product-card {
-      background: #111111;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: #0d0d0d;
+      border: 1px solid #1c1c1c;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
-      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
-      position: relative;
+      transition: transform 0.2s ease, border-color 0.2s ease;
     }
 
     .product-card:hover {
-      border-color: var(--color-gold);
-      transform: translateY(-4px);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.9);
+      border-color: #333333;
     }
 
     .image-wrapper {
       position: relative;
-      height: 440px;
-      background: #050505;
+      height: 420px;
       overflow: hidden;
       cursor: pointer;
+      background: #141414;
     }
 
     .product-image {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      object-position: top center;
-      transition: transform 0.5s ease;
+      transition: transform 0.4s ease;
     }
 
-    .product-card:hover .product-image {
-      transform: scale(1.04);
+    .image-wrapper:hover .product-image {
+      transform: scale(1.03);
     }
 
     .badge-overlay {
       position: absolute;
       top: 1rem;
       left: 1rem;
-      right: 1rem;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      pointer-events: none;
+      flex-direction: column;
+      gap: 0.5rem;
     }
 
     .category-tag {
       background: rgba(0, 0, 0, 0.85);
       border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #ffffff;
-      font-size: 0.65rem;
+      font-size: 0.68rem;
       letter-spacing: 0.15em;
-      padding: 4px 10px;
+      padding: 0.25rem 0.65rem;
       text-transform: uppercase;
+      color: #ffffff;
     }
 
     .ar-badge {
-      background: rgba(19, 19, 19, 0.9);
-      border: 1px solid var(--color-gold);
-      color: var(--color-gold);
-      font-size: 0.65rem;
-      font-weight: 600;
+      background: #100c02;
+      border: 1px solid #d4af37;
+      color: #d4af37;
+      font-size: 0.68rem;
       letter-spacing: 0.15em;
-      padding: 4px 10px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
-    }
-
-    .ar-icon {
-      color: var(--color-gold);
+      padding: 0.25rem 0.65rem;
+      font-weight: 700;
     }
 
     .hover-action-overlay {
       position: absolute;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transition: opacity 0.3s ease;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.85);
+      padding: 0.85rem;
+      text-align: center;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
     }
 
-    .product-card:hover .hover-action-overlay {
-      opacity: 1;
+    .image-wrapper:hover .hover-action-overlay {
+      transform: translateY(0);
     }
 
     .hover-btn {
-      background: #ffffff;
-      color: #000000;
       font-size: 0.75rem;
-      font-weight: 600;
       letter-spacing: 0.2em;
-      padding: 0.8rem 1.5rem;
-      border: none;
-      text-transform: uppercase;
+      color: #d4af37;
+      font-weight: 600;
     }
 
     .product-info {
-      padding: 1.75rem;
+      padding: 1.5rem;
+      flex: 1;
       display: flex;
       flex-direction: column;
-      flex: 1;
     }
 
     .meta-row {
       display: flex;
       justify-content: space-between;
-      font-size: 0.7rem;
-      letter-spacing: 0.1em;
-      color: var(--color-on-surface-muted);
       margin-bottom: 0.5rem;
-    }
-
-    .sku-tag {
+      font-size: 0.72rem;
+      color: #666666;
       font-family: monospace;
-      color: var(--color-gold);
     }
 
     .product-title {
-      font-family: var(--font-serif);
-      font-size: 1.6rem;
+      font-family: 'Bodoni Moda', serif;
+      font-size: 1.4rem;
       font-weight: 400;
+      margin: 0 0 0.75rem 0;
       color: #ffffff;
-      margin-bottom: 0.75rem;
       cursor: pointer;
-      line-height: 1.25;
-      transition: color 0.2s ease;
     }
 
     .product-title:hover {
-      color: var(--color-gold);
+      color: #d4af37;
     }
 
     .product-desc {
@@ -557,10 +833,7 @@ import { Prenda, PrendaMultimedia } from '../models/catalogo.models';
       color: #888888;
       line-height: 1.5;
       margin-bottom: 1.25rem;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+      flex: 1;
     }
 
     .variants-row {
@@ -568,14 +841,12 @@ import { Prenda, PrendaMultimedia } from '../models/catalogo.models';
       align-items: center;
       gap: 0.75rem;
       margin-bottom: 1.5rem;
-      padding-top: 0.75rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .variants-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
-      color: var(--color-on-surface-muted);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: #666666;
     }
 
     .size-chips {
@@ -584,102 +855,129 @@ import { Prenda, PrendaMultimedia } from '../models/catalogo.models';
     }
 
     .size-chip {
-      font-size: 0.65rem;
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      display: inline-block;
+      min-width: 26px;
+      text-align: center;
+      padding: 0.2rem 0.4rem;
+      background: #1a1a1a;
+      border: 1px solid #333333;
+      font-size: 0.72rem;
       color: #cccccc;
-      padding: 2px 7px;
-      font-family: monospace;
     }
 
     .card-footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: auto;
+      border-top: 1px solid #1a1a1a;
       padding-top: 1.25rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .price-container {
-      display: flex;
-      align-items: baseline;
-      gap: 2px;
+      font-family: 'Inter', sans-serif;
     }
 
     .currency {
-      font-size: 1rem;
-      color: var(--color-gold);
-      font-weight: 500;
+      color: #d4af37;
+      margin-right: 2px;
+      font-size: 0.9rem;
     }
 
     .price-value {
-      font-size: 1.4rem;
+      font-size: 1.25rem;
       font-weight: 600;
       color: #ffffff;
-      letter-spacing: -0.02em;
     }
 
     .btn-card-action {
       background: transparent;
-      border: 1px solid var(--color-gold);
-      color: var(--color-gold);
-      padding: 0.65rem 1.1rem;
-      font-size: 0.7rem;
-      font-weight: 600;
+      border: 1px solid #333333;
+      color: #d4af37;
+      padding: 0.6rem 1rem;
+      font-size: 0.72rem;
       letter-spacing: 0.15em;
-      text-transform: uppercase;
+      font-weight: 600;
       cursor: pointer;
+      border-radius: 0;
       transition: all 0.2s ease;
     }
 
     .btn-card-action:hover {
-      background: var(--color-gold);
+      background: #d4af37;
       color: #000000;
+      border-color: #d4af37;
     }
 
     /* Modal Styling */
     .modal-backdrop {
       position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.88);
-      backdrop-filter: blur(8px);
-      z-index: 1000;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(4px);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 2rem;
+      z-index: 1000;
     }
 
     .modal-container {
-      background: #111111;
-      border: 1px solid var(--color-gold);
-      max-width: 900px;
-      width: 100%;
+      background: #0e0e0e;
+      border: 1px solid #d4af37;
+      border-radius: 0;
+      width: 90%;
+      max-width: 960px;
       max-height: 90vh;
       overflow-y: auto;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95);
-      position: relative;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9);
+    }
+
+    .modal-dialog {
+      background: #0e0e0e;
+      border: 1px solid #d4af37;
+      border-radius: 0;
+      width: 90%;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9);
+    }
+
+    .modal-dialog-large {
+      background: #0e0e0e;
+      border: 1px solid #d4af37;
+      border-radius: 0;
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9);
     }
 
     .modal-header {
-      padding: 1.75rem 2rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid #222222;
     }
 
     .modal-eyebrow {
-      font-size: 0.7rem;
-      letter-spacing: 0.2em;
-      color: var(--color-gold);
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      color: #d4af37;
+      text-transform: uppercase;
       display: block;
       margin-bottom: 0.25rem;
     }
 
     .modal-title {
-      font-family: var(--font-serif);
-      font-size: 2rem;
+      font-family: 'Bodoni Moda', serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin: 0;
       color: #ffffff;
     }
 
@@ -687,80 +985,118 @@ import { Prenda, PrendaMultimedia } from '../models/catalogo.models';
       background: transparent;
       border: none;
       color: #888888;
-      font-size: 2rem;
+      font-size: 1.75rem;
       cursor: pointer;
-      line-height: 1;
-      transition: color 0.2s ease;
-    }
-
-    .modal-close:hover {
-      color: #ffffff;
     }
 
     .modal-body {
-      display: grid;
-      grid-template-columns: 1fr 1.2fr;
-      gap: 2rem;
       padding: 2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
     }
 
-    @media (max-width: 768px) {
-      .modal-body {
-        grid-template-columns: 1fr;
-      }
+    .modal-form-body {
+      padding: 2rem;
     }
 
     .modal-main-img {
       width: 100%;
-      height: 420px;
+      height: 380px;
       object-fit: cover;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid #222222;
+      margin-bottom: 1rem;
     }
 
-    .modal-info-column {
+    .multimedia-add-box {
+      background: #141414;
+      border: 1px solid #282828;
+      padding: 1rem;
+    }
+
+    .add-box-title {
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      color: #d4af37;
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .add-box-row {
       display: flex;
       flex-direction: column;
-      gap: 1.25rem;
+      gap: 0.5rem;
+    }
+
+    .add-box-row select,
+    .add-box-row input {
+      background: #0a0a0a;
+      border: 1px solid #333333;
+      color: #ffffff;
+      padding: 0.5rem;
+      font-size: 0.8rem;
+      border-radius: 0;
+      outline: none;
+    }
+
+    .btn-attach {
+      background: #1a1a1a;
+      border: 1px solid #d4af37;
+      color: #d4af37;
+      padding: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 0;
+    }
+
+    .btn-attach:hover {
+      background: #d4af37;
+      color: #000;
     }
 
     .modal-desc {
       font-size: 0.9rem;
-      color: #cccccc;
       line-height: 1.6;
+      color: #aaaaaa;
+      margin-bottom: 1.5rem;
     }
 
     .modal-price-box {
-      background: #181818;
-      padding: 1rem;
-      border-left: 3px solid var(--color-gold);
+      background: #111111;
+      border: 1px solid #222222;
+      padding: 1rem 1.25rem;
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 1rem;
+      margin-bottom: 1.5rem;
     }
 
     .modal-price-label {
       font-size: 0.75rem;
       letter-spacing: 0.15em;
-      color: var(--color-on-surface-muted);
+      color: #888888;
     }
 
     .modal-price-value {
-      font-size: 1.6rem;
+      font-size: 1.4rem;
       font-weight: 700;
       color: #ffffff;
     }
 
     .ar-section {
-      background: #141414;
-      border: 1px solid rgba(212, 175, 55, 0.3);
+      background: #121008;
+      border: 1px solid #4a3d16;
       padding: 1.25rem;
+      margin-bottom: 1.5rem;
     }
 
     .ar-section-title {
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       letter-spacing: 0.15em;
-      color: var(--color-gold);
-      margin-bottom: 0.5rem;
+      color: #d4af37;
+      margin: 0 0 0.5rem 0;
     }
 
     .ar-note {
@@ -769,214 +1105,277 @@ import { Prenda, PrendaMultimedia } from '../models/catalogo.models';
       margin-bottom: 1rem;
     }
 
-    .ar-models-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
     .ar-model-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #0b0b0b;
-      padding: 0.6rem 0.8rem;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .ar-model-meta {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      background: #080808;
+      border: 1px solid #222222;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.5rem;
     }
 
     .ar-badge-pill {
-      font-size: 0.65rem;
-      background: var(--color-gold);
-      color: #000000;
-      font-weight: 700;
-      padding: 2px 6px;
+      font-size: 0.7rem;
+      font-family: monospace;
+      padding: 0.2rem 0.4rem;
+      background: #2a2000;
+      color: #d4af37;
+      border: 1px solid #5a4500;
+      margin-right: 0.5rem;
     }
 
     .ar-model-type {
-      font-size: 0.75rem;
-      color: #cccccc;
+      font-size: 0.78rem;
+      color: #bbbbbb;
     }
 
     .ar-link {
-      color: var(--color-gold);
+      color: #d4af37;
       font-size: 0.75rem;
       text-decoration: none;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.08em;
     }
 
     .ar-link:hover {
       text-decoration: underline;
-      color: #ffffff;
-    }
-
-    .variants-section {
-      padding-top: 0.5rem;
     }
 
     .section-subtitle {
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       letter-spacing: 0.15em;
       color: #888888;
-      margin-bottom: 0.5rem;
+      margin: 0 0 0.75rem 0;
     }
 
     .variants-table-mini {
       display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 1.5rem;
     }
 
     .variant-pill {
-      background: #1c1c1c;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 4px 10px;
-      font-size: 0.75rem;
       display: flex;
-      gap: 6px;
+      justify-content: space-between;
+      padding: 0.5rem 0.85rem;
+      background: #141414;
+      border: 1px solid #252525;
+      font-size: 0.8rem;
     }
 
-    .v-talla {
-      color: #ffffff;
-      font-weight: 600;
+    .v-sku {
+      color: #666666;
+      font-family: monospace;
+      font-size: 0.75rem;
     }
 
     .btn-reserve-lead {
       width: 100%;
-      background: #ffffff;
+      background: #d4af37;
       color: #000000;
-      border: none;
+      border: 1px solid #d4af37;
       padding: 1rem;
-      font-weight: 600;
+      font-size: 0.78rem;
       letter-spacing: 0.2em;
-      font-size: 0.8rem;
-      text-transform: uppercase;
+      font-weight: 700;
       cursor: pointer;
-      transition: all 0.2s ease;
-      margin-top: 0.5rem;
+      border-radius: 0;
+      transition: background 0.2s ease;
     }
 
     .btn-reserve-lead:hover {
-      background: var(--color-gold);
-      color: #000000;
+      background: #b89628;
     }
 
-    /* Skeleton Loading */
-    .loading-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-      gap: 2.5rem;
+    /* Form rows */
+    .form-group {
+      margin-bottom: 1.25rem;
     }
 
-    .skeleton-card {
-      background: #111111;
-      height: 520px;
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      animation: pulse 1.5s infinite;
-    }
-
-    .skeleton-img {
-      height: 380px;
-      background: #1a1a1a;
-    }
-
-    .skeleton-line {
-      background: #1a1a1a;
-      height: 16px;
-    }
-
-    .skeleton-line.title {
-      width: 70%;
-    }
-
-    .skeleton-line.price {
-      width: 40%;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 0.6; }
-      50% { opacity: 1; }
-    }
-
-    /* Error & Empty States */
-    .alert-box {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid #ef4444;
-      padding: 2rem;
-      text-align: center;
-      margin: 2rem 0;
-    }
-
-    .alert-title {
-      color: #f87171;
-      font-weight: 600;
-      letter-spacing: 0.15em;
+    .form-group label {
       display: block;
-      margin-bottom: 0.5rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      color: #999999;
+      text-transform: uppercase;
+      margin-bottom: 0.45rem;
     }
 
-    .alert-desc {
-      color: #e5e5e5;
-      font-size: 0.9rem;
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 0;
+      color: #ffffff;
+      padding: 0.75rem;
+      font-size: 0.85rem;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: #d4af37;
+    }
+
+    .form-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .form-row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .ar-inputs-box {
+      background: #121008;
+      border: 1px solid #3d3110;
+      padding: 1.25rem;
       margin-bottom: 1.5rem;
     }
 
-    .btn-retry {
+    .ar-box-title {
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      color: #d4af37;
+      display: block;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    .modal-actions-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .btn-cancel {
       background: transparent;
-      border: 1px solid #ef4444;
-      color: #f87171;
-      padding: 0.6rem 1.5rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
+      border: 1px solid #333333;
+      color: #888888;
+      padding: 0.75rem 1.25rem;
       font-size: 0.75rem;
       cursor: pointer;
+      border-radius: 0;
+    }
+
+    .btn-submit {
+      background: #d4af37;
+      border: 1px solid #d4af37;
+      color: #000000;
+      padding: 0.75rem 1.5rem;
+      font-weight: 700;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      border-radius: 0;
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Skeleton */
+    .loading-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+    }
+
+    .skeleton-card {
+      background: #111;
+      height: 480px;
     }
 
     .empty-state {
       text-align: center;
-      padding: 4rem 2rem;
-      border: 1px dashed rgba(255, 255, 255, 0.15);
+      padding: 5rem 0;
     }
 
     .empty-title {
-      font-family: var(--font-serif);
-      font-size: 1.8rem;
-      margin-bottom: 0.5rem;
+      font-family: 'Bodoni Moda', serif;
+      font-size: 1.5rem;
+      color: #666;
     }
 
     .empty-text {
-      color: var(--color-on-surface-muted);
+      color: #444;
+      font-size: 0.85rem;
     }
   `]
 })
 export class CatalogoPageComponent implements OnInit {
   private readonly catalogoService = inject(CatalogoService);
+  private readonly inventarioService = inject(InventarioService);
 
-  readonly prendas = signal<Prenda[]>([]);
-  readonly isLoading = signal(true);
-  readonly errorMessage = signal<string | null>(null);
+  prendas = signal<Prenda[]>([]);
+  categorias = signal<Categoria[]>([]);
+  temporadas = signal<Temporada[]>([]);
+  tallas = signal<Talla[]>([]);
+  colores = signal<Color[]>([]);
+  sucursales = signal<Sucursal[]>([]);
 
+  isLoading = signal<boolean>(false);
+  errorMessage = signal<string | null>(null);
+  feedbackMsg = signal<string | null>(null);
+  feedbackIsError = signal<boolean>(false);
+
+  selectedSector = signal<string>('ALL');
   searchQuery = '';
-  readonly selectedSector = signal<'ALL' | 'TRENCH' | 'PANT'>('ALL');
-  readonly selectedPrenda = signal<Prenda | null>(null);
+  selectedPrenda = signal<Prenda | null>(null);
 
-  readonly filteredPrendas = computed(() => {
+  // Modals visibility
+  showCreateModal = signal<boolean>(false);
+  showAjusteModal = signal<boolean>(false);
+
+  // Forms state
+  nuevaPrenda: PrendaCreate = {
+    sku: '',
+    nombre: '',
+    descripcion: '',
+    precio_base: 280,
+    categoria_id: 1,
+    temporada_id: 1
+  };
+  varianteInicialTallaId: number = 1;
+  varianteInicialColorId: number = 1;
+  urlPortada: string = 'https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=800&q=80';
+  urlGlb: string = 'https://storage.googleapis.com/fashion-models/midnight-trench.glb';
+  urlUsdz: string = 'https://storage.googleapis.com/fashion-models/midnight-trench.usdz';
+
+  nuevoAjuste: AjusteInventarioRequest = {
+    variante_id: 1,
+    sucursal_id: 1,
+    tipo_movimiento: 'INGRESO_INICIAL',
+    cantidad: 25,
+    motivo: 'Recepción inicial de colección SS26'
+  };
+
+  nuevoMultimedia: PrendaMultimediaCreate = {
+    tipo: 'MODELO_3D_GLB',
+    url: '',
+    formato: '.glb',
+    es_portada: false
+  };
+
+  filteredPrendas = computed(() => {
     let list = this.prendas();
     const sector = this.selectedSector();
     const query = this.searchQuery.trim().toLowerCase();
 
     if (sector === 'TRENCH') {
-      list = list.filter(p => p.sku.includes('TRN') || (p.categoria?.nombre.toLowerCase().includes('abrigos') ?? false));
+      list = list.filter(p => p.sku.toLowerCase().includes('trench') || p.nombre.toLowerCase().includes('trench'));
     } else if (sector === 'PANT') {
-      list = list.filter(p => p.sku.includes('PNT') || (p.categoria?.nombre.toLowerCase().includes('pantalones') ?? false));
+      list = list.filter(p => p.sku.toLowerCase().includes('pant') || p.nombre.toLowerCase().includes('pant'));
     }
 
     if (query) {
@@ -992,6 +1391,7 @@ export class CatalogoPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadPrendas();
+    this.loadMetadata();
   }
 
   loadPrendas(): void {
@@ -1007,6 +1407,160 @@ export class CatalogoPageComponent implements OnInit {
         this.isLoading.set(false);
         this.errorMessage.set(err.message || 'No se pudo cargar el catalogo de prendas desde FastAPI.');
       }
+    });
+  }
+
+  loadMetadata(): void {
+    this.catalogoService.getCategorias().subscribe({
+      next: (cats) => {
+        this.categorias.set(cats);
+        if (cats.length > 0) this.nuevaPrenda.categoria_id = cats[0].id;
+      }
+    });
+
+    this.catalogoService.getTemporadas().subscribe({
+      next: (temps) => {
+        this.temporadas.set(temps);
+        if (temps.length > 0) this.nuevaPrenda.temporada_id = temps[0].id;
+      }
+    });
+
+    this.catalogoService.getTallas().subscribe({
+      next: (t) => {
+        this.tallas.set(t);
+        if (t.length > 0) this.varianteInicialTallaId = t[0].id;
+      }
+    });
+
+    this.catalogoService.getColores().subscribe({
+      next: (c) => {
+        this.colores.set(c);
+        if (c.length > 0) this.varianteInicialColorId = c[0].id;
+      }
+    });
+
+    this.inventarioService.getSucursales().subscribe({
+      next: (sucs) => {
+        this.sucursales.set(sucs);
+        if (sucs.length > 0) this.nuevoAjuste.sucursal_id = sucs[0].id;
+      }
+    });
+  }
+
+  openCreatePrendaModal(): void {
+    this.nuevaPrenda = {
+      sku: `PRD-${Date.now().toString().slice(-4)}`,
+      nombre: '',
+      descripcion: '',
+      precio_base: 320,
+      categoria_id: this.categorias()[0]?.id || 1,
+      temporada_id: this.temporadas()[0]?.id || 1
+    };
+    this.showCreateModal.set(true);
+  }
+
+  savePrenda(): void {
+    this.isLoading.set(true);
+    const payload: PrendaCreate = {
+      ...this.nuevaPrenda,
+      variantes: [
+        {
+          talla_id: Number(this.varianteInicialTallaId),
+          color_id: Number(this.varianteInicialColorId)
+        }
+      ]
+    };
+
+    this.catalogoService.createPrenda(payload).subscribe({
+      next: (prendaCreada) => {
+        // Attach initial media if URLs provided
+        if (this.urlPortada) {
+          this.catalogoService.vincularMultimedia(prendaCreada.id, {
+            tipo: 'IMAGEN',
+            url: this.urlPortada,
+            formato: '.jpg',
+            es_portada: true
+          }).subscribe();
+        }
+        if (this.urlGlb) {
+          this.catalogoService.vincularMultimedia(prendaCreada.id, {
+            tipo: 'MODELO_3D_GLB',
+            url: this.urlGlb,
+            formato: '.glb',
+            es_portada: false
+          }).subscribe();
+        }
+        if (this.urlUsdz) {
+          this.catalogoService.vincularMultimedia(prendaCreada.id, {
+            tipo: 'MODELO_3D_USDZ',
+            url: this.urlUsdz,
+            formato: '.usdz',
+            es_portada: false
+          }).subscribe();
+        }
+
+        this.showCreateModal.set(false);
+        this.showFeedback(`Prenda '${prendaCreada.nombre}' y modelos 3D registrados exitosamente.`);
+        this.loadPrendas();
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        this.showFeedback(err.error?.detail || 'Error al registrar prenda.', true);
+      }
+    });
+  }
+
+  openAjusteModal(): void {
+    // Pick first available variant ID
+    const firstPrenda = this.prendas()[0];
+    const firstVarId = firstPrenda?.variantes?.[0]?.id || 1;
+    this.nuevoAjuste = {
+      variante_id: firstVarId,
+      sucursal_id: this.sucursales()[0]?.id || 1,
+      tipo_movimiento: 'INGRESO_INICIAL',
+      cantidad: 20,
+      motivo: 'Ajuste inicial de inventario en tienda'
+    };
+    this.showAjusteModal.set(true);
+  }
+
+  saveAjuste(): void {
+    this.isLoading.set(true);
+    this.catalogoService.ajustarInventario({
+      ...this.nuevoAjuste,
+      variante_id: Number(this.nuevoAjuste.variante_id),
+      sucursal_id: Number(this.nuevoAjuste.sucursal_id),
+      cantidad: Number(this.nuevoAjuste.cantidad)
+    }).subscribe({
+      next: (stock) => {
+        this.isLoading.set(false);
+        this.showAjusteModal.set(false);
+        this.showFeedback(`Stock ajustado exitosamente: ${stock.cantidad_disponible} unidades disponibles.`);
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        this.showFeedback(err.error?.detail || 'Error al aplicar ajuste de stock.', true);
+      }
+    });
+  }
+
+  attachMultimedia(prendaId: number): void {
+    if (!this.nuevoMultimedia.url) return;
+    const formato = this.nuevoMultimedia.url.endsWith('.glb') ? '.glb' : (this.nuevoMultimedia.url.endsWith('.usdz') ? '.usdz' : '.jpg');
+    this.catalogoService.vincularMultimedia(prendaId, {
+      ...this.nuevoMultimedia,
+      formato: formato
+    }).subscribe({
+      next: (media) => {
+        this.showFeedback(`Activo AR '${media.tipo}' vinculado con éxito.`);
+        this.nuevoMultimedia.url = '';
+        this.loadPrendas();
+        // Update selectedPrenda
+        this.catalogoService.getPrendaById(prendaId).subscribe({
+          next: (p) => this.selectedPrenda.set(p)
+        });
+      },
+      error: (err) => this.showFeedback(err.error?.detail || 'Error al vincular multimedia.', true)
     });
   }
 
@@ -1045,5 +1599,15 @@ export class CatalogoPageComponent implements OnInit {
 
   closeDetail(): void {
     this.selectedPrenda.set(null);
+  }
+
+  showFeedback(msg: string, isError = false): void {
+    this.feedbackMsg.set(msg);
+    this.feedbackIsError.set(isError);
+    setTimeout(() => {
+      if (this.feedbackMsg() === msg) {
+        this.feedbackMsg.set(null);
+      }
+    }, 4500);
   }
 }

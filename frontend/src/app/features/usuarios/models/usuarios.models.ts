@@ -42,6 +42,66 @@ export interface TokenResponse {
   usuario: UsuarioResponse;
 }
 
+export interface RolCreate {
+  nombre: string;
+  descripcion?: string;
+  permisos_ids: number[];
+}
+
+export interface RolUpdate {
+  nombre?: string;
+  descripcion?: string;
+  permisos_ids?: number[];
+}
+
+export interface PersonalRegistroRequest {
+  email: string;
+  password: string;
+  nombre: string;
+  apellido: string;
+  ci_nit: string;
+  rol_id: number;
+  sucursal_id?: number | null;
+  telefono?: string;
+  direccion?: string;
+}
+
+export interface ClienteRegistroRequest {
+  email: string;
+  password: string;
+  nombre: string;
+  apellido: string;
+  ci_nit: string;
+  telefono?: string;
+  direccion?: string;
+}
+
+export interface UsuarioUpdate {
+  nombre?: string;
+  apellido?: string;
+  telefono?: string;
+  direccion?: string;
+  rol_id?: number;
+  sucursal_id?: number | null;
+}
+
+export interface CambiarEstadoRequest {
+  estado: 'ACTIVO' | 'INACTIVO' | 'BLOQUEADO';
+}
+
+export interface BitacoraAuditoriaResponse {
+  id: number;
+  timestamp: string;
+  usuario_id?: number | null;
+  usuario_email?: string | null;
+  ip_address?: string | null;
+  accion: string;
+  modulo: string;
+  detalle: string;
+  valores_anteriores?: string | null;
+  valores_nuevos?: string | null;
+}
+
 export interface UsuariosState {
   id?: string;
   name?: string;

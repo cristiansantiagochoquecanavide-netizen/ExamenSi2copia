@@ -3,7 +3,7 @@ import secrets
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 from fastapi import HTTPException, status
-from sqlalchemy import select, and_, or_, desc
+from sqlalchemy import select, and_, or_, desc, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -98,7 +98,7 @@ class AuthService:
     @staticmethod
     async def login(db: AsyncSession, data: LoginRequest, ip_address: Optional[str] = None):
         result = await db.execute(
-            select(Usuario).options(selectinload(Usuario.rol).selectinload(Rol.permisos)).where(Usuario.email == data.email)
+            select(Usuario).options(selectinload(Usuario.rol).selectinload(Rol.permisos)).where(func.lower(Usuario.email) == func.lower(data.email))
         )
         usuario = result.scalar_one_or_none()
         if not usuario or not verify_password(data.password, usuario.password_hash):
