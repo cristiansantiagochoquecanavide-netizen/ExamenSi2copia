@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -327,12 +327,19 @@ import { AuthService } from '../../../core/services/auth.service';
 export class LoginPageComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   email = '';
   password = '';
 
   readonly isLoading = signal(false);
   readonly errorMessage = signal<string | null>(null);
+
+  constructor() {
+    if (this.route.snapshot.queryParams['expired'] === 'true') {
+      this.errorMessage.set('Tu sesión ha expirado por inactividad. Por favor volvé a ingresar.');
+    }
+  }
 
   fillRole(role: 'ADMIN' | 'ENCARGADO' | 'CAJERO' | 'CLIENTE'): void {
     if (role === 'ADMIN') {

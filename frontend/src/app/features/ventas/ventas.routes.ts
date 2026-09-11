@@ -1,9 +1,19 @@
 import { Routes } from '@angular/router';
-import { VentasPageComponent } from './pages/ventas-page.component';
+import { VentasPosPageComponent } from './pages/ventas-pos-page.component';
+import { DevolucionesPageComponent } from './pages/devoluciones-page.component';
+import { PagosPageComponent } from './pages/pagos-page.component';
 
 export const VENTAS_ROUTES: Routes = [
   {
     path: '',
-    component: VentasPageComponent
+    component: VentasPosPageComponent
+  },
+  {
+    path: 'devoluciones',
+    component: DevolucionesPageComponent
+  },
+  {
+    path: 'pagos',
+    component: PagosPageComponent
   }
 ];

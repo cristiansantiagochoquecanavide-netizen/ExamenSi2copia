@@ -8,12 +8,94 @@
     </div>
 
     <nav class="nav-links">
-      <a routerLink="/catalogo" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Catálogo &amp; AR</a>
-      <a routerLink="/catalogo/parametros" routerLinkActive="active">Parámetros Moda</a>
-      <a routerLink="/inventario" routerLinkActive="active">Sucursales</a>
-      <a routerLink="/usuarios/gestion" routerLinkActive="active">Personal &amp; Clientes</a>
-      <a routerLink="/usuarios/roles" routerLinkActive="active">Roles / RBAC</a>
-      <a routerLink="/usuarios/auditoria" routerLinkActive="active">Auditoría</a>
+      <!-- 1. CATÁLOGO & MODA -->
+      <div class="nav-dropdown" [class.active-module]="isModuleActive('/catalogo')">
+        <button type="button" class="dropdown-trigger">
+          <span>Catálogo &amp; Moda</span>
+          <span class="dropdown-chevron">&#9662;</span>
+        </button>
+        <div class="dropdown-menu">
+          <a routerLink="/catalogo" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+            <span class="menu-icon">&bull;</span> Catálogo &amp; AR
+          </a>
+          <a routerLink="/catalogo/parametros" routerLinkActive="active">
+            <span class="menu-icon">&bull;</span> Parámetros Moda
+          </a>
+        </div>
+      </div>
+
+      <!-- 2. INVENTARIO & LOGÍSTICA -->
+      <div class="nav-dropdown" [class.active-module]="isModuleActive('/inventario')">
+        <button type="button" class="dropdown-trigger">
+          <span>Inventario &amp; Logística</span>
+          <span class="dropdown-chevron">&#9662;</span>
+        </button>
+        <div class="dropdown-menu">
+          <a routerLink="/inventario" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+            <span class="menu-icon">&bull;</span> Sucursales
+          </a>
+          <a routerLink="/inventario/recepcion" routerLinkActive="active">
+            <span class="menu-icon">&bull;</span> Proveedores &amp; Lotes
+          </a>
+          <a routerLink="/inventario/transferencias" routerLinkActive="active">
+            <span class="menu-icon">&bull;</span> Transferencias
+          </a>
+        </div>
+      </div>
+
+      <!-- 3. VENTAS & POS -->
+      <div class="nav-dropdown" [class.active-module]="isModuleActive('/ventas')">
+        <button type="button" class="dropdown-trigger">
+          <span>Ventas &amp; POS</span>
+          <span class="dropdown-chevron">&#9662;</span>
+        </button>
+        <div class="dropdown-menu">
+          <a routerLink="/ventas" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+            <span class="menu-icon">&bull;</span> Punto de Venta POS
+          </a>
+          <a routerLink="/ventas/devoluciones" routerLinkActive="active">
+            <span class="menu-icon">&bull;</span> Devoluciones &amp; Cambios
+          </a>
+          <a routerLink="/ventas/pagos" routerLinkActive="active">
+            <span class="menu-icon">&bull;</span> Pasarela de Pagos
+          </a>
+        </div>
+      </div>
+
+      <!-- 4. RESERVAS & PROBADORES -->
+      <div class="nav-dropdown" [class.active-module]="isModuleActive('/reservas')">
+        <button type="button" class="dropdown-trigger">
+          <span>Reservas &amp; Probador</span>
+          <span class="dropdown-chevron">&#9662;</span>
+        </button>
+        <div class="dropdown-menu">
+          <a routerLink="/reservas" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+            <span class="menu-icon">&bull;</span> Agendar Probador Físico
+          </a>
+          <a routerLink="/reservas/gestion" routerLinkActive="active">
+            <span class="menu-icon">&bull;</span> Gestión en Tienda / Probadores
+          </a>
+        </div>
+      </div>
+
+      <!-- 5. ADMINISTRACIÓN & SEGURIDAD -->
+      <div class="nav-dropdown" [class.active-module]="isModuleActive('/usuarios')">
+        <button type="button" class="dropdown-trigger">
+          <span>Administración</span>
+          <span class="dropdown-chevron">&#9662;</span>
+        </button>
+        <div class="dropdown-menu">
+          <a routerLink="/usuarios/gestion" routerLinkActive="active">
+            <span class="menu-icon">&bull;</span> Personal &amp; Clientes
+          </a>
+          <a routerLink="/usuarios/roles" routerLinkActive="active">
+            <span class="menu-icon">&bull;</span> Roles / RBAC
+          </a>
+          <a routerLink="/usuarios/auditoria" routerLinkActive="active">
+            <span class="menu-icon">&bull;</span> Auditoría
+          </a>
+        </div>
+      </div>
     </nav>
 
     <div class="user-auth-zone">

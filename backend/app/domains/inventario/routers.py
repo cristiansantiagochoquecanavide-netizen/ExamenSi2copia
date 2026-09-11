@@ -8,9 +8,16 @@ from app.domains.usuarios.routers import get_current_user, require_permissions
 from app.domains.inventario.schemas import (
     CiudadCreate, CiudadUpdate, CiudadResponse,
     SucursalCreate, SucursalUpdate, SucursalResponse,
-    AsignarEncargadoRequest, MensajeInventarioResponse
+    AsignarEncargadoRequest, MensajeInventarioResponse,
+    ProveedorCreate, ProveedorUpdate, ProveedorResponse,
+    RecepcionMercaderiaCreate, RecepcionMercaderiaResponse,
+    TransferenciaStockCreate, TransferenciaStockResponse,
+    RecibirTransferenciaRequest, CancelarTransferenciaRequest
 )
-from app.domains.inventario.services import CiudadService, SucursalService
+from app.domains.inventario.services import (
+    CiudadService, SucursalService, ProveedorService, RecepcionMercaderiaService,
+    TransferenciaStockService
+)
 
 router = APIRouter(prefix="/inventario", tags=["Inventario & Sucursales"])
 
@@ -121,3 +128,127 @@ async def eliminar_sucursal(
     ip = request.client.host if request.client else None
     await SucursalService.eliminar(db, sucursal_id, current_user, ip)
     return MensajeInventarioResponse(mensaje="Sucursal eliminada exitosamente")
+
+
+# ----------------- CU8: GESTION DE PROVEEDORES -----------------
+@router.get("/proveedores", response_model=List[ProveedorResponse], summary="Listar Proveedores Textiles (CU8)")
+async def listar_proveedores(
+    activo_solo: bool = False,
+    search: Optional[str] = None,
+    db: AsyncSession = Depends(get_db)
+):
+    return await ProveedorService.listar(db, activo_solo, search)
+
+
+@router.post("/proveedores", response_model=ProveedorResponse, status_code=status.HTTP_201_CREATED, summary="Registrar Proveedor (CU8)")
+async def crear_proveedor(
+    data: ProveedorCreate,
+    request: Request,
+    current_user: Usuario = Depends(require_permissions("inventario:write")),
+    db: AsyncSession = Depends(get_db)
+):
+    ip = request.client.host if request.client else None
+    return await ProveedorService.crear(db, data, current_user, ip)
+
+
+@router.get("/proveedores/{proveedor_id}", response_model=ProveedorResponse, summary="Obtener Proveedor (CU8)")
+async def obtener_proveedor(proveedor_id: int, db: AsyncSession = Depends(get_db)):
+    return await ProveedorService.obtener_por_id(db, proveedor_id)
+
+
+@router.put("/proveedores/{proveedor_id}", response_model=ProveedorResponse, summary="Actualizar Proveedor (CU8)")
+async def actualizar_proveedor(
+    proveedor_id: int,
+    data: ProveedorUpdate,
+    request: Request,
+    current_user: Usuario = Depends(require_permissions("inventario:write")),
+    db: AsyncSession = Depends(get_db)
+):
+    ip = request.client.host if request.client else None
+    return await ProveedorService.actualizar(db, proveedor_id, data, current_user, ip)
+
+
+# ----------------- CU8: RECEPCIÓN DE MERCADERÍA / LOTES AL KARDEX -----------------
+@router.get("/recepciones", response_model=List[RecepcionMercaderiaResponse], summary="Listar Recepciones de Mercadería (CU8)")
+async def listar_recepciones(
+    sucursal_id: Optional[int] = None,
+    proveedor_id: Optional[int] = None,
+    limit: int = 50,
+    offset: int = 0,
+    db: AsyncSession = Depends(get_db)
+):
+    return await RecepcionMercaderiaService.listar(db, sucursal_id, proveedor_id, limit, offset)
+
+
+@router.post("/recepciones", response_model=RecepcionMercaderiaResponse, status_code=status.HTTP_201_CREATED, summary="Registrar Recepción de Mercadería en Kardex (CU8)")
+async def registrar_recepcion(
+    data: RecepcionMercaderiaCreate,
+    request: Request,
+    current_user: Usuario = Depends(require_permissions("inventario:write")),
+    db: AsyncSession = Depends(get_db)
+):
+    ip = request.client.host if request.client else None
+    return await RecepcionMercaderiaService.registrar_recepcion(db, data, current_user, ip)
+
+
+@router.get("/recepciones/{recepcion_id}", response_model=RecepcionMercaderiaResponse, summary="Obtener Detalle de Recepción (CU8)")
+async def obtener_recepcion(recepcion_id: int, db: AsyncSession = Depends(get_db)):
+    return await RecepcionMercaderiaService.obtener_por_id(db, recepcion_id)
+
+
+# ----------------- CU9: TRANSFERENCIA DE STOCK ENTRE SUCURSALES -----------------
+@router.get("/transferencias", response_model=List[TransferenciaStockResponse], summary="Listar Transferencias de Stock (CU9)")
+async def listar_transferencias(
+    sucursal_id: Optional[int] = None,
+    estado: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0,
+    db: AsyncSession = Depends(get_db)
+):
+    return await TransferenciaStockService.listar(db, sucursal_id, estado, limit, offset)
+
+
+@router.post("/transferencias", response_model=TransferenciaStockResponse, status_code=status.HTTP_201_CREATED, summary="Registrar Transferencia de Stock (CU9)")
+async def crear_transferencia(
+    data: TransferenciaStockCreate,
+    request: Request,
+    current_user: Usuario = Depends(require_permissions("inventario:write")),
+    db: AsyncSession = Depends(get_db)
+):
+    ip = request.client.host if request.client else None
+    return await TransferenciaStockService.crear_transferencia(db, data, current_user, ip)
+
+
+@router.get("/transferencias/{transferencia_id}", response_model=TransferenciaStockResponse, summary="Obtener Detalle de Transferencia (CU9)")
+async def obtener_transferencia(transferencia_id: int, db: AsyncSession = Depends(get_db)):
+    return await TransferenciaStockService.obtener_por_id(db, transferencia_id)
+
+
+@router.put("/transferencias/{transferencia_id}/recibir", response_model=TransferenciaStockResponse, summary="Confirmar Recepción de Traslado en Destino (CU9)")
+async def recibir_transferencia(
+    transferencia_id: int,
+    data: RecibirTransferenciaRequest,
+    request: Request,
+    current_user: Usuario = Depends(require_permissions("inventario:write")),
+    db: AsyncSession = Depends(get_db)
+):
+    ip = request.client.host if request.client else None
+    return await TransferenciaStockService.recibir_transferencia(
+        db, transferencia_id, current_user, data.observaciones, ip
+    )
+
+
+@router.put("/transferencias/{transferencia_id}/cancelar", response_model=TransferenciaStockResponse, summary="Cancelar Traslado y Revertir Stock (CU9)")
+async def cancelar_transferencia(
+    transferencia_id: int,
+    data: CancelarTransferenciaRequest,
+    request: Request,
+    current_user: Usuario = Depends(require_permissions("inventario:write")),
+    db: AsyncSession = Depends(get_db)
+):
+    ip = request.client.host if request.client else None
+    return await TransferenciaStockService.cancelar_transferencia(
+        db, transferencia_id, current_user, data.motivo, ip
+    )
+
+

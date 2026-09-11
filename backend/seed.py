@@ -8,7 +8,7 @@ from app.core.security import hash_password
 
 # Modelos
 from app.domains.usuarios.models import Rol, Permiso, Usuario, BitacoraAuditoria
-from app.domains.inventario.models import Ciudad, Sucursal
+from app.domains.inventario.models import Ciudad, Sucursal, Proveedor, RecepcionMercaderia, DetalleRecepcionMercaderia
 from app.domains.catalogo.models import (
     Categoria, Talla, Color, Temporada, Prenda, PrendaMultimedia, PrendaVariante,
     InventarioStock, MovimientoInventario
@@ -291,6 +291,43 @@ async def run_seed():
                 u_exists.estado = "ACTIVO"
                 if u_data["sucursal_id"]:
                     u_exists.sucursal_id = u_data["sucursal_id"]
+        await session.flush()
+
+        # 4.2 PROVEEDORES TEXTILES (CU8)
+        print("--> 4.2 Creando Proveedores Textiles Base (CU8)...")
+        proveedores_base = [
+            {
+                "razon_social": "Textiles Andinos S.A.",
+                "nit": "1023948021",
+                "contacto_nombre": "Roberto Gutiérrez",
+                "telefono": "+591 3 3221144",
+                "email": "ventas@textilesandinos.bo",
+                "direccion": "Parque Industrial Manzana 12, Santa Cruz",
+                "activo": True
+            },
+            {
+                "razon_social": "Hilandería Santa Cruz S.R.L.",
+                "nit": "3049281019",
+                "contacto_nombre": "Mariana Barba",
+                "telefono": "+591 3 3556677",
+                "email": "pedidos@hilanderiascz.com",
+                "direccion": "Av. Doble Vía a La Guardia Km 6",
+                "activo": True
+            },
+            {
+                "razon_social": "Loro Piana Fabrics Bolivia",
+                "nit": "5019283011",
+                "contacto_nombre": "Alessandro Rossi",
+                "telefono": "+591 2 2794400",
+                "email": "importaciones@loropiana.bo",
+                "direccion": "Calle 18 de Achumani #400, La Paz",
+                "activo": True
+            }
+        ]
+        for p_data in proveedores_base:
+            p_exist = (await session.execute(select(Proveedor).where(Proveedor.nit == p_data["nit"]))).scalar_one_or_none()
+            if not p_exist:
+                session.add(Proveedor(**p_data))
         await session.flush()
 
         # 5. PARAMETROS DE MODA (CU5)

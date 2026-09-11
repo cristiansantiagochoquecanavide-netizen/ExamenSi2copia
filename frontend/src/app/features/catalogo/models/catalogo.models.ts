@@ -96,6 +96,7 @@ export interface PrendaVariante {
   activo: boolean;
   talla?: Talla;
   color?: Color;
+  prenda?: Prenda;
 }
 
 export interface PrendaCreate {

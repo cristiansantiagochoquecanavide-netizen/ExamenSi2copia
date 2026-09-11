@@ -4,6 +4,8 @@ from app.core.database import Base, engine
 import app.domains.usuarios.models
 import app.domains.inventario.models
 import app.domains.catalogo.models
+import app.domains.ventas.models
+import app.domains.reservas.models
 
 async def init_tables():
     print("==> Conectando a PostgreSQL...")

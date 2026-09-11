@@ -1,62 +1,1333 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ReservasService } from '../services/reservas.service';
+import { InventarioService } from '../../inventario/services/inventario.service';
+import { CatalogoService } from '../../catalogo/services/catalogo.service';
+import { Reserva, ReservaCreate, DetalleReservaCreate } from '../models/reservas.models';
+import { Sucursal } from '../../inventario/models/inventario.models';
+import { Prenda, PrendaVariante, InventarioStock } from '../../catalogo/models/catalogo.models';
+
+interface PrendaEnReserva {
+  prenda: Prenda;
+  variante: PrendaVariante;
+  cantidad: number;
+}
 
 @Component({
   selector: 'app-reservas-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   template: `
-    <div class="feature-container">
-      <div class="header-section">
-        <h2 class="editorial-heading">Reservas</h2>
-        <p class="subtitle">Reservas de probadores fisicos, turnos y preparacion en sucursal</p>
+    <div class="atelier-reservas-container">
+      <!-- HEADER -->
+      <header class="reservas-header">
+        <div class="header-titles">
+          <div class="subtitle-badge">ATELIER NOIR &bull; CICLO #2 &bull; CU13</div>
+          <h1>Reservas para Probador en Boutique</h1>
+          <p class="description">
+            Apartá prendas exclusivas de alta costura para probarlas en tu boutique favorita con fecha y turno agendado.
+          </p>
+        </div>
+        <div class="header-actions">
+          <div class="tabs-switcher">
+            <button
+              type="button"
+              class="tab-btn"
+              [class.active]="activeTab === 'agendar'"
+              (click)="activeTab = 'agendar'">
+              Agendar Probador
+            </button>
+            <button
+              type="button"
+              class="tab-btn"
+              [class.active]="activeTab === 'mis-reservas'"
+              (click)="cambiarAMisReservas()">
+              Mis Reservas
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- MENSAJES TOAST -->
+      <div *ngIf="mensajeExito" class="toast-banner success">
+        <span class="toast-icon">&#10003;</span>
+        <div class="toast-body">
+          <strong>Reserva Confirmada</strong>
+          <span>{{ mensajeExito }}</span>
+        </div>
+        <button type="button" class="btn-close-toast" (click)="mensajeExito = null">&times;</button>
       </div>
-      <div class="status-card">
-        <span class="status-indicator">MODULO CARGADO VIA LAZY LOADING</span>
-        <p>Estado de sincronizacion con el backend FastAPI: <strong>{{ domainStatus() }}</strong></p>
+
+      <div *ngIf="mensajeError" class="toast-banner error">
+        <span class="toast-icon">&#9888;</span>
+        <div class="toast-body">
+          <strong>Error en la Reserva</strong>
+          <span>{{ mensajeError }}</span>
+        </div>
+        <button type="button" class="btn-close-toast" (click)="mensajeError = null">&times;</button>
+      </div>
+
+      <!-- TAB 1: AGENDAR PROBADOR -->
+      <main *ngIf="activeTab === 'agendar'" class="agendar-layout">
+        <!-- COLUMNA IZQUIERDA: PARÁMETROS DE CITA & SUCURSAL -->
+        <section class="atelier-card step-card">
+          <div class="card-header">
+            <h3>1. Boutique &amp; Turno de Visita</h3>
+            <span class="gold-pill">Paso 1</span>
+          </div>
+
+          <div class="form-grid">
+            <!-- SUCURSAL -->
+            <div class="form-group full-width">
+              <label>Seleccionar Boutique / Sucursal *</label>
+              <select
+                [(ngModel)]="sucursalSeleccionadaId"
+                (change)="onSucursalChange()"
+                class="atelier-select">
+                <option [ngValue]="null">-- Elegir boutique --</option>
+                <option *ngFor="let s of sucursalesList" [ngValue]="s.id">
+                  {{ s.nombre }} ({{ s.direccion }})
+                </option>
+              </select>
+            </div>
+
+            <!-- DETALLES SUCURSAL SELECCIONADA -->
+            <div *ngIf="sucursalActual" class="sucursal-info-box full-width">
+              <div class="info-line">
+                <span class="lbl">&#128205; Dirección:</span>
+                <span class="val">{{ sucursalActual.direccion }}</span>
+              </div>
+              <div class="info-line">
+                <span class="lbl">&#9200; Horario:</span>
+                <span class="val">{{ sucursalActual.horario_atencion || '10:00 - 20:00' }}</span>
+              </div>
+              <div class="info-line">
+                <span class="lbl">&#128085; Capacidad Vestidores:</span>
+                <span class="val highlight-gold">{{ sucursalActual.capacidad_probadores }} probadores disponibles</span>
+              </div>
+            </div>
+
+            <!-- FECHA -->
+            <div class="form-group">
+              <label>Fecha de la Cita *</label>
+              <input
+                type="date"
+                [(ngModel)]="fechaReserva"
+                [min]="hoyStr"
+                class="atelier-input">
+            </div>
+
+            <!-- HORA / TURNO -->
+            <div class="form-group">
+              <label>Hora Estimada *</label>
+              <select [(ngModel)]="horaEstimada" class="atelier-select">
+                <option value="10:00">10:00 AM (Mañana)</option>
+                <option value="11:30">11:30 AM (Mañana)</option>
+                <option value="14:00">02:00 PM (Tarde)</option>
+                <option value="15:30">03:30 PM (Tarde)</option>
+                <option value="17:00">05:00 PM (Tarde)</option>
+                <option value="18:30">06:30 PM (Noche)</option>
+                <option value="19:30">07:30 PM (Noche)</option>
+              </select>
+            </div>
+
+            <!-- ANTICIPO / GARANTÍA OPCIONAL -->
+            <div class="form-group">
+              <label>Anticipo de Garantía (Opcional)</label>
+              <div class="input-currency-group">
+                <span class="currency-label">{{ moneda === 'USD' ? '$' : 'Bs.' }}</span>
+                <input
+                  type="number"
+                  step="5"
+                  min="0"
+                  [(ngModel)]="montoAnticipo"
+                  class="atelier-input-amount"
+                  placeholder="0.00">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Moneda</label>
+              <select [(ngModel)]="moneda" class="atelier-select">
+                <option value="USD">USD ($)</option>
+                <option value="BOB">BOB (Bs.)</option>
+              </select>
+            </div>
+
+            <!-- OBSERVACIONES -->
+            <div class="form-group full-width">
+              <label>Peticiones Especiales / Notas para el Asesor</label>
+              <textarea
+                [(ngModel)]="observaciones"
+                rows="2"
+                class="atelier-textarea"
+                placeholder="Ej: Deseo probar con tacones negros, preparar probador VIP..."></textarea>
+            </div>
+          </div>
+        </section>
+
+        <!-- COLUMNA DERECHA: SELECCIÓN DE PRENDAS DEL CATÁLOGO & CARRITO -->
+        <section class="atelier-card prendas-card">
+          <div class="card-header">
+            <h3>2. Prendas a Probarse</h3>
+            <span class="gold-pill">Paso 2</span>
+          </div>
+
+          <div *ngIf="!sucursalSeleccionadaId" class="select-sucursal-notice">
+            <span class="notice-icon">&#9754;</span>
+            <p>Primero seleccioná una boutique en el Paso 1 para verificar las existencias físicas en tiempo real.</p>
+          </div>
+
+          <div *ngIf="sucursalSeleccionadaId">
+            <!-- BUSCADOR RÁPIDO DE PRENDAS -->
+            <div class="prendas-search-box">
+              <input
+                type="text"
+                [(ngModel)]="busquedaPrenda"
+                placeholder="Buscar prenda por nombre o código..."
+                class="atelier-input">
+            </div>
+
+            <!-- GRILLA DE PRENDAS DISPONIBLES EN LA BOUTIQUE -->
+            <div class="prendas-selector-list">
+              <div *ngFor="let p of prendasFiltradas()" class="prenda-mini-card">
+                <div class="prenda-mini-body">
+                  <strong class="prenda-name">{{ p.nombre }}</strong>
+                  <div class="prenda-meta">
+                    <span class="prenda-price">{{ moneda === 'USD' ? '$' : 'Bs.' }} {{ p.precio_base | number:'1.2-2' }}</span>
+                    <span class="prenda-cat">{{ p.categoria?.nombre || 'Alta Costura' }}</span>
+                  </div>
+
+                  <!-- SELECTOR DE VARIANTE (TALLA Y COLOR) -->
+                  <div class="variante-picker-row" *ngIf="p.variantes && p.variantes.length > 0">
+                    <select
+                      #varianteSelect
+                      class="atelier-select-mini">
+                      <option
+                        *ngFor="let v of p.variantes"
+                        [value]="v.id">
+                        Talla: {{ v.talla?.codigo || 'U' }} &bull; {{ v.color?.nombre || 'Color' }} (Stock: {{ getStockDisponible(v.id) }} uds)
+                      </option>
+                    </select>
+
+                    <button
+                      type="button"
+                      class="btn-add-prenda"
+                      (click)="agregarPrenda(p, +varianteSelect.value)">
+                      + Apartar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CESTA DE PRENDAS APARTADAS -->
+            <div class="prendas-apartadas-box">
+              <h4>Prendas en tu Cita de Probador ({{ prendasApartadas.length }})</h4>
+
+              <div *ngIf="prendasApartadas.length === 0" class="empty-basket">
+                <p>No has agregado prendas a tu cita todavía. Seleccioná arriba las piezas que deseas probarte.</p>
+              </div>
+
+              <div *ngIf="prendasApartadas.length > 0" class="basket-items-list">
+                <div *ngFor="let item of prendasApartadas; let i = index" class="basket-item-row">
+                  <div class="basket-item-info">
+                    <strong>{{ item.prenda.nombre }}</strong>
+                    <small class="basket-item-specs">
+                      Talla: {{ item.variante.talla?.codigo }} &bull; Color: {{ item.variante.color?.nombre }} &bull; SKU: {{ item.variante.sku_variante }}
+                    </small>
+                  </div>
+
+                  <div class="basket-item-qty">
+                    <button type="button" class="btn-qty" (click)="cambiarCantidad(i, -1)">-</button>
+                    <span class="qty-num">{{ item.cantidad }}</span>
+                    <button type="button" class="btn-qty" (click)="cambiarCantidad(i, 1)">+</button>
+                  </div>
+
+                  <div class="basket-item-subtotal">
+                    {{ moneda === 'USD' ? '$' : 'Bs.' }} {{ (item.prenda.precio_base * item.cantidad) | number:'1.2-2' }}
+                  </div>
+
+                  <button type="button" class="btn-remove-item" (click)="eliminarPrenda(i)">&times;</button>
+                </div>
+
+                <!-- TOTAL ESTIMADO & BOTÓN CONFIRMAR -->
+                <div class="basket-total-summary">
+                  <div class="summary-total-line">
+                    <span>Total Estimado de las Prendas:</span>
+                    <strong class="gold-amount">{{ moneda === 'USD' ? '$' : 'Bs.' }} {{ calcularTotalPrendas() | number:'1.2-2' }}</strong>
+                  </div>
+                  <div class="summary-total-line" *ngIf="montoAnticipo > 0">
+                    <span>Anticipo de Garantía Agendado:</span>
+                    <span class="anticipo-val">{{ moneda === 'USD' ? '$' : 'Bs.' }} {{ montoAnticipo | number:'1.2-2' }}</span>
+                  </div>
+
+                  <button
+                    type="button"
+                    class="btn-atelier-gold btn-confirm-reserva"
+                    (click)="confirmarReserva()"
+                    [disabled]="guardandoReserva || prendasApartadas.length === 0 || !sucursalSeleccionadaId || !fechaReserva">
+                    <span *ngIf="guardandoReserva" class="spinner-inline"></span>
+                    {{ guardandoReserva ? 'Confirmando Reserva...' : '&#128085; Agendar Cita en Probador Físico' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- TAB 2: MIS RESERVAS -->
+      <section *ngIf="activeTab === 'mis-reservas'" class="atelier-card mis-reservas-card">
+        <div class="reservas-toolbar">
+          <div class="filter-item">
+            <label>Filtrar por Estado:</label>
+            <select [(ngModel)]="filtroEstado" (change)="cargarMisReservas()" class="atelier-select">
+              <option value="">Todos los Estados</option>
+              <option value="CONFIRMADA">Confirmadas / Agendadas</option>
+              <option value="EN_PROBADOR">En Probador</option>
+              <option value="COMPLETADA">Completadas</option>
+              <option value="CANCELADA">Canceladas</option>
+            </select>
+          </div>
+
+          <button type="button" class="btn-atelier-outline btn-refresh" (click)="cargarMisReservas()">
+            &#8635; Actualizar Lista
+          </button>
+        </div>
+
+        <div *ngIf="cargandoReservas" class="loading-state">
+          <div class="spinner-inline large"></div>
+          <p>Consultando tu agenda de probadores...</p>
+        </div>
+
+        <div *ngIf="!cargandoReservas && reservasList.length === 0" class="empty-state">
+          <p>No tenés citas de probador registradas con los filtros seleccionados.</p>
+        </div>
+
+        <div *ngIf="!cargandoReservas && reservasList.length > 0" class="reservas-grid">
+          <div *ngFor="let r of reservasList" class="reserva-card-luxury">
+            <div class="card-reserva-header">
+              <span class="code-badge">{{ r.codigo_reserva }}</span>
+              <span class="status-pill" [ngClass]="r.estado.toLowerCase()">{{ r.estado }}</span>
+            </div>
+
+            <div class="card-reserva-body">
+              <div class="reserva-info-row">
+                <span class="lbl">&#128205; Boutique:</span>
+                <span class="val font-bold">{{ r.sucursal?.nombre || 'Boutique Atelier' }}</span>
+              </div>
+              <div class="reserva-info-row">
+                <span class="lbl">&#128197; Fecha &amp; Hora:</span>
+                <span class="val highlight-gold">{{ r.fecha_reserva | date:'dd/MM/yyyy' }} a las {{ r.hora_estimada }}</span>
+              </div>
+              <div class="reserva-info-row" *ngIf="r.monto_anticipo > 0">
+                <span class="lbl">&#128179; Anticipo:</span>
+                <span class="val">{{ r.moneda === 'USD' ? '$' : 'Bs.' }} {{ r.monto_anticipo | number:'1.2-2' }}</span>
+              </div>
+
+              <!-- PRENDAS APARTADAS -->
+              <div class="reserva-items-preview">
+                <small class="items-title">Prendas en Vestidor ({{ r.detalles.length }}):</small>
+                <ul>
+                  <li *ngFor="let d of r.detalles">
+                    {{ d.cantidad }}x {{ d.variante?.prenda?.nombre || 'Prenda' }} 
+                    <span class="tag-specs">({{ d.variante?.talla?.codigo }} / {{ d.variante?.color?.nombre }})</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="card-reserva-actions">
+              <button
+                type="button"
+                class="btn-action-qr"
+                (click)="abrirPaseProbador(r)">
+                &#9638; Ver Pase QR
+              </button>
+
+              <button
+                type="button"
+                *ngIf="r.estado === 'CONFIRMADA' || r.estado === 'PENDIENTE'"
+                class="btn-action-cancel"
+                (click)="cancelarReserva(r)">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MODAL: PASE DE ACCESO A PROBADOR (FITTING ROOM PASS) -->
+      <div *ngIf="mostrarPaseModal && reservaActualPase" class="modal-backdrop">
+        <div class="modal-pase-container">
+          <div class="modal-header-actions">
+            <span class="pase-title">Pase de Acceso a Probador Físico</span>
+            <button type="button" class="btn-close-modal" (click)="cerrarPase()">&times;</button>
+          </div>
+
+          <div class="pase-slip" id="printable-fitting-pass">
+            <div class="pase-brand">
+              <div class="brand-crest">&#9670; ATELIER NOIR &#9670;</div>
+              <div class="brand-sub">FITTING ROOM RESERVATION PASS</div>
+            </div>
+
+            <div class="pase-status-banner" [class.confirmed]="reservaActualPase.estado === 'CONFIRMADA'">
+              {{ reservaActualPase.estado === 'CONFIRMADA' ? 'CITA CONFIRMADA' : reservaActualPase.estado }}
+            </div>
+
+            <!-- CÓDIGO QR EN CUADRO DORADO -->
+            <div class="pase-qr-box">
+              <div class="pase-qr-svg" [innerHTML]="sanitizedQrSvg"></div>
+              <span class="pase-code-display">{{ reservaActualPase.codigo_reserva }}</span>
+              <small class="pase-scan-hint">Presentá este código al llegar a la boutique</small>
+            </div>
+
+            <!-- DETALLES DE LA CITA -->
+            <div class="pase-details-table">
+              <div class="pase-row">
+                <span class="lbl">BOUTIQUE:</span>
+                <span class="val font-bold">{{ reservaActualPase.sucursal?.nombre }}</span>
+              </div>
+              <div class="pase-row">
+                <span class="lbl">DIRECCIÓN:</span>
+                <span class="val">{{ reservaActualPase.sucursal?.direccion }}</span>
+              </div>
+              <div class="pase-row">
+                <span class="lbl">FECHA Y HORA:</span>
+                <span class="val font-bold highlight-black">{{ reservaActualPase.fecha_reserva | date:'dd/MM/yyyy' }} - {{ reservaActualPase.hora_estimada }}</span>
+              </div>
+              <div class="pase-row">
+                <span class="lbl">CLIENTE:</span>
+                <span class="val">{{ reservaActualPase.cliente?.nombre }} {{ reservaActualPase.cliente?.apellido }}</span>
+              </div>
+            </div>
+
+            <!-- LISTA DE PRENDAS RESERVADAS -->
+            <div class="pase-prendas-section">
+              <div class="prendas-header-lbl">PRENDAS RESERVADAS EN PROBADOR:</div>
+              <div *ngFor="let d of reservaActualPase.detalles" class="pase-prenda-line">
+                <span>&bull; {{ d.cantidad }}x {{ d.variante?.prenda?.nombre }} ({{ d.variante?.talla?.codigo }} / {{ d.variante?.color?.nombre }})</span>
+                <span class="font-bold">{{ reservaActualPase.moneda === 'USD' ? '$' : 'Bs.' }} {{ d.subtotal | number:'1.2-2' }}</span>
+              </div>
+            </div>
+
+            <div class="pase-footer-notes">
+              <p>Por favor presentate 5 minutos antes de tu turno agendado.</p>
+              <p class="micro">Las prendas se apartarán exclusivamente durante la franja asignada.</p>
+            </div>
+          </div>
+
+          <div class="modal-footer-actions">
+            <button type="button" class="btn-atelier-outline" (click)="imprimirPase()">
+              &#128438; Imprimir Pase
+            </button>
+            <button type="button" class="btn-atelier-gold" (click)="cerrarPase()">
+              Cerrar
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   `,
   styles: [`
-    .feature-container {
-      padding: 1rem 0;
+    .atelier-reservas-container {
+      padding: 1.5rem 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      color: #e5e5e5;
     }
-    .editorial-heading {
-      font-size: 2.2rem;
-      margin-bottom: 0.5rem;
-      color: var(--color-primary);
-    }
-    .subtitle {
-      color: var(--color-on-surface-muted);
-      font-size: 0.95rem;
+
+    /* HEADER */
+    .reservas-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
       margin-bottom: 2rem;
+      gap: 1.5rem;
+      flex-wrap: wrap;
     }
-    .status-card {
-      background: var(--color-surface);
-      border: var(--border-hairline);
-      padding: 1.5rem;
-      max-width: 600px;
+    .subtitle-badge {
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      color: #d4af37;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
     }
-    .status-indicator {
-      display: inline-block;
+    .header-titles h1 {
+      font-size: 2rem;
+      font-family: 'Cinzel', 'Playfair Display', serif, sans-serif;
+      color: #f3e5ab;
+      margin: 0 0 0.5rem 0;
+      letter-spacing: 1px;
+    }
+    .header-titles .description {
+      color: #999;
+      font-size: 0.9rem;
+      max-width: 650px;
+      margin: 0;
+    }
+
+    /* TABS */
+    .tabs-switcher {
+      display: flex;
+      background: #141414;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 8px;
+      padding: 4px;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: #aaa;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.25s ease;
+      font-weight: 500;
+    }
+    .tab-btn.active {
+      background: #d4af37;
+      color: #0a0a0a;
+      font-weight: 700;
+    }
+
+    /* TOASTS */
+    .toast-banner {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      animation: slideDown 0.3s ease;
+    }
+    .toast-banner.success {
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      color: #86efac;
+    }
+    .toast-banner.error {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+    }
+    .toast-icon { font-size: 1.3rem; }
+    .toast-body { flex: 1; display: flex; flex-direction: column; }
+    .btn-close-toast {
+      background: none;
+      border: none;
+      color: inherit;
+      font-size: 1.3rem;
+      cursor: pointer;
+    }
+
+    /* CARDS */
+    .atelier-card {
+      background: #111111;
+      border: 1px solid rgba(212, 175, 55, 0.22);
+      border-radius: 12px;
+      padding: 1.75rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+    }
+    .card-header h3 {
+      font-size: 1.2rem;
+      color: #f3e5ab;
+      margin: 0;
+      letter-spacing: 0.5px;
+    }
+    .gold-pill {
       font-size: 0.7rem;
-      letter-spacing: 0.1em;
-      color: var(--color-gold);
-      border: 1px solid var(--color-gold);
-      padding: 2px 8px;
+      background: rgba(212, 175, 55, 0.15);
+      color: #d4af37;
+      padding: 0.25rem 0.6rem;
+      border-radius: 20px;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* AGENDAR LAYOUT */
+    .agendar-layout {
+      display: grid;
+      grid-template-columns: 1.1fr 1.4fr;
+      gap: 2rem;
+    }
+    @media (max-width: 1024px) {
+      .agendar-layout { grid-template-columns: 1fr; }
+    }
+
+    /* FORMS */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .full-width { grid-column: span 2; }
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      color: #aaa;
+      margin-bottom: 0.35rem;
+    }
+    .atelier-input, .atelier-select, .atelier-textarea {
+      width: 100%;
+      background: #181818;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #eee;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .atelier-input:focus, .atelier-select:focus, .atelier-textarea:focus {
+      border-color: #d4af37;
+    }
+    .input-currency-group {
+      display: flex;
+      background: #181818;
+      border: 1px solid #333;
+      border-radius: 8px;
+      align-items: center;
+      padding: 0 0.75rem;
+    }
+    .currency-label {
+      color: #d4af37;
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-right: 0.5rem;
+    }
+    .atelier-input-amount {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: #f3e5ab;
+      font-size: 1.2rem;
+      font-weight: 700;
+      padding: 0.6rem 0;
+      outline: none;
+    }
+    .sucursal-info-box {
+      background: #0d0d0d;
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-radius: 8px;
+      padding: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+    }
+    .sucursal-info-box .lbl { color: #888; margin-right: 0.5rem; }
+    .sucursal-info-box .val { color: #ddd; }
+
+    /* PRENDAS CARD */
+    .select-sucursal-notice {
+      padding: 3rem 1.5rem;
+      text-align: center;
+      color: #888;
+      font-size: 0.95rem;
+    }
+    .notice-icon { font-size: 2rem; color: #d4af37; display: block; margin-bottom: 0.5rem; }
+    .prendas-search-box { margin-bottom: 1rem; }
+    .prendas-selector-list {
+      max-height: 280px;
+      overflow-y: auto;
+      border: 1px solid #222;
+      border-radius: 8px;
+      background: #0e0e0e;
+      margin-bottom: 1.5rem;
+    }
+    .prenda-mini-card {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid #1a1a1a;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .prenda-mini-card:last-child { border-bottom: none; }
+    .prenda-mini-body { width: 100%; }
+    .prenda-name {
+      display: block;
+      font-size: 0.9rem;
+      color: #f3e5ab;
+      margin-bottom: 0.2rem;
+    }
+    .prenda-meta {
+      display: flex;
+      gap: 0.75rem;
+      font-size: 0.75rem;
+      color: #888;
+      margin-bottom: 0.5rem;
+    }
+    .prenda-price { color: #d4af37; font-weight: 700; }
+    .variante-picker-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    .atelier-select-mini {
+      flex: 1;
+      background: #181818;
+      border: 1px solid #333;
+      color: #eee;
+      padding: 0.4rem 0.6rem;
+      font-size: 0.8rem;
+      border-radius: 6px;
+      outline: none;
+    }
+    .btn-add-prenda {
+      background: #222;
+      border: 1px solid #d4af37;
+      color: #d4af37;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.4rem 0.85rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-add-prenda:hover {
+      background: #d4af37;
+      color: #000;
+    }
+
+    /* CESTA DE PRENDAS */
+    .prendas-apartadas-box {
+      background: #0a0a0a;
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-radius: 10px;
+      padding: 1.25rem;
+    }
+    .prendas-apartadas-box h4 {
+      margin: 0 0 1rem 0;
+      font-size: 0.95rem;
+      color: #f3e5ab;
+      letter-spacing: 0.5px;
+    }
+    .empty-basket {
+      text-align: center;
+      color: #666;
+      font-size: 0.85rem;
+      padding: 1.5rem 0;
+    }
+    .basket-item-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #1a1a1a;
+      font-size: 0.85rem;
+    }
+    .basket-item-info { flex: 1; }
+    .basket-item-specs { display: block; color: #777; font-size: 0.75rem; }
+    .basket-item-qty {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .btn-qty {
+      background: #222;
+      border: 1px solid #444;
+      color: #eee;
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .qty-num { min-width: 20px; text-align: center; font-weight: bold; }
+    .basket-item-subtotal {
+      color: #d4af37;
+      font-weight: 700;
+      min-width: 70px;
+      text-align: right;
+    }
+    .btn-remove-item {
+      background: none;
+      border: none;
+      color: #ef4444;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    .basket-total-summary {
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px dashed rgba(212, 175, 55, 0.3);
+    }
+    .summary-total-line {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+    .gold-amount { color: #f3e5ab; font-size: 1.3rem; font-weight: 700; }
+    .btn-confirm-reserva {
+      width: 100%;
+      margin-top: 1rem;
+      padding: 0.9rem;
+    }
+
+    /* MIS RESERVAS GRID */
+    .reservas-toolbar {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-end;
+      margin-bottom: 1.5rem;
+    }
+    .reservas-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.5rem;
+    }
+    .reserva-card-luxury {
+      background: #161616;
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: 10px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .card-reserva-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #222;
+    }
+    .code-badge {
+      font-family: monospace;
+      color: #f3e5ab;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    .status-pill {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 12px;
+      letter-spacing: 0.5px;
+    }
+    .status-pill.confirmada {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    .status-pill.cancelada {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .reserva-info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      margin-bottom: 0.4rem;
+    }
+    .reserva-info-row .lbl { color: #888; }
+    .reserva-info-row .val { color: #ddd; }
+    .reserva-items-preview {
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid #222;
+      font-size: 0.8rem;
+    }
+    .items-title { color: #aaa; display: block; margin-bottom: 0.35rem; }
+    .reserva-items-preview ul {
+      margin: 0;
+      padding-left: 1.2rem;
+      color: #ccc;
+    }
+    .tag-specs { color: #777; font-size: 0.7rem; }
+    .card-reserva-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid #222;
+    }
+    .btn-action-qr {
+      flex: 1;
+      background: #1c1c1c;
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      color: #d4af37;
+      font-weight: 600;
+      padding: 0.55rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-action-qr:hover { background: #d4af37; color: #000; }
+    .btn-action-cancel {
+      background: transparent;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #f87171;
+      padding: 0.55rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-action-cancel:hover { background: rgba(239, 68, 68, 0.1); }
+
+    /* MODAL PASE DE PROBADOR */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 1rem;
+    }
+    .modal-pase-container {
+      background: #111111;
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      border-radius: 12px;
+      max-width: 460px;
+      width: 100%;
+      padding: 1.5rem;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+      animation: zoomIn 0.25s ease;
+    }
+    .modal-header-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .pase-title {
+      font-size: 0.85rem;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .btn-close-modal {
+      background: none;
+      border: none;
+      color: #999;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    .pase-slip {
+      background: #fafafa;
+      color: #1a1a1a;
+      border-radius: 6px;
+      padding: 1.5rem;
+      font-family: 'Courier New', Courier, monospace;
+      border-top: 4px solid #d4af37;
+    }
+    .pase-brand {
+      text-align: center;
       margin-bottom: 0.75rem;
+      border-bottom: 1px dashed #999;
+      padding-bottom: 0.5rem;
+    }
+    .brand-crest {
+      font-weight: 900;
+      letter-spacing: 2px;
+      font-size: 1.1rem;
+    }
+    .brand-sub { font-size: 0.65rem; color: #666; letter-spacing: 1px; }
+    .pase-status-banner {
+      text-align: center;
+      padding: 0.35rem;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      font-size: 0.8rem;
+      margin-bottom: 1rem;
+      border-radius: 4px;
+      background: #eee;
+    }
+    .pase-status-banner.confirmed {
+      background: #e6f7ec;
+      color: #15803d;
+      border: 1px solid #86efac;
+    }
+    .pase-qr-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      padding: 0.75rem;
+      background: #fff;
+      border: 2px dashed #d4af37;
+      border-radius: 8px;
+    }
+    .pase-qr-svg {
+      width: 170px;
+      height: 170px;
+    }
+    .pase-qr-svg ::ng-deep svg { width: 100%; height: 100%; }
+    .pase-code-display {
+      font-size: 1rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      margin-top: 0.5rem;
+      color: #000;
+    }
+    .pase-scan-hint { font-size: 0.65rem; color: #666; }
+    .pase-details-table {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      font-size: 0.8rem;
+      margin-bottom: 1rem;
+    }
+    .pase-row { display: flex; justify-content: space-between; }
+    .pase-row .lbl { color: #555; }
+    .pase-row .val { color: #000; }
+    .pase-prendas-section {
+      border-top: 1px dashed #777;
+      border-bottom: 1px dashed #777;
+      padding: 0.75rem 0;
+      margin-bottom: 1rem;
+      font-size: 0.75rem;
+    }
+    .prendas-header-lbl { font-weight: 700; margin-bottom: 0.35rem; color: #333; }
+    .pase-prenda-line { display: flex; justify-content: space-between; margin-bottom: 0.2rem; }
+    .pase-footer-notes {
+      font-size: 0.65rem;
+      color: #666;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .modal-footer-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+    }
+
+    /* GLOBAL BUTTONS */
+    .btn-atelier-gold {
+      background: linear-gradient(135deg, #d4af37 0%, #aa820a 100%);
+      color: #0a0a0a;
+      border: none;
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .btn-atelier-gold:hover:not(:disabled) {
+      box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
+      transform: translateY(-1px);
+    }
+    .btn-atelier-gold:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-atelier-outline {
+      background: transparent;
+      border: 1px solid rgba(212, 175, 55, 0.5);
+      color: #f3e5ab;
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 0.65rem 1.25rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .highlight-gold { color: #f3e5ab; font-weight: 600; }
+    .font-bold { font-weight: bold; }
+    .spinner-inline {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(0,0,0,0.2);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+      margin-right: 0.4rem;
+    }
+    .spinner-inline.large {
+      width: 32px;
+      height: 32px;
+      border-width: 3px;
+      border-top-color: #d4af37;
+      margin-bottom: 1rem;
+    }
+    .loading-state, .empty-state {
+      padding: 3rem;
+      text-align: center;
+      color: #888;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+    @media print {
+      body * { visibility: hidden; }
+      #printable-fitting-pass, #printable-fitting-pass * { visibility: visible; }
+      #printable-fitting-pass {
+        position: absolute;
+        left: 0; top: 0;
+        width: 100%;
+      }
     }
   `]
 })
 export class ReservasPageComponent implements OnInit {
-  private readonly service = inject(ReservasService);
-  domainStatus = signal<string>('Inicializando...');
+  private readonly reservasService = inject(ReservasService);
+  private readonly inventarioService = inject(InventarioService);
+  private readonly catalogoService = inject(CatalogoService);
+  private readonly sanitizer = inject(DomSanitizer);
+
+  activeTab: 'agendar' | 'mis-reservas' = 'agendar';
+
+  // Paso 1: Sucursal y Cita
+  sucursalesList: Sucursal[] = [];
+  sucursalSeleccionadaId: number | null = null;
+  sucursalActual: Sucursal | null = null;
+
+  hoyStr: string = new Date().toISOString().split('T')[0];
+  fechaReserva: string = new Date().toISOString().split('T')[0];
+  horaEstimada: string = '15:30';
+  montoAnticipo: number = 0;
+  moneda: 'USD' | 'BOB' = 'USD';
+  observaciones: string = '';
+
+  // Paso 2: Catálogo y Prendas Apartadas
+  prendasList: Prenda[] = [];
+  stockMap: Map<number, number> = new Map(); // variante_id -> disponible
+  busquedaPrenda: string = '';
+  prendasApartadas: PrendaEnReserva[] = [];
+
+  guardandoReserva: boolean = false;
+
+  // Tab 2: Mis Reservas
+  reservasList: Reserva[] = [];
+  cargandoReservas: boolean = false;
+  filtroEstado: string = '';
+
+  // Modal Pase
+  reservaActualPase: Reserva | null = null;
+  sanitizedQrSvg: SafeHtml | null = null;
+  mostrarPaseModal: boolean = false;
+
+  // Toasts
+  mensajeExito: string | null = null;
+  mensajeError: string | null = null;
 
   ngOnInit(): void {
-    this.service.getStatus().subscribe({
-      next: (res: any) => this.domainStatus.set(res.message || 'Operativo'),
-      error: () => this.domainStatus.set('Pendiente de conexion con backend')
+    this.cargarSucursales();
+    this.cargarCatalogo();
+  }
+
+  cargarSucursales(): void {
+    this.inventarioService.getSucursales().subscribe({
+      next: (sucursales) => {
+        this.sucursalesList = sucursales;
+        if (sucursales.length > 0 && !this.sucursalSeleccionadaId) {
+          this.sucursalSeleccionadaId = sucursales[0].id;
+          this.onSucursalChange();
+        }
+      },
+      error: (err) => console.error('Error cargando sucursales:', err)
     });
+  }
+
+  cargarCatalogo(): void {
+    this.catalogoService.getPrendas().subscribe({
+      next: (prendas) => {
+        this.prendasList = prendas;
+      },
+      error: (err) => console.error('Error cargando catálogo:', err)
+    });
+  }
+
+  onSucursalChange(): void {
+    this.sucursalActual = this.sucursalesList.find(s => s.id === this.sucursalSeleccionadaId) || null;
+    this.actualizarStockSucursal();
+  }
+
+  actualizarStockSucursal(): void {
+    if (!this.sucursalSeleccionadaId) {
+      this.stockMap.clear();
+      return;
+    }
+    this.catalogoService.getStockPorSucursal(this.sucursalSeleccionadaId).subscribe({
+      next: (stocks: InventarioStock[]) => {
+        this.stockMap.clear();
+        stocks.forEach(s => {
+          this.stockMap.set(s.variante_id, s.cantidad_disponible);
+        });
+      },
+      error: (err) => console.error('Error cargando stock de sucursal:', err)
+    });
+  }
+
+  getStockDisponible(varianteId: number): number {
+    return this.stockMap.get(varianteId) || 0;
+  }
+
+  prendasFiltradas(): Prenda[] {
+    if (!this.busquedaPrenda.trim()) return this.prendasList;
+    const q = this.busquedaPrenda.toLowerCase();
+    return this.prendasList.filter(p =>
+      p.nombre.toLowerCase().includes(q) ||
+      p.sku.toLowerCase().includes(q) ||
+      (p.categoria?.nombre && p.categoria.nombre.toLowerCase().includes(q))
+    );
+  }
+
+  agregarPrenda(prenda: Prenda, varianteId: number): void {
+    this.mensajeError = null;
+    const variante = prenda.variantes?.find(v => v.id === varianteId);
+    if (!variante) return;
+
+    const disponible = this.getStockDisponible(varianteId);
+    if (disponible <= 0) {
+      this.mensajeError = `La variante seleccionada no cuenta con existencias en ${this.sucursalActual?.nombre}.`;
+      return;
+    }
+
+    const existente = this.prendasApartadas.find(item => item.variante.id === varianteId);
+    if (existente) {
+      if (existente.cantidad + 1 > disponible) {
+        this.mensajeError = `No podés apartar más de ${disponible} unidades disponibles de esta prenda.`;
+        return;
+      }
+      existente.cantidad++;
+    } else {
+      this.prendasApartadas.push({
+        prenda,
+        variante,
+        cantidad: 1
+      });
+    }
+  }
+
+  cambiarCantidad(index: number, delta: number): void {
+    const item = this.prendasApartadas[index];
+    const nuevaCantidad = item.cantidad + delta;
+    const disponible = this.getStockDisponible(item.variante.id);
+
+    if (nuevaCantidad <= 0) {
+      this.eliminarPrenda(index);
+    } else if (nuevaCantidad > disponible) {
+      this.mensajeError = `Stock máximo disponible en sucursal: ${disponible} unidades.`;
+    } else {
+      item.cantidad = nuevaCantidad;
+    }
+  }
+
+  eliminarPrenda(index: number): void {
+    this.prendasApartadas.splice(index, 1);
+  }
+
+  calcularTotalPrendas(): number {
+    return this.prendasApartadas.reduce((acc, item) => acc + (item.prenda.precio_base * item.cantidad), 0);
+  }
+
+  confirmarReserva(): void {
+    if (!this.sucursalSeleccionadaId || this.prendasApartadas.length === 0) return;
+
+    this.guardandoReserva = true;
+    this.mensajeError = null;
+    this.mensajeExito = null;
+
+    const payload: ReservaCreate = {
+      sucursal_id: this.sucursalSeleccionadaId,
+      fecha_reserva: this.fechaReserva,
+      hora_estimada: this.horaEstimada,
+      monto_anticipo: this.montoAnticipo || 0,
+      moneda: this.moneda,
+      observaciones: this.observaciones || null,
+      detalles: this.prendasApartadas.map(item => ({
+        variante_id: item.variante.id,
+        cantidad: item.cantidad
+      }))
+    };
+
+    this.reservasService.crearReserva(payload).subscribe({
+      next: (reserva) => {
+        this.guardandoReserva = false;
+        this.mensajeExito = `Cita agendada con éxito. Código de Pase: ${reserva.codigo_reserva}`;
+        this.prendasApartadas = [];
+        this.actualizarStockSucursal();
+        this.abrirPaseProbador(reserva);
+      },
+      error: (err) => {
+        this.guardandoReserva = false;
+        this.mensajeError = err.error?.detail || 'Error al procesar la reserva';
+      }
+    });
+  }
+
+  // --- TAB 2: MIS RESERVAS ---
+  cambiarAMisReservas(): void {
+    this.activeTab = 'mis-reservas';
+    this.cargarMisReservas();
+  }
+
+  cargarMisReservas(): void {
+    this.cargandoReservas = true;
+    this.reservasService.getReservas(undefined, this.filtroEstado || undefined).subscribe({
+      next: (reservas) => {
+        this.reservasList = reservas;
+        this.cargandoReservas = false;
+      },
+      error: (err) => {
+        this.cargandoReservas = false;
+        console.error('Error cargando reservas:', err);
+      }
+    });
+  }
+
+  cancelarReserva(r: Reserva): void {
+    if (!confirm(`¿Confirmás la cancelación de la reserva #${r.codigo_reserva}? Las prendas se liberarán a disponibilidad general.`)) {
+      return;
+    }
+
+    this.reservasService.cancelarReserva(r.id, 'Cancelada por el cliente desde la plataforma').subscribe({
+      next: (reservaActualizada) => {
+        this.mensajeExito = `Reserva #${reservaActualizada.codigo_reserva} cancelada y stock liberado.`;
+        this.cargarMisReservas();
+        this.actualizarStockSucursal();
+      },
+      error: (err) => {
+        this.mensajeError = err.error?.detail || 'Error al cancelar la reserva';
+      }
+    });
+  }
+
+  // --- MODAL PASE ---
+  abrirPaseProbador(r: Reserva): void {
+    this.reservaActualPase = r;
+    if (r.qr_svg) {
+      this.sanitizedQrSvg = this.sanitizer.bypassSecurityTrustHtml(r.qr_svg);
+    } else {
+      this.sanitizedQrSvg = null;
+    }
+    this.mostrarPaseModal = true;
+  }
+
+  cerrarPase(): void {
+    this.mostrarPaseModal = false;
+    this.reservaActualPase = null;
+    this.sanitizedQrSvg = null;
+  }
+
+  imprimirPase(): void {
+    window.print();
   }
 }

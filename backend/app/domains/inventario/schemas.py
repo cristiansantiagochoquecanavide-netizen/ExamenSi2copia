@@ -63,3 +63,127 @@ class SucursalResponse(BaseSchema):
 class MensajeInventarioResponse(BaseModel):
     mensaje: str
     exito: bool = True
+
+# ----------------- CU8: PROVEEDOR SCHEMAS -----------------
+class ProveedorCreate(BaseModel):
+    razon_social: str = Field(..., max_length=150)
+    nit: str = Field(..., max_length=25)
+    contacto_nombre: Optional[str] = Field(None, max_length=100)
+    telefono: Optional[str] = Field(None, max_length=50)
+    email: Optional[str] = Field(None, max_length=100)
+    direccion: Optional[str] = Field(None, max_length=255)
+    activo: bool = True
+
+class ProveedorUpdate(BaseModel):
+    razon_social: Optional[str] = Field(None, max_length=150)
+    nit: Optional[str] = Field(None, max_length=25)
+    contacto_nombre: Optional[str] = Field(None, max_length=100)
+    telefono: Optional[str] = Field(None, max_length=50)
+    email: Optional[str] = Field(None, max_length=100)
+    direccion: Optional[str] = Field(None, max_length=255)
+    activo: Optional[bool] = None
+
+class ProveedorResponse(BaseSchema):
+    id: int
+    razon_social: str
+    nit: str
+    contacto_nombre: Optional[str] = None
+    telefono: Optional[str] = None
+    email: Optional[str] = None
+    direccion: Optional[str] = None
+    activo: bool
+    created_at: datetime
+
+# ----------------- CU8: RECEPCIÓN DE MERCADERÍA SCHEMAS -----------------
+from decimal import Decimal
+from datetime import date
+from app.domains.catalogo.schemas import PrendaVarianteResponse
+
+class DetalleRecepcionCreate(BaseModel):
+    variante_id: int
+    cantidad: int = Field(..., gt=0)
+    costo_unitario: Decimal = Field(..., ge=0)
+
+class DetalleRecepcionResponse(BaseSchema):
+    id: int
+    recepcion_id: int
+    variante_id: int
+    cantidad: int
+    costo_unitario: Decimal
+    subtotal: Decimal
+    variante: Optional[PrendaVarianteResponse] = None
+
+class RecepcionMercaderiaCreate(BaseModel):
+    numero_documento: str = Field(..., max_length=50)
+    proveedor_id: int
+    sucursal_id: int
+    fecha_recepcion: Optional[date] = None
+    observaciones: Optional[str] = None
+    detalles: List[DetalleRecepcionCreate] = Field(..., min_length=1)
+
+class RecepcionMercaderiaResponse(BaseSchema):
+    id: int
+    numero_documento: str
+    proveedor_id: int
+    sucursal_id: int
+    usuario_id: int
+    fecha_recepcion: date
+    observaciones: Optional[str] = None
+    costo_total: Decimal
+    created_at: datetime
+    proveedor: Optional[ProveedorResponse] = None
+    sucursal: Optional[SucursalResponse] = None
+    detalles: List[DetalleRecepcionResponse] = []
+
+
+# ----------------- CU9: TRANSFERENCIA DE STOCK SCHEMAS -----------------
+from app.domains.usuarios.schemas import UsuarioResponse
+
+class DetalleTransferenciaCreate(BaseModel):
+    variante_id: int
+    cantidad: int = Field(..., gt=0)
+
+class DetalleTransferenciaResponse(BaseSchema):
+    id: int
+    transferencia_id: int
+    variante_id: int
+    cantidad: int
+    variante: Optional[PrendaVarianteResponse] = None
+
+class TransferenciaStockCreate(BaseModel):
+    codigo: Optional[str] = Field(None, max_length=50)
+    sucursal_origen_id: int
+    sucursal_destino_id: int
+    motivo: Optional[str] = Field(None, max_length=255)
+    observaciones: Optional[str] = None
+    inmediata: bool = False
+    detalles: List[DetalleTransferenciaCreate] = Field(..., min_length=1)
+
+class TransferenciaStockResponse(BaseSchema):
+    id: int
+    codigo: str
+    sucursal_origen_id: int
+    sucursal_destino_id: int
+    usuario_envia_id: int
+    usuario_recibe_id: Optional[int] = None
+    estado: str
+    motivo: Optional[str] = None
+    observaciones: Optional[str] = None
+    fecha_envio: datetime
+    fecha_recepcion: Optional[datetime] = None
+    total_prendas: int
+    created_at: datetime
+    updated_at: datetime
+    sucursal_origen: Optional[SucursalResponse] = None
+    sucursal_destino: Optional[SucursalResponse] = None
+    usuario_envia: Optional[UsuarioResponse] = None
+    usuario_recibe: Optional[UsuarioResponse] = None
+    detalles: List[DetalleTransferenciaResponse] = []
+
+class RecibirTransferenciaRequest(BaseModel):
+    observaciones: Optional[str] = None
+
+class CancelarTransferenciaRequest(BaseModel):
+    motivo: Optional[str] = None
+
+

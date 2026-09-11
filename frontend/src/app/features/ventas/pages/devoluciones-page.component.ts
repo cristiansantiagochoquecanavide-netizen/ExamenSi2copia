@@ -1,0 +1,1640 @@
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { VentasService } from '../services/ventas.service';
+import { CatalogoService } from '../../catalogo/services/catalogo.service';
+import { InventarioService } from '../../inventario/services/inventario.service';
+import { AuthService } from '../../../core/services/auth.service';
+import {
+  VentaParaDevolucionResponse, VentaParaDevolucionItem,
+  DevolucionCreate, DetalleDevolucionCreate, DevolucionResponse, VentaResponse
+} from '../models/ventas.models';
+import { Prenda, PrendaVariante } from '../../catalogo/models/catalogo.models';
+import { Sucursal } from '../../inventario/models/inventario.models';
+
+interface ItemDevolucionRow {
+  item: VentaParaDevolucionItem;
+  cantidadDevolver: number;
+  condicion: 'APTO_PARA_VENTA' | 'DEFECTUOSO_MERMA';
+  varianteCambioId?: number | null;
+  varianteCambioObj?: PrendaVariante | null;
+  cantidadCambio: number;
+  precioCambio: number;
+}
+
+@Component({
+  selector: 'app-devoluciones-page',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  template: `
+    <div class="devoluciones-container">
+      <!-- HEADER HERO -->
+      <div class="hero-header">
+        <div class="hero-titles">
+          <span class="luxury-badge">ATELIER NOIR &bull; SERVICIO POSVENTA</span>
+          <h1 class="page-title">Gestión de Devoluciones y Cambios</h1>
+          <p class="subtitle">
+            Reintegro automatizado al stock local, cambios de talla/modelo y emisión de comprobantes de ajuste
+          </p>
+        </div>
+
+        <div class="branch-selector-card">
+          <span class="branch-label">SUCURSAL OPERATIVA:</span>
+          <select class="select-luxury" [ngModel]="sucursalSeleccionadaId()" (ngModelChange)="onSucursalChange($event)">
+            @for (s of sucursales(); track s.id) {
+              <option [value]="s.id">{{ s.nombre }} ({{ s.ciudad?.nombre || 'Ciudad' }})</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <!-- TABS NAVEGACIÓN -->
+      <div class="tabs-bar">
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="tabActiva() === 'nueva'"
+          (click)="tabActiva.set('nueva')">
+          <span class="tab-dot">&bull;</span> NUEVA DEVOLUCIÓN O CAMBIO
+        </button>
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="tabActiva() === 'historial'"
+          (click)="cargarHistorial(); tabActiva.set('historial')">
+          <span class="tab-dot">&bull;</span> HISTORIAL DE OPERACIONES ({{ historial().length }})
+        </button>
+      </div>
+
+      <!-- TAB 1: NUEVA OPERACIÓN -->
+      @if (tabActiva() === 'nueva') {
+        <div class="tab-content-grid">
+          <!-- PANEL IZQUIERDO: BÚSQUEDA Y CONFIGURACIÓN -->
+          <div class="main-column">
+            <!-- CAJA DE BÚSQUEDA DE TICKET -->
+            <div class="card-noir search-card">
+              <h3 class="card-title">1. Localizar Ticket o Factura Original</h3>
+              <p class="card-desc">Ingrese el código de la venta emitido por caja para validar prendas elegibles</p>
+
+              <div class="search-input-group">
+                <input
+                  type="text"
+                  class="input-luxury"
+                  placeholder="Ej: VTA-20260911202744-2"
+                  [(ngModel)]="codigoBusqueda"
+                  (keyup.enter)="buscarTicket()" />
+                <button
+                  type="button"
+                  class="btn-gold"
+                  [disabled]="buscando() || !codigoBusqueda.trim()"
+                  (click)="buscarTicket()">
+                  {{ buscando() ? 'Buscando...' : 'Buscar Ticket' }}
+                </button>
+              </div>
+
+              <!-- VENTAS RECIENTES PARA ACCESO RÁPIDO -->
+              @if (ventasRecientes().length > 0) {
+                <div class="quick-fill-zone">
+                  <span class="quick-label">Ventas recientes en sucursal:</span>
+                  <div class="quick-tags">
+                    @for (v of ventasRecientes(); track v.id) {
+                      <button
+                        type="button"
+                        class="btn-tag"
+                        (click)="cargarVentaRapida(v.codigo_venta)">
+                        {{ v.codigo_venta }} ({{ v.cliente_nombre }})
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+
+              @if (errorBusqueda()) {
+                <div class="alert-error">
+                  <span class="error-icon">&times;</span>
+                  <span>{{ errorBusqueda() }}</span>
+                </div>
+              }
+            </div>
+
+            <!-- FICHA DE LA VENTA ENCONTRADA -->
+            @if (ventaCargada(); as v) {
+              <div class="card-noir ticket-info-card">
+                <div class="ticket-header-flex">
+                  <div>
+                    <span class="ticket-status-badge">{{ v.estado }}</span>
+                    <h3 class="ticket-code">{{ v.codigo_venta }}</h3>
+                    <p class="ticket-meta">
+                      Fecha: <strong>{{ v.fecha | date:'dd/MM/yyyy HH:mm' }}</strong> &bull;
+                      Sucursal: <strong>{{ v.sucursal_nombre }}</strong> &bull;
+                      Cajero: <strong>{{ v.cajero_nombre }}</strong>
+                    </p>
+                  </div>
+                  <div class="ticket-customer-box">
+                    <span class="cust-label">CLIENTE:</span>
+                    <span class="cust-name">{{ v.cliente_nombre }}</span>
+                    <span class="cust-nit">NIT: {{ v.cliente_nit }}</span>
+                  </div>
+                </div>
+
+                <!-- SELECTOR DE OPERACIÓN GENERAL -->
+                <div class="operation-type-selector">
+                  <div class="op-option" [class.selected]="tipoOperacion() === 'DEVOLUCION'" (click)="tipoOperacion.set('DEVOLUCION')">
+                    <div class="op-radio">
+                      <div class="op-radio-dot" *ngIf="tipoOperacion() === 'DEVOLUCION'"></div>
+                    </div>
+                    <div>
+                      <strong class="op-title">DEVOLUCIÓN PURA (Reembolso de Dinero)</strong>
+                      <p class="op-desc">El cliente reintegra prendas y se le devuelve el importe a su favor.</p>
+                    </div>
+                  </div>
+
+                  <div class="op-option" [class.selected]="tipoOperacion() === 'CAMBIO'" (click)="tipoOperacion.set('CAMBIO')">
+                    <div class="op-radio">
+                      <div class="op-radio-dot" *ngIf="tipoOperacion() === 'CAMBIO'"></div>
+                    </div>
+                    <div>
+                      <strong class="op-title">CAMBIO DE PRENDA (Talla / Color / Modelo)</strong>
+                      <p class="op-desc">El cliente entrega prendas y retira otras; se liquida la diferencia de precio.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- TABLA DE PRENDAS DE LA VENTA -->
+                <div class="table-title-zone">
+                  <h4 class="section-title">2. Seleccionar Prendas a Procesar</h4>
+                  <span class="legend-note">* Solo se pueden devolver hasta el saldo adquirido no devuelto</span>
+                </div>
+
+                <div class="table-wrapper">
+                  <table class="luxury-table">
+                    <thead>
+                      <tr>
+                        <th>Prenda &amp; SKU</th>
+                        <th>Talla/Color</th>
+                        <th class="text-right">Precio Pagado</th>
+                        <th class="text-center">Comprado</th>
+                        <th class="text-center">Disponible</th>
+                        <th class="text-center">Cant. a Procesar</th>
+                        <th>Condición</th>
+                        @if (tipoOperacion() === 'CAMBIO') {
+                          <th>Prenda de Cambio</th>
+                        }
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (row of itemsDevolucion(); track row.item.detalle_id) {
+                        <tr [class.row-active]="row.cantidadDevolver > 0">
+                          <td>
+                            <strong>{{ row.item.prenda_nombre }}</strong>
+                            <span class="sub-sku">{{ row.item.sku }}</span>
+                          </td>
+                          <td>
+                            <span class="badge-attr">{{ row.item.talla }}</span>
+                            <span class="badge-attr">{{ row.item.color }}</span>
+                          </td>
+                          <td class="text-right col-strong">
+                            <span class="currency">$</span>{{ row.item.precio_unitario | number:'1.2-2' }}
+                          </td>
+                          <td class="text-center">{{ row.item.cantidad_comprada }}</td>
+                          <td class="text-center">
+                            <span class="badge-disp" [class.zero]="row.item.cantidad_disponible_devolucion === 0">
+                              {{ row.item.cantidad_disponible_devolucion }} uds
+                            </span>
+                          </td>
+                          <td class="text-center">
+                            <div class="qty-control">
+                              <button
+                                type="button"
+                                class="btn-qty"
+                                [disabled]="row.cantidadDevolver <= 0"
+                                (click)="modificarCantidad(row, -1)">-</button>
+                              <span class="qty-num">{{ row.cantidadDevolver }}</span>
+                              <button
+                                type="button"
+                                class="btn-qty"
+                                [disabled]="row.cantidadDevolver >= row.item.cantidad_disponible_devolucion"
+                                (click)="modificarCantidad(row, 1)">+</button>
+                            </div>
+                          </td>
+                          <td>
+                            @if (row.cantidadDevolver > 0) {
+                              <select class="select-mini" [(ngModel)]="row.condicion">
+                                <option value="APTO_PARA_VENTA">Apto Reventa (Suma Stock)</option>
+                                <option value="DEFECTUOSO_MERMA">Defectuoso / Falla (Merma)</option>
+                              </select>
+                            } @else {
+                              <span class="dash-text">-</span>
+                            }
+                          </td>
+                          @if (tipoOperacion() === 'CAMBIO') {
+                            <td>
+                              @if (row.cantidadDevolver > 0) {
+                                @if (row.varianteCambioObj) {
+                                  <div class="selected-cambio-box">
+                                    <span class="cambio-name">{{ row.varianteCambioObj.prenda?.nombre }}</span>
+                                    <span class="cambio-sku">{{ row.varianteCambioObj.sku_variante }}</span>
+                                    <span class="cambio-price">Precio: <span class="currency">$</span>{{ row.precioCambio | number:'1.2-2' }}</span>
+                                    <button type="button" class="btn-link-mini" (click)="abrirModalCambio(row)">Cambiar...</button>
+                                  </div>
+                                } @else {
+                                  <button type="button" class="btn-select-cambio" (click)="abrirModalCambio(row)">
+                                    + Elegir Prenda Nueva
+                                  </button>
+                                }
+                              } @else {
+                                <span class="dash-text">-</span>
+                              }
+                            </td>
+                          }
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- PANEL DERECHO: LIQUIDACIÓN Y CONFIRMACIÓN -->
+          <div class="side-column">
+            <div class="card-noir summary-card">
+              <h3 class="card-title">Resumen de Liquidación</h3>
+
+              <div class="motivo-box">
+                <label class="field-label">Motivo de la Operación:</label>
+                <select class="select-luxury" [(ngModel)]="motivoSeleccionado">
+                  <option value="CAMBIO_TALLA">Cambio de Talla / Calce</option>
+                  <option value="FALLA_FABRICA">Falla de Fábrica / Confección</option>
+                  <option value="DISCONFORMIDAD">Disconformidad de Color / Estilo</option>
+                  <option value="OTRO">Otro Motivo</option>
+                </select>
+              </div>
+
+              <div class="summary-breakdown">
+                <div class="breakdown-row">
+                  <span class="muted-lbl">Total Prendas Devueltas:</span>
+                  <span class="val-txt"><span class="currency">$</span>{{ totalDevuelto() | number:'1.2-2' }}</span>
+                </div>
+
+                @if (tipoOperacion() === 'CAMBIO') {
+                  <div class="breakdown-row">
+                    <span class="muted-lbl">Total Prendas Nuevas:</span>
+                    <span class="val-txt"><span class="currency">$</span>{{ totalNuevo() | number:'1.2-2' }}</span>
+                  </div>
+                }
+
+                <div class="divider-gold"></div>
+
+                <div class="breakdown-row balance-row">
+                  <span class="balance-lbl">BALANCE NETO:</span>
+                  <span class="balance-val" [class.credit]="diferencia() < 0" [class.charge]="diferencia() > 0">
+                    <span *ngIf="diferencia() > 0">+</span><span class="currency">$</span>{{ diferencia() | number:'1.2-2' }}
+                  </span>
+                </div>
+
+                <div class="balance-badge" [class.badge-credit]="diferencia() < 0" [class.badge-charge]="diferencia() > 0">
+                  @if (diferencia() < 0) {
+                    &bull; REEMBOLSO A FAVOR DEL CLIENTE
+                  } @else if (diferencia() > 0) {
+                    &bull; COBRO ADICIONAL AL CLIENTE
+                  } @else {
+                    &bull; CAMBIO EXACTO SIN DIFERENCIA
+                  }
+                </div>
+              </div>
+
+              <!-- MÉTODO DE PAGO / REEMBOLSO -->
+              @if (diferencia() !== 0 || totalDevuelto() > 0) {
+                <div class="tender-section">
+                  <label class="field-label">
+                    {{ diferencia() > 0 ? 'Método de Cobro de la Diferencia:' : 'Modalidad de Reembolso:' }}
+                  </label>
+                  <select class="select-luxury" [(ngModel)]="metodoReembolso">
+                    <option value="EFECTIVO">Efectivo en Caja</option>
+                    <option value="TARJETA">Tarjeta de Débito / Crédito</option>
+                    <option value="SALDO_FAVOR">Nota de Crédito / Saldo a Favor</option>
+                  </select>
+                </div>
+              }
+
+              <div class="obs-section">
+                <label class="field-label">Observaciones:</label>
+                <textarea
+                  class="textarea-luxury"
+                  rows="2"
+                  placeholder="Detalles sobre falla física, estado del embalaje o etiquetas..."
+                  [(ngModel)]="observaciones"></textarea>
+              </div>
+
+              @if (errorOperacion()) {
+                <div class="alert-error">
+                  <span>{{ errorOperacion() }}</span>
+                </div>
+              }
+
+              <button
+                type="button"
+                class="btn-confirm-op"
+                [disabled]="procesando() || totalDevuelto() <= 0"
+                (click)="confirmarOperacion()">
+                {{ procesando() ? 'Procesando en Kardex...' : 'Confirmar y Emitir Nota' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- TAB 2: HISTORIAL DE DEVOLUCIONES Y CAMBIOS -->
+      @if (tabActiva() === 'historial') {
+        <div class="card-noir history-card">
+          <div class="history-header">
+            <div>
+              <h3 class="card-title">Registro Auditor de Devoluciones y Cambios</h3>
+              <p class="card-desc">Histórico de comprobantes y ajustes de existencias en el inventario</p>
+            </div>
+
+            <div class="history-filters">
+              <select class="select-luxury" [(ngModel)]="filtroTipo" (ngModelChange)="cargarHistorial()">
+                <option value="">Todos los Tipos</option>
+                <option value="DEVOLUCION">Devoluciones de Dinero</option>
+                <option value="CAMBIO">Cambios de Prenda</option>
+              </select>
+              <button type="button" class="btn-gold" (click)="cargarHistorial()">Refrescar</button>
+            </div>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="luxury-table">
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Fecha/Hora</th>
+                  <th>Ticket Origen</th>
+                  <th>Tipo</th>
+                  <th>Motivo</th>
+                  <th>Cajero</th>
+                  <th class="text-right">Devuelto</th>
+                  <th class="text-right">Entregado</th>
+                  <th class="text-right">Balance</th>
+                  <th class="text-right">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (d of historial(); track d.id) {
+                  <tr>
+                    <td><strong class="col-gold">{{ d.codigo }}</strong></td>
+                    <td class="col-time">{{ d.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
+                    <td><span class="sub-ticket">{{ d.venta?.codigo_venta || 'Venta #' + d.venta_id }}</span></td>
+                    <td>
+                      <span class="type-badge" [class.badge-cambio]="d.tipo === 'CAMBIO'">{{ d.tipo }}</span>
+                    </td>
+                    <td><span class="badge-attr">{{ d.motivo }}</span></td>
+                    <td>{{ d.cajero?.nombre || 'Cajero' }}</td>
+                    <td class="text-right"><span class="currency">$</span>{{ d.total_devuelto | number:'1.2-2' }}</td>
+                    <td class="text-right"><span class="currency">$</span>{{ d.total_nuevo | number:'1.2-2' }}</td>
+                    <td class="text-right col-strong" [class.credit]="d.diferencia < 0" [class.charge]="d.diferencia > 0">
+                      <span class="currency">$</span>{{ d.diferencia | number:'1.2-2' }}
+                    </td>
+                    <td class="text-right">
+                      <button type="button" class="btn-action-view" (click)="verRecibo(d)">
+                        Ver Nota
+                      </button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="10" class="empty-msg">No hay devoluciones ni cambios registrados</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+
+      <!-- MODAL SELECTOR DE PRENDA DE CAMBIO -->
+      @if (mostrarModalCambio()) {
+        <div class="modal-overlay" (click)="cerrarModalCambio()">
+          <div class="modal-content modal-cambio" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3 class="modal-title">Seleccionar Prenda de Reemplazo</h3>
+              <button type="button" class="btn-close" (click)="cerrarModalCambio()">&times;</button>
+            </div>
+
+            <div class="modal-body">
+              <input
+                type="text"
+                class="input-luxury modal-search"
+                placeholder="Buscar prenda en catálogo por nombre o categoría..."
+                [(ngModel)]="busquedaCatalogo" />
+
+              <div class="catalog-cards-grid">
+                @for (p of prendasCatalogoFiltradas(); track p.id) {
+                  <div class="catalog-card">
+                    <strong class="cat-title">{{ p.nombre }}</strong>
+                    <span class="cat-price"><span class="currency">$</span>{{ p.precio_base | number:'1.2-2' }}</span>
+                    <span class="cat-sec">{{ p.categoria?.nombre }} &bull; {{ p.categoria?.sector || 'UNISEX' }}</span>
+
+                    <div class="variant-select-list">
+                      <span class="var-title">Variantes Disponibles:</span>
+                      <div class="var-chips">
+                        @for (v of p.variantes; track v.id) {
+                          <button
+                            type="button"
+                            class="chip-var"
+                            [disabled]="getStockVariante(v.id) <= 0"
+                            (click)="seleccionarVarianteCambio(p, v)">
+                            <span class="chip-size">{{ v.talla?.codigo }}</span>
+                            <span class="chip-color">{{ v.color?.nombre }}</span>
+                            <span class="chip-stock">({{ getStockVariante(v.id) }} disp)</span>
+                          </button>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- MODAL COMPROBANTE OFICIAL (NOTA DE CRÉDITO / CAMBIO) -->
+      @if (comprobanteActivo(); as c) {
+        <div class="modal-overlay" (click)="comprobanteActivo.set(null)">
+          <div class="modal-content receipt-modal" (click)="$event.stopPropagation()">
+            <div class="thermal-receipt">
+              <div class="receipt-header">
+                <span class="receipt-brand">FASHIONSTORE</span>
+                <span class="receipt-subbrand">ATELIER NOIR &bull; SERVICIO POSVENTA</span>
+                <div class="receipt-divider">================================</div>
+                <h4 class="receipt-type">
+                  {{ c.tipo === 'DEVOLUCION' ? 'NOTA DE DEVOLUCIÓN / REEMBOLSO' : 'COMPROBANTE DE CAMBIO DE PRENDA' }}
+                </h4>
+                <p class="receipt-meta">NÚMERO: <strong>{{ c.codigo }}</strong></p>
+                <p class="receipt-meta">TICKET ORIGEN: <strong>{{ c.venta?.codigo_venta }}</strong></p>
+                <p class="receipt-meta">FECHA: {{ c.created_at | date:'dd/MM/yyyy HH:mm:ss' }}</p>
+                <p class="receipt-meta">SUCURSAL: {{ c.sucursal?.nombre }}</p>
+                <p class="receipt-meta">CAJERO: {{ c.cajero?.nombre }} {{ c.cajero?.apellido }}</p>
+                <p class="receipt-meta">CLIENTE: {{ c.venta?.cliente_nombre }} (NIT: {{ c.venta?.cliente_nit }})</p>
+              </div>
+
+              <div class="receipt-divider">================================</div>
+
+              <div class="receipt-section-label">PRENDAS DEVUELTAS:</div>
+              <div class="receipt-items">
+                @for (item of c.detalles; track item.id) {
+                  <div class="receipt-item-row">
+                    <div class="rec-item-info">
+                      <strong>{{ item.variante_devuelta?.prenda?.nombre }}</strong>
+                      <span>{{ item.cantidad_devuelta }}x &#64; <span class="currency">$</span>{{ item.precio_unitario_devuelto | number:'1.2-2' }}</span>
+                      <span class="rec-cond">Condición: {{ item.condicion_prenda }}</span>
+                    </div>
+                    <div class="rec-item-total">
+                      -<span class="currency">$</span>{{ item.subtotal_devuelto | number:'1.2-2' }}
+                    </div>
+                  </div>
+
+                  @if (item.variante_cambio) {
+                    <div class="receipt-item-row row-entrega">
+                      <div class="rec-item-info">
+                        <strong>(NUEVA) {{ item.variante_cambio.prenda?.nombre }}</strong>
+                        <span>{{ item.cantidad_cambio }}x &#64; <span class="currency">$</span>{{ item.precio_unitario_cambio | number:'1.2-2' }}</span>
+                        <span class="rec-cond">Talla: {{ item.variante_cambio.talla?.codigo }} | Color: {{ item.variante_cambio.color?.nombre }}</span>
+                      </div>
+                      <div class="rec-item-total col-gold">
+                        +<span class="currency">$</span>{{ item.subtotal_cambio | number:'1.2-2' }}
+                      </div>
+                    </div>
+                  }
+                }
+              </div>
+
+              <div class="receipt-divider">================================</div>
+
+              <div class="receipt-totals">
+                <div class="rec-total-row">
+                  <span>TOTAL DEVUELTO:</span>
+                  <span><span class="currency">$</span>{{ c.total_devuelto | number:'1.2-2' }}</span>
+                </div>
+                @if (c.tipo === 'CAMBIO') {
+                  <div class="rec-total-row">
+                    <span>TOTAL ENTREGADO:</span>
+                    <span><span class="currency">$</span>{{ c.total_nuevo | number:'1.2-2' }}</span>
+                  </div>
+                }
+                <div class="rec-total-row rec-grand-total">
+                  <span>BALANCE LIQUIDADO:</span>
+                  <span><span class="currency">$</span>{{ c.diferencia | number:'1.2-2' }}</span>
+                </div>
+                <div class="rec-total-row">
+                  <span>MODALIDAD:</span>
+                  <span>{{ c.metodo_reembolso || 'NO APLICA' }}</span>
+                </div>
+              </div>
+
+              <div class="receipt-divider">================================</div>
+
+              <div class="receipt-footer">
+                <p>MOTIVO: {{ c.motivo }}</p>
+                <p *ngIf="c.observaciones">OBS: {{ c.observaciones }}</p>
+                <p class="receipt-thanks">AJUSTE DE INVENTARIO Y KARDEX CERTIFICADO</p>
+                <p class="receipt-thanks">GRACIAS POR SU PREFERENCIA</p>
+              </div>
+
+              <div class="receipt-actions">
+                <button type="button" class="btn-print" (click)="imprimirRecibo()">
+                  Imprimir Comprobante
+                </button>
+                <button type="button" class="btn-cancel" (click)="comprobanteActivo.set(null)">
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  `,
+  styles: [`
+    :host {
+      display: block;
+      color: var(--color-on-surface, #f5f5f5);
+    }
+    .devoluciones-container {
+      padding: 1.5rem 0 3rem 0;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .hero-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+      padding-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+    .luxury-badge {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      color: #d4af37;
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      padding: 3px 8px;
+      display: inline-block;
+      margin-bottom: 0.5rem;
+    }
+    .page-title {
+      font-size: 2.2rem;
+      font-family: serif;
+      letter-spacing: 0.02em;
+      margin: 0 0 0.5rem 0;
+      color: #ffffff;
+    }
+    .subtitle {
+      color: #a0a0a0;
+      font-size: 0.95rem;
+      margin: 0;
+    }
+    .branch-selector-card {
+      background: #141414;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      padding: 1rem 1.25rem;
+      min-width: 280px;
+    }
+    .branch-label {
+      display: block;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: #d4af37;
+      margin-bottom: 0.5rem;
+    }
+    .tabs-bar {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 2rem;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: #888888;
+      padding: 0.8rem 1.5rem;
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover {
+      color: #ffffff;
+    }
+    .tab-btn.active {
+      color: #d4af37;
+      border-bottom-color: #d4af37;
+      background: rgba(212, 175, 55, 0.05);
+    }
+    .tab-dot {
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+    .tab-content-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 2rem;
+    }
+    @media (max-width: 1024px) {
+      .tab-content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .card-noir {
+      background: #141414;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .card-title {
+      font-size: 1.1rem;
+      color: #ffffff;
+      margin: 0 0 0.35rem 0;
+      letter-spacing: 0.02em;
+    }
+    .card-desc {
+      color: #888888;
+      font-size: 0.85rem;
+      margin: 0 0 1.25rem 0;
+    }
+    .search-input-group {
+      display: flex;
+      gap: 0.75rem;
+    }
+    .input-luxury {
+      flex: 1;
+      background: #0a0a0a;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-luxury:focus {
+      border-color: #d4af37;
+    }
+    .select-luxury {
+      width: 100%;
+      background: #0a0a0a;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      padding: 0.65rem 0.75rem;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .select-mini {
+      background: #0a0a0a;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      padding: 0.35rem 0.5rem;
+      font-size: 0.8rem;
+    }
+    .btn-gold {
+      background: #d4af37;
+      color: #0a0a0a;
+      border: none;
+      padding: 0 1.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-gold:hover:not(:disabled) {
+      opacity: 0.9;
+    }
+    .btn-gold:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .quick-fill-zone {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed rgba(255, 255, 255, 0.08);
+    }
+    .quick-label {
+      font-size: 0.75rem;
+      color: #888888;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    .quick-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .btn-tag {
+      background: #1a1a1a;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      color: #d4af37;
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-tag:hover {
+      background: #d4af37;
+      color: #0a0a0a;
+    }
+    .alert-error {
+      background: rgba(220, 53, 69, 0.15);
+      border: 1px solid #dc3545;
+      color: #ff8b94;
+      padding: 0.75rem 1rem;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .ticket-header-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 1.25rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .ticket-status-badge {
+      font-size: 0.65rem;
+      background: rgba(40, 167, 69, 0.15);
+      color: #28a745;
+      border: 1px solid #28a745;
+      padding: 2px 6px;
+      letter-spacing: 0.1em;
+      display: inline-block;
+      margin-bottom: 0.25rem;
+    }
+    .ticket-code {
+      font-size: 1.4rem;
+      font-family: monospace;
+      color: #ffffff;
+      margin: 0 0 0.25rem 0;
+    }
+    .ticket-meta {
+      font-size: 0.8rem;
+      color: #888888;
+      margin: 0;
+    }
+    .ticket-customer-box {
+      background: #0a0a0a;
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      padding: 0.75rem 1rem;
+      text-align: right;
+    }
+    .cust-label {
+      display: block;
+      font-size: 0.65rem;
+      color: #d4af37;
+      letter-spacing: 0.1em;
+    }
+    .cust-name {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+    .cust-nit {
+      display: block;
+      font-size: 0.8rem;
+      color: #888888;
+    }
+    .operation-type-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 600px) {
+      .operation-type-selector {
+        grid-template-columns: 1fr;
+      }
+    }
+    .op-option {
+      background: #0a0a0a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1rem;
+      cursor: pointer;
+      display: flex;
+      gap: 0.75rem;
+      transition: all 0.2s;
+    }
+    .op-option:hover {
+      border-color: rgba(212, 175, 55, 0.4);
+    }
+    .op-option.selected {
+      border-color: #d4af37;
+      background: rgba(212, 175, 55, 0.05);
+    }
+    .op-radio {
+      width: 18px;
+      height: 18px;
+      border: 1px solid #d4af37;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+    .op-radio-dot {
+      width: 8px;
+      height: 8px;
+      background: #d4af37;
+      border-radius: 50%;
+    }
+    .op-title {
+      display: block;
+      font-size: 0.85rem;
+      color: #ffffff;
+      margin-bottom: 0.25rem;
+    }
+    .op-desc {
+      font-size: 0.75rem;
+      color: #888888;
+      margin: 0;
+    }
+    .table-title-zone {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.75rem;
+    }
+    .section-title {
+      font-size: 0.95rem;
+      color: #d4af37;
+      margin: 0;
+      letter-spacing: 0.05em;
+    }
+    .legend-note {
+      font-size: 0.75rem;
+      color: #666666;
+    }
+    .table-wrapper {
+      overflow-x: auto;
+    }
+    .luxury-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    .luxury-table th {
+      background: #0a0a0a;
+      color: #888888;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .luxury-table td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      vertical-align: middle;
+    }
+    .row-active {
+      background: rgba(212, 175, 55, 0.03);
+    }
+    .sub-sku {
+      display: block;
+      font-size: 0.7rem;
+      color: #888888;
+      font-family: monospace;
+    }
+    .badge-attr {
+      background: #1a1a1a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      margin-right: 4px;
+      display: inline-block;
+    }
+    .badge-disp {
+      font-size: 0.75rem;
+      background: rgba(40, 167, 69, 0.1);
+      color: #28a745;
+      border: 1px solid rgba(40, 167, 69, 0.3);
+      padding: 2px 8px;
+    }
+    .badge-disp.zero {
+      background: rgba(220, 53, 69, 0.1);
+      color: #dc3545;
+      border-color: rgba(220, 53, 69, 0.3);
+    }
+    .qty-control {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .btn-qty {
+      background: #1a1a1a;
+      border: none;
+      color: #ffffff;
+      width: 26px;
+      height: 26px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn-qty:disabled {
+      opacity: 0.2;
+      cursor: not-allowed;
+    }
+    .qty-num {
+      padding: 0 8px;
+      min-width: 24px;
+      text-align: center;
+      font-weight: 600;
+    }
+    .selected-cambio-box {
+      background: #0a0a0a;
+      border: 1px dashed #d4af37;
+      padding: 0.4rem 0.6rem;
+      font-size: 0.75rem;
+    }
+    .cambio-name {
+      display: block;
+      font-weight: 600;
+      color: #ffffff;
+    }
+    .cambio-sku {
+      display: block;
+      color: #888888;
+      font-family: monospace;
+    }
+    .cambio-price {
+      display: block;
+      color: #d4af37;
+    }
+    .btn-link-mini {
+      background: none;
+      border: none;
+      color: #d4af37;
+      text-decoration: underline;
+      cursor: pointer;
+      padding: 0;
+      font-size: 0.75rem;
+    }
+    .btn-select-cambio {
+      background: #1a1a1a;
+      border: 1px dashed rgba(212, 175, 55, 0.5);
+      color: #d4af37;
+      padding: 0.4rem 0.75rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+    .btn-select-cambio:hover {
+      background: rgba(212, 175, 55, 0.1);
+    }
+    .dash-text {
+      color: #555555;
+    }
+    .col-strong {
+      font-weight: 600;
+      color: #ffffff;
+    }
+    .text-right { text-align: right; }
+    .text-center { text-align: center; }
+
+    /* PANEL DERECHO */
+    .summary-card {
+      position: sticky;
+      top: 1rem;
+    }
+    .motivo-box, .tender-section, .obs-section {
+      margin-bottom: 1.25rem;
+    }
+    .field-label {
+      display: block;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      color: #888888;
+      margin-bottom: 0.5rem;
+    }
+    .textarea-luxury {
+      width: 100%;
+      background: #0a0a0a;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      padding: 0.65rem;
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .summary-breakdown {
+      background: #0a0a0a;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .breakdown-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      margin-bottom: 0.65rem;
+    }
+    .muted-lbl { color: #888888; }
+    .val-txt { font-weight: 600; color: #ffffff; }
+    .divider-gold {
+      height: 1px;
+      background: rgba(212, 175, 55, 0.2);
+      margin: 0.75rem 0;
+    }
+    .balance-row {
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+    }
+    .balance-lbl {
+      color: #d4af37;
+      font-weight: 600;
+    }
+    .balance-val {
+      font-weight: 700;
+      font-family: monospace;
+      color: #ffffff;
+    }
+    .balance-val.credit { color: #28a745; }
+    .balance-val.charge { color: #d4af37; }
+    .balance-badge {
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-align: center;
+      padding: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #a0a0a0;
+    }
+    .badge-credit {
+      border-color: #28a745;
+      color: #28a745;
+      background: rgba(40, 167, 69, 0.08);
+    }
+    .badge-charge {
+      border-color: #d4af37;
+      color: #d4af37;
+      background: rgba(212, 175, 55, 0.08);
+    }
+    .btn-confirm-op {
+      width: 100%;
+      background: #d4af37;
+      color: #0a0a0a;
+      border: none;
+      padding: 1rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-confirm-op:hover:not(:disabled) {
+      opacity: 0.9;
+    }
+    .btn-confirm-op:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* TAB HISTORIAL */
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .history-filters {
+      display: flex;
+      gap: 0.75rem;
+    }
+    .col-gold { color: #d4af37; font-family: monospace; }
+    .col-time { font-size: 0.8rem; color: #888888; }
+    .sub-ticket { font-family: monospace; font-size: 0.8rem; color: #a0a0a0; }
+    .type-badge {
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .type-badge.badge-cambio {
+      background: rgba(212, 175, 55, 0.15);
+      color: #d4af37;
+      border-color: #d4af37;
+    }
+    .btn-action-view {
+      background: transparent;
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      color: #d4af37;
+      font-size: 0.75rem;
+      padding: 3px 10px;
+      cursor: pointer;
+    }
+    .btn-action-view:hover {
+      background: #d4af37;
+      color: #0a0a0a;
+    }
+    .empty-msg {
+      text-align: center;
+      padding: 3rem 0;
+      color: #666666;
+    }
+
+    /* MODAL CAMBIO */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 1rem;
+    }
+    .modal-content {
+      background: #141414;
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-cambio {
+      width: 100%;
+      max-width: 800px;
+      padding: 1.5rem;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 0.75rem;
+    }
+    .modal-title {
+      font-size: 1.2rem;
+      color: #ffffff;
+      margin: 0;
+    }
+    .btn-close {
+      background: none;
+      border: none;
+      color: #ffffff;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    .modal-search {
+      margin-bottom: 1.25rem;
+    }
+    .catalog-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 1rem;
+      max-height: 55vh;
+      overflow-y: auto;
+    }
+    .catalog-card {
+      background: #0a0a0a;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 1rem;
+    }
+    .cat-title {
+      display: block;
+      font-size: 0.9rem;
+      color: #ffffff;
+      margin-bottom: 0.25rem;
+    }
+    .cat-price {
+      display: block;
+      color: #d4af37;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .cat-sec {
+      display: block;
+      font-size: 0.75rem;
+      color: #666666;
+      margin-bottom: 0.75rem;
+    }
+    .var-title {
+      display: block;
+      font-size: 0.7rem;
+      color: #888888;
+      margin-bottom: 0.4rem;
+    }
+    .var-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .chip-var {
+      background: #1a1a1a;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      padding: 3px 6px;
+      font-size: 0.7rem;
+      cursor: pointer;
+    }
+    .chip-var:hover:not(:disabled) {
+      border-color: #d4af37;
+      background: rgba(212, 175, 55, 0.1);
+    }
+    .chip-var:disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+    }
+    .chip-stock { color: #28a745; font-size: 0.65rem; }
+
+    /* COMPROBANTE TÉRMICO DE LUJO */
+    .receipt-modal {
+      width: 100%;
+      max-width: 440px;
+      padding: 1.5rem;
+    }
+    .thermal-receipt {
+      background: #ffffff;
+      color: #000000;
+      font-family: 'Courier New', Courier, monospace;
+      padding: 1.5rem;
+      font-size: 0.85rem;
+    }
+    .receipt-header {
+      text-align: center;
+    }
+    .receipt-brand {
+      display: block;
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+    }
+    .receipt-subbrand {
+      display: block;
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+      margin-top: 2px;
+    }
+    .receipt-type {
+      margin: 0.5rem 0;
+      font-size: 0.95rem;
+      font-weight: bold;
+    }
+    .receipt-meta {
+      margin: 2px 0;
+      font-size: 0.75rem;
+      text-align: left;
+    }
+    .receipt-divider {
+      margin: 0.5rem 0;
+      text-align: center;
+      letter-spacing: -1px;
+    }
+    .receipt-section-label {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      font-size: 0.8rem;
+    }
+    .receipt-item-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.8rem;
+    }
+    .row-entrega {
+      padding-left: 0.5rem;
+      border-left: 2px solid #000000;
+    }
+    .rec-item-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .rec-cond {
+      font-size: 0.7rem;
+      font-style: italic;
+    }
+    .rec-item-total {
+      font-weight: bold;
+    }
+    .rec-total-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 3px;
+      font-size: 0.8rem;
+    }
+    .rec-grand-total {
+      font-size: 1rem;
+      font-weight: bold;
+      border-top: 1px dashed #000;
+      border-bottom: 1px dashed #000;
+      padding: 4px 0;
+      margin: 6px 0;
+    }
+    .receipt-footer {
+      text-align: center;
+      font-size: 0.75rem;
+      margin-top: 0.75rem;
+    }
+    .receipt-thanks {
+      margin-top: 6px;
+      font-weight: bold;
+    }
+    .receipt-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+    .btn-print {
+      flex: 1;
+      background: #000000;
+      color: #ffffff;
+      border: none;
+      padding: 0.75rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-cancel {
+      background: #cccccc;
+      border: none;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+    }
+  `]
+})
+export class DevolucionesPageComponent implements OnInit {
+  private readonly ventasService = inject(VentasService);
+  private readonly catalogoService = inject(CatalogoService);
+  private readonly inventarioService = inject(InventarioService);
+  private readonly authService = inject(AuthService);
+
+  // Estados reactivos
+  tabActiva = signal<'nueva' | 'historial'>('nueva');
+  sucursales = signal<Sucursal[]>([]);
+  sucursalSeleccionadaId = signal<number>(2);
+
+  // Búsqueda de ticket
+  codigoBusqueda = '';
+  buscando = signal<boolean>(false);
+  errorBusqueda = signal<string | null>(null);
+  ventaCargada = signal<VentaParaDevolucionResponse | null>(null);
+  ventasRecientes = signal<VentaResponse[]>([]);
+
+  // Configuración de operación
+  tipoOperacion = signal<'DEVOLUCION' | 'CAMBIO'>('DEVOLUCION');
+  motivoSeleccionado = 'CAMBIO_TALLA';
+  metodoReembolso = 'EFECTIVO';
+  observaciones = '';
+  itemsDevolucion = signal<ItemDevolucionRow[]>([]);
+  procesando = signal<boolean>(false);
+  errorOperacion = signal<string | null>(null);
+
+  // Modal selector de cambio
+  mostrarModalCambio = signal<boolean>(false);
+  filaEnEdicion: ItemDevolucionRow | null = null;
+  busquedaCatalogo = '';
+  prendasCatalogo = signal<Prenda[]>([]);
+  stockSucursalMap = signal<Map<number, number>>(new Map());
+
+  // Historial y Comprobante
+  historial = signal<DevolucionResponse[]>([]);
+  filtroTipo = '';
+  comprobanteActivo = signal<DevolucionResponse | null>(null);
+
+  // Totales computados
+  totalDevuelto = computed(() => {
+    let tot = 0;
+    for (const r of this.itemsDevolucion()) {
+      tot += r.cantidadDevolver * r.item.precio_unitario;
+    }
+    return tot;
+  });
+
+  totalNuevo = computed(() => {
+    if (this.tipoOperacion() !== 'CAMBIO') return 0;
+    let tot = 0;
+    for (const r of this.itemsDevolucion()) {
+      if (r.cantidadDevolver > 0 && r.varianteCambioObj) {
+        tot += r.cantidadCambio * r.precioCambio;
+      }
+    }
+    return tot;
+  });
+
+  diferencia = computed(() => {
+    return this.totalNuevo() - this.totalDevuelto();
+  });
+
+  prendasCatalogoFiltradas = computed(() => {
+    const q = this.busquedaCatalogo.toLowerCase().trim();
+    if (!q) return this.prendasCatalogo();
+    return this.prendasCatalogo().filter(p =>
+      p.nombre.toLowerCase().includes(q) ||
+      (p.categoria?.nombre && p.categoria.nombre.toLowerCase().includes(q))
+    );
+  });
+
+  ngOnInit(): void {
+    this.cargarSucursales();
+    this.cargarPrendas();
+  }
+
+  cargarSucursales(): void {
+    this.inventarioService.getSucursales().subscribe({
+      next: (res) => {
+        this.sucursales.set(res);
+        const user = this.authService.currentUser();
+        if (user && user.sucursal_id) {
+          this.sucursalSeleccionadaId.set(user.sucursal_id);
+        } else if (res.length > 0) {
+          this.sucursalSeleccionadaId.set(res[0].id);
+        }
+        this.cargarStockSucursal();
+        this.cargarVentasRecientes();
+      },
+      error: (err: any) => console.error('Error cargando sucursales', err)
+    });
+  }
+
+  cargarPrendas(): void {
+    this.catalogoService.getPrendas().subscribe({
+      next: (res) => this.prendasCatalogo.set(res),
+      error: (err: any) => console.error('Error cargando catálogo', err)
+    });
+  }
+
+  cargarStockSucursal(): void {
+    const sucId = this.sucursalSeleccionadaId();
+    this.catalogoService.getStockPorSucursal(sucId).subscribe({
+      next: (stocks: any[]) => {
+        const map = new Map<number, number>();
+        for (const s of stocks) {
+          map.set(s.variante_id, s.cantidad_disponible);
+        }
+        this.stockSucursalMap.set(map);
+      },
+      error: (err: any) => console.error('Error cargando stock sucursal', err)
+    });
+  }
+
+  getStockVariante(varianteId: number): number {
+    return this.stockSucursalMap().get(varianteId) || 0;
+  }
+
+  cargarVentasRecientes(): void {
+    const sucId = this.sucursalSeleccionadaId();
+    this.ventasService.getVentas(sucId).subscribe({
+      next: (ventas) => this.ventasRecientes.set(ventas.slice(0, 4)),
+      error: (err: any) => console.error('Error cargando ventas recientes', err)
+    });
+  }
+
+  onSucursalChange(newId: number): void {
+    this.sucursalSeleccionadaId.set(Number(newId));
+    this.cargarStockSucursal();
+    this.cargarVentasRecientes();
+    if (this.tabActiva() === 'historial') {
+      this.cargarHistorial();
+    }
+  }
+
+  cargarVentaRapida(codigo: string): void {
+    this.codigoBusqueda = codigo;
+    this.buscarTicket();
+  }
+
+  buscarTicket(): void {
+    if (!this.codigoBusqueda.trim()) return;
+    this.buscando.set(true);
+    this.errorBusqueda.set(null);
+    this.ventaCargada.set(null);
+
+    this.ventasService.buscarVentaPorCodigo(this.codigoBusqueda.trim()).subscribe({
+      next: (res) => {
+        this.buscando.set(false);
+        this.ventaCargada.set(res);
+        const rows: ItemDevolucionRow[] = res.items.map(item => ({
+          item,
+          cantidadDevolver: 0,
+          condicion: 'APTO_PARA_VENTA',
+          varianteCambioId: null,
+          varianteCambioObj: null,
+          cantidadCambio: 1,
+          precioCambio: 0
+        }));
+        this.itemsDevolucion.set(rows);
+      },
+      error: (err) => {
+        this.buscando.set(false);
+        this.errorBusqueda.set(err.error?.detail || 'No se encontró la venta con el código ingresado');
+      }
+    });
+  }
+
+  modificarCantidad(row: ItemDevolucionRow, delta: number): void {
+    const nuevaCant = row.cantidadDevolver + delta;
+    if (nuevaCant >= 0 && nuevaCant <= row.item.cantidad_disponible_devolucion) {
+      row.cantidadDevolver = nuevaCant;
+      row.cantidadCambio = nuevaCant;
+      this.itemsDevolucion.update(items => [...items]);
+    }
+  }
+
+  abrirModalCambio(row: ItemDevolucionRow): void {
+    this.filaEnEdicion = row;
+    this.mostrarModalCambio.set(true);
+  }
+
+  cerrarModalCambio(): void {
+    this.mostrarModalCambio.set(false);
+    this.filaEnEdicion = null;
+  }
+
+  seleccionarVarianteCambio(prenda: Prenda, variante: PrendaVariante): void {
+    if (!this.filaEnEdicion) return;
+    const vCompleta = { ...variante, prenda };
+    this.filaEnEdicion.varianteCambioId = variante.id;
+    this.filaEnEdicion.varianteCambioObj = vCompleta;
+    this.filaEnEdicion.precioCambio = prenda.precio_base;
+    this.filaEnEdicion.cantidadCambio = this.filaEnEdicion.cantidadDevolver || 1;
+    this.itemsDevolucion.update(items => [...items]);
+    this.cerrarModalCambio();
+  }
+
+  confirmarOperacion(): void {
+    const venta = this.ventaCargada();
+    if (!venta) return;
+
+    const itemsAProcesar = this.itemsDevolucion().filter(r => r.cantidadDevolver > 0);
+    if (itemsAProcesar.length === 0) {
+      this.errorOperacion.set('Debe seleccionar al menos una prenda para procesar');
+      return;
+    }
+
+    if (this.tipoOperacion() === 'CAMBIO') {
+      for (const r of itemsAProcesar) {
+        if (!r.varianteCambioId) {
+          this.errorOperacion.set(`Seleccione la prenda nueva para el cambio de '${r.item.prenda_nombre}'`);
+          return;
+        }
+      }
+    }
+
+    this.procesando.set(true);
+    this.errorOperacion.set(null);
+
+    const payload: DevolucionCreate = {
+      venta_id: venta.id,
+      sucursal_id: this.sucursalSeleccionadaId(),
+      tipo: this.tipoOperacion(),
+      motivo: this.motivoSeleccionado as any,
+      metodo_reembolso: this.diferencia() === 0 ? 'NO_APLICA' : (this.metodoReembolso as any),
+      observaciones: this.observaciones || undefined,
+      detalles: itemsAProcesar.map(r => ({
+        variante_devuelta_id: r.item.variante_id,
+        cantidad_devuelta: r.cantidadDevolver,
+        condicion_prenda: r.condicion,
+        variante_cambio_id: this.tipoOperacion() === 'CAMBIO' ? r.varianteCambioId : null,
+        cantidad_cambio: this.tipoOperacion() === 'CAMBIO' ? r.cantidadCambio : null
+      }))
+    };
+
+    this.ventasService.registrarDevolucion(payload).subscribe({
+      next: (res) => {
+        this.procesando.set(false);
+        this.comprobanteActivo.set(res);
+        this.cargarStockSucursal();
+        this.buscarTicket(); // Refrescar saldo del ticket
+      },
+      error: (err) => {
+        this.procesando.set(false);
+        this.errorOperacion.set(err.error?.detail || 'Error al procesar la devolución o cambio');
+      }
+    });
+  }
+
+  cargarHistorial(): void {
+    const sucId = this.sucursalSeleccionadaId();
+    this.ventasService.getDevoluciones(sucId, this.filtroTipo || undefined).subscribe({
+      next: (res) => this.historial.set(res),
+      error: (err: any) => console.error('Error cargando historial', err)
+    });
+  }
+
+  verRecibo(dev: DevolucionResponse): void {
+    this.comprobanteActivo.set(dev);
+  }
+
+  imprimirRecibo(): void {
+    window.print();
+  }
+}
