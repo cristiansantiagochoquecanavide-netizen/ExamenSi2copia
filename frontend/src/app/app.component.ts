@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './core/services/auth.service';
+import { CartService } from './features/ventas/services/cart.service';
 
 @Component({
   selector: 'app-root',
@@ -13,6 +14,7 @@ import { AuthService } from './core/services/auth.service';
 export class AppComponent {
   title = 'FashionStore';
   readonly authService = inject(AuthService);
+  readonly cartService = inject(CartService);
   readonly router = inject(Router);
 
   isModuleActive(prefix: string): boolean {

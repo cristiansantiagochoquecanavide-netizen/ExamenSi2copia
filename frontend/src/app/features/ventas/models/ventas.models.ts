@@ -74,6 +74,7 @@ export interface VentaResponse {
   cliente?: UsuarioResponse | null;
   detalles: DetalleVentaResponse[];
   pagos: PagoResponse[];
+  envio?: EnvioPedido | null;
 }
 
 // ----------------- CU11: DEVOLUCIONES Y CAMBIOS -----------------
@@ -202,4 +203,58 @@ export interface PagoIniciarResponse {
   pago: PagoResponse;
   qr?: QRGenerarResponse | null;
 }
+
+// ----------------- CU15: CARRITO & CHECKOUT E-COMMERCE -----------------
+export interface EnvioPedido {
+  id: number;
+  venta_id: number;
+  tipo_entrega: 'DOMICILIO' | 'CLICK_AND_COLLECT';
+  estado_envio: 'PENDIENTE' | 'PREPARANDO' | 'EN_CAMINO' | 'LISTO_RECOJO' | 'ENTREGADO' | 'CANCELADO';
+  codigo_seguimiento: string;
+  direccion_linea1?: string | null;
+  direccion_linea2?: string | null;
+  ciudad?: string | null;
+  departamento?: string | null;
+  codigo_postal?: string | null;
+  telefono_contacto?: string | null;
+  instrucciones_entrega?: string | null;
+  costo_envio: number;
+  courier_nombre?: string | null;
+  fecha_despacho?: string | null;
+  fecha_entrega_estimada?: string | null;
+  fecha_entrega_real?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DatosEnvioInput {
+  tipo_entrega: 'DOMICILIO' | 'CLICK_AND_COLLECT';
+  direccion_linea1?: string;
+  direccion_linea2?: string;
+  ciudad?: string;
+  departamento?: string;
+  codigo_postal?: string;
+  telefono_contacto?: string;
+  instrucciones_entrega?: string;
+  sucursal_recojo_id?: number;
+}
+
+export interface VentaOnlineCheckoutRequest {
+  sucursal_id: number;
+  cliente_nombre: string;
+  cliente_nit?: string;
+  cliente_email: string;
+  cliente_telefono?: string;
+  observaciones?: string;
+  detalles: DetalleVentaCreate[];
+  datos_envio: DatosEnvioInput;
+  pago: PagoElectronicoCreate;
+}
+
+export interface ActualizarEstadoEnvioRequest {
+  estado_envio: 'PREPARANDO' | 'EN_CAMINO' | 'LISTO_RECOJO' | 'ENTREGADO' | 'CANCELADO';
+  courier_nombre?: string;
+  notas?: string;
+}
+
 

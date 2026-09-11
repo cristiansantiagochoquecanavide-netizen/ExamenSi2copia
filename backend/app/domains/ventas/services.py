@@ -1,5 +1,5 @@
 """Capa de Servicio (Lógica de Negocio) para el dominio de Ventas y Pagos."""
-from datetime import datetime, timezone, date
+from datetime import datetime, timezone, date, timedelta
 from decimal import Decimal
 from typing import List, Optional
 from fastapi import HTTPException, status
@@ -12,10 +12,11 @@ import json
 import uuid
 import qrcode
 import qrcode.image.svg
-from app.domains.ventas.models import Venta, DetalleVenta, Pago, Devolucion, DetalleDevolucion
+from app.domains.ventas.models import Venta, DetalleVenta, Pago, Devolucion, DetalleDevolucion, EnvioPedido
 from app.domains.ventas.schemas import (
     VentaPOSCreate, DevolucionCreate, VentaParaDevolucionResponse, VentaParaDevolucionItem,
-    PagoElectronicoCreate, ConfirmarPagoRequest, QRGenerarResponse, WebhookPagoPayload
+    PagoElectronicoCreate, ConfirmarPagoRequest, QRGenerarResponse, WebhookPagoPayload,
+    VentaOnlineCheckoutRequest, ActualizarEstadoEnvioRequest
 )
 from app.domains.inventario.models import Sucursal
 from app.domains.usuarios.models import Usuario
@@ -49,6 +50,7 @@ class VentasService:
             selectinload(Venta.cajero),
             selectinload(Venta.cliente),
             selectinload(Venta.pagos),
+            selectinload(Venta.envio).selectinload(EnvioPedido.sucursal_recojo),
             selectinload(Venta.detalles).selectinload(DetalleVenta.variante).selectinload(PrendaVariante.prenda),
             selectinload(Venta.detalles).selectinload(DetalleVenta.variante).selectinload(PrendaVariante.talla),
             selectinload(Venta.detalles).selectinload(DetalleVenta.variante).selectinload(PrendaVariante.color)
@@ -71,6 +73,7 @@ class VentasService:
             selectinload(Venta.cajero),
             selectinload(Venta.cliente),
             selectinload(Venta.pagos),
+            selectinload(Venta.envio).selectinload(EnvioPedido.sucursal_recojo),
             selectinload(Venta.detalles).selectinload(DetalleVenta.variante).selectinload(PrendaVariante.prenda),
             selectinload(Venta.detalles).selectinload(DetalleVenta.variante).selectinload(PrendaVariante.talla),
             selectinload(Venta.detalles).selectinload(DetalleVenta.variante).selectinload(PrendaVariante.color)
@@ -906,4 +909,296 @@ class VentasService:
         if not pago:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Comprobante de pago no encontrado")
         return pago
+
+    # ----------------- CU15: CARRITO Y CHECKOUT E-COMMERCE -----------------
+    @staticmethod
+    async def procesar_checkout_online(
+        db: AsyncSession,
+        data: VentaOnlineCheckoutRequest,
+        current_user: Usuario,
+        ip: Optional[str] = None
+    ) -> Venta:
+        """
+        Procesa la venta digital de la bolsa de compras / carrito (CU15).
+        - Valida stock disponible en la sucursal que despacha.
+        - Calcula costos de envío según modalidad (Domicilio vs Click & Collect).
+        - Genera venta con canal ONLINE_WEB, descuenta stock físico (VENTA_ONLINE).
+        - Genera registro formal de comprobante de pago y despacho con código de tracking (ENV-...).
+        """
+        # 1. Validar sucursal de despacho / origen
+        sucursal = await db.get(Sucursal, data.sucursal_despacho_id)
+        if not sucursal or not sucursal.activo:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Sucursal de despacho inválida o inactiva"
+            )
+
+        if not data.detalles:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El carrito de compras debe contener al menos una prenda"
+            )
+
+        # 2. Validar stock disponible para cada prenda
+        lineas_procesadas = []
+        subtotal_acumulado = Decimal("0.00")
+
+        for item in data.detalles:
+            query_var = select(PrendaVariante).options(
+                selectinload(PrendaVariante.prenda),
+                selectinload(PrendaVariante.talla),
+                selectinload(PrendaVariante.color)
+            ).where(PrendaVariante.id == item.variante_id)
+            res_var = await db.execute(query_var)
+            variante = res_var.scalar_one_or_none()
+
+            if not variante or not variante.activo:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Variante ID {item.variante_id} inexistente o inactiva"
+                )
+
+            # Consultar existencias en la sucursal de despacho
+            res_stock = await db.execute(
+                select(InventarioStock).where(
+                    and_(
+                        InventarioStock.variante_id == item.variante_id,
+                        InventarioStock.sucursal_id == data.sucursal_despacho_id
+                    )
+                )
+            )
+            stock = res_stock.scalar_one_or_none()
+            disponible = stock.cantidad_disponible if stock else 0
+
+            if not stock or disponible < item.cantidad:
+                nombre_prenda = variante.prenda.nombre if variante.prenda else "Prenda"
+                talla_code = variante.talla.codigo if variante.talla else ""
+                color_nom = variante.color.nombre if variante.color else ""
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Stock insuficiente en la boutique '{sucursal.nombre}' para '{nombre_prenda}' (Talla: {talla_code}, Color: {color_nom}). Disponible: {disponible} uds, Solicitado: {item.cantidad} uds."
+                )
+
+            precio_unitario = (
+                item.precio_unitario if item.precio_unitario is not None
+                else (variante.prenda.precio_base if variante.prenda else Decimal("0.00"))
+            )
+            subtotal_linea = Decimal(item.cantidad) * Decimal(precio_unitario)
+            subtotal_acumulado += subtotal_linea
+
+            lineas_procesadas.append({
+                "variante_id": item.variante_id,
+                "cantidad": item.cantidad,
+                "precio_unitario": Decimal(precio_unitario),
+                "subtotal": subtotal_linea,
+                "stock_obj": stock,
+                "variante_obj": variante
+            })
+
+        # 3. Calcular costo de envío y total
+        descuento = Decimal(data.descuento) if data.descuento else Decimal("0.00")
+        if descuento > subtotal_acumulado:
+            descuento = subtotal_acumulado
+
+        costo_envio = Decimal("0.00")
+        if data.envio.tipo_entrega == "DOMICILIO":
+            # Si subtotal >= 150 -> Envío gratis, sino tarifa estándar $5.00
+            costo_envio = Decimal("0.00") if (subtotal_acumulado - descuento) >= Decimal("150.00") else Decimal("5.00")
+        elif data.envio.tipo_entrega == "RECOJO_TIENDA":
+            costo_envio = Decimal("0.00")
+            if data.envio.sucursal_recojo_id:
+                suc_rec = await db.get(Sucursal, data.envio.sucursal_recojo_id)
+                if not suc_rec or not suc_rec.activo:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="La sucursal de recojo seleccionada no existe o está inactiva"
+                    )
+
+        total_a_liquidar = (subtotal_acumulado - descuento) + costo_envio
+
+        # 4. Validar método de pago
+        metodo_pago = data.pago.metodo_pago.upper()
+
+        # 5. Generar código de venta y crear cabecera Venta
+        ahora = datetime.now(timezone.utc)
+        codigo_venta = f"VTA-ONL-{ahora.strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:4].upper()}"
+
+        cliente_id = current_user.id if current_user.rol and current_user.rol.nombre == "CLIENTE" else data.cliente_id
+        if not cliente_id and current_user:
+            cliente_id = current_user.id
+
+        venta = Venta(
+            codigo_venta=codigo_venta,
+            sucursal_id=data.sucursal_despacho_id,
+            usuario_id=current_user.id,
+            cliente_id=cliente_id,
+            canal_venta="ONLINE_WEB",
+            cliente_nombre=data.cliente_nombre.strip(),
+            cliente_nit=data.cliente_nit.strip() or "0",
+            subtotal=subtotal_acumulado,
+            descuento=descuento,
+            costo_envio=costo_envio,
+            total=total_a_liquidar,
+            estado="PAGADA",
+            observaciones=data.observaciones
+        )
+        db.add(venta)
+        await db.flush()
+
+        # 6. Insertar Detalles y Descontar Kardex
+        for lp in lineas_procesadas:
+            db.add(DetalleVenta(
+                venta_id=venta.id,
+                variante_id=lp["variante_id"],
+                cantidad=lp["cantidad"],
+                precio_unitario=lp["precio_unitario"],
+                subtotal=lp["subtotal"]
+            ))
+
+            stk = lp["stock_obj"]
+            ant_cant = stk.cantidad_disponible
+            stk.cantidad_disponible -= lp["cantidad"]
+
+            db.add(MovimientoInventario(
+                stock_id=stk.id,
+                tipo_movimiento="VENTA_ONLINE",
+                cantidad=-lp["cantidad"],
+                cantidad_anterior=ant_cant,
+                cantidad_nueva=stk.cantidad_disponible,
+                motivo=f"Pedido Online Web #{codigo_venta} - Cliente: {venta.cliente_nombre}",
+                usuario_id=current_user.id
+            ))
+
+        # 7. Registrar Comprobante de Pago
+        ext_id = data.pago.transaccion_externa_id or f"PAY-ONL-{uuid.uuid4().hex[:8].upper()}"
+        pago = Pago(
+            venta_id=venta.id,
+            metodo_pago=metodo_pago,
+            pasarela=f"ECOMMERCE_{metodo_pago}",
+            monto=total_a_liquidar,
+            estado_pago="CONFIRMADO",
+            transaccion_externa_id=ext_id,
+            cliente_email=data.cliente_email.strip(),
+            fecha_hora=ahora
+        )
+        db.add(pago)
+
+        # 8. Crear EnvioPedido con tracking
+        tracking_code = f"ENV-{ahora.strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
+        estado_envio_inicial = "LISTO_RECOJO" if data.envio.tipo_entrega == "RECOJO_TIENDA" else "PREPARANDO"
+        courier_name = "Click & Collect Atelier" if data.envio.tipo_entrega == "RECOJO_TIENDA" else "Yaigo Express Courier"
+
+        envio = EnvioPedido(
+            venta_id=venta.id,
+            codigo_seguimiento=tracking_code,
+            tipo_entrega=data.envio.tipo_entrega,
+            sucursal_recojo_id=data.envio.sucursal_recojo_id if data.envio.tipo_entrega == "RECOJO_TIENDA" else None,
+            direccion_linea1=data.envio.direccion_linea1,
+            direccion_linea2=data.envio.direccion_linea2,
+            ciudad=data.envio.ciudad,
+            departamento=data.envio.departamento,
+            telefono_contacto=data.envio.telefono_contacto,
+            instrucciones_entrega=data.envio.instrucciones_entrega,
+            costo_envio=costo_envio,
+            empresa_courier=courier_name,
+            estado_envio=estado_envio_inicial,
+            fecha_estimada_entrega=(ahora + timedelta(days=2)).date()
+        )
+        db.add(envio)
+
+        await db.commit()
+
+        # 9. Auditoría
+        await AuditoriaService.registrar_evento(
+            db,
+            accion="VENTA_ONLINE_CREADA",
+            modulo="ventas",
+            detalle=f"Venta E-Commerce #{codigo_venta} completada por ${total_a_liquidar}. Tracking envío #{tracking_code}. Modalidad: {data.envio.tipo_entrega}.",
+            usuario_id=current_user.id,
+            usuario_email=current_user.email,
+            ip_address=ip,
+            valores_nuevos={
+                "venta_id": venta.id,
+                "codigo_venta": codigo_venta,
+                "tracking": tracking_code,
+                "total": str(total_a_liquidar),
+                "tipo_entrega": data.envio.tipo_entrega
+            }
+        )
+
+        return await VentasService.obtener_venta_por_id(db, venta.id)
+
+    @staticmethod
+    async def listar_pedidos_online(
+        db: AsyncSession,
+        sucursal_id: Optional[int] = None,
+        estado_envio: Optional[str] = None,
+        cliente_id: Optional[int] = None,
+        limit: int = 50,
+        offset: int = 0
+    ) -> List[Venta]:
+        """Consulta los pedidos e-commerce con sus datos de envío y tracking."""
+        query = select(Venta).join(EnvioPedido, Venta.id == EnvioPedido.venta_id).options(
+            selectinload(Venta.sucursal),
+            selectinload(Venta.cliente),
+            selectinload(Venta.pagos),
+            selectinload(Venta.envio).selectinload(EnvioPedido.sucursal_recojo),
+            selectinload(Venta.detalles).selectinload(DetalleVenta.variante).selectinload(PrendaVariante.prenda),
+            selectinload(Venta.detalles).selectinload(DetalleVenta.variante).selectinload(PrendaVariante.talla),
+            selectinload(Venta.detalles).selectinload(DetalleVenta.variante).selectinload(PrendaVariante.color)
+        ).where(Venta.canal_venta == "ONLINE_WEB")
+
+        if sucursal_id:
+            query = query.where(Venta.sucursal_id == sucursal_id)
+        if cliente_id:
+            query = query.where(Venta.cliente_id == cliente_id)
+        if estado_envio:
+            query = query.where(EnvioPedido.estado_envio == estado_envio.upper())
+
+        result = await db.execute(query.order_by(desc(Venta.id)).limit(limit).offset(offset))
+        return list(result.scalars().all())
+
+    @staticmethod
+    async def actualizar_estado_envio(
+        db: AsyncSession,
+        envio_id: int,
+        data: ActualizarEstadoEnvioRequest,
+        staff_user: Usuario,
+        ip: Optional[str] = None
+    ) -> EnvioPedido:
+        """Actualiza el estado de tracking de un envío de venta online."""
+        res = await db.execute(
+            select(EnvioPedido).options(
+                selectinload(EnvioPedido.sucursal_recojo),
+                selectinload(EnvioPedido.venta)
+            ).where(EnvioPedido.id == envio_id)
+        )
+        envio = res.scalar_one_or_none()
+        if not envio:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Envío no encontrado")
+
+        envio.estado_envio = data.estado_envio
+        if data.empresa_courier:
+            envio.empresa_courier = data.empresa_courier
+        if data.instrucciones_entrega:
+            envio.instrucciones_entrega = data.instrucciones_entrega
+        if data.estado_envio == "ENTREGADO":
+            envio.fecha_entregado = datetime.now(timezone.utc)
+        envio.updated_at = datetime.now(timezone.utc)
+
+        await db.commit()
+
+        await AuditoriaService.registrar_evento(
+            db,
+            accion="ESTADO_ENVIO_ACTUALIZADO",
+            modulo="ventas",
+            detalle=f"Envío #{envio.codigo_seguimiento} actualizado a '{envio.estado_envio}' por {staff_user.nombre}.",
+            usuario_id=staff_user.id,
+            usuario_email=staff_user.email,
+            ip_address=ip,
+            valores_nuevos={"envio_id": envio.id, "estado_envio": envio.estado_envio}
+        )
+
+        return envio
+
 

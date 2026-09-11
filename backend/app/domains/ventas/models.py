@@ -1,9 +1,9 @@
 """Modelos ORM SQLAlchemy para el dominio de Ventas y Pagos."""
-from datetime import datetime, timezone
+from datetime import datetime, date, timezone
 from decimal import Decimal
 from typing import List, Optional
 from sqlalchemy import (
-    Boolean, Column, DateTime, ForeignKey, Integer, Numeric, String, Text
+    Boolean, Column, DateTime, Date, ForeignKey, Integer, Numeric, String, Text
 )
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from app.core.database import Base
@@ -36,6 +36,8 @@ class Venta(Base):
     detalles: Mapped[List["DetalleVenta"]] = relationship("DetalleVenta", back_populates="venta", cascade="all, delete-orphan", lazy="selectin")
     pagos: Mapped[List["Pago"]] = relationship("Pago", back_populates="venta", cascade="all, delete-orphan", lazy="selectin")
     devoluciones: Mapped[List["Devolucion"]] = relationship("Devolucion", back_populates="venta", cascade="all, delete-orphan", lazy="selectin")
+    envio: Mapped[Optional["EnvioPedido"]] = relationship("EnvioPedido", back_populates="venta", uselist=False, cascade="all, delete-orphan", lazy="selectin")
+
 
 
 class DetalleVenta(Base):
@@ -121,4 +123,39 @@ class DetalleDevolucion(Base):
     variante_cambio: Mapped[Optional["app.domains.catalogo.models.PrendaVariante"]] = relationship(
         "app.domains.catalogo.models.PrendaVariante", foreign_keys=[variante_cambio_id], lazy="selectin"
     )
+
+
+# ----------------- CU15: DESPACHO Y ENVÍO DE PEDIDOS E-COMMERCE -----------------
+class EnvioPedido(Base):
+    __tablename__ = "envios_pedido"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    venta_id: Mapped[int] = mapped_column(Integer, ForeignKey("ventas.id", ondelete="CASCADE"), nullable=False, index=True)
+    codigo_seguimiento: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
+    tipo_entrega: Mapped[str] = mapped_column(String(20), default="DOMICILIO", nullable=False)  # DOMICILIO, RECOJO_TIENDA
+    sucursal_recojo_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("sucursales.id", ondelete="SET NULL"), nullable=True)
+    direccion_linea1: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    direccion_linea2: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    ciudad: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    departamento: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    telefono_contacto: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    instrucciones_entrega: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    costo_envio: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=Decimal("0.00"), nullable=False)
+    empresa_courier: Mapped[Optional[str]] = mapped_column(String(100), default="Atelier Courier Express", nullable=True)
+    estado_envio: Mapped[str] = mapped_column(String(30), default="PREPARANDO", nullable=False, index=True)  # PREPARANDO, EN_CAMINO, ENTREGADO, LISTO_RECOJO
+    fecha_estimada_entrega: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    fecha_entregado: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc)
+    )
+
+    # Relaciones
+    venta: Mapped["Venta"] = relationship("Venta", back_populates="envio")
+    sucursal_recojo: Mapped[Optional["app.domains.inventario.models.Sucursal"]] = relationship(
+        "app.domains.inventario.models.Sucursal", foreign_keys=[sucursal_recojo_id], lazy="selectin"
+    )
+
 

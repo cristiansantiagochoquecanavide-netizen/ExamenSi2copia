@@ -1,5 +1,5 @@
 """Esquemas Pydantic para el dominio de Ventas y Pagos."""
-from datetime import datetime
+from datetime import datetime, date
 from decimal import Decimal
 from typing import List, Optional
 from pydantic import BaseModel, ConfigDict, Field
@@ -23,7 +23,7 @@ class DetalleVentaCreate(BaseModel):
     precio_unitario: Optional[Decimal] = Field(None, ge=0)
 
 class PagoCreate(BaseModel):
-    metodo_pago: str = Field(..., pattern="^(EFECTIVO|TARJETA|QR_SIMPLE)$")
+    metodo_pago: str = Field(..., pattern="^(EFECTIVO|TARJETA|QR_SIMPLE|PAYPAL)$")
     monto: Optional[Decimal] = Field(None, ge=0)
     monto_entregado: Optional[Decimal] = Field(None, ge=0)  # Para cálculo de vuelto en efectivo
     transaccion_externa_id: Optional[str] = Field(None, max_length=100)
@@ -62,6 +62,27 @@ class PagoResponse(BaseVentasSchema):
     datos_transaccion: Optional[str] = None
     fecha_hora: datetime
 
+class EnvioPedidoResponse(BaseVentasSchema):
+    id: int
+    venta_id: int
+    codigo_seguimiento: str
+    tipo_entrega: str
+    sucursal_recojo_id: Optional[int] = None
+    direccion_linea1: Optional[str] = None
+    direccion_linea2: Optional[str] = None
+    ciudad: Optional[str] = None
+    departamento: Optional[str] = None
+    telefono_contacto: Optional[str] = None
+    instrucciones_entrega: Optional[str] = None
+    costo_envio: Decimal
+    empresa_courier: Optional[str] = None
+    estado_envio: str
+    fecha_estimada_entrega: Optional[date] = None
+    fecha_entregado: Optional[datetime] = None
+    sucursal_recojo: Optional[SucursalResponse] = None
+    created_at: datetime
+    updated_at: datetime
+
 class VentaResponse(BaseVentasSchema):
     id: int
     codigo_venta: str
@@ -84,6 +105,8 @@ class VentaResponse(BaseVentasSchema):
     cliente: Optional[UsuarioResponse] = None
     detalles: List[DetalleVentaResponse] = []
     pagos: List[PagoResponse] = []
+    envio: Optional[EnvioPedidoResponse] = None
+
 
 
 # ----------------- CU11: DEVOLUCIONES Y CAMBIOS SCHEMAS -----------------
@@ -219,5 +242,37 @@ class WebhookPagoPayload(BaseModel):
 class PagoIniciarResponse(BaseModel):
     pago: PagoResponse
     qr: Optional[QRGenerarResponse] = None
+
+
+# ----------------- CU15: CARRITO & CHECKOUT E-COMMERCE SCHEMAS -----------------
+class DatosEnvioInput(BaseModel):
+    tipo_entrega: str = Field("DOMICILIO", pattern="^(DOMICILIO|RECOJO_TIENDA)$")
+    sucursal_recojo_id: Optional[int] = None
+    direccion_linea1: Optional[str] = None
+    direccion_linea2: Optional[str] = None
+    ciudad: Optional[str] = None
+    departamento: Optional[str] = None
+    telefono_contacto: Optional[str] = None
+    instrucciones_entrega: Optional[str] = None
+
+
+class VentaOnlineCheckoutRequest(BaseModel):
+    sucursal_despacho_id: int
+    cliente_id: Optional[int] = None
+    cliente_nombre: str = Field("Cliente E-Commerce", min_length=2, max_length=150)
+    cliente_nit: str = Field("0", max_length=50)
+    cliente_email: str = Field(..., max_length=150)
+    descuento: Decimal = Field(Decimal("0.00"), ge=0)
+    observaciones: Optional[str] = None
+    detalles: List[DetalleVentaCreate] = Field(..., min_length=1)
+    envio: DatosEnvioInput
+    pago: PagoCreate
+
+
+class ActualizarEstadoEnvioRequest(BaseModel):
+    estado_envio: str = Field(..., pattern="^(PREPARANDO|EN_CAMINO|ENTREGADO|LISTO_RECOJO)$")
+    empresa_courier: Optional[str] = None
+    instrucciones_entrega: Optional[str] = None
+
 
 

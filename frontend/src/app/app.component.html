@@ -53,6 +53,9 @@
           <a routerLink="/ventas" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
             <span class="menu-icon">&bull;</span> Punto de Venta POS
           </a>
+          <a routerLink="/ventas/checkout" routerLinkActive="active">
+            <span class="menu-icon">&bull;</span> E-Commerce &amp; Carrito (CU15)
+          </a>
           <a routerLink="/ventas/devoluciones" routerLinkActive="active">
             <span class="menu-icon">&bull;</span> Devoluciones &amp; Cambios
           </a>
@@ -99,6 +102,10 @@
     </nav>
 
     <div class="user-auth-zone">
+      <a routerLink="/ventas/checkout" class="nav-cart-btn" title="Bolsa de Compras E-Commerce">
+        <span class="cart-icon">🛍️</span>
+        <span class="cart-badge">{{ (cartService.count$ | async) || 0 }}</span>
+      </a>
       @if (authService.isAuthenticated()) {
         <div class="user-profile-box">
           <span class="user-role-badge">{{ authService.currentUser()?.rol?.nombre || 'AUTENTICADO' }}</span>

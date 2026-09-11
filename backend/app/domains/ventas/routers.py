@@ -6,13 +6,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.domains.usuarios.models import Usuario
-from app.domains.usuarios.routers import require_permissions
+from app.domains.usuarios.routers import get_current_user, require_permissions
 from app.domains.ventas.services import VentasService
 from app.domains.ventas.schemas import (
     VentasStatusResponse, VentaPOSCreate, VentaResponse,
     DevolucionCreate, DevolucionResponse, VentaParaDevolucionResponse,
     PagoResponse, PagoElectronicoCreate, ConfirmarPagoRequest,
-    QRGenerarResponse, WebhookPagoPayload, PagoIniciarResponse
+    QRGenerarResponse, WebhookPagoPayload, PagoIniciarResponse,
+    VentaOnlineCheckoutRequest, ActualizarEstadoEnvioRequest, EnvioPedidoResponse
 )
 
 router = APIRouter(
@@ -204,6 +205,65 @@ async def obtener_pago(
     return await VentasService.obtener_pago_por_id(db, pago_id)
 
 
+# ----------------- CU15: CARRITO & CHECKOUT E-COMMERCE -----------------
+@router.post(
+    "/checkout-online",
+    response_model=VentaResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Procesar Venta Digital / Carrito de Compras (CU15)"
+)
+async def procesar_checkout_online(
+    data: VentaOnlineCheckoutRequest,
+    request: Request,
+    current_user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    ip = request.client.host if request.client else None
+    return await VentasService.procesar_checkout_online(db, data, current_user, ip)
+
+
+@router.get(
+    "/pedidos-online",
+    response_model=List[VentaResponse],
+    summary="Listar Pedidos de Venta Digital E-Commerce (CU15)"
+)
+async def listar_pedidos_online(
+    sucursal_id: Optional[int] = None,
+    estado_envio: Optional[str] = None,
+    cliente_id: Optional[int] = None,
+    limit: int = 50,
+    offset: int = 0,
+    current_user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    if current_user.rol and current_user.rol.nombre == "CLIENTE":
+        cliente_id = current_user.id
+    return await VentasService.listar_pedidos_online(
+        db=db,
+        sucursal_id=sucursal_id,
+        estado_envio=estado_envio,
+        cliente_id=cliente_id,
+        limit=limit,
+        offset=offset
+    )
+
+
+@router.put(
+    "/pedidos-online/{envio_id}/estado",
+    response_model=EnvioPedidoResponse,
+    summary="Actualizar Estado de Envío de Pedido E-Commerce (CU15)"
+)
+async def actualizar_estado_envio(
+    envio_id: int,
+    data: ActualizarEstadoEnvioRequest,
+    request: Request,
+    current_user: Usuario = Depends(require_permissions("ventas:write")),
+    db: AsyncSession = Depends(get_db)
+):
+    ip = request.client.host if request.client else None
+    return await VentasService.actualizar_estado_envio(db, envio_id, data, current_user, ip)
+
+
 # ----------------- VENTA POR ID (CU10) -----------------
 @router.get(
     "/{venta_id}",
@@ -216,4 +276,6 @@ async def obtener_venta(
     db: AsyncSession = Depends(get_db)
 ):
     return await VentasService.obtener_venta_por_id(db, venta_id)
+
+
 

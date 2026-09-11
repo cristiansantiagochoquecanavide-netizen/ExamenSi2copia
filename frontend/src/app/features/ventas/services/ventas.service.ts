@@ -5,7 +5,8 @@ import { Observable } from 'rxjs';
 import {
   VentaPOSCreate, VentaResponse,
   DevolucionCreate, DevolucionResponse, VentaParaDevolucionResponse,
-  PagoElectronicoCreate, ConfirmarPagoRequest, PagoIniciarResponse, PagoResponse
+  PagoElectronicoCreate, ConfirmarPagoRequest, PagoIniciarResponse, PagoResponse,
+  VentaOnlineCheckoutRequest, ActualizarEstadoEnvioRequest, EnvioPedido
 } from '../models/ventas.models';
 
 @Injectable({
@@ -77,6 +78,23 @@ export class VentasService {
 
   notificarWebhook(payload: any): Observable<any> {
     return this.http.post(`${this.baseUrl}/pagos/webhook`, payload);
+  }
+
+  // ----------------- CU15: CARRITO & CHECKOUT E-COMMERCE -----------------
+  procesarCheckoutOnline(data: VentaOnlineCheckoutRequest): Observable<VentaResponse> {
+    return this.http.post<VentaResponse>(`${this.baseUrl}/checkout-online`, data);
+  }
+
+  getPedidosOnline(sucursalId?: number, estadoEnvio?: string, clienteId?: number): Observable<VentaResponse[]> {
+    let params = new HttpParams();
+    if (sucursalId) params = params.set('sucursal_id', sucursalId.toString());
+    if (estadoEnvio) params = params.set('estado_envio', estadoEnvio);
+    if (clienteId) params = params.set('cliente_id', clienteId.toString());
+    return this.http.get<VentaResponse[]>(`${this.baseUrl}/pedidos-online`, { params });
+  }
+
+  actualizarEstadoEnvio(envioId: number, data: ActualizarEstadoEnvioRequest): Observable<EnvioPedido> {
+    return this.http.put<EnvioPedido>(`${this.baseUrl}/pedidos-online/${envioId}/estado`, data);
   }
 }
 
