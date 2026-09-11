@@ -926,7 +926,13 @@ class VentasService:
         - Genera registro formal de comprobante de pago y despacho con código de tracking (ENV-...).
         """
         # 1. Validar sucursal de despacho / origen
-        sucursal = await db.get(Sucursal, data.sucursal_despacho_id)
+        sucursal_id = data.sucursal_despacho_id or data.sucursal_id
+        if not sucursal_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Debe especificar la sucursal de despacho"
+            )
+        sucursal = await db.get(Sucursal, sucursal_id)
         if not sucursal or not sucursal.activo:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -963,7 +969,7 @@ class VentasService:
                 select(InventarioStock).where(
                     and_(
                         InventarioStock.variante_id == item.variante_id,
-                        InventarioStock.sucursal_id == data.sucursal_despacho_id
+                        InventarioStock.sucursal_id == sucursal_id
                     )
                 )
             )
@@ -1001,13 +1007,21 @@ class VentasService:
             descuento = subtotal_acumulado
 
         costo_envio = Decimal("0.00")
-        if data.envio.tipo_entrega == "DOMICILIO":
+        envio_data = data.envio or data.datos_envio
+        if not envio_data:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Debe incluir los datos de envío"
+            )
+
+        es_recojo = envio_data.tipo_entrega in ("RECOJO_TIENDA", "CLICK_AND_COLLECT")
+        if not es_recojo:
             # Si subtotal >= 150 -> Envío gratis, sino tarifa estándar $5.00
             costo_envio = Decimal("0.00") if (subtotal_acumulado - descuento) >= Decimal("150.00") else Decimal("5.00")
-        elif data.envio.tipo_entrega == "RECOJO_TIENDA":
+        else:
             costo_envio = Decimal("0.00")
-            if data.envio.sucursal_recojo_id:
-                suc_rec = await db.get(Sucursal, data.envio.sucursal_recojo_id)
+            if envio_data.sucursal_recojo_id:
+                suc_rec = await db.get(Sucursal, envio_data.sucursal_recojo_id)
                 if not suc_rec or not suc_rec.activo:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
@@ -1029,7 +1043,7 @@ class VentasService:
 
         venta = Venta(
             codigo_venta=codigo_venta,
-            sucursal_id=data.sucursal_despacho_id,
+            sucursal_id=sucursal_id,
             usuario_id=current_user.id,
             cliente_id=cliente_id,
             canal_venta="ONLINE_WEB",
@@ -1085,20 +1099,20 @@ class VentasService:
 
         # 8. Crear EnvioPedido con tracking
         tracking_code = f"ENV-{ahora.strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
-        estado_envio_inicial = "LISTO_RECOJO" if data.envio.tipo_entrega == "RECOJO_TIENDA" else "PREPARANDO"
-        courier_name = "Click & Collect Atelier" if data.envio.tipo_entrega == "RECOJO_TIENDA" else "Yaigo Express Courier"
+        estado_envio_inicial = "LISTO_RECOJO" if es_recojo else "PREPARANDO"
+        courier_name = "Click & Collect Atelier" if es_recojo else "Yaigo Express Courier"
 
         envio = EnvioPedido(
             venta_id=venta.id,
             codigo_seguimiento=tracking_code,
-            tipo_entrega=data.envio.tipo_entrega,
-            sucursal_recojo_id=data.envio.sucursal_recojo_id if data.envio.tipo_entrega == "RECOJO_TIENDA" else None,
-            direccion_linea1=data.envio.direccion_linea1,
-            direccion_linea2=data.envio.direccion_linea2,
-            ciudad=data.envio.ciudad,
-            departamento=data.envio.departamento,
-            telefono_contacto=data.envio.telefono_contacto,
-            instrucciones_entrega=data.envio.instrucciones_entrega,
+            tipo_entrega="RECOJO_TIENDA" if es_recojo else "DOMICILIO",
+            sucursal_recojo_id=envio_data.sucursal_recojo_id if es_recojo else None,
+            direccion_linea1=envio_data.direccion_linea1 if not es_recojo else None,
+            direccion_linea2=envio_data.direccion_linea2 if not es_recojo else None,
+            ciudad=envio_data.ciudad if not es_recojo else None,
+            departamento=envio_data.departamento if not es_recojo else None,
+            telefono_contacto=envio_data.telefono_contacto,
+            instrucciones_entrega=envio_data.instrucciones_entrega,
             costo_envio=costo_envio,
             empresa_courier=courier_name,
             estado_envio=estado_envio_inicial,
@@ -1178,10 +1192,12 @@ class VentasService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Envío no encontrado")
 
         envio.estado_envio = data.estado_envio
-        if data.empresa_courier:
-            envio.empresa_courier = data.empresa_courier
-        if data.instrucciones_entrega:
-            envio.instrucciones_entrega = data.instrucciones_entrega
+        courier = data.empresa_courier or data.courier_nombre
+        if courier:
+            envio.empresa_courier = courier
+        notas = data.instrucciones_entrega or data.notas
+        if notas:
+            envio.instrucciones_entrega = notas
         if data.estado_envio == "ENTREGADO":
             envio.fecha_entregado = datetime.now(timezone.utc)
         envio.updated_at = datetime.now(timezone.utc)

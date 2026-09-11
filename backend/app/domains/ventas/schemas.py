@@ -1,8 +1,8 @@
 """Esquemas Pydantic para el dominio de Ventas y Pagos."""
 from datetime import datetime, date
 from decimal import Decimal
-from typing import List, Optional
-from pydantic import BaseModel, ConfigDict, Field
+from typing import List, Optional, Any
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.domains.inventario.schemas import SucursalResponse
 from app.domains.usuarios.schemas import UsuarioResponse
@@ -246,33 +246,78 @@ class PagoIniciarResponse(BaseModel):
 
 # ----------------- CU15: CARRITO & CHECKOUT E-COMMERCE SCHEMAS -----------------
 class DatosEnvioInput(BaseModel):
-    tipo_entrega: str = Field("DOMICILIO", pattern="^(DOMICILIO|RECOJO_TIENDA)$")
+    tipo_entrega: str = Field("DOMICILIO", pattern="^(DOMICILIO|RECOJO_TIENDA|CLICK_AND_COLLECT)$")
     sucursal_recojo_id: Optional[int] = None
     direccion_linea1: Optional[str] = None
     direccion_linea2: Optional[str] = None
     ciudad: Optional[str] = None
     departamento: Optional[str] = None
+    codigo_postal: Optional[str] = None
     telefono_contacto: Optional[str] = None
     instrucciones_entrega: Optional[str] = None
 
 
+class PagoOnlineInput(BaseModel):
+    metodo_pago: str = Field(..., pattern="^(EFECTIVO|TARJETA|QR_SIMPLE|PAYPAL)$")
+    pasarela: Optional[str] = None
+    monto: Optional[Decimal] = None
+    moneda: Optional[str] = "USD"
+    cliente_email: Optional[str] = None
+    transaccion_externa_id: Optional[str] = None
+    datos_tarjeta: Optional[DatosTarjetaInput] = None
+    concepto: Optional[str] = None
+
+
 class VentaOnlineCheckoutRequest(BaseModel):
-    sucursal_despacho_id: int
+    sucursal_despacho_id: Optional[int] = None
+    sucursal_id: Optional[int] = None
     cliente_id: Optional[int] = None
     cliente_nombre: str = Field("Cliente E-Commerce", min_length=2, max_length=150)
     cliente_nit: str = Field("0", max_length=50)
     cliente_email: str = Field(..., max_length=150)
+    cliente_telefono: Optional[str] = None
     descuento: Decimal = Field(Decimal("0.00"), ge=0)
     observaciones: Optional[str] = None
     detalles: List[DetalleVentaCreate] = Field(..., min_length=1)
-    envio: DatosEnvioInput
-    pago: PagoCreate
+    envio: Optional[DatosEnvioInput] = None
+    datos_envio: Optional[DatosEnvioInput] = None
+    pago: PagoOnlineInput
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalizar_payload(cls, values: Any) -> Any:
+        if isinstance(values, dict):
+            # Normalizar sucursal_despacho_id / sucursal_id
+            if values.get("sucursal_despacho_id") is None and values.get("sucursal_id") is not None:
+                values["sucursal_despacho_id"] = values["sucursal_id"]
+            elif values.get("sucursal_id") is None and values.get("sucursal_despacho_id") is not None:
+                values["sucursal_id"] = values["sucursal_despacho_id"]
+
+            # Normalizar envio / datos_envio
+            if values.get("envio") is None and values.get("datos_envio") is not None:
+                values["envio"] = values["datos_envio"]
+            elif values.get("datos_envio") is None and values.get("envio") is not None:
+                values["datos_envio"] = values["envio"]
+        return values
 
 
 class ActualizarEstadoEnvioRequest(BaseModel):
-    estado_envio: str = Field(..., pattern="^(PREPARANDO|EN_CAMINO|ENTREGADO|LISTO_RECOJO)$")
+    estado_envio: str = Field(..., pattern="^(PREPARANDO|EN_CAMINO|ENTREGADO|LISTO_RECOJO|CANCELADO)$")
+    courier_nombre: Optional[str] = None
     empresa_courier: Optional[str] = None
+    notas: Optional[str] = None
     instrucciones_entrega: Optional[str] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalizar_courier(cls, values: Any) -> Any:
+        if isinstance(values, dict):
+            if values.get("empresa_courier") is None and values.get("courier_nombre") is not None:
+                values["empresa_courier"] = values["courier_nombre"]
+            elif values.get("courier_nombre") is None and values.get("empresa_courier") is not None:
+                values["courier_nombre"] = values["empresa_courier"]
+        return values
+
 
 
 

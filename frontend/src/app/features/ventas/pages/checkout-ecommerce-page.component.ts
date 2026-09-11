@@ -1864,7 +1864,19 @@ export class CheckoutEcommercePageComponent implements OnInit {
     if (this.pasarelaSeleccionada === 'STRIPE_INTL') metodoPagoFinal = 'TARJETA';
     if (this.pasarelaSeleccionada === 'PAYPAL_EXPRESS') metodoPagoFinal = 'PAYPAL';
 
-    const payload: VentaOnlineCheckoutRequest = {
+    const tipoEntregaPayload = this.tipoEntrega === 'CLICK_AND_COLLECT' ? 'CLICK_AND_COLLECT' : 'DOMICILIO';
+    const datosEnvioObj = {
+      tipo_entrega: tipoEntregaPayload,
+      direccion_linea1: this.tipoEntrega === 'DOMICILIO' ? this.direccionLinea1 : undefined,
+      ciudad: this.tipoEntrega === 'DOMICILIO' ? this.ciudad : undefined,
+      departamento: this.tipoEntrega === 'DOMICILIO' ? this.departamento : undefined,
+      telefono_contacto: this.clienteTelefono || undefined,
+      instrucciones_entrega: this.instruccionesEntrega || undefined,
+      sucursal_recojo_id: this.tipoEntrega === 'CLICK_AND_COLLECT' ? Number(this.sucursalDespachoId) : undefined
+    };
+
+    const payload: any = {
+      sucursal_despacho_id: Number(this.sucursalDespachoId),
       sucursal_id: Number(this.sucursalDespachoId),
       cliente_nombre: this.clienteNombre,
       cliente_nit: this.clienteNit || '0',
@@ -1876,15 +1888,8 @@ export class CheckoutEcommercePageComponent implements OnInit {
         cantidad: item.cantidad,
         precio_unitario: item.precio_unitario
       })),
-      datos_envio: {
-        tipo_entrega: this.tipoEntrega,
-        direccion_linea1: this.tipoEntrega === 'DOMICILIO' ? this.direccionLinea1 : undefined,
-        ciudad: this.tipoEntrega === 'DOMICILIO' ? this.ciudad : undefined,
-        departamento: this.tipoEntrega === 'DOMICILIO' ? this.departamento : undefined,
-        telefono_contacto: this.clienteTelefono || undefined,
-        instrucciones_entrega: this.instruccionesEntrega || undefined,
-        sucursal_recojo_id: this.tipoEntrega === 'CLICK_AND_COLLECT' ? Number(this.sucursalDespachoId) : undefined
-      },
+      envio: datosEnvioObj,
+      datos_envio: datosEnvioObj,
       pago: {
         metodo_pago: metodoPagoFinal,
         pasarela: this.pasarelaSeleccionada,
@@ -1911,8 +1916,14 @@ export class CheckoutEcommercePageComponent implements OnInit {
       },
       error: (err) => {
         this.isSubmitting = false;
-        const detail = err.error?.detail || 'No se pudo procesar la compra online.';
-        this.mensajeError = typeof detail === 'string' ? detail : JSON.stringify(detail);
+        const detail = err.error?.detail;
+        if (Array.isArray(detail)) {
+          this.mensajeError = detail.map((d: any) => d.msg ? `${d.loc?.slice(1)?.join('.') || ''}: ${d.msg}` : JSON.stringify(d)).join(' | ');
+        } else if (typeof detail === 'string') {
+          this.mensajeError = detail;
+        } else {
+          this.mensajeError = 'No se pudo procesar la compra online.';
+        }
       }
     });
   }
