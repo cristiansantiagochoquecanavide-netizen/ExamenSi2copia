@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.domains.inventario.schemas import SucursalResponse
 from app.domains.usuarios.schemas import UsuarioResponse
-from app.domains.catalogo.schemas import PrendaVarianteResponse
+from app.domains.catalogo.schemas import PrendaVarianteResponse, CategoriaResponse
 
 class BaseVentasSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -34,6 +34,7 @@ class VentaPOSCreate(BaseModel):
     cliente_nombre: str = Field("Consumidor Final", max_length=150)
     cliente_nit: str = Field("0", max_length=50)
     descuento: Decimal = Field(Decimal("0.00"), ge=0)
+    codigo_cupon: Optional[str] = None
     observaciones: Optional[str] = None
     detalles: List[DetalleVentaCreate] = Field(..., min_length=1)
     pago: PagoCreate
@@ -277,6 +278,7 @@ class VentaOnlineCheckoutRequest(BaseModel):
     cliente_email: str = Field(..., max_length=150)
     cliente_telefono: Optional[str] = None
     descuento: Decimal = Field(Decimal("0.00"), ge=0)
+    codigo_cupon: Optional[str] = None
     observaciones: Optional[str] = None
     detalles: List[DetalleVentaCreate] = Field(..., min_length=1)
     envio: Optional[DatosEnvioInput] = None
@@ -317,6 +319,103 @@ class ActualizarEstadoEnvioRequest(BaseModel):
             elif values.get("courier_nombre") is None and values.get("empresa_courier") is not None:
                 values["courier_nombre"] = values["empresa_courier"]
         return values
+
+
+# ----------------- CU16: PROMOCIONES Y DESCUENTOS SCHEMAS -----------------
+class PromocionBase(BaseModel):
+    codigo: str = Field(..., min_length=2, max_length=50)
+    nombre: str = Field(..., min_length=2, max_length=150)
+    descripcion: Optional[str] = None
+    tipo_descuento: str = Field("PORCENTAJE", pattern="^(PORCENTAJE|MONTO_FIJO|ENVIO_GRATIS)$")
+    valor_descuento: Decimal = Field(Decimal("0.00"), ge=0)
+    monto_minimo_compra: Decimal = Field(Decimal("0.00"), ge=0)
+    descuento_maximo: Optional[Decimal] = Field(None, ge=0)
+    limite_usos: Optional[int] = Field(None, gt=0)
+    limite_por_cliente: int = Field(1, gt=0)
+    fecha_inicio: datetime
+    fecha_fin: datetime
+    activo: bool = True
+    categoria_id: Optional[int] = None
+    sucursal_id: Optional[int] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalizar_codigo(cls, values: Any) -> Any:
+        if isinstance(values, dict) and "codigo" in values and isinstance(values["codigo"], str):
+            values["codigo"] = values["codigo"].strip().upper()
+        return values
+
+
+class PromocionCreate(PromocionBase):
+    pass
+
+
+class PromocionUpdate(BaseModel):
+    nombre: Optional[str] = Field(None, min_length=2, max_length=150)
+    descripcion: Optional[str] = None
+    tipo_descuento: Optional[str] = Field(None, pattern="^(PORCENTAJE|MONTO_FIJO|ENVIO_GRATIS)$")
+    valor_descuento: Optional[Decimal] = Field(None, ge=0)
+    monto_minimo_compra: Optional[Decimal] = Field(None, ge=0)
+    descuento_maximo: Optional[Decimal] = Field(None, ge=0)
+    limite_usos: Optional[int] = Field(None, gt=0)
+    limite_por_cliente: Optional[int] = Field(None, gt=0)
+    fecha_inicio: Optional[datetime] = None
+    fecha_fin: Optional[datetime] = None
+    activo: Optional[bool] = None
+    categoria_id: Optional[int] = None
+    sucursal_id: Optional[int] = None
+
+
+class PromocionResponse(BaseVentasSchema):
+    id: int
+    codigo: str
+    nombre: str
+    descripcion: Optional[str] = None
+    tipo_descuento: str
+    valor_descuento: Decimal
+    monto_minimo_compra: Decimal
+    descuento_maximo: Optional[Decimal] = None
+    limite_usos: Optional[int] = None
+    usos_actuales: int
+    limite_por_cliente: int
+    fecha_inicio: datetime
+    fecha_fin: datetime
+    activo: bool
+    categoria_id: Optional[int] = None
+    sucursal_id: Optional[int] = None
+    created_at: datetime
+    updated_at: datetime
+    categoria: Optional[CategoriaResponse] = None
+    sucursal: Optional[SucursalResponse] = None
+
+
+class ValidarCuponRequest(BaseModel):
+    codigo: str = Field(..., min_length=2, max_length=50)
+    subtotal: Decimal = Field(..., ge=0)
+    costo_envio: Optional[Decimal] = Field(Decimal("0.00"), ge=0)
+    sucursal_id: Optional[int] = None
+    cliente_id: Optional[int] = None
+
+
+class ValidarCuponResponse(BaseModel):
+    valido: bool
+    codigo: str
+    mensaje: str
+    tipo_descuento: Optional[str] = None
+    valor_descuento: Optional[Decimal] = None
+    descuento_calculado: Decimal = Decimal("0.00")
+    total_con_descuento: Decimal = Decimal("0.00")
+    promocion: Optional[PromocionResponse] = None
+
+
+class UsoPromocionResponse(BaseVentasSchema):
+    id: int
+    promocion_id: int
+    venta_id: int
+    usuario_id: Optional[int] = None
+    monto_descontado: Decimal
+    fecha_canje: datetime
+
 
 
 

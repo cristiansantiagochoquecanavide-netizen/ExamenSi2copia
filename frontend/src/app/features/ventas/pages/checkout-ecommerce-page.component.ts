@@ -13,7 +13,8 @@ import {
   VentaResponse,
   VentaOnlineCheckoutRequest,
   EnvioPedido,
-  ActualizarEstadoEnvioRequest
+  ActualizarEstadoEnvioRequest,
+  ValidarCuponResponse
 } from '../models/ventas.models';
 
 @Component({
@@ -475,11 +476,54 @@ import {
               </div>
             </div>
 
+            <!-- CUPÓN DE DESCUENTO (CU16) -->
+            <div class="panel-box form-section coupon-box">
+              <div class="section-title">
+                <span class="step-num">🏷️</span>
+                <h3>Cupón de Promoción o Descuento (CU16)</h3>
+              </div>
+              <div class="coupon-content">
+                <div *ngIf="!cuponAplicado || !cuponAplicado.valido" class="coupon-input-group">
+                  <input
+                    type="text"
+                    class="atelier-input font-mono uppercase"
+                    [(ngModel)]="codigoCuponInput"
+                    placeholder="Ej: ATELIER20, NOIR50, ENVIOGRATIS"
+                    (keyup.enter)="aplicarCupon()">
+                  <button
+                    type="button"
+                    class="btn-apply-coupon"
+                    [disabled]="validandoCupon || !codigoCuponInput.trim()"
+                    (click)="aplicarCupon()">
+                    {{ validandoCupon ? 'Validando...' : 'Aplicar Cupón' }}
+                  </button>
+                </div>
+
+                <div *ngIf="mensajeCupon" class="coupon-feedback" [class.success]="cuponAplicado?.valido" [class.error]="cuponAplicado && !cuponAplicado.valido">
+                  <span>{{ mensajeCupon }}</span>
+                </div>
+
+                <div *ngIf="cuponAplicado && cuponAplicado.valido" class="coupon-badge-applied">
+                  <div class="coupon-applied-info">
+                    <span class="coupon-tag">✓ {{ cuponAplicado.codigo }}</span>
+                    <span class="coupon-benefit">
+                      {{ cuponAplicado.tipo_descuento === 'ENVIO_GRATIS' ? 'Envío Yaigo Bonificado (GRATIS)' : ('-$' + (cuponAplicado.descuento_calculado | number:'1.2-2') + ' USD de Descuento') }}
+                    </span>
+                  </div>
+                  <button type="button" class="btn-remove-coupon" (click)="quitarCupon()" title="Quitar cupón">&times;</button>
+                </div>
+              </div>
+            </div>
+
             <!-- PASO 4: TOTAL Y BOTÓN DE CONFIRMACIÓN -->
             <div class="panel-box checkout-summary-box">
               <div class="summary-line">
                 <span>Subtotal Prendas:</span>
                 <span><span class="currency">$</span>{{ subtotal | number:'1.2-2' }} USD</span>
+              </div>
+              <div *ngIf="descuentoCupon > 0" class="summary-line discount-line">
+                <span class="gold-text">Descuento Cupón ({{ cuponAplicado?.codigo }}):</span>
+                <span class="gold-text font-bold">- <span class="currency">$</span>{{ descuentoCupon | number:'1.2-2' }} USD</span>
               </div>
               <div class="summary-line">
                 <span>Logística / Envío:</span>
@@ -1687,6 +1731,90 @@ import {
       from { opacity: 0; transform: translateY(4px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
+    /* ESTILOS CUPÓN CU16 */
+    .coupon-box {
+      border: 1px dashed rgba(212, 175, 55, 0.4) !important;
+      background: rgba(28, 25, 23, 0.6) !important;
+    }
+    .coupon-input-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .btn-apply-coupon {
+      padding: 0 18px;
+      background: var(--atelier-gold, #d4af37);
+      color: #0c0a09;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .btn-apply-coupon:hover:not(:disabled) {
+      background: #dfbe52;
+      box-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
+    }
+    .btn-apply-coupon:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .coupon-feedback {
+      margin-top: 10px;
+      font-size: 12px;
+      padding: 8px 12px;
+      border-radius: 4px;
+    }
+    .coupon-feedback.success {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
+    .coupon-feedback.error {
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.4);
+      color: #fb7185;
+    }
+    .coupon-badge-applied {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(212, 175, 55, 0.1);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      padding: 10px 14px;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+    .coupon-tag {
+      font-family: monospace;
+      font-weight: 700;
+      color: var(--atelier-gold, #d4af37);
+      margin-right: 8px;
+    }
+    .coupon-benefit {
+      font-size: 12px;
+      color: #e7e5e4;
+    }
+    .btn-remove-coupon {
+      background: transparent;
+      border: none;
+      color: #a8a29e;
+      font-size: 18px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0 4px;
+    }
+    .btn-remove-coupon:hover {
+      color: #f43f5e;
+    }
+    .discount-line {
+      color: var(--atelier-gold, #d4af37);
+    }
   `]
 })
 export class CheckoutEcommercePageComponent implements OnInit {
@@ -1701,6 +1829,13 @@ export class CheckoutEcommercePageComponent implements OnInit {
   subtotal = 0;
   costoCalculadoEnvio = 5.00;
   totalFinal = 0;
+
+  // Cupones CU16
+  codigoCuponInput = '';
+  validandoCupon = false;
+  cuponAplicado: ValidarCuponResponse | null = null;
+  descuentoCupon = 0;
+  mensajeCupon: string | null = null;
 
   // Formulario Checkout
   clienteNombre = '';
@@ -1790,13 +1925,71 @@ export class CheckoutEcommercePageComponent implements OnInit {
 
   calcularTotales(): void {
     this.subtotal = this.cartService.getSubtotal();
+    let envioBase = 0.0;
     if (this.tipoEntrega === 'CLICK_AND_COLLECT') {
-      this.costoCalculadoEnvio = 0.0;
+      envioBase = 0.0;
     } else {
       // Envío gratis si subtotal >= 150
-      this.costoCalculadoEnvio = this.subtotal >= 150 ? 0.0 : 5.0;
+      envioBase = this.subtotal >= 150 ? 0.0 : 5.0;
     }
-    this.totalFinal = this.subtotal + this.costoCalculadoEnvio;
+
+    if (this.cuponAplicado && this.cuponAplicado.valido) {
+      if (this.cuponAplicado.tipo_descuento === 'ENVIO_GRATIS') {
+        this.costoCalculadoEnvio = 0.0;
+        this.descuentoCupon = envioBase;
+      } else {
+        this.costoCalculadoEnvio = envioBase;
+        this.descuentoCupon = this.cuponAplicado.descuento_calculado;
+      }
+    } else {
+      this.costoCalculadoEnvio = envioBase;
+      this.descuentoCupon = 0.0;
+    }
+
+    this.totalFinal = Math.max(0, this.subtotal - this.descuentoCupon + this.costoCalculadoEnvio);
+  }
+
+  aplicarCupon(): void {
+    const code = this.codigoCuponInput.trim().toUpperCase();
+    if (!code) return;
+
+    this.validandoCupon = true;
+    this.mensajeCupon = null;
+
+    this.ventasService.validarCupon({
+      codigo: code,
+      subtotal: this.subtotal,
+      costo_envio: this.tipoEntrega === 'CLICK_AND_COLLECT' ? 0.0 : 5.0,
+      sucursal_id: Number(this.sucursalDespachoId)
+    }).subscribe({
+      next: (res) => {
+        this.validandoCupon = false;
+        this.cuponAplicado = res;
+        if (res.valido) {
+          this.mensajeCupon = res.mensaje;
+          this.calcularTotales();
+        } else {
+          this.mensajeCupon = res.mensaje;
+          this.descuentoCupon = 0;
+          this.calcularTotales();
+        }
+      },
+      error: (err) => {
+        this.validandoCupon = false;
+        this.mensajeCupon = err.error?.detail || 'Error al validar el cupón con el servidor.';
+        this.cuponAplicado = null;
+        this.descuentoCupon = 0;
+        this.calcularTotales();
+      }
+    });
+  }
+
+  quitarCupon(): void {
+    this.cuponAplicado = null;
+    this.descuentoCupon = 0;
+    this.codigoCuponInput = '';
+    this.mensajeCupon = null;
+    this.calcularTotales();
   }
 
   seleccionarTipoEntrega(tipo: 'DOMICILIO' | 'CLICK_AND_COLLECT'): void {
@@ -1883,6 +2076,8 @@ export class CheckoutEcommercePageComponent implements OnInit {
       cliente_email: this.clienteEmail,
       cliente_telefono: this.clienteTelefono || undefined,
       observaciones: 'Venta E-Commerce Atelier Noir',
+      codigo_cupon: this.cuponAplicado?.valido ? this.cuponAplicado.codigo : undefined,
+      descuento: this.descuentoCupon,
       detalles: this.cartItems.map(item => ({
         variante_id: item.variante_id,
         cantidad: item.cantidad,

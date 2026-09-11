@@ -159,3 +159,57 @@ class EnvioPedido(Base):
     )
 
 
+# ----------------- CU16: PROMOCIONES Y DESCUENTOS -----------------
+class Promocion(Base):
+    __tablename__ = "promociones"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    codigo: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
+    nombre: Mapped[str] = mapped_column(String(150), nullable=False)
+    descripcion: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    tipo_descuento: Mapped[str] = mapped_column(String(30), nullable=False)  # PORCENTAJE, MONTO_FIJO, ENVIO_GRATIS
+    valor_descuento: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=Decimal("0.00"), nullable=False)
+    monto_minimo_compra: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=Decimal("0.00"), nullable=False)
+    descuento_maximo: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 2), nullable=True)
+    limite_usos: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    usos_actuales: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    limite_por_cliente: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    fecha_inicio: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    fecha_fin: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    activo: Mapped[bool] = mapped_column(Boolean, default=True, index=True, nullable=False)
+    categoria_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("categorias.id", ondelete="SET NULL"), nullable=True)
+    sucursal_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("sucursales.id", ondelete="SET NULL"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc)
+    )
+
+    # Relaciones
+    categoria: Mapped[Optional["app.domains.catalogo.models.Categoria"]] = relationship(
+        "app.domains.catalogo.models.Categoria", lazy="selectin"
+    )
+    sucursal: Mapped[Optional["app.domains.inventario.models.Sucursal"]] = relationship(
+        "app.domains.inventario.models.Sucursal", lazy="selectin"
+    )
+    usos: Mapped[List["UsoPromocion"]] = relationship("UsoPromocion", back_populates="promocion", cascade="all, delete-orphan")
+
+
+class UsoPromocion(Base):
+    __tablename__ = "usos_promocion"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    promocion_id: Mapped[int] = mapped_column(Integer, ForeignKey("promociones.id", ondelete="CASCADE"), nullable=False, index=True)
+    venta_id: Mapped[int] = mapped_column(Integer, ForeignKey("ventas.id", ondelete="CASCADE"), nullable=False, index=True)
+    usuario_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("usuarios.id", ondelete="SET NULL"), nullable=True)
+    monto_descontado: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=Decimal("0.00"), nullable=False)
+    fecha_canje: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+    # Relaciones
+    promocion: Mapped["Promocion"] = relationship("Promocion", back_populates="usos")
+    venta: Mapped["Venta"] = relationship("Venta", backref="usos_promocion")
+    usuario: Mapped[Optional["app.domains.usuarios.models.Usuario"]] = relationship("app.domains.usuarios.models.Usuario", lazy="selectin")
+
+
+

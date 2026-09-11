@@ -6,7 +6,8 @@ import {
   VentaPOSCreate, VentaResponse,
   DevolucionCreate, DevolucionResponse, VentaParaDevolucionResponse,
   PagoElectronicoCreate, ConfirmarPagoRequest, PagoIniciarResponse, PagoResponse,
-  VentaOnlineCheckoutRequest, ActualizarEstadoEnvioRequest, EnvioPedido
+  VentaOnlineCheckoutRequest, ActualizarEstadoEnvioRequest, EnvioPedido,
+  Promocion, PromocionCreate, PromocionUpdate, ValidarCuponRequest, ValidarCuponResponse
 } from '../models/ventas.models';
 
 @Injectable({
@@ -96,6 +97,42 @@ export class VentasService {
   actualizarEstadoEnvio(envioId: number, data: ActualizarEstadoEnvioRequest): Observable<EnvioPedido> {
     return this.http.put<EnvioPedido>(`${this.baseUrl}/pedidos-online/${envioId}/estado`, data);
   }
+
+  // ----------------- CU16: PROMOCIONES Y DESCUENTOS -----------------
+  validarCupon(data: ValidarCuponRequest): Observable<ValidarCuponResponse> {
+    return this.http.post<ValidarCuponResponse>(`${this.baseUrl}/promociones/validar`, data);
+  }
+
+  getPromociones(soloActivas?: boolean, tipoDescuento?: string, soloVigentes?: boolean): Observable<Promocion[]> {
+    let params = new HttpParams();
+    if (soloActivas !== undefined) params = params.set('activo', soloActivas.toString());
+    if (tipoDescuento) params = params.set('tipo_descuento', tipoDescuento);
+    if (soloVigentes) params = params.set('solo_vigentes', 'true');
+    return this.http.get<Promocion[]>(`${this.baseUrl}/promociones`, { params });
+  }
+
+  getPromocionById(id: number): Observable<Promocion> {
+    return this.http.get<Promocion>(`${this.baseUrl}/promociones/${id}`);
+  }
+
+  createPromocion(data: PromocionCreate): Observable<Promocion> {
+    return this.http.post<Promocion>(`${this.baseUrl}/promociones`, data);
+  }
+
+  updatePromocion(id: number, data: PromocionUpdate): Observable<Promocion> {
+    return this.http.put<Promocion>(`${this.baseUrl}/promociones/${id}`, data);
+  }
+
+  cambiarEstadoPromocion(id: number, activo: boolean): Observable<Promocion> {
+    return this.http.patch<Promocion>(`${this.baseUrl}/promociones/${id}/estado`, null, {
+      params: { activo: activo.toString() }
+    });
+  }
+
+  deletePromocion(id: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/promociones/${id}`);
+  }
 }
+
 
 

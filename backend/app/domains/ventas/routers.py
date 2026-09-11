@@ -13,7 +13,9 @@ from app.domains.ventas.schemas import (
     DevolucionCreate, DevolucionResponse, VentaParaDevolucionResponse,
     PagoResponse, PagoElectronicoCreate, ConfirmarPagoRequest,
     QRGenerarResponse, WebhookPagoPayload, PagoIniciarResponse,
-    VentaOnlineCheckoutRequest, ActualizarEstadoEnvioRequest, EnvioPedidoResponse
+    VentaOnlineCheckoutRequest, ActualizarEstadoEnvioRequest, EnvioPedidoResponse,
+    PromocionCreate, PromocionUpdate, PromocionResponse,
+    ValidarCuponRequest, ValidarCuponResponse
 )
 
 router = APIRouter(
@@ -262,6 +264,117 @@ async def actualizar_estado_envio(
 ):
     ip = request.client.host if request.client else None
     return await VentasService.actualizar_estado_envio(db, envio_id, data, current_user, ip)
+
+
+# ----------------- CU16: PROMOCIONES Y DESCUENTOS -----------------
+@router.post(
+    "/promociones/validar",
+    response_model=ValidarCuponResponse,
+    summary="Validar Cupón de Descuento (CU16)"
+)
+async def validar_cupon(
+    data: ValidarCuponRequest,
+    current_user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    if not data.cliente_id and current_user:
+        data.cliente_id = current_user.id
+    return await VentasService.validar_cupon(db, data)
+
+
+@router.post(
+    "/promociones",
+    response_model=PromocionResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Crear Promoción / Cupón de Descuento (CU16)"
+)
+async def crear_promocion(
+    data: PromocionCreate,
+    request: Request,
+    current_user: Usuario = Depends(require_permissions("ventas:write")),
+    db: AsyncSession = Depends(get_db)
+):
+    ip = request.client.host if request.client else None
+    return await VentasService.crear_promocion(db, data, current_user, ip)
+
+
+@router.get(
+    "/promociones",
+    response_model=List[PromocionResponse],
+    summary="Listar Promociones y Campañas (CU16)"
+)
+async def listar_promociones(
+    activo: Optional[bool] = None,
+    tipo_descuento: Optional[str] = None,
+    solo_vigentes: bool = False,
+    limit: int = 50,
+    offset: int = 0,
+    current_user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    return await VentasService.listar_promociones(
+        db, activo=activo, tipo_descuento=tipo_descuento,
+        solo_vigentes=solo_vigentes, limit=limit, offset=offset
+    )
+
+
+@router.get(
+    "/promociones/{promocion_id}",
+    response_model=PromocionResponse,
+    summary="Obtener Promoción por ID (CU16)"
+)
+async def obtener_promocion(
+    promocion_id: int,
+    current_user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    return await VentasService.obtener_promocion_por_id(db, promocion_id)
+
+
+@router.put(
+    "/promociones/{promocion_id}",
+    response_model=PromocionResponse,
+    summary="Actualizar Promoción (CU16)"
+)
+async def actualizar_promocion(
+    promocion_id: int,
+    data: PromocionUpdate,
+    request: Request,
+    current_user: Usuario = Depends(require_permissions("ventas:write")),
+    db: AsyncSession = Depends(get_db)
+):
+    ip = request.client.host if request.client else None
+    return await VentasService.actualizar_promocion(db, promocion_id, data, current_user, ip)
+
+
+@router.patch(
+    "/promociones/{promocion_id}/estado",
+    response_model=PromocionResponse,
+    summary="Activar o Desactivar Promoción (CU16)"
+)
+async def cambiar_estado_promocion(
+    promocion_id: int,
+    activo: bool,
+    request: Request,
+    current_user: Usuario = Depends(require_permissions("ventas:write")),
+    db: AsyncSession = Depends(get_db)
+):
+    ip = request.client.host if request.client else None
+    return await VentasService.cambiar_estado_promocion(db, promocion_id, activo, current_user, ip)
+
+
+@router.delete(
+    "/promociones/{promocion_id}",
+    summary="Eliminar o Desactivar Promoción (CU16)"
+)
+async def eliminar_promocion(
+    promocion_id: int,
+    request: Request,
+    current_user: Usuario = Depends(require_permissions("ventas:write")),
+    db: AsyncSession = Depends(get_db)
+):
+    ip = request.client.host if request.client else None
+    return await VentasService.eliminar_promocion(db, promocion_id, current_user, ip)
 
 
 # ----------------- VENTA POR ID (CU10) -----------------

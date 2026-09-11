@@ -246,6 +246,8 @@ export interface VentaOnlineCheckoutRequest {
   cliente_email: string;
   cliente_telefono?: string;
   observaciones?: string;
+  descuento?: number;
+  codigo_cupon?: string;
   detalles: DetalleVentaCreate[];
   datos_envio: DatosEnvioInput;
   pago: PagoElectronicoCreate;
@@ -255,6 +257,82 @@ export interface ActualizarEstadoEnvioRequest {
   estado_envio: 'PREPARANDO' | 'EN_CAMINO' | 'LISTO_RECOJO' | 'ENTREGADO' | 'CANCELADO';
   courier_nombre?: string;
   notas?: string;
+}
+
+// ----------------- CU16: PROMOCIONES Y DESCUENTOS -----------------
+export interface Promocion {
+  id: number;
+  codigo: string;
+  nombre: string;
+  descripcion?: string | null;
+  tipo_descuento: 'PORCENTAJE' | 'MONTO_FIJO' | 'ENVIO_GRATIS';
+  valor_descuento: number;
+  monto_minimo_compra: number;
+  descuento_maximo?: number | null;
+  limite_usos?: number | null;
+  usos_actuales: number;
+  limite_por_cliente: number;
+  fecha_inicio: string;
+  fecha_fin: string;
+  activo: boolean;
+  categoria_id?: number | null;
+  sucursal_id?: number | null;
+  created_at: string;
+  updated_at: string;
+  categoria?: { id: number; nombre: string } | null;
+  sucursal?: Sucursal | null;
+}
+
+export interface PromocionCreate {
+  codigo: string;
+  nombre: string;
+  descripcion?: string;
+  tipo_descuento: 'PORCENTAJE' | 'MONTO_FIJO' | 'ENVIO_GRATIS';
+  valor_descuento: number;
+  monto_minimo_compra: number;
+  descuento_maximo?: number | null;
+  limite_usos?: number | null;
+  limite_por_cliente?: number;
+  fecha_inicio: string;
+  fecha_fin: string;
+  activo?: boolean;
+  categoria_id?: number | null;
+  sucursal_id?: number | null;
+}
+
+export interface PromocionUpdate {
+  nombre?: string;
+  descripcion?: string;
+  tipo_descuento?: 'PORCENTAJE' | 'MONTO_FIJO' | 'ENVIO_GRATIS';
+  valor_descuento?: number;
+  monto_minimo_compra?: number;
+  descuento_maximo?: number | null;
+  limite_usos?: number | null;
+  limite_por_cliente?: number;
+  fecha_inicio?: string;
+  fecha_fin?: string;
+  activo?: boolean;
+  categoria_id?: number | null;
+  sucursal_id?: number | null;
+}
+
+export interface ValidarCuponRequest {
+  codigo: string;
+  subtotal: number;
+  costo_envio?: number;
+  sucursal_id?: number;
+  cliente_id?: number;
+}
+
+export interface ValidarCuponResponse {
+  valido: boolean;
+  codigo: string;
+  mensaje: string;
+  tipo_descuento?: 'PORCENTAJE' | 'MONTO_FIJO' | 'ENVIO_GRATIS';
+  valor_descuento?: number;
+  descuento_calculado: number;
+  total_con_descuento: number;
+  promocion?: Promocion;
 }
 
 

@@ -3,7 +3,7 @@ from datetime import datetime, timezone, date, timedelta
 from decimal import Decimal
 from typing import List, Optional
 from fastapi import HTTPException, status
-from sqlalchemy import select, and_, desc, cast, Date
+from sqlalchemy import select, and_, desc, cast, Date, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -12,11 +12,15 @@ import json
 import uuid
 import qrcode
 import qrcode.image.svg
-from app.domains.ventas.models import Venta, DetalleVenta, Pago, Devolucion, DetalleDevolucion, EnvioPedido
+from app.domains.ventas.models import (
+    Venta, DetalleVenta, Pago, Devolucion, DetalleDevolucion, EnvioPedido,
+    Promocion, UsoPromocion
+)
 from app.domains.ventas.schemas import (
     VentaPOSCreate, DevolucionCreate, VentaParaDevolucionResponse, VentaParaDevolucionItem,
     PagoElectronicoCreate, ConfirmarPagoRequest, QRGenerarResponse, WebhookPagoPayload,
-    VentaOnlineCheckoutRequest, ActualizarEstadoEnvioRequest
+    VentaOnlineCheckoutRequest, ActualizarEstadoEnvioRequest,
+    PromocionCreate, PromocionUpdate, PromocionResponse, ValidarCuponRequest, ValidarCuponResponse
 )
 from app.domains.inventario.models import Sucursal
 from app.domains.usuarios.models import Usuario
@@ -164,6 +168,26 @@ class VentasService:
 
         # 3. Aplicar descuento y liquidar total
         descuento = Decimal(data.descuento) if data.descuento else Decimal("0.00")
+        cupon_aplicado = None
+        if getattr(data, "codigo_cupon", None):
+            res_cupon = await VentasService.validar_cupon(
+                db,
+                ValidarCuponRequest(
+                    codigo=data.codigo_cupon,
+                    subtotal=subtotal_acumulado,
+                    costo_envio=Decimal("0.00"),
+                    sucursal_id=data.sucursal_id,
+                    cliente_id=data.cliente_id
+                )
+            )
+            if not res_cupon.valido:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Cupón inválido: {res_cupon.mensaje}"
+                )
+            descuento = max(descuento, res_cupon.descuento_calculado)
+            cupon_aplicado = res_cupon
+
         if descuento > subtotal_acumulado:
             descuento = subtotal_acumulado
         total_a_pagar = subtotal_acumulado - descuento
@@ -198,6 +222,18 @@ class VentasService:
         )
         db.add(venta)
         await db.flush()
+
+        # Registrar canje de cupón si aplica
+        if cupon_aplicado and cupon_aplicado.promocion:
+            promo_db = await db.get(Promocion, cupon_aplicado.promocion.id)
+            if promo_db:
+                promo_db.usos_actuales += 1
+                db.add(UsoPromocion(
+                    promocion_id=promo_db.id,
+                    venta_id=venta.id,
+                    usuario_id=data.cliente_id or cajero.id,
+                    monto_descontado=cupon_aplicado.descuento_calculado
+                ))
 
         # 7. Insertar Detalles de Venta y Descontar Kardex
         for lp in lineas_procesadas:
@@ -238,6 +274,20 @@ class VentasService:
             fecha_hora=ahora
         )
         db.add(pago)
+
+        # Si se aplicó un cupón de promoción, registrar el canje y sumar usos
+        if cupon_aplicado and cupon_aplicado.promocion:
+            promo_obj = await db.get(Promocion, cupon_aplicado.promocion.id)
+            if promo_obj:
+                promo_obj.usos_actuales += 1
+                uso = UsoPromocion(
+                    promocion_id=promo_obj.id,
+                    venta_id=venta.id,
+                    usuario_id=data.cliente_id,
+                    monto_descontado=cupon_aplicado.descuento_calculado,
+                    fecha_canje=ahora
+                )
+                db.add(uso)
 
         await db.commit()
 
@@ -1002,9 +1052,12 @@ class VentasService:
             })
 
         # 3. Calcular costo de envío y total
+        cliente_id = current_user.id if current_user.rol and current_user.rol.nombre == "CLIENTE" else data.cliente_id
+        if not cliente_id and current_user:
+            cliente_id = current_user.id
+
         descuento = Decimal(data.descuento) if data.descuento else Decimal("0.00")
-        if descuento > subtotal_acumulado:
-            descuento = subtotal_acumulado
+        promo_aplicada = None
 
         costo_envio = Decimal("0.00")
         envio_data = data.envio or data.datos_envio
@@ -1015,18 +1068,48 @@ class VentasService:
             )
 
         es_recojo = envio_data.tipo_entrega in ("RECOJO_TIENDA", "CLICK_AND_COLLECT")
-        if not es_recojo:
-            # Si subtotal >= 150 -> Envío gratis, sino tarifa estándar $5.00
-            costo_envio = Decimal("0.00") if (subtotal_acumulado - descuento) >= Decimal("150.00") else Decimal("5.00")
+        costo_envio_base = Decimal("0.00") if es_recojo else Decimal("5.00")
+
+        if getattr(data, "codigo_cupon", None) and data.codigo_cupon.strip():
+            res_cupon = await VentasService.validar_cupon(
+                db,
+                ValidarCuponRequest(
+                    codigo=data.codigo_cupon.strip(),
+                    subtotal=subtotal_acumulado,
+                    costo_envio=costo_envio_base,
+                    sucursal_id=sucursal_id,
+                    cliente_id=cliente_id
+                )
+            )
+            if not res_cupon.valido:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Cupón inválido: {res_cupon.mensaje}"
+                )
+            descuento = max(descuento, res_cupon.descuento_calculado)
+            if res_cupon.tipo_descuento == "ENVIO_GRATIS":
+                costo_envio = Decimal("0.00")
+            elif not es_recojo:
+                costo_envio = Decimal("0.00") if (subtotal_acumulado - descuento) >= Decimal("150.00") else Decimal("5.00")
+            else:
+                costo_envio = Decimal("0.00")
+            promo_aplicada = res_cupon
         else:
-            costo_envio = Decimal("0.00")
-            if envio_data.sucursal_recojo_id:
-                suc_rec = await db.get(Sucursal, envio_data.sucursal_recojo_id)
-                if not suc_rec or not suc_rec.activo:
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="La sucursal de recojo seleccionada no existe o está inactiva"
-                    )
+            if not es_recojo:
+                costo_envio = Decimal("0.00") if (subtotal_acumulado - descuento) >= Decimal("150.00") else Decimal("5.00")
+            else:
+                costo_envio = Decimal("0.00")
+
+        if es_recojo and envio_data.sucursal_recojo_id:
+            suc_rec = await db.get(Sucursal, envio_data.sucursal_recojo_id)
+            if not suc_rec or not suc_rec.activo:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="La sucursal de recojo seleccionada no existe o está inactiva"
+                )
+
+        if descuento > subtotal_acumulado:
+            descuento = subtotal_acumulado
 
         total_a_liquidar = (subtotal_acumulado - descuento) + costo_envio
 
@@ -1036,10 +1119,6 @@ class VentasService:
         # 5. Generar código de venta y crear cabecera Venta
         ahora = datetime.now(timezone.utc)
         codigo_venta = f"VTA-ONL-{ahora.strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:4].upper()}"
-
-        cliente_id = current_user.id if current_user.rol and current_user.rol.nombre == "CLIENTE" else data.cliente_id
-        if not cliente_id and current_user:
-            cliente_id = current_user.id
 
         venta = Venta(
             codigo_venta=codigo_venta,
@@ -1120,6 +1199,20 @@ class VentasService:
         )
         db.add(envio)
 
+        # Si se aplicó un cupón de promoción, registrar el canje y sumar usos
+        if promo_aplicada and promo_aplicada.promocion:
+            promo_obj = await db.get(Promocion, promo_aplicada.promocion.id)
+            if promo_obj:
+                promo_obj.usos_actuales += 1
+                uso = UsoPromocion(
+                    promocion_id=promo_obj.id,
+                    venta_id=venta.id,
+                    usuario_id=cliente_id,
+                    monto_descontado=promo_aplicada.descuento_calculado,
+                    fecha_canje=ahora
+                )
+                db.add(uso)
+
         await db.commit()
 
         # 9. Auditoría
@@ -1127,7 +1220,7 @@ class VentasService:
             db,
             accion="VENTA_ONLINE_CREADA",
             modulo="ventas",
-            detalle=f"Venta E-Commerce #{codigo_venta} completada por ${total_a_liquidar}. Tracking envío #{tracking_code}. Modalidad: {data.envio.tipo_entrega}.",
+            detalle=f"Venta E-Commerce #{codigo_venta} completada por ${total_a_liquidar}. Tracking envío #{tracking_code}. Modalidad: {envio_data.tipo_entrega}.",
             usuario_id=current_user.id,
             usuario_email=current_user.email,
             ip_address=ip,
@@ -1136,7 +1229,8 @@ class VentasService:
                 "codigo_venta": codigo_venta,
                 "tracking": tracking_code,
                 "total": str(total_a_liquidar),
-                "tipo_entrega": data.envio.tipo_entrega
+                "tipo_entrega": envio_data.tipo_entrega,
+                "codigo_cupon": promo_aplicada.codigo if promo_aplicada else None
             }
         )
 
@@ -1216,5 +1310,304 @@ class VentasService:
         )
 
         return envio
+
+    # ----------------- CU16: PROMOCIONES Y DESCUENTOS -----------------
+    @staticmethod
+    async def crear_promocion(
+        db: AsyncSession,
+        data: PromocionCreate,
+        staff_user: Usuario,
+        ip: Optional[str] = None
+    ) -> Promocion:
+        codigo_clean = data.codigo.strip().upper()
+        res = await db.execute(select(Promocion).where(Promocion.codigo == codigo_clean))
+        if res.scalar_one_or_none():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Ya existe una promoción con el código '{codigo_clean}'"
+            )
+
+        if data.fecha_fin <= data.fecha_inicio:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="La fecha de finalización debe ser posterior a la fecha de inicio"
+            )
+
+        promocion = Promocion(
+            codigo=codigo_clean,
+            nombre=data.nombre.strip(),
+            descripcion=data.descripcion,
+            tipo_descuento=data.tipo_descuento,
+            valor_descuento=data.valor_descuento,
+            monto_minimo_compra=data.monto_minimo_compra,
+            descuento_maximo=data.descuento_maximo,
+            limite_usos=data.limite_usos,
+            limite_por_cliente=data.limite_por_cliente,
+            fecha_inicio=data.fecha_inicio,
+            fecha_fin=data.fecha_fin,
+            activo=data.activo,
+            categoria_id=data.categoria_id,
+            sucursal_id=data.sucursal_id
+        )
+        db.add(promocion)
+        await db.commit()
+        await db.refresh(promocion)
+
+        await AuditoriaService.registrar_evento(
+            db,
+            accion="PROMOCION_CREADA",
+            modulo="ventas",
+            detalle=f"Promoción '{promocion.nombre}' (Código: {promocion.codigo}) creada por {staff_user.nombre}.",
+            usuario_id=staff_user.id,
+            usuario_email=staff_user.email,
+            ip_address=ip,
+            valores_nuevos={"codigo": promocion.codigo, "tipo": promocion.tipo_descuento, "valor": str(promocion.valor_descuento)}
+        )
+        return promocion
+
+    @staticmethod
+    async def listar_promociones(
+        db: AsyncSession,
+        activo: Optional[bool] = None,
+        tipo_descuento: Optional[str] = None,
+        solo_vigentes: bool = False,
+        limit: int = 50,
+        offset: int = 0
+    ) -> List[Promocion]:
+        query = select(Promocion).options(
+            selectinload(Promocion.categoria),
+            selectinload(Promocion.sucursal)
+        )
+
+        if activo is not None:
+            query = query.where(Promocion.activo == activo)
+        if tipo_descuento:
+            query = query.where(Promocion.tipo_descuento == tipo_descuento.upper())
+        if solo_vigentes:
+            ahora = datetime.now(timezone.utc)
+            query = query.where(
+                and_(
+                    Promocion.activo == True,
+                    Promocion.fecha_inicio <= ahora,
+                    Promocion.fecha_fin >= ahora
+                )
+            )
+
+        res = await db.execute(query.order_by(desc(Promocion.id)).limit(limit).offset(offset))
+        return list(res.scalars().all())
+
+    @staticmethod
+    async def obtener_promocion_por_id(db: AsyncSession, promocion_id: int) -> Promocion:
+        query = select(Promocion).options(
+            selectinload(Promocion.categoria),
+            selectinload(Promocion.sucursal)
+        ).where(Promocion.id == promocion_id)
+        res = await db.execute(query)
+        promo = res.scalar_one_or_none()
+        if not promo:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Promoción no encontrada")
+        return promo
+
+    @staticmethod
+    async def actualizar_promocion(
+        db: AsyncSession,
+        promocion_id: int,
+        data: PromocionUpdate,
+        staff_user: Usuario,
+        ip: Optional[str] = None
+    ) -> Promocion:
+        promo = await VentasService.obtener_promocion_por_id(db, promocion_id)
+
+        if data.nombre is not None:
+            promo.nombre = data.nombre.strip()
+        if data.descripcion is not None:
+            promo.descripcion = data.descripcion
+        if data.tipo_descuento is not None:
+            promo.tipo_descuento = data.tipo_descuento
+        if data.valor_descuento is not None:
+            promo.valor_descuento = data.valor_descuento
+        if data.monto_minimo_compra is not None:
+            promo.monto_minimo_compra = data.monto_minimo_compra
+        if data.descuento_maximo is not None:
+            promo.descuento_maximo = data.descuento_maximo
+        if data.limite_usos is not None:
+            promo.limite_usos = data.limite_usos
+        if data.limite_por_cliente is not None:
+            promo.limite_por_cliente = data.limite_por_cliente
+        if data.fecha_inicio is not None:
+            promo.fecha_inicio = data.fecha_inicio
+        if data.fecha_fin is not None:
+            promo.fecha_fin = data.fecha_fin
+        if data.activo is not None:
+            promo.activo = data.activo
+        if data.categoria_id is not None:
+            promo.categoria_id = data.categoria_id
+        if data.sucursal_id is not None:
+            promo.sucursal_id = data.sucursal_id
+
+        promo.updated_at = datetime.now(timezone.utc)
+        await db.commit()
+        await db.refresh(promo)
+
+        await AuditoriaService.registrar_evento(
+            db,
+            accion="PROMOCION_ACTUALIZADA",
+            modulo="ventas",
+            detalle=f"Promoción #{promo.id} ({promo.codigo}) modificada por {staff_user.nombre}.",
+            usuario_id=staff_user.id,
+            usuario_email=staff_user.email,
+            ip_address=ip
+        )
+        return promo
+
+    @staticmethod
+    async def cambiar_estado_promocion(
+        db: AsyncSession,
+        promocion_id: int,
+        activo: bool,
+        staff_user: Usuario,
+        ip: Optional[str] = None
+    ) -> Promocion:
+        promo = await VentasService.obtener_promocion_por_id(db, promocion_id)
+        promo.activo = activo
+        promo.updated_at = datetime.now(timezone.utc)
+        await db.commit()
+        await db.refresh(promo)
+
+        await AuditoriaService.registrar_evento(
+            db,
+            accion="PROMOCION_ESTADO_CAMBIADO",
+            modulo="ventas",
+            detalle=f"Promoción #{promo.id} ({promo.codigo}) {'activada' if activo else 'desactivada'} por {staff_user.nombre}.",
+            usuario_id=staff_user.id,
+            usuario_email=staff_user.email,
+            ip_address=ip
+        )
+        return promo
+
+    @staticmethod
+    async def eliminar_promocion(
+        db: AsyncSession,
+        promocion_id: int,
+        staff_user: Usuario,
+        ip: Optional[str] = None
+    ) -> dict:
+        promo = await VentasService.obtener_promocion_por_id(db, promocion_id)
+        res_usos = await db.execute(select(func.count(UsoPromocion.id)).where(UsoPromocion.promocion_id == promocion_id))
+        cant_usos = res_usos.scalar() or 0
+        if cant_usos > 0:
+            promo.activo = False
+            await db.commit()
+            return {"mensaje": f"Promoción '{promo.codigo}' desactivada para preservar {cant_usos} canje(s) histórico(s).", "accion": "desactivada"}
+        else:
+            await db.delete(promo)
+            await db.commit()
+            return {"mensaje": f"Promoción '{promo.codigo}' eliminada exitosamente.", "accion": "eliminada"}
+
+    @staticmethod
+    async def validar_cupon(
+        db: AsyncSession,
+        data: ValidarCuponRequest
+    ) -> ValidarCuponResponse:
+        codigo_clean = data.codigo.strip().upper()
+        res = await db.execute(
+            select(Promocion).options(
+                selectinload(Promocion.categoria),
+                selectinload(Promocion.sucursal)
+            ).where(Promocion.codigo == codigo_clean)
+        )
+        promo = res.scalar_one_or_none()
+
+        if not promo:
+            return ValidarCuponResponse(
+                valido=False,
+                codigo=codigo_clean,
+                mensaje="El código de cupón ingresado no existe."
+            )
+
+        if not promo.activo:
+            return ValidarCuponResponse(
+                valido=False,
+                codigo=codigo_clean,
+                mensaje="Este cupón de promoción se encuentra actualmente inactivo."
+            )
+
+        ahora = datetime.now(timezone.utc)
+        if ahora < promo.fecha_inicio:
+            return ValidarCuponResponse(
+                valido=False,
+                codigo=codigo_clean,
+                mensaje=f"Este cupón aún no es válido. Entrará en vigencia a partir del {promo.fecha_inicio.strftime('%d/%m/%Y')}."
+            )
+
+        if ahora > promo.fecha_fin:
+            return ValidarCuponResponse(
+                valido=False,
+                codigo=codigo_clean,
+                mensaje="Este cupón ha expirado."
+            )
+
+        if promo.limite_usos is not None and promo.usos_actuales >= promo.limite_usos:
+            return ValidarCuponResponse(
+                valido=False,
+                codigo=codigo_clean,
+                mensaje="Este cupón ha alcanzado el límite máximo de canjes disponibles."
+            )
+
+        if data.cliente_id and promo.limite_por_cliente:
+            res_usos_cli = await db.execute(
+                select(func.count(UsoPromocion.id)).where(
+                    and_(
+                        UsoPromocion.promocion_id == promo.id,
+                        UsoPromocion.usuario_id == data.cliente_id
+                    )
+                )
+            )
+            usos_cliente = res_usos_cli.scalar() or 0
+            if usos_cliente >= promo.limite_por_cliente:
+                return ValidarCuponResponse(
+                    valido=False,
+                    codigo=codigo_clean,
+                    mensaje=f"Has alcanzado el límite de {promo.limite_por_cliente} canje(s) permitido(s) para este cupón."
+                )
+
+        if promo.sucursal_id and data.sucursal_id and promo.sucursal_id != data.sucursal_id:
+            return ValidarCuponResponse(
+                valido=False,
+                codigo=codigo_clean,
+                mensaje="Este cupón es exclusivo para otra boutique o sucursal."
+            )
+
+        if data.subtotal < promo.monto_minimo_compra:
+            return ValidarCuponResponse(
+                valido=False,
+                codigo=codigo_clean,
+                mensaje=f"Monto mínimo no alcanzado. Requiere una compra de al menos ${promo.monto_minimo_compra:.2f} USD."
+            )
+
+        # Cálculo del descuento
+        descuento_calc = Decimal("0.00")
+        if promo.tipo_descuento == "PORCENTAJE":
+            descuento_calc = (data.subtotal * promo.valor_descuento) / Decimal("100.00")
+            if promo.descuento_maximo and descuento_calc > promo.descuento_maximo:
+                descuento_calc = promo.descuento_maximo
+        elif promo.tipo_descuento == "MONTO_FIJO":
+            descuento_calc = min(promo.valor_descuento, data.subtotal)
+        elif promo.tipo_descuento == "ENVIO_GRATIS":
+            descuento_calc = data.costo_envio or Decimal("5.00")
+
+        total_con_descuento = max(Decimal("0.00"), data.subtotal - descuento_calc + (data.costo_envio or Decimal("0.00")))
+
+        return ValidarCuponResponse(
+            valido=True,
+            codigo=promo.codigo,
+            tipo_descuento=promo.tipo_descuento,
+            valor_descuento=promo.valor_descuento,
+            descuento_calculado=descuento_calc,
+            total_con_descuento=total_con_descuento,
+            mensaje=f"¡Cupón '{promo.codigo}' aplicado con éxito! Ahorro: ${descuento_calc:.2f} USD",
+            promocion=PromocionResponse.model_validate(promo)
+        )
+
 
 
