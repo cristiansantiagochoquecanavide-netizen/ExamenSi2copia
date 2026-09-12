@@ -84,7 +84,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
         </div>
         <div class="action-buttons-group">
           <button type="button" class="btn-action-gold" (click)="openCreatePrendaModal()">
-            + REGISTRAR PRENDA (CU6)
+            + REGISTRAR PRENDA
           </button>
           <button type="button" class="btn-action-outline" (click)="openAjusteModal()">
             AJUSTAR STOCK SUCURSAL
@@ -298,7 +298,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
         <div class="modal-backdrop" (click)="showCreateModal.set(false)">
           <div class="modal-dialog-large" (click)="$event.stopPropagation()">
             <div class="modal-header">
-              <h3 class="modal-title">Registrar Nueva Prenda en Catálogo (CU6)</h3>
+              <h3 class="modal-title">Registrar Nueva Prenda en Catálogo</h3>
               <button type="button" class="modal-close" (click)="showCreateModal.set(false)">&times;</button>
             </div>
             <form (ngSubmit)="savePrenda()" class="modal-form-body">
