@@ -82,9 +82,9 @@ Proyecto/
 
 ---
 
-## 🏛️ Arquitectura Modular con MVC (Backend & Frontend)
+## 🏛️ Arquitectura Modular con MVC (Backend, Web & Móvil)
 
-El sistema implementa una **Arquitectura Modular orientada al dominio (Vertical Slice Architecture)** combinada con el patrón **MVC (Modelo - Vista - Controlador)** tanto en el Backend como en el Frontend, complementado con una capa de servicios (*Service Layer*) para garantizar alta cohesión, bajo acoplamiento y controladores delgados (*Thin Controllers*).
+El sistema implementa una **Arquitectura Modular orientada al dominio (Vertical Slice / Feature-Driven)** combinada con el patrón **MVC (Modelo - Vista - Controlador)** de forma homogénea en el Backend, la Plataforma Web y la Aplicación Móvil, complementado con capas de servicios y repositorios para garantizar alta cohesión, bajo acoplamiento y componentes delgados (*Thin Controllers*).
 
 ---
 
@@ -165,6 +165,49 @@ features/<modulo>/
   - Clases TypeScript de cada componente (`*PageComponent`), encargadas de la gestión del estado reactivo (Signals / RxJS), recepción de eventos del DOM y orquestación con los servicios.
 - **Capa de Servicios**: 
   - Archivos en `services/` (ej: `ventas.service.ts`, `cart.service.ts`), que actúan como clientes HTTP desacoplados para interactuar con la API REST del backend.
+
+---
+
+### 3. Aplicación Móvil (Flutter + Dart)
+
+La aplicación móvil multiplataforma implementa una **Arquitectura Modular por Features (Feature-Driven)** siguiendo los principios del patrón **MVC / Clean Architecture** en `movil/lib/`:
+
+```text
+movil/lib/
+├── core/                         # Infraestructura transversal
+│   ├── network/api_client.dart   # Conexión HTTP al Backend FastAPI
+│   ├── routes/app_router.dart    # Enrutador central de pantallas
+│   └── theme/app_theme.dart      # Paleta visual de alta costura Atelier Noir
+├── shared/                       # Widgets reutilizables (AtelierScaffold)
+└── features/                     # MÓDULOS DE NEGOCIO (FEATURE-DRIVEN)
+    ├── usuarios/                 # Login móvil y perfil de cliente
+    ├── catalogo/                 # Catálogo interactivo y vestidor virtual AR
+    ├── inventario/               # Consulta de existencias y tallas
+    ├── reservas/                 # Reservas para probador físico en tienda
+    ├── ventas/                   # Carrito móvil, checkout digital y pasarelas
+    └── ia_asistente/             # Recomendador de moda y estilista IA
+```
+
+Cada módulo o feature en Flutter encapsula internamente sus 3 capas:
+
+```text
+features/<modulo>/
+├── domain/models/        # [M] MODELO: Clases de datos y entidades de negocio
+├── presentation/screens/ # [V] VISTA: Widgets Flutter y pantallas de usuario
+└── data/repositories/    # [C] CONTROLADOR / DATOS: Repositorios y consumo de API
+```
+
+#### Conceptos y Mapeo MVC en la App Móvil:
+
+- **Modelo (M)**:
+  - Archivos dentro de `domain/models/` (ej: `ventas_model.dart`, `catalogo_model.dart`), que representan los objetos y contratos de datos del negocio en Dart.
+- **Vista (V)**:
+  - Widgets y pantallas dentro de `presentation/screens/` (ej: `ventas_screen.dart`, `vestidor_ar_screen.dart`), encargadas del renderizado visual en Flutter, animaciones y vistas de cámara para Realidad Aumentada (AR).
+- **Controlador / Repositorio (C)**:
+  - Clases dentro de `data/repositories/` (ej: `ventas_repository.dart`, `catalogo_repository.dart`), que actúan como controladores de datos intermediarios: orquestan peticiones HTTP a través de `api_client.dart`, gestionan el estado y abastecen a las vistas.
+- **Enrutamiento y Conexión Global**:
+  - `core/routes/app_router.dart`: Gestiona el mapa de navegación entre pantallas.
+  - `core/network/api_client.dart`: Cliente HTTP centralizado que conecta directamente con la API REST de FastAPI (`/api/v1`).
 
 ---
 
