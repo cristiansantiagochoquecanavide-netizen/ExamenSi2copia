@@ -82,16 +82,89 @@ Proyecto/
 
 ---
 
-## 🏛️ Regla Arquitectónica Estricta: Monolito Modular en FastAPI (RNF06)
+## 🏛️ Arquitectura Modular con MVC (Backend & Frontend)
 
-Para garantizar la mantenibilidad y desacoplamiento, el backend debe respetar 3 reglas inquebrantables:
-1. **Agrupación por Dominios de Negocio**: Prohibido el esquema plano o archivos gigantes. Módulos padre divididos por capacidades de negocio.
-2. **Submódulos Aislados (`APIRouter`)**: Cada funcionalidad dentro del dominio se expone mediante su propio `APIRouter` independiente.
-3. **Encapsulamiento Interno (Patrón de Capas)**: Cada submódulo implementa estrictamente 4 capas:
-   - `models/`: Entidades ORM (SQLAlchemy 2.0).
-   - `schemas/`: Contratos de entrada y salida (Pydantic v2).
-   - `services/`: Lógica de negocio pura, reglas transaccionales e integraciones.
-   - `routers/`: Controladores de endpoints y dependencias FastAPI.
+El sistema implementa una **Arquitectura Modular orientada al dominio (Vertical Slice Architecture)** combinada con el patrón **MVC (Modelo - Vista - Controlador)** tanto en el Backend como en el Frontend, complementado con una capa de servicios (*Service Layer*) para garantizar alta cohesión, bajo acoplamiento y controladores delgados (*Thin Controllers*).
+
+---
+
+### 1. Backend (FastAPI + SQLAlchemy)
+
+El backend está estructurado en **módulos de negocio independientes** bajo `backend/app/domains/`:
+
+```text
+backend/app/
+├── core/                  # Configuración global, BD PostgreSQL, JWT y seguridad
+└── domains/               # ARQUITECTURA MODULAR (VERTICAL SLICES)
+    ├── usuarios/          # Auth, roles RBAC, clientes y personal
+    ├── catalogo/          # Prendas, categorías, temporadas, colecciones y modelos 3D AR
+    ├── inventario/        # Sucursales, stock multitienda, tallas, colores y proveedores
+    ├── reservas/          # Reservas presenciales, probadores físicos y vouchers QR
+    ├── ventas/            # POS presencial, checkout online, pasarelas y cupones
+    └── ia_asistente/      # Recomendador inteligente, reportes generativos y chatbot
+```
+
+Dentro de cada módulo o dominio se implementa estrictamente la siguiente separación de responsabilidades:
+
+```text
+domains/<modulo>/
+├── models.py      # [M] MODELO: Entidades ORM / Tablas PostgreSQL (SQLAlchemy 2.0)
+├── schemas.py     # [M/V] MODELO DTO: Validación y serialización (Pydantic v2)
+├── routers.py     # [C] CONTROLADOR: Endpoints HTTP, validación y autenticación (APIRouter)
+└── services.py    # [LÓGICA]: Service Layer transaccional (Reglas de negocio y Kardex)
+```
+
+#### ¿Cómo responde al patrón MVC?
+
+- **Modelo (M)**: 
+  - **`models.py`**: Define las entidades de datos mapeadas a PostgreSQL con SQLAlchemy ORM, relaciones y restricciones de integridad.
+  - **`schemas.py`**: Define los modelos de transferencia de datos (DTOs) y validación de esquemas con Pydantic.
+- **Controlador (C)**: 
+  - **`routers.py`**: Controladores de endpoints (`APIRouter`). Reciben los requests HTTP, validan los parámetros y payloads, verifican permisos de usuario (`Depends`) y delegan la ejecución a la capa de servicios.
+- **Vista (V)**: 
+  - Al ser una arquitectura desacoplada basada en API REST, la "Vista" en el backend corresponde a las representaciones JSON generadas a partir de los `schemas.py` de respuesta que consume el cliente web o móvil.
+- **Service Layer (Lógica de Negocio)**: 
+  - **`services.py`**: Contiene la lógica empresarial, transacciones de inventario (Kardex), cálculos financieros y validaciones comerciales, evitando el antipatrón de *Fat Controllers*.
+
+---
+
+### 2. Frontend (Angular 19)
+
+El frontend web replica de manera simétrica la misma **modularidad funcional** en `frontend/src/app/features/`:
+
+```text
+frontend/src/app/
+├── core/                  # Servicios transversales (AuthService, interceptores JWT, guards)
+├── shared/                # Componentes y utilidades compartidas
+└── features/              # MÓDULOS DE NEGOCIO (FEATURE-BASED)
+    ├── usuarios/          # Login, gestión de usuarios, roles y auditoría
+    ├── catalogo/          # Catálogo interactivo, modelos 3D y visor AR
+    ├── inventario/        # Control de stock, sucursales y alertas
+    ├── reservas/          # Agendamiento de probadores y gestión en tienda
+    ├── ventas/            # POS, checkout e-commerce, promociones y pasarela de pagos
+    └── ia-asistente/      # Chatbot y estilista virtual con IA
+```
+
+Cada módulo de negocio frontend contiene su propia estructura interna:
+
+```text
+features/<modulo>/
+├── models/        # [M] MODELO: Interfaces y tipos TypeScript
+├── services/      # [API Client]: Comunicación HTTP y manejo de estado reactivo
+├── pages/         # [V + C] VISTA Y CONTROLADOR: Componentes visuales y lógica UI
+└── <modulo>.routes.ts # Enrutamiento perezoso (Lazy Loading) del módulo
+```
+
+#### Conceptos y Mapeo MVC en Frontend:
+
+- **Modelo (M)**: 
+  - Archivos dentro de `models/` (ej: `ventas.models.ts`), donde se definen las interfaces y contratos de datos tipados en TypeScript.
+- **Vista (V)**: 
+  - Plantillas declarativas (HTML) estilizadas con **Tailwind CSS** y diseño de alta costura **Atelier Noir**, responsables del renderizado y experiencia de usuario.
+- **Controlador (C)**: 
+  - Clases TypeScript de cada componente (`*PageComponent`), encargadas de la gestión del estado reactivo (Signals / RxJS), recepción de eventos del DOM y orquestación con los servicios.
+- **Capa de Servicios**: 
+  - Archivos en `services/` (ej: `ventas.service.ts`, `cart.service.ts`), que actúan como clientes HTTP desacoplados para interactuar con la API REST del backend.
 
 ---
 
