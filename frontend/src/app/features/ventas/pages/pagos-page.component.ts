@@ -18,7 +18,7 @@ import {
       <!-- HEADER -->
       <header class="pagos-header">
         <div class="header-titles">
-          <div class="subtitle-badge">ATELIER NOIR &bull; CICLO #2 &bull; CU12</div>
+          <div class="subtitle-badge">ATELIER NOIR &bull; CAJA &amp; PAGOS</div>
           <h1>Pasarela de Pagos Multi-Canal</h1>
           <p class="description">
             Cobro digital y conciliación omnicanal: QR Simple (Libélula Bolivia), Tarjetas de Crédito/Débito (Stripe Sandbox) y Billetera Digital (PayPal Express).
@@ -575,10 +575,11 @@ import {
   `,
   styles: [`
     .atelier-pagos-container {
-      padding: 1.5rem 2rem;
+      padding: 2rem 2.5rem;
       max-width: 1400px;
       margin: 0 auto;
-      color: #e5e5e5;
+      color: #111827;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     /* HEADER */
@@ -591,49 +592,57 @@ import {
       flex-wrap: wrap;
     }
     .subtitle-badge {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       letter-spacing: 2px;
-      color: #d4af37;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
+      color: #4b5563;
+      margin-bottom: 0.4rem;
+      font-weight: 700;
+      text-transform: uppercase;
     }
     .header-titles h1 {
-      font-size: 2rem;
-      font-family: 'Cinzel', 'Playfair Display', serif, sans-serif;
-      color: #f3e5ab;
+      font-size: 2.25rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #000000;
       margin: 0 0 0.5rem 0;
-      letter-spacing: 1px;
     }
     .header-titles .description {
-      color: #999;
-      font-size: 0.9rem;
+      color: #4b5563;
+      font-size: 0.95rem;
       max-width: 650px;
       margin: 0;
+      line-height: 1.5;
     }
 
     /* TABS */
     .tabs-switcher {
-      display: flex;
-      background: #141414;
-      border: 1px solid rgba(212, 175, 55, 0.3);
-      border-radius: 8px;
+      display: inline-flex;
+      background: #f3f4f6;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 6px;
       padding: 4px;
+      gap: 4px;
     }
     .tab-btn {
       background: transparent;
       border: none;
-      color: #aaa;
+      color: #4b5563;
       padding: 0.6rem 1.2rem;
       font-size: 0.85rem;
       cursor: pointer;
-      border-radius: 6px;
-      transition: all 0.25s ease;
-      font-weight: 500;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+      font-weight: 600;
+    }
+    .tab-btn:hover {
+      color: #000000;
     }
     .tab-btn.active {
-      background: #d4af37;
-      color: #0a0a0a;
+      background: #000000;
+      color: #ffffff;
       font-weight: 700;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
 
     /* TOASTS */
@@ -642,22 +651,22 @@ import {
       align-items: center;
       gap: 1rem;
       padding: 1rem 1.25rem;
-      border-radius: 8px;
+      border-radius: 4px;
       margin-bottom: 1.5rem;
       animation: slideDown 0.3s ease;
     }
     .toast-banner.success {
-      background: rgba(34, 197, 94, 0.12);
-      border: 1px solid rgba(34, 197, 94, 0.4);
-      color: #86efac;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
     }
     .toast-banner.error {
-      background: rgba(239, 68, 68, 0.12);
-      border: 1px solid rgba(239, 68, 68, 0.4);
-      color: #fca5a5;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
     }
     .toast-icon { font-size: 1.3rem; }
-    .toast-body { flex: 1; display: flex; flex-direction: column; }
+    .toast-body { flex: 1; display: flex; flex-direction: column; font-size: 0.875rem; }
     .btn-close-toast {
       background: none;
       border: none;
@@ -668,11 +677,11 @@ import {
 
     /* CARDS */
     .atelier-card {
-      background: #111111;
-      border: 1px solid rgba(212, 175, 55, 0.22);
-      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 4px;
       padding: 1.75rem;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
     }
     .card-header {
       display: flex;
@@ -680,23 +689,25 @@ import {
       align-items: center;
       margin-bottom: 1.5rem;
       padding-bottom: 0.75rem;
-      border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     }
     .card-header h3 {
       font-size: 1.2rem;
-      color: #f3e5ab;
+      color: #000000;
       margin: 0;
-      letter-spacing: 0.5px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
     }
     .gold-pill {
       font-size: 0.7rem;
-      background: rgba(212, 175, 55, 0.15);
-      color: #d4af37;
+      background: #f3f4f6;
+      color: #111827;
       padding: 0.25rem 0.6rem;
-      border-radius: 20px;
-      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 9999px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
       text-transform: uppercase;
       letter-spacing: 1px;
+      font-weight: 700;
     }
 
     /* LAYOUT TERMINAL */
@@ -704,6 +715,7 @@ import {
       display: grid;
       grid-template-columns: 1fr 1.3fr;
       gap: 2rem;
+      align-items: start;
     }
     @media (max-width: 1024px) {
       .terminal-layout { grid-template-columns: 1fr; }
@@ -719,59 +731,63 @@ import {
     .full-width { grid-column: span 2; }
     .form-group label {
       display: block;
-      font-size: 0.8rem;
-      color: #aaa;
+      font-size: 0.75rem;
+      color: #4b5563;
       margin-bottom: 0.35rem;
       letter-spacing: 0.5px;
+      text-transform: uppercase;
+      font-weight: 600;
     }
     .input-currency-group {
       display: flex;
-      background: #181818;
-      border: 1px solid #333;
-      border-radius: 8px;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: 4px;
       align-items: center;
-      padding: 0 0.75rem;
-      transition: border-color 0.2s;
+      padding: 0 0.85rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
     .input-currency-group:focus-within {
-      border-color: #d4af37;
+      border-color: #000000;
+      box-shadow: 0 0 0 1px #000000;
     }
     .currency-label {
-      color: #d4af37;
-      font-weight: 700;
-      font-size: 1.1rem;
+      color: #000000;
+      font-weight: 800;
+      font-size: 1.2rem;
       margin-right: 0.5rem;
     }
     .atelier-input-amount {
       width: 100%;
       background: transparent;
       border: none;
-      color: #f3e5ab;
+      color: #000000;
       font-size: 1.3rem;
-      font-weight: 700;
-      padding: 0.6rem 0;
+      font-weight: 800;
+      padding: 0.65rem 0;
       outline: none;
     }
     .atelier-input, .atelier-select {
       width: 100%;
-      background: #181818;
-      border: 1px solid #333;
-      border-radius: 8px;
-      color: #eee;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: 4px;
+      color: #111827;
       padding: 0.65rem 0.85rem;
       font-size: 0.9rem;
       outline: none;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
     .atelier-input:focus, .atelier-select:focus {
-      border-color: #d4af37;
+      border-color: #000000;
+      box-shadow: 0 0 0 1px #000000;
     }
 
     /* SUMMARY BOX */
     .live-summary-box {
-      background: #0a0a0a;
-      border: 1px solid rgba(212, 175, 55, 0.2);
-      border-radius: 8px;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 4px;
       padding: 1.2rem;
     }
     .summary-row {
@@ -779,12 +795,12 @@ import {
       justify-content: space-between;
       align-items: center;
       font-size: 0.85rem;
-      color: #888;
+      color: #4b5563;
       margin-bottom: 0.5rem;
     }
     .free-badge {
-      background: rgba(34, 197, 94, 0.15);
-      color: #4ade80;
+      background: #dcfce7;
+      color: #15803d;
       padding: 0.15rem 0.45rem;
       border-radius: 4px;
       font-size: 0.7rem;
@@ -792,19 +808,19 @@ import {
     }
     .divider-gold {
       height: 1px;
-      background: rgba(212, 175, 55, 0.2);
+      background: rgba(0, 0, 0, 0.08);
       margin: 0.8rem 0;
     }
     .total-row {
       font-size: 1rem;
-      color: #eee;
-      font-weight: 600;
+      color: #000000;
+      font-weight: 700;
       margin-bottom: 0;
     }
     .gold-price {
-      color: #f3e5ab;
+      color: #000000;
       font-size: 1.4rem;
-      font-weight: 700;
+      font-weight: 900;
     }
 
     /* GATEWAY SELECTOR */
@@ -818,47 +834,48 @@ import {
       .gateway-selector { grid-template-columns: 1fr; }
     }
     .gateway-option {
-      background: #181818;
-      border: 1px solid #333;
-      border-radius: 10px;
-      padding: 1rem 0.85rem;
+      background: #fbfbfb;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 4px;
+      padding: 1.15rem 0.85rem;
       text-align: left;
       cursor: pointer;
       display: flex;
       flex-direction: column;
       gap: 0.4rem;
       position: relative;
-      transition: all 0.25s;
+      transition: all 0.2s ease;
     }
     .gateway-option:hover {
-      border-color: rgba(212, 175, 55, 0.5);
-      background: #1c1c1c;
+      border-color: #000000;
+      background: #ffffff;
     }
     .gateway-option.selected {
-      border-color: #d4af37;
-      background: rgba(212, 175, 55, 0.08);
-      box-shadow: 0 0 15px rgba(212, 175, 55, 0.15);
+      border: 2px solid #000000;
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
     .gateway-icon {
       font-size: 1.4rem;
-      color: #d4af37;
+      color: #000000;
     }
     .gateway-info strong {
       display: block;
       font-size: 0.85rem;
-      color: #f3e5ab;
+      color: #000000;
+      font-weight: 700;
     }
     .gateway-info small {
       display: block;
       font-size: 0.7rem;
-      color: #888;
+      color: #6b7280;
     }
     .check-badge {
       position: absolute;
       top: 8px;
       right: 8px;
-      background: #d4af37;
-      color: #000;
+      background: #000000;
+      color: #ffffff;
       font-size: 0.65rem;
       font-weight: bold;
       width: 18px;
@@ -876,14 +893,14 @@ import {
       align-items: center;
       text-align: center;
       padding: 1.5rem;
-      background: #0c0c0c;
-      border-radius: 10px;
-      border: 1px dashed rgba(212, 175, 55, 0.3);
+      background: #f9fafb;
+      border-radius: 4px;
+      border: 1px dashed rgba(0, 0, 0, 0.15);
     }
     .instruction-box {
       max-width: 420px;
       margin-bottom: 1.5rem;
-      color: #aaa;
+      color: #4b5563;
       font-size: 0.85rem;
       line-height: 1.5;
     }
@@ -899,30 +916,32 @@ import {
       justify-content: space-between;
       align-items: center;
       width: 100%;
-      background: #161616;
-      border-radius: 8px;
+      background: #ffffff;
+      border-radius: 4px;
       padding: 0.6rem 1rem;
-      border: 1px solid #333;
+      border: 1px solid rgba(0, 0, 0, 0.08);
     }
     .status-badge {
       font-size: 0.75rem;
       font-weight: 700;
       letter-spacing: 0.5px;
+      text-transform: uppercase;
     }
-    .status-badge.pending { color: #f59e0b; }
-    .status-badge.confirmed { color: #10b981; }
-    .status-badge.expired { color: #ef4444; }
+    .status-badge.pending { color: #d97706; }
+    .status-badge.confirmed { color: #15803d; }
+    .status-badge.expired { color: #dc2626; }
     .countdown-timer {
       font-size: 0.8rem;
-      color: #aaa;
+      color: #6b7280;
       display: flex;
       gap: 0.4rem;
       align-items: center;
     }
     .timer-digits {
-      color: #d4af37;
+      color: #000000;
       font-size: 1.05rem;
       font-family: monospace;
+      font-weight: 700;
     }
     .qr-svg-wrapper {
       display: flex;
@@ -933,9 +952,9 @@ import {
     .qr-svg-frame {
       background: #ffffff;
       padding: 1rem;
-      border-radius: 12px;
-      border: 3px solid #d4af37;
-      box-shadow: 0 8px 25px rgba(212, 175, 55, 0.25);
+      border-radius: 4px;
+      border: 2px solid #000000;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
       width: 220px;
       height: 220px;
       display: flex;
@@ -948,7 +967,7 @@ import {
     }
     .qr-details {
       font-size: 0.8rem;
-      color: #999;
+      color: #6b7280;
       display: flex;
       flex-direction: column;
       gap: 0.2rem;
@@ -967,20 +986,21 @@ import {
       gap: 1.5rem;
     }
     .luxury-credit-card-preview {
-      background: linear-gradient(135deg, #1c1c1c 0%, #0f0f0f 50%, #29241b 100%);
-      border: 1px solid rgba(212, 175, 55, 0.4);
-      border-radius: 14px;
+      background: #000000;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
       padding: 1.5rem 1.75rem;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
       position: relative;
       height: 190px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      color: #ffffff;
     }
     .card-chip {
       font-size: 1.3rem;
-      color: #d4af37;
+      color: #ffffff;
     }
     .card-brand-logo {
       position: absolute;
@@ -989,15 +1009,14 @@ import {
       font-size: 1.2rem;
       font-weight: 900;
       letter-spacing: 2px;
-      color: #f3e5ab;
+      color: #ffffff;
       font-family: sans-serif;
     }
     .card-number-display {
       font-family: monospace;
       font-size: 1.25rem;
       letter-spacing: 3px;
-      color: #f5f5f5;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+      color: #ffffff;
     }
     .card-meta-row {
       display: flex;
@@ -1007,12 +1026,13 @@ import {
     .card-holder-box small, .card-expiry-box small {
       display: block;
       font-size: 0.6rem;
-      color: #d4af37;
+      color: #9ca3af;
       letter-spacing: 1px;
+      text-transform: uppercase;
     }
     .card-holder-box span, .card-expiry-box span {
       font-size: 0.85rem;
-      color: #eee;
+      color: #ffffff;
       letter-spacing: 1px;
       font-weight: 600;
     }
@@ -1021,33 +1041,35 @@ import {
       gap: 0.75rem;
       align-items: center;
       flex-wrap: wrap;
-      background: #141414;
+      background: #f3f4f6;
       padding: 0.6rem 0.85rem;
-      border-radius: 8px;
+      border-radius: 4px;
     }
     .quick-label {
       font-size: 0.75rem;
-      color: #888;
+      color: #4b5563;
+      font-weight: 600;
     }
     .btn-chip {
-      background: #222;
-      border: 1px solid #444;
-      color: #ccc;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      color: #374151;
       font-size: 0.72rem;
       padding: 0.3rem 0.65rem;
-      border-radius: 4px;
+      border-radius: 3px;
       cursor: pointer;
+      font-weight: 600;
       transition: all 0.2s;
     }
     .btn-chip.approved:hover {
-      border-color: #22c55e;
-      color: #86efac;
-      background: rgba(34, 197, 94, 0.1);
+      border-color: #166534;
+      color: #166534;
+      background: #f0fdf4;
     }
     .btn-chip.declined:hover {
-      border-color: #ef4444;
-      color: #fca5a5;
-      background: rgba(239, 68, 68, 0.1);
+      border-color: #dc2626;
+      color: #dc2626;
+      background: #fef2f2;
     }
     .card-form-grid {
       display: grid;
@@ -1058,9 +1080,9 @@ import {
 
     /* PAYPAL PANEL */
     .paypal-hero-box {
-      background: #0d0d0d;
-      border: 1px solid rgba(212, 175, 55, 0.25);
-      border-radius: 12px;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 4px;
       padding: 2.5rem 1.5rem;
       text-align: center;
       display: flex;
@@ -1081,7 +1103,7 @@ import {
     .express-badge {
       font-size: 0.75rem;
       font-style: normal;
-      background: #ffc439;
+      background: #f3f4f6;
       color: #000;
       padding: 0.2rem 0.5rem;
       border-radius: 4px;
@@ -1089,7 +1111,7 @@ import {
       font-weight: 700;
     }
     .paypal-hero-box p {
-      color: #888;
+      color: #4b5563;
       font-size: 0.85rem;
       max-width: 440px;
       margin: 0;
@@ -1102,24 +1124,24 @@ import {
     .paypal-buyer-field label {
       display: block;
       font-size: 0.75rem;
-      color: #aaa;
+      color: #4b5563;
       margin-bottom: 0.3rem;
+      font-weight: 600;
+      text-transform: uppercase;
     }
     .btn-paypal-express {
-      background: #ffc439;
-      color: #000;
+      background: #0070ba;
+      color: #ffffff;
       border: none;
       font-weight: 700;
-      font-size: 1.05rem;
+      font-size: 1rem;
       padding: 0.85rem 2.5rem;
-      border-radius: 25px;
+      border-radius: 4px;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(255, 196, 57, 0.35);
       transition: all 0.2s;
     }
     .btn-paypal-express:hover {
-      background: #f4b620;
-      transform: translateY(-1px);
+      background: #005ea6;
     }
 
     /* HISTORIAL & TABLA */
@@ -1138,7 +1160,9 @@ import {
     }
     .filter-item label {
       font-size: 0.75rem;
-      color: #888;
+      color: #4b5563;
+      text-transform: uppercase;
+      font-weight: 600;
     }
     .btn-refresh {
       margin-bottom: 2px;
@@ -1152,21 +1176,22 @@ import {
       font-size: 0.85rem;
     }
     .atelier-table th {
-      background: #141414;
-      color: #d4af37;
+      background: #f9fafb;
+      color: #4b5563;
       text-transform: uppercase;
-      font-size: 0.7rem;
+      font-size: 0.72rem;
       letter-spacing: 1px;
       padding: 0.75rem 0.85rem;
-      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      font-weight: 700;
     }
     .atelier-table td {
       padding: 0.85rem;
-      border-bottom: 1px solid #1f1f1f;
-      color: #ccc;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      color: #111827;
     }
     .atelier-table tbody tr:hover {
-      background: rgba(212, 175, 55, 0.04);
+      background: #f9fafb;
     }
     .code-font {
       font-family: monospace;
@@ -1182,69 +1207,75 @@ import {
       display: inline-block;
       font-size: 0.7rem;
       padding: 0.2rem 0.45rem;
-      border-radius: 4px;
+      border-radius: 3px;
       font-weight: 600;
-      background: #222;
-      color: #eee;
+      background: #f3f4f6;
+      color: #111827;
+      border: 1px solid rgba(0, 0, 0, 0.06);
     }
     .gateway-sub {
       display: block;
       font-size: 0.65rem;
-      color: #777;
+      color: #6b7280;
     }
     .status-pill {
       display: inline-block;
       font-size: 0.7rem;
       font-weight: 700;
       padding: 0.2rem 0.5rem;
-      border-radius: 12px;
+      border-radius: 9999px;
       letter-spacing: 0.5px;
+      text-transform: uppercase;
     }
     .status-pill.confirmado {
-      background: rgba(34, 197, 94, 0.15);
-      color: #4ade80;
-      border: 1px solid rgba(34, 197, 94, 0.3);
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
     }
     .status-pill.pendiente {
-      background: rgba(245, 158, 11, 0.15);
-      color: #fbbf24;
-      border: 1px solid rgba(245, 158, 11, 0.3);
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fcd34d;
     }
     .status-pill.rechazado {
-      background: rgba(239, 68, 68, 0.15);
-      color: #f87171;
-      border: 1px solid rgba(239, 68, 68, 0.3);
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
     }
     .btn-icon-action {
-      background: #181818;
-      border: 1px solid rgba(212, 175, 55, 0.3);
-      color: #d4af37;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      color: #111827;
       padding: 0.35rem 0.65rem;
-      border-radius: 6px;
+      border-radius: 3px;
       font-size: 0.75rem;
       cursor: pointer;
+      font-weight: 600;
       transition: all 0.2s;
     }
     .btn-icon-action:hover {
-      background: #d4af37;
-      color: #000;
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
     }
 
     /* BUTTONS GLOBALES */
     .btn-atelier-gold {
-      background: linear-gradient(135deg, #d4af37 0%, #aa820a 100%);
-      color: #0a0a0a;
+      background: #000000;
+      color: #ffffff;
       border: none;
       font-weight: 700;
       font-size: 0.9rem;
       padding: 0.75rem 1.5rem;
-      border-radius: 8px;
+      border-radius: 2px;
       cursor: pointer;
-      transition: all 0.25s;
+      transition: all 0.2s;
       letter-spacing: 0.5px;
+      text-transform: uppercase;
     }
     .btn-atelier-gold:hover:not(:disabled) {
-      box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
+      background: #262626;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       transform: translateY(-1px);
     }
     .btn-atelier-gold:disabled {
@@ -1257,30 +1288,31 @@ import {
     }
     .btn-atelier-outline {
       background: transparent;
-      border: 1px solid rgba(212, 175, 55, 0.5);
-      color: #f3e5ab;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #374151;
       font-weight: 600;
       font-size: 0.85rem;
       padding: 0.65rem 1.25rem;
-      border-radius: 8px;
+      border-radius: 2px;
       cursor: pointer;
       transition: all 0.2s;
     }
     .btn-atelier-outline:hover {
-      background: rgba(212, 175, 55, 0.1);
-      border-color: #d4af37;
+      background: #f3f4f6;
+      border-color: #000000;
+      color: #000000;
     }
     .btn-atelier-text {
       background: none;
       border: none;
-      color: #888;
+      color: #6b7280;
       font-size: 0.8rem;
       cursor: pointer;
       text-decoration: underline;
     }
-    .btn-atelier-text:hover { color: #ccc; }
+    .btn-atelier-text:hover { color: #000000; }
 
-    .highlight-gold { color: #f3e5ab; font-weight: 600; }
+    .highlight-gold { color: #000000; font-weight: 700; }
     .text-right { text-align: right; }
     .text-center { text-align: center; }
 
@@ -1288,8 +1320,8 @@ import {
     .modal-backdrop {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(5px);
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1297,14 +1329,15 @@ import {
       padding: 1rem;
     }
     .modal-voucher-container {
-      background: #111111;
-      border: 1px solid rgba(212, 175, 55, 0.4);
-      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 4px;
       max-width: 480px;
       width: 100%;
-      padding: 1.5rem;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+      padding: 1.75rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
       animation: zoomIn 0.25s ease;
+      color: #111827;
     }
     .modal-header-actions {
       display: flex;
@@ -1314,45 +1347,51 @@ import {
     }
     .voucher-title {
       font-size: 0.85rem;
-      color: #888;
+      color: #4b5563;
       text-transform: uppercase;
       letter-spacing: 1px;
+      font-weight: 700;
     }
     .btn-close-modal {
       background: none;
       border: none;
-      color: #999;
+      color: #9ca3af;
       font-size: 1.5rem;
       cursor: pointer;
     }
+    .btn-close-modal:hover {
+      color: #000000;
+    }
     .voucher-slip {
-      background: #fafafa;
-      color: #1a1a1a;
-      border-radius: 6px;
+      background: #f9fafb;
+      color: #111827;
+      border-radius: 4px;
       padding: 1.5rem;
       font-family: 'Courier New', Courier, monospace;
-      border-top: 4px solid #d4af37;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-top: 4px solid #000000;
     }
     .voucher-brand {
       text-align: center;
       margin-bottom: 1rem;
-      border-bottom: 1px dashed #999;
+      border-bottom: 1px dashed rgba(0, 0, 0, 0.15);
       padding-bottom: 0.75rem;
     }
     .brand-crest {
       font-weight: 900;
       letter-spacing: 2px;
       font-size: 1.1rem;
+      color: #000000;
     }
     .brand-sub {
       font-size: 0.65rem;
-      color: #666;
+      color: #6b7280;
       letter-spacing: 1px;
     }
     .voucher-badge-seal {
       text-align: center;
       padding: 0.4rem;
-      background: #eee;
+      background: #f3f4f6;
       font-weight: 900;
       letter-spacing: 1.5px;
       font-size: 0.85rem;
@@ -1360,9 +1399,9 @@ import {
       border-radius: 4px;
     }
     .voucher-badge-seal.approved {
-      background: #e6f7ec;
+      background: #dcfce7;
       color: #15803d;
-      border: 1px solid #86efac;
+      border: 1px solid #bbf7d0;
     }
     .voucher-details-grid {
       display: flex;
@@ -1375,11 +1414,11 @@ import {
       display: flex;
       justify-content: space-between;
     }
-    .voucher-row .lbl { color: #555; }
-    .voucher-row .val { color: #000; }
+    .voucher-row .lbl { color: #6b7280; }
+    .voucher-row .val { color: #000000; font-weight: 600; }
     .voucher-total-box {
-      border-top: 1px dashed #777;
-      border-bottom: 1px dashed #777;
+      border-top: 1px dashed rgba(0, 0, 0, 0.15);
+      border-bottom: 1px dashed rgba(0, 0, 0, 0.15);
       padding: 0.75rem 0;
       text-align: center;
       margin-bottom: 1rem;
@@ -1387,17 +1426,19 @@ import {
     .total-label {
       display: block;
       font-size: 0.7rem;
-      color: #555;
+      color: #6b7280;
       letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 600;
     }
     .total-number {
       font-size: 1.6rem;
       font-weight: 900;
-      color: #000;
+      color: #000000;
     }
     .voucher-footer-notes {
       font-size: 0.65rem;
-      color: #666;
+      color: #6b7280;
       text-align: center;
       line-height: 1.4;
     }
@@ -1413,8 +1454,8 @@ import {
       display: inline-block;
       width: 16px;
       height: 16px;
-      border: 2px solid rgba(0,0,0,0.2);
-      border-top-color: #000;
+      border: 2px solid rgba(0,0,0,0.15);
+      border-top-color: #000000;
       border-radius: 50%;
       animation: spin 0.6s linear infinite;
       vertical-align: middle;
@@ -1424,13 +1465,13 @@ import {
       width: 32px;
       height: 32px;
       border-width: 3px;
-      border-top-color: #d4af37;
+      border-top-color: #000000;
       margin-bottom: 1rem;
     }
     .loading-state, .empty-state {
       padding: 3rem;
       text-align: center;
-      color: #888;
+      color: #6b7280;
     }
 
     @keyframes spin {

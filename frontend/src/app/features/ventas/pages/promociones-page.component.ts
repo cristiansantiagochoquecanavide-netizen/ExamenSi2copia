@@ -9,22 +9,22 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="min-h-screen bg-stone-950 text-stone-100 p-6 sm:p-10">
+    <div class="min-h-screen bg-white text-gray-900 p-6 sm:p-10 font-sans">
       <div class="max-w-7xl mx-auto space-y-8">
         
         <!-- HEADER -->
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between border-b border-stone-800 pb-6 gap-4">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between border-b border-gray-200 pb-6 gap-4">
           <div>
             <div class="flex items-center gap-3">
-              <span class="px-2.5 py-1 text-xs font-semibold tracking-wider uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded">
-                CU16 &bull; Marketing &amp; Fidelizacion
+              <span class="px-2.5 py-1 text-xs font-semibold tracking-wider uppercase bg-gray-100 text-gray-800 border border-gray-200 rounded">
+                Marketing &amp; Fidelización
               </span>
-              <span class="text-xs text-stone-500 tracking-widest font-mono">ATELIER NOIR CRM</span>
+              <span class="text-xs text-gray-500 tracking-widest font-mono">ATELIER NOIR CRM</span>
             </div>
-            <h1 class="text-3xl font-light tracking-wide text-white mt-2 font-serif">
+            <h1 class="text-3xl font-extrabold tracking-tight text-black mt-2">
               Promociones &amp; Cupones de Descuento
             </h1>
-            <p class="text-sm text-stone-400 mt-1">
+            <p class="text-sm text-gray-500 mt-1">
               Configura campanas comerciales, cupones de descuento y valida reglas comerciales en tiempo real.
             </p>
           </div>
@@ -32,46 +32,46 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
           <div class="flex items-center gap-3">
             <button 
               (click)="activeTab = 'campanas'"
-              [class.bg-amber-500]="activeTab === 'campanas'"
-              [class.text-stone-950]="activeTab === 'campanas'"
-              [class.bg-stone-900]="activeTab !== 'campanas'"
-              [class.text-stone-300]="activeTab !== 'campanas'"
-              class="px-4 py-2 text-xs font-medium uppercase tracking-wider rounded border border-stone-700 transition hover:border-amber-500/50">
+              [class.bg-black]="activeTab === 'campanas'"
+              [class.text-white]="activeTab === 'campanas'"
+              [class.bg-gray-100]="activeTab !== 'campanas'"
+              [class.text-gray-700]="activeTab !== 'campanas'"
+              class="px-4 py-2 text-xs font-semibold uppercase tracking-wider rounded border border-gray-200 transition hover:border-black">
               Campanas y Cupones
             </button>
             <button 
               (click)="activeTab = 'simulador'"
-              [class.bg-amber-500]="activeTab === 'simulador'"
-              [class.text-stone-950]="activeTab === 'simulador'"
-              [class.bg-stone-900]="activeTab !== 'simulador'"
-              [class.text-stone-300]="activeTab !== 'simulador'"
-              class="px-4 py-2 text-xs font-medium uppercase tracking-wider rounded border border-stone-700 transition hover:border-amber-500/50 flex items-center gap-1.5">
+              [class.bg-black]="activeTab === 'simulador'"
+              [class.text-white]="activeTab === 'simulador'"
+              [class.bg-gray-100]="activeTab !== 'simulador'"
+              [class.text-gray-700]="activeTab !== 'simulador'"
+              class="px-4 py-2 text-xs font-semibold uppercase tracking-wider rounded border border-gray-200 transition hover:border-black flex items-center gap-1.5">
               <span>&#9889;</span> Simulador de Canje
             </button>
             <button 
               *ngIf="activeTab === 'campanas'"
               (click)="abrirModalNuevaPromo()"
-              class="px-4 py-2 text-xs font-medium uppercase tracking-wider bg-white text-stone-950 rounded hover:bg-stone-200 transition shadow-lg shadow-white/5 flex items-center gap-2">
+              class="px-4 py-2 text-xs font-semibold uppercase tracking-wider bg-black text-white rounded hover:bg-neutral-800 transition shadow-sm flex items-center gap-2 border border-black">
               <span>+</span> Nueva Campana
             </button>
           </div>
         </div>
 
         <!-- NOTIFICACIONES FLASH -->
-        <div *ngIf="mensajeExito" class="bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 px-4 py-3 rounded text-sm flex items-center justify-between">
+        <div *ngIf="mensajeExito" class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded text-sm flex items-center justify-between">
           <div class="flex items-center gap-2">
             <span>&#10003;</span>
             <span>{{ mensajeExito }}</span>
           </div>
-          <button (click)="mensajeExito = null" class="text-stone-400 hover:text-white">&times;</button>
+          <button (click)="mensajeExito = null" class="text-gray-400 hover:text-black">&times;</button>
         </div>
 
-        <div *ngIf="errorGeneral" class="bg-rose-950/40 border border-rose-500/30 text-rose-300 px-4 py-3 rounded text-sm flex items-center justify-between">
+        <div *ngIf="errorGeneral" class="bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 rounded text-sm flex items-center justify-between">
           <div class="flex items-center gap-2">
             <span>&#9888;</span>
             <span>{{ errorGeneral }}</span>
           </div>
-          <button (click)="errorGeneral = null" class="text-stone-400 hover:text-white">&times;</button>
+          <button (click)="errorGeneral = null" class="text-gray-400 hover:text-black">&times;</button>
         </div>
 
         <!-- ================= TAB 1: CAMPANAS Y CUPONES ================= -->
@@ -79,42 +79,42 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
           
           <!-- KPI METRICS -->
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-stone-900/60 border border-stone-800 p-5 rounded-lg">
-              <span class="text-xs uppercase tracking-widest text-stone-400 font-mono">Total Campanas</span>
-              <p class="text-3xl font-light text-white mt-2">{{ promociones.length }}</p>
-              <span class="text-xs text-stone-500 mt-1 block">Estrategias creadas</span>
+            <div class="bg-white border border-gray-200 p-5 rounded shadow-sm">
+              <span class="text-xs uppercase tracking-widest text-gray-500 font-mono">Total Campanas</span>
+              <p class="text-3xl font-bold text-black mt-2">{{ promociones.length }}</p>
+              <span class="text-xs text-gray-500 mt-1 block">Estrategias creadas</span>
             </div>
-            <div class="bg-stone-900/60 border border-stone-800 p-5 rounded-lg">
-              <span class="text-xs uppercase tracking-widest text-emerald-400 font-mono">Cupones Activos</span>
-              <p class="text-3xl font-light text-emerald-400 mt-2">{{ totalActivas }}</p>
-              <span class="text-xs text-stone-500 mt-1 block">Listos para redimir</span>
+            <div class="bg-white border border-gray-200 p-5 rounded shadow-sm">
+              <span class="text-xs uppercase tracking-widest text-emerald-700 font-mono">Cupones Activos</span>
+              <p class="text-3xl font-bold text-emerald-700 mt-2">{{ totalActivas }}</p>
+              <span class="text-xs text-gray-500 mt-1 block">Listos para redimir</span>
             </div>
-            <div class="bg-stone-900/60 border border-stone-800 p-5 rounded-lg">
-              <span class="text-xs uppercase tracking-widest text-amber-400 font-mono">Canjes Registrados</span>
-              <p class="text-3xl font-light text-amber-400 mt-2">{{ totalUsos }}</p>
-              <span class="text-xs text-stone-500 mt-1 block">En POS y E-Commerce</span>
+            <div class="bg-white border border-gray-200 p-5 rounded shadow-sm">
+              <span class="text-xs uppercase tracking-widest text-gray-600 font-mono">Canjes Registrados</span>
+              <p class="text-3xl font-bold text-black mt-2">{{ totalUsos }}</p>
+              <span class="text-xs text-gray-500 mt-1 block">En POS y E-Commerce</span>
             </div>
-            <div class="bg-stone-900/60 border border-stone-800 p-5 rounded-lg">
-              <span class="text-xs uppercase tracking-widest text-stone-400 font-mono">Ahorro Bonificado</span>
-              <p class="text-3xl font-light text-white mt-2"><span class="text-amber-400">$</span>{{ totalAhorroEstimado | number:'1.2-2' }}</p>
-              <span class="text-xs text-stone-500 mt-1 block">Beneficio acumulado</span>
+            <div class="bg-white border border-gray-200 p-5 rounded shadow-sm">
+              <span class="text-xs uppercase tracking-widest text-gray-500 font-mono">Ahorro Bonificado</span>
+              <p class="text-3xl font-bold text-black mt-2"><span class="text-black">$</span>{{ totalAhorroEstimado | number:'1.2-2' }}</p>
+              <span class="text-xs text-gray-500 mt-1 block">Beneficio acumulado</span>
             </div>
           </div>
 
           <!-- FILTROS & BUSQUEDA -->
-          <div class="flex flex-col sm:flex-row gap-4 justify-between items-center bg-stone-900/40 p-4 rounded-lg border border-stone-800/80">
+          <div class="flex flex-col sm:flex-row gap-4 justify-between items-center bg-gray-50 p-4 rounded border border-gray-200">
             <div class="relative w-full sm:w-80">
               <input 
                 type="text" 
                 [(ngModel)]="filtroTexto" 
                 placeholder="Buscar codigo o nombre..." 
-                class="w-full bg-stone-950 border border-stone-700 text-stone-200 text-xs px-3.5 py-2.5 rounded focus:border-amber-500 focus:outline-none placeholder-stone-600">
+                class="w-full bg-white border border-gray-300 text-gray-900 text-xs px-3.5 py-2.5 rounded focus:border-black focus:outline-none placeholder-gray-400">
             </div>
 
             <div class="flex items-center gap-3 w-full sm:w-auto">
               <select 
                 [(ngModel)]="filtroTipo" 
-                class="bg-stone-950 border border-stone-700 text-stone-300 text-xs px-3 py-2 rounded focus:border-amber-500 focus:outline-none">
+                class="bg-white border border-gray-300 text-gray-800 text-xs px-3 py-2 rounded focus:border-black focus:outline-none">
                 <option value="TODOS">Todos los tipos</option>
                 <option value="PORCENTAJE">Porcentaje (%)</option>
                 <option value="MONTO_FIJO">Monto Fijo ($)</option>
@@ -123,7 +123,7 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
 
               <select 
                 [(ngModel)]="filtroEstado" 
-                class="bg-stone-950 border border-stone-700 text-stone-300 text-xs px-3 py-2 rounded focus:border-amber-500 focus:outline-none">
+                class="bg-white border border-gray-300 text-gray-800 text-xs px-3 py-2 rounded focus:border-black focus:outline-none">
                 <option value="TODOS">Todos los estados</option>
                 <option value="ACTIVOS">Solo Activos</option>
                 <option value="INACTIVOS">Solo Inactivos</option>
@@ -132,26 +132,26 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
               <button 
                 (click)="cargarPromociones()" 
                 title="Recargar"
-                class="p-2 text-stone-400 hover:text-white bg-stone-950 border border-stone-700 rounded transition">
+                class="p-2 text-gray-600 hover:text-black bg-white border border-gray-300 rounded transition">
                 &#8635;
               </button>
             </div>
           </div>
 
           <!-- TABLA DE PROMOCIONES -->
-          <div class="bg-stone-900/30 border border-stone-800 rounded-lg overflow-hidden">
-            <div *ngIf="cargando" class="py-12 text-center text-stone-500 text-sm">
+          <div class="bg-white border border-gray-200 rounded shadow-sm overflow-hidden">
+            <div *ngIf="cargando" class="py-12 text-center text-gray-500 text-sm">
               Cargando catalogo de promociones...
             </div>
 
-            <div *ngIf="!cargando && promocionesFiltradas.length === 0" class="py-12 text-center text-stone-500 text-sm">
+            <div *ngIf="!cargando && promocionesFiltradas.length === 0" class="py-12 text-center text-gray-500 text-sm">
               No se encontraron promociones que coincidan con los filtros.
             </div>
 
             <div *ngIf="!cargando && promocionesFiltradas.length > 0" class="overflow-x-auto">
               <table class="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr class="border-b border-stone-800 text-stone-400 uppercase tracking-widest bg-stone-900/60 font-mono text-[11px]">
+                  <tr class="border-b border-gray-200 text-gray-600 uppercase tracking-widest bg-gray-50 font-mono text-[11px]">
                     <th class="py-3 px-4">Codigo</th>
                     <th class="py-3 px-4">Campana / Descripcion</th>
                     <th class="py-3 px-4">Beneficio</th>
@@ -162,15 +162,15 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
                     <th class="py-3 px-4 text-right">Acciones</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-stone-800/60 text-stone-300">
-                  <tr *ngFor="let p of promocionesFiltradas" class="hover:bg-stone-900/40 transition">
+                <tbody class="divide-y divide-gray-100 text-gray-800">
+                  <tr *ngFor="let p of promocionesFiltradas" class="hover:bg-gray-50 transition">
                     <!-- Codigo -->
-                    <td class="py-3.5 px-4 font-mono font-semibold text-amber-400">
+                    <td class="py-3.5 px-4 font-mono font-bold text-black">
                       <div class="flex items-center gap-1.5">
-                        <span class="px-2 py-0.5 bg-amber-500/10 border border-amber-500/30 rounded text-amber-300">
+                        <span class="px-2 py-0.5 bg-gray-100 border border-gray-300 rounded text-black font-mono">
                           {{ p.codigo }}
                         </span>
-                        <button (click)="copiarCodigo(p.codigo)" title="Copiar codigo" class="text-stone-500 hover:text-amber-300 text-xs">
+                        <button (click)="copiarCodigo(p.codigo)" title="Copiar codigo" class="text-gray-400 hover:text-black text-xs">
                           &#128203;
                         </button>
                       </div>
@@ -178,56 +178,56 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
 
                     <!-- Campana -->
                     <td class="py-3.5 px-4">
-                      <div class="font-medium text-white">{{ p.nombre }}</div>
-                      <div class="text-stone-500 text-[11px] truncate max-w-xs">{{ p.descripcion || 'Sin descripcion detallada' }}</div>
+                      <div class="font-semibold text-black">{{ p.nombre }}</div>
+                      <div class="text-gray-500 text-[11px] truncate max-w-xs">{{ p.descripcion || 'Sin descripcion detallada' }}</div>
                     </td>
 
                     <!-- Beneficio -->
                     <td class="py-3.5 px-4">
-                      <span *ngIf="p.tipo_descuento === 'PORCENTAJE'" class="font-semibold text-emerald-400">
+                      <span *ngIf="p.tipo_descuento === 'PORCENTAJE'" class="font-bold text-emerald-700">
                         {{ p.valor_descuento }}% OFF
                       </span>
-                      <span *ngIf="p.tipo_descuento === 'MONTO_FIJO'" class="font-semibold text-sky-400">
-                        <span class="text-stone-400">$</span>{{ p.valor_descuento | number:'1.2-2' }} USD
+                      <span *ngIf="p.tipo_descuento === 'MONTO_FIJO'" class="font-bold text-blue-700">
+                        <span class="text-gray-500">$</span>{{ p.valor_descuento | number:'1.2-2' }} USD
                       </span>
-                      <span *ngIf="p.tipo_descuento === 'ENVIO_GRATIS'" class="font-semibold text-purple-400 flex items-center gap-1">
+                      <span *ngIf="p.tipo_descuento === 'ENVIO_GRATIS'" class="font-bold text-purple-700 flex items-center gap-1">
                         <span>&#128666;</span> Envio Bonificado
                       </span>
                     </td>
 
                     <!-- Reglas -->
-                    <td class="py-3.5 px-4 text-[11px] text-stone-400 space-y-0.5">
-                      <div>Min: <span class="text-stone-200"><span class="currency">$</span>{{ p.monto_minimo_compra | number:'1.2-2' }}</span></div>
-                      <div *ngIf="p.descuento_maximo">Tope: <span class="text-stone-200"><span class="currency">$</span>{{ p.descuento_maximo | number:'1.2-2' }}</span></div>
-                      <div>Lim/cliente: <span class="text-stone-200">{{ p.limite_por_cliente }} uso(s)</span></div>
+                    <td class="py-3.5 px-4 text-[11px] text-gray-500 space-y-0.5">
+                      <div>Min: <span class="text-gray-900 font-medium"><span class="currency">$</span>{{ p.monto_minimo_compra | number:'1.2-2' }}</span></div>
+                      <div *ngIf="p.descuento_maximo">Tope: <span class="text-gray-900 font-medium"><span class="currency">$</span>{{ p.descuento_maximo | number:'1.2-2' }}</span></div>
+                      <div>Lim/cliente: <span class="text-gray-900 font-medium">{{ p.limite_por_cliente }} uso(s)</span></div>
                     </td>
 
                     <!-- Usos / Limite -->
                     <td class="py-3.5 px-4 text-center">
                       <div class="font-mono text-xs">
-                        <span class="text-white font-semibold">{{ p.usos_actuales }}</span>
-                        <span class="text-stone-500"> / {{ p.limite_usos ? p.limite_usos : '&#8734;' }}</span>
+                        <span class="text-black font-semibold">{{ p.usos_actuales }}</span>
+                        <span class="text-gray-400"> / {{ p.limite_usos ? p.limite_usos : '&#8734;' }}</span>
                       </div>
-                      <div *ngIf="p.limite_usos" class="w-20 bg-stone-800 h-1 rounded-full mx-auto mt-1 overflow-hidden">
+                      <div *ngIf="p.limite_usos" class="w-20 bg-gray-200 h-1 rounded-full mx-auto mt-1 overflow-hidden">
                         <div 
-                          class="bg-amber-400 h-full" 
+                          class="bg-black h-full" 
                           [style.width.%]="(p.usos_actuales / p.limite_usos) * 100">
                         </div>
                       </div>
                     </td>
 
                     <!-- Vigencia -->
-                    <td class="py-3.5 px-4 text-[11px] text-stone-400">
+                    <td class="py-3.5 px-4 text-[11px] text-gray-500">
                       <div>{{ p.fecha_inicio | date:'dd/MM/yyyy' }}</div>
-                      <div class="text-stone-500">hasta {{ p.fecha_fin | date:'dd/MM/yyyy' }}</div>
+                      <div class="text-gray-400">hasta {{ p.fecha_fin | date:'dd/MM/yyyy' }}</div>
                     </td>
 
                     <!-- Estado Toggle -->
                     <td class="py-3.5 px-4 text-center">
                       <button 
                         (click)="alternarEstado(p)" 
-                        [ngClass]="p.activo ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-stone-800 text-stone-500 border-stone-700'"
-                        class="px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase rounded-full border transition hover:opacity-80">
+                        [ngClass]="p.activo ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-gray-100 text-gray-500 border-gray-200'"
+                        class="px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase rounded-full border transition hover:opacity-80">
                         {{ p.activo ? 'ACTIVO' : 'INACTIVO' }}
                       </button>
                     </td>
@@ -237,13 +237,13 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
                       <button 
                         (click)="probarEnSimulador(p.codigo)" 
                         title="Probar en simulador" 
-                        class="text-amber-400 hover:text-amber-300 text-xs px-2 py-1 bg-amber-500/10 border border-amber-500/20 rounded">
+                        class="text-black hover:bg-gray-100 text-xs px-2.5 py-1 bg-white border border-gray-300 rounded font-medium transition">
                         &#9889; Probar
                       </button>
                       <button 
                         (click)="eliminarPromo(p)" 
                         title="Eliminar o archivar" 
-                        class="text-rose-400 hover:text-rose-300 text-xs px-2 py-1 bg-rose-500/10 border border-rose-500/20 rounded">
+                        class="text-rose-600 hover:bg-rose-50 text-xs px-2.5 py-1 bg-white border border-rose-200 rounded font-medium transition">
                         &#10005;
                       </button>
                     </td>
@@ -258,23 +258,23 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
         <div *ngIf="activeTab === 'simulador'" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           <!-- PANEL DE CONFIGURACION DE SIMULACION -->
-          <div class="lg:col-span-5 bg-stone-900/40 border border-stone-800 p-6 rounded-lg space-y-6">
+          <div class="lg:col-span-5 bg-white border border-gray-200 p-6 rounded shadow-sm space-y-6">
             <div>
-              <span class="text-xs uppercase tracking-widest text-amber-400 font-mono">Motor de Validacion</span>
-              <h2 class="text-xl font-light text-white mt-1">Simular Canje de Cupon</h2>
-              <p class="text-xs text-stone-400 mt-1">
+              <span class="text-xs uppercase tracking-widest text-gray-500 font-mono">Motor de Validacion</span>
+              <h2 class="text-xl font-bold text-black mt-1">Simular Canje de Cupon</h2>
+              <p class="text-xs text-gray-500 mt-1">
                 Comprueba las reglas de negocio (monto minimo, tope, vigencia, modalidad) antes de aplicar un descuento.
               </p>
             </div>
 
             <!-- Botones de Cupones Rapidos -->
             <div>
-              <label class="block text-xs uppercase tracking-wider text-stone-400 mb-2 font-mono">Cupones de prueba rapida</label>
+              <label class="block text-xs uppercase tracking-wider text-gray-500 mb-2 font-mono font-semibold">Cupones de prueba rapida</label>
               <div class="flex flex-wrap gap-2">
                 <button 
                   *ngFor="let c of cuponesSugeridos" 
                   (click)="simuladorCodigo = c"
-                  class="px-2.5 py-1 text-xs font-mono bg-stone-950 border border-stone-700 text-amber-300 rounded hover:border-amber-400 transition">
+                  class="px-2.5 py-1 text-xs font-mono bg-gray-50 border border-gray-300 text-black rounded hover:border-black font-bold transition">
                   {{ c }}
                 </button>
               </div>
@@ -282,44 +282,44 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
 
             <div class="space-y-4">
               <div>
-                <label class="block text-xs uppercase tracking-wider text-stone-400 mb-1 font-mono">Codigo del Cupon</label>
+                <label class="block text-xs uppercase tracking-wider text-gray-600 mb-1 font-mono font-semibold">Codigo del Cupon</label>
                 <input 
                   type="text" 
                   [(ngModel)]="simuladorCodigo" 
                   placeholder="Ej. ATELIER20" 
-                  class="w-full bg-stone-950 border border-stone-700 text-amber-400 font-mono text-sm px-3.5 py-2.5 rounded focus:border-amber-500 focus:outline-none uppercase">
+                  class="w-full bg-white border border-gray-300 text-black font-mono font-bold text-sm px-3.5 py-2.5 rounded focus:border-black focus:outline-none uppercase">
               </div>
 
               <div>
                 <div class="flex justify-between items-center mb-1">
-                  <label class="text-xs uppercase tracking-wider text-stone-400 font-mono">Subtotal del Carrito ($ USD)</label>
-                  <span class="text-xs text-white font-mono"><span class="currency">$</span>{{ simuladorSubtotal | number:'1.2-2' }}</span>
+                  <label class="text-xs uppercase tracking-wider text-gray-600 font-mono font-semibold">Subtotal del Carrito ($ USD)</label>
+                  <span class="text-xs text-black font-mono font-bold"><span class="currency">$</span>{{ simuladorSubtotal | number:'1.2-2' }}</span>
                 </div>
                 <input 
                   type="number" 
                   [(ngModel)]="simuladorSubtotal" 
                   min="0" 
                   step="10"
-                  class="w-full bg-stone-950 border border-stone-700 text-white text-sm px-3.5 py-2 rounded focus:border-amber-500 focus:outline-none">
+                  class="w-full bg-white border border-gray-300 text-gray-900 text-sm px-3.5 py-2 rounded focus:border-black focus:outline-none font-medium">
               </div>
 
               <div>
                 <div class="flex justify-between items-center mb-1">
-                  <label class="text-xs uppercase tracking-wider text-stone-400 font-mono">Costo de Envio Base ($ USD)</label>
-                  <span class="text-xs text-white font-mono"><span class="currency">$</span>{{ simuladorCostoEnvio | number:'1.2-2' }}</span>
+                  <label class="text-xs uppercase tracking-wider text-gray-600 font-mono font-semibold">Costo de Envio Base ($ USD)</label>
+                  <span class="text-xs text-black font-mono font-bold"><span class="currency">$</span>{{ simuladorCostoEnvio | number:'1.2-2' }}</span>
                 </div>
                 <input 
                   type="number" 
                   [(ngModel)]="simuladorCostoEnvio" 
                   min="0" 
                   step="1"
-                  class="w-full bg-stone-950 border border-stone-700 text-white text-sm px-3.5 py-2 rounded focus:border-amber-500 focus:outline-none">
+                  class="w-full bg-white border border-gray-300 text-gray-900 text-sm px-3.5 py-2 rounded focus:border-black focus:outline-none font-medium">
               </div>
 
               <button 
                 (click)="ejecutarSimulacion()" 
                 [disabled]="simulando || !simuladorCodigo.trim()"
-                class="w-full py-3 bg-amber-500 text-stone-950 font-semibold text-xs uppercase tracking-wider rounded hover:bg-amber-400 transition shadow-lg shadow-amber-500/10 disabled:opacity-50 flex items-center justify-center gap-2">
+                class="w-full py-3 bg-black text-white font-bold text-xs uppercase tracking-wider rounded hover:bg-neutral-800 transition shadow-sm disabled:opacity-50 flex items-center justify-center gap-2">
                 <span *ngIf="simulando">Validando con Motor Comercial...</span>
                 <span *ngIf="!simulando">&#9889; Validar &amp; Calcular Descuento</span>
               </button>
@@ -327,57 +327,57 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
           </div>
 
           <!-- PANEL DE RESULTADO EN VIVO -->
-          <div class="lg:col-span-7 bg-stone-900/40 border border-stone-800 p-6 rounded-lg flex flex-col justify-between space-y-6">
+          <div class="lg:col-span-7 bg-white border border-gray-200 p-6 rounded shadow-sm flex flex-col justify-between space-y-6">
             <div>
-              <span class="text-xs uppercase tracking-widest text-stone-500 font-mono">Resultado de la Auditoria</span>
-              <h2 class="text-xl font-light text-white mt-1">Desglose Financiero</h2>
+              <span class="text-xs uppercase tracking-widest text-gray-500 font-mono">Resultado de la Auditoria</span>
+              <h2 class="text-xl font-bold text-black mt-1">Desglose Financiero</h2>
             </div>
 
             <!-- Estado sin simulacion -->
-            <div *ngIf="!resultadoSimulacion" class="py-16 text-center text-stone-500 text-sm border border-dashed border-stone-800 rounded">
+            <div *ngIf="!resultadoSimulacion" class="py-16 text-center text-gray-500 text-sm border border-dashed border-gray-300 rounded bg-gray-50">
               Ingresa un codigo y un subtotal para simular la liquidacion en tiempo real.
             </div>
 
             <!-- Resultado Exitoso -->
             <div *ngIf="resultadoSimulacion && resultadoSimulacion.valido" class="space-y-6">
-              <div class="bg-emerald-950/40 border border-emerald-500/40 p-4 rounded-lg flex items-center gap-3">
+              <div class="bg-emerald-50 border border-emerald-200 p-4 rounded flex items-center gap-3">
                 <span class="text-2xl">&#127881;</span>
                 <div>
-                  <div class="text-emerald-400 font-medium text-sm">{{ resultadoSimulacion.mensaje }}</div>
-                  <div class="text-xs text-stone-400 mt-0.5">Cupon verificado con exito bajo las politicas comerciales de la boutique.</div>
+                  <div class="text-emerald-800 font-semibold text-sm">{{ resultadoSimulacion.mensaje }}</div>
+                  <div class="text-xs text-emerald-600 mt-0.5">Cupon verificado con exito bajo las politicas comerciales de la boutique.</div>
                 </div>
               </div>
 
-              <div class="bg-stone-950 p-5 rounded-lg border border-stone-800 space-y-3 font-mono text-xs">
-                <div class="flex justify-between text-stone-400">
+              <div class="bg-gray-50 p-5 rounded border border-gray-200 space-y-3 font-mono text-xs">
+                <div class="flex justify-between text-gray-600">
                   <span>Subtotal prendas:</span>
-                  <span class="text-white"><span class="currency">$</span>{{ simuladorSubtotal | number:'1.2-2' }} USD</span>
+                  <span class="text-black font-semibold"><span class="currency">$</span>{{ simuladorSubtotal | number:'1.2-2' }} USD</span>
                 </div>
-                <div class="flex justify-between text-emerald-400 font-semibold">
+                <div class="flex justify-between text-emerald-700 font-bold">
                   <span>Descuento cupon ({{ resultadoSimulacion.codigo }}):</span>
                   <span>- <span class="currency">$</span>{{ resultadoSimulacion.descuento_calculado | number:'1.2-2' }} USD</span>
                 </div>
-                <div class="flex justify-between text-stone-400">
+                <div class="flex justify-between text-gray-600">
                   <span>Costo de envio despacho:</span>
                   <span [class.line-through]="resultadoSimulacion.tipo_descuento === 'ENVIO_GRATIS'">
                     <span class="currency">$</span>{{ simuladorCostoEnvio | number:'1.2-2' }} USD
                   </span>
                 </div>
-                <div *ngIf="resultadoSimulacion.tipo_descuento === 'ENVIO_GRATIS'" class="flex justify-between text-purple-400">
+                <div *ngIf="resultadoSimulacion.tipo_descuento === 'ENVIO_GRATIS'" class="flex justify-between text-purple-700 font-semibold">
                   <span>Bonificacion Yaigo Express:</span>
                   <span>Gratis ($0.00)</span>
                 </div>
-                <div class="border-t border-stone-800 pt-3 flex justify-between text-sm text-white font-bold">
+                <div class="border-t border-gray-200 pt-3 flex justify-between text-sm text-black font-bold">
                   <span>TOTAL FINAL A COBRAR:</span>
-                  <span class="text-amber-400"><span class="currency">$</span>{{ resultadoSimulacion.total_con_descuento | number:'1.2-2' }} USD</span>
+                  <span class="text-black text-base font-extrabold"><span class="currency">$</span>{{ resultadoSimulacion.total_con_descuento | number:'1.2-2' }} USD</span>
                 </div>
               </div>
 
-              <div *ngIf="resultadoSimulacion.promocion" class="bg-stone-900/80 p-4 rounded border border-stone-800 text-xs space-y-1">
-                <div class="text-stone-400 font-mono text-[11px] uppercase">Detalle de Reglas Activas:</div>
-                <div class="text-stone-300">Campana: <strong class="text-white">{{ resultadoSimulacion.promocion.nombre }}</strong></div>
-                <div class="text-stone-400">Monto minimo exigido: <span class="currency">$</span>{{ resultadoSimulacion.promocion.monto_minimo_compra | number:'1.2-2' }} USD</div>
-                <div *ngIf="resultadoSimulacion.promocion.descuento_maximo" class="text-stone-400">
+              <div *ngIf="resultadoSimulacion.promocion" class="bg-gray-100 p-4 rounded border border-gray-200 text-xs space-y-1">
+                <div class="text-gray-500 font-mono text-[11px] uppercase font-semibold">Detalle de Reglas Activas:</div>
+                <div class="text-gray-800">Campana: <strong class="text-black">{{ resultadoSimulacion.promocion.nombre }}</strong></div>
+                <div class="text-gray-600">Monto minimo exigido: <span class="currency">$</span>{{ resultadoSimulacion.promocion.monto_minimo_compra | number:'1.2-2' }} USD</div>
+                <div *ngIf="resultadoSimulacion.promocion.descuento_maximo" class="text-gray-600">
                   Tope maximo de descuento: <span class="currency">$</span>{{ resultadoSimulacion.promocion.descuento_maximo | number:'1.2-2' }} USD
                 </div>
               </div>
@@ -385,36 +385,36 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
 
             <!-- Resultado Invalido -->
             <div *ngIf="resultadoSimulacion && !resultadoSimulacion.valido" class="space-y-6">
-              <div class="bg-rose-950/40 border border-rose-500/40 p-4 rounded-lg flex items-center gap-3">
+              <div class="bg-rose-50 border border-rose-200 p-4 rounded flex items-center gap-3">
                 <span class="text-2xl">&#128683;</span>
                 <div>
-                  <div class="text-rose-400 font-medium text-sm">Cupon Rechazado por el Motor</div>
-                  <div class="text-xs text-rose-300/80 mt-0.5">{{ resultadoSimulacion.mensaje }}</div>
+                  <div class="text-rose-800 font-semibold text-sm">Cupon Rechazado por el Motor</div>
+                  <div class="text-xs text-rose-600 mt-0.5">{{ resultadoSimulacion.mensaje }}</div>
                 </div>
               </div>
 
-              <div class="bg-stone-950 p-5 rounded-lg border border-stone-800 space-y-3 font-mono text-xs opacity-70">
-                <div class="flex justify-between text-stone-400">
+              <div class="bg-gray-50 p-5 rounded border border-gray-200 space-y-3 font-mono text-xs opacity-80">
+                <div class="flex justify-between text-gray-600">
                   <span>Subtotal prendas:</span>
-                  <span class="text-white"><span class="currency">$</span>{{ simuladorSubtotal | number:'1.2-2' }} USD</span>
+                  <span class="text-black font-semibold"><span class="currency">$</span>{{ simuladorSubtotal | number:'1.2-2' }} USD</span>
                 </div>
-                <div class="flex justify-between text-stone-500">
+                <div class="flex justify-between text-gray-500">
                   <span>Descuento aplicado:</span>
                   <span>$0.00 USD</span>
                 </div>
-                <div class="flex justify-between text-stone-400">
+                <div class="flex justify-between text-gray-600">
                   <span>Costo de envio:</span>
                   <span><span class="currency">$</span>{{ simuladorCostoEnvio | number:'1.2-2' }} USD</span>
                 </div>
-                <div class="border-t border-stone-800 pt-3 flex justify-between text-sm text-white font-bold">
+                <div class="border-t border-gray-200 pt-3 flex justify-between text-sm text-black font-bold">
                   <span>TOTAL SIN DESCUENTO:</span>
-                  <span class="text-white"><span class="currency">$</span>{{ (simuladorSubtotal + simuladorCostoEnvio) | number:'1.2-2' }} USD</span>
+                  <span class="text-black"><span class="currency">$</span>{{ (simuladorSubtotal + simuladorCostoEnvio) | number:'1.2-2' }} USD</span>
                 </div>
               </div>
             </div>
 
-            <div class="text-stone-600 text-[11px] font-mono border-t border-stone-800 pt-4 flex justify-between">
-              <span>MOTOR: CU16 PromoEngine v2.4</span>
+            <div class="text-gray-400 text-[11px] font-mono border-t border-gray-200 pt-4 flex justify-between">
+              <span>MOTOR: PromoEngine v2.4</span>
               <span>ATELIER NOIR VALIDATOR</span>
             </div>
           </div>
@@ -424,55 +424,55 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
       </div>
 
       <!-- ================= MODAL NUEVA CAMPANA / CUPON ================= -->
-      <div *ngIf="modalNuevaPromo" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-stone-900 border border-stone-800 rounded-lg max-w-2xl w-full p-6 space-y-5 my-8 shadow-2xl">
+      <div *ngIf="modalNuevaPromo" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white border border-gray-200 rounded max-w-2xl w-full p-6 space-y-5 my-8 shadow-2xl text-gray-900">
           
-          <div class="flex justify-between items-start border-b border-stone-800 pb-4">
+          <div class="flex justify-between items-start border-b border-gray-200 pb-4">
             <div>
-              <span class="text-xs uppercase tracking-widest text-amber-400 font-mono">Alta Comercial</span>
-              <h3 class="text-xl font-light text-white mt-1">Crear Nueva Campana / Cupon</h3>
+              <span class="text-xs uppercase tracking-widest text-gray-500 font-mono">Alta Comercial</span>
+              <h3 class="text-xl font-bold text-black mt-1">Crear Nueva Campana / Cupon</h3>
             </div>
-            <button (click)="modalNuevaPromo = false" class="text-stone-400 hover:text-white text-xl">&times;</button>
+            <button (click)="modalNuevaPromo = false" class="text-gray-400 hover:text-black text-xl">&times;</button>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             
             <!-- Codigo -->
             <div>
-              <label class="block uppercase tracking-wider text-stone-400 mb-1 font-mono">Codigo de Cupon *</label>
+              <label class="block uppercase tracking-wider text-gray-600 mb-1 font-mono font-semibold">Codigo de Cupon *</label>
               <input 
                 type="text" 
                 [(ngModel)]="nuevaPromo.codigo" 
                 placeholder="Ej. VERANO25" 
-                class="w-full bg-stone-950 border border-stone-700 text-amber-400 font-mono px-3 py-2 rounded focus:border-amber-500 focus:outline-none uppercase">
+                class="w-full bg-white border border-gray-300 text-black font-mono font-bold px-3 py-2 rounded focus:border-black focus:outline-none uppercase">
             </div>
 
             <!-- Nombre -->
             <div>
-              <label class="block uppercase tracking-wider text-stone-400 mb-1 font-mono">Nombre de Campana *</label>
+              <label class="block uppercase tracking-wider text-gray-600 mb-1 font-mono font-semibold">Nombre de Campana *</label>
               <input 
                 type="text" 
                 [(ngModel)]="nuevaPromo.nombre" 
                 placeholder="Ej. Descuento Temporada Verano" 
-                class="w-full bg-stone-950 border border-stone-700 text-white px-3 py-2 rounded focus:border-amber-500 focus:outline-none">
+                class="w-full bg-white border border-gray-300 text-gray-900 px-3 py-2 rounded focus:border-black focus:outline-none">
             </div>
 
             <!-- Descripcion -->
             <div class="sm:col-span-2">
-              <label class="block uppercase tracking-wider text-stone-400 mb-1 font-mono">Descripcion Comercial</label>
+              <label class="block uppercase tracking-wider text-gray-600 mb-1 font-mono font-semibold">Descripcion Comercial</label>
               <input 
                 type="text" 
                 [(ngModel)]="nuevaPromo.descripcion" 
                 placeholder="Ej. Valido en vestidos y trajes seleccionados" 
-                class="w-full bg-stone-950 border border-stone-700 text-stone-300 px-3 py-2 rounded focus:border-amber-500 focus:outline-none">
+                class="w-full bg-white border border-gray-300 text-gray-800 px-3 py-2 rounded focus:border-black focus:outline-none">
             </div>
 
             <!-- Tipo de Descuento -->
             <div>
-              <label class="block uppercase tracking-wider text-stone-400 mb-1 font-mono">Tipo de Descuento *</label>
+              <label class="block uppercase tracking-wider text-gray-600 mb-1 font-mono font-semibold">Tipo de Descuento *</label>
               <select 
                 [(ngModel)]="nuevaPromo.tipo_descuento" 
-                class="w-full bg-stone-950 border border-stone-700 text-white px-3 py-2 rounded focus:border-amber-500 focus:outline-none">
+                class="w-full bg-white border border-gray-300 text-gray-800 px-3 py-2 rounded focus:border-black focus:outline-none">
                 <option value="PORCENTAJE">Porcentaje (%)</option>
                 <option value="MONTO_FIJO">Monto Fijo ($ USD)</option>
                 <option value="ENVIO_GRATIS">Envio Gratis</option>
@@ -481,89 +481,89 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
 
             <!-- Valor de Descuento -->
             <div>
-              <label class="block uppercase tracking-wider text-stone-400 mb-1 font-mono">
+              <label class="block uppercase tracking-wider text-gray-600 mb-1 font-mono font-semibold">
                 Valor Beneficio {{ nuevaPromo.tipo_descuento === 'PORCENTAJE' ? '(%)' : '($ USD)' }} *
               </label>
               <input 
                 type="number" 
                 [(ngModel)]="nuevaPromo.valor_descuento" 
-                min="0"
+                min="0" 
                 step="5"
                 [disabled]="nuevaPromo.tipo_descuento === 'ENVIO_GRATIS'"
-                class="w-full bg-stone-950 border border-stone-700 text-white px-3 py-2 rounded focus:border-amber-500 focus:outline-none disabled:opacity-40">
+                class="w-full bg-white border border-gray-300 text-gray-900 px-3 py-2 rounded focus:border-black focus:outline-none disabled:opacity-40">
             </div>
 
             <!-- Monto Minimo Compra -->
             <div>
-              <label class="block uppercase tracking-wider text-stone-400 mb-1 font-mono">Monto Minimo Compra ($ USD)</label>
+              <label class="block uppercase tracking-wider text-gray-600 mb-1 font-mono font-semibold">Monto Minimo Compra ($ USD)</label>
               <input 
                 type="number" 
                 [(ngModel)]="nuevaPromo.monto_minimo_compra" 
-                min="0"
-                class="w-full bg-stone-950 border border-stone-700 text-white px-3 py-2 rounded focus:border-amber-500 focus:outline-none">
+                min="0" 
+                class="w-full bg-white border border-gray-300 text-gray-900 px-3 py-2 rounded focus:border-black focus:outline-none">
             </div>
 
             <!-- Descuento Maximo (Tope) -->
             <div>
-              <label class="block uppercase tracking-wider text-stone-400 mb-1 font-mono">Tope Max. Descuento ($ USD)</label>
+              <label class="block uppercase tracking-wider text-gray-600 mb-1 font-mono font-semibold">Tope Max. Descuento ($ USD)</label>
               <input 
                 type="number" 
                 [(ngModel)]="nuevaPromo.descuento_maximo" 
-                min="0"
-                placeholder="Opcional (sin limite)"
-                class="w-full bg-stone-950 border border-stone-700 text-white px-3 py-2 rounded focus:border-amber-500 focus:outline-none">
+                min="0" 
+                placeholder="Opcional (sin limite)" 
+                class="w-full bg-white border border-gray-300 text-gray-900 px-3 py-2 rounded focus:border-black focus:outline-none">
             </div>
 
             <!-- Limite Global de Usos -->
             <div>
-              <label class="block uppercase tracking-wider text-stone-400 mb-1 font-mono">Limite Global de Canjes</label>
+              <label class="block uppercase tracking-wider text-gray-600 mb-1 font-mono font-semibold">Limite Global de Canjes</label>
               <input 
                 type="number" 
                 [(ngModel)]="nuevaPromo.limite_usos" 
                 min="1"
                 placeholder="Opcional (ilimitado)"
-                class="w-full bg-stone-950 border border-stone-700 text-white px-3 py-2 rounded focus:border-amber-500 focus:outline-none">
+                class="w-full bg-white border border-gray-300 text-gray-900 px-3 py-2 rounded focus:border-black focus:outline-none">
             </div>
 
             <!-- Limite por Cliente -->
             <div>
-              <label class="block uppercase tracking-wider text-stone-400 mb-1 font-mono">Limite por Cliente</label>
+              <label class="block uppercase tracking-wider text-gray-600 mb-1 font-mono font-semibold">Limite por Cliente</label>
               <input 
                 type="number" 
                 [(ngModel)]="nuevaPromo.limite_por_cliente" 
                 min="1"
-                class="w-full bg-stone-950 border border-stone-700 text-white px-3 py-2 rounded focus:border-amber-500 focus:outline-none">
+                class="w-full bg-white border border-gray-300 text-gray-900 px-3 py-2 rounded focus:border-black focus:outline-none">
             </div>
 
             <!-- Fechas Vigencia -->
             <div>
-              <label class="block uppercase tracking-wider text-stone-400 mb-1 font-mono">Fecha Inicio *</label>
+              <label class="block uppercase tracking-wider text-gray-600 mb-1 font-mono font-semibold">Fecha Inicio *</label>
               <input 
                 type="date" 
                 [(ngModel)]="fechaInicioInput" 
-                class="w-full bg-stone-950 border border-stone-700 text-white px-3 py-2 rounded focus:border-amber-500 focus:outline-none">
+                class="w-full bg-white border border-gray-300 text-gray-900 px-3 py-2 rounded focus:border-black focus:outline-none">
             </div>
 
             <div>
-              <label class="block uppercase tracking-wider text-stone-400 mb-1 font-mono">Fecha Fin *</label>
+              <label class="block uppercase tracking-wider text-gray-600 mb-1 font-mono font-semibold">Fecha Fin *</label>
               <input 
                 type="date" 
                 [(ngModel)]="fechaFinInput" 
-                class="w-full bg-stone-950 border border-stone-700 text-white px-3 py-2 rounded focus:border-amber-500 focus:outline-none">
+                class="w-full bg-white border border-gray-300 text-gray-900 px-3 py-2 rounded focus:border-black focus:outline-none">
             </div>
 
           </div>
 
-          <div class="border-t border-stone-800 pt-4 flex justify-end gap-3">
+          <div class="border-t border-gray-200 pt-4 flex justify-end gap-3">
             <button 
               (click)="modalNuevaPromo = false" 
-              class="px-4 py-2 bg-stone-800 text-stone-300 text-xs uppercase tracking-wider rounded hover:bg-stone-700 transition">
+              class="px-4 py-2 bg-gray-100 text-gray-700 text-xs uppercase tracking-wider rounded hover:bg-gray-200 transition border border-gray-200">
               Cancelar
             </button>
             <button 
               (click)="guardarNuevaPromo()" 
               [disabled]="guardandoPromo"
-              class="px-5 py-2 bg-amber-500 text-stone-950 font-semibold text-xs uppercase tracking-wider rounded hover:bg-amber-400 transition shadow-lg shadow-amber-500/10 disabled:opacity-50">
+              class="px-5 py-2 bg-black text-white font-bold text-xs uppercase tracking-wider rounded hover:bg-neutral-800 transition shadow-sm disabled:opacity-50">
               {{ guardandoPromo ? 'Guardando...' : 'Crear Promocion' }}
             </button>
           </div>
