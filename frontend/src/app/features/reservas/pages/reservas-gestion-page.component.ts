@@ -233,7 +233,7 @@ interface ItemChecklist {
             </div>
 
             <div *ngIf="r.observaciones" class="notes-snippet">
-              <span class="note-label">Nota:</span> {{ r.observaciones }}
+              <span class="note-label">Nota:</span> {{ limpiarNota(r.observaciones) }}
             </div>
           </div>
 
@@ -1463,6 +1463,15 @@ export class ReservasGestionPageComponent implements OnInit {
       case 'CANCELADA': return 'status-cancelada';
       default: return 'status-default';
     }
+  }
+
+  limpiarNota(nota: string | null | undefined): string {
+    if (!nota) return '';
+    return nota
+      .replace(/\bCU\d+\b/gi, '')
+      .replace(/\bCiclo\s*#?\d+\b/gi, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
   }
 
   // --- ACCIONES MODAL ASIGNAR ---
