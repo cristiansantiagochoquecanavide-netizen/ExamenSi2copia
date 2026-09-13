@@ -630,8 +630,8 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
       padding: 0.25rem 0.65rem;
       border-radius: 4px;
       background: #000000;
-      color: #d4af37;
-      border: 1px solid rgba(212, 175, 55, 0.4);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.15);
     }
 
     /* TABS SWITCHER */
