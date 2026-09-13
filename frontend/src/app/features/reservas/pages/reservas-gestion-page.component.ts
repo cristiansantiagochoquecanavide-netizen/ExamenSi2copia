@@ -30,7 +30,7 @@ interface ItemChecklist {
       <!-- HEADER PRINCIPAL -->
       <header class="gestion-header">
         <div class="header-titles">
-          <div class="luxury-badge">ATELIER NOIR &bull; CICLO #2 &bull; CU14</div>
+          <div class="luxury-badge">ATELIER NOIR &bull; ATENCIÓN EN TIENDA</div>
           <h1>Gestión de Probadores &amp; Atención en Tienda</h1>
           <p class="subtitle">
             Control de citas presenciales, asignación de vestidores físicos, chequeo post-prueba y derivación directa a Caja POS.
@@ -503,7 +503,8 @@ interface ItemChecklist {
       max-width: 1400px;
       margin: 0 auto;
       padding: 2rem 1.5rem 4rem;
-      color: #e2e8f0;
+      color: #111827;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
     /* HEADER */
@@ -512,38 +513,40 @@ interface ItemChecklist {
       justify-content: space-between;
       align-items: flex-start;
       margin-bottom: 2rem;
-      border-bottom: 1px solid #262635;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
       padding-bottom: 1.5rem;
     }
     .luxury-badge {
       display: inline-block;
       font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      color: #d4af37;
-      background: rgba(212, 175, 55, 0.1);
-      border: 1px solid rgba(212, 175, 55, 0.3);
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: #6b7280;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
       padding: 0.25rem 0.6rem;
       border-radius: 4px;
       margin-bottom: 0.5rem;
+      text-transform: uppercase;
     }
     .gestion-header h1 {
       font-size: 2rem;
-      font-weight: 600;
-      color: #f8fafc;
+      font-weight: 700;
+      color: #000000;
       margin: 0 0 0.5rem 0;
       letter-spacing: -0.02em;
     }
     .subtitle {
-      color: #94a3b8;
+      color: #6b7280;
       font-size: 0.95rem;
       max-width: 700px;
       margin: 0;
+      line-height: 1.5;
     }
     .btn-refresh {
-      background: #1e1e2d;
-      color: #cbd5e1;
-      border: 1px solid #33334d;
+      background: #ffffff;
+      color: #374151;
+      border: 1px solid #d1d5db;
       padding: 0.6rem 1.1rem;
       border-radius: 6px;
       font-weight: 500;
@@ -554,9 +557,9 @@ interface ItemChecklist {
       transition: all 0.2s;
     }
     .btn-refresh:hover {
-      background: #27273a;
-      color: #fff;
-      border-color: #d4af37;
+      background: #f9fafb;
+      color: #000000;
+      border-color: #9ca3af;
     }
 
     /* METRICAS */
@@ -567,35 +570,37 @@ interface ItemChecklist {
       margin-bottom: 2rem;
     }
     .metric-card {
-      background: #14141d;
-      border: 1px solid #232333;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.08);
       border-radius: 8px;
       padding: 1.25rem;
       cursor: pointer;
       transition: all 0.2s;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
     .metric-card:hover, .metric-card.active {
       transform: translateY(-2px);
-      border-color: #d4af37;
-      background: #1a1a27;
+      border-color: #000000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
     .metric-val {
       font-size: 2.2rem;
       font-weight: 700;
-      color: #f8fafc;
+      color: #111827;
       line-height: 1;
       margin-bottom: 0.4rem;
     }
     .metric-label {
-      font-size: 0.85rem;
-      color: #94a3b8;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #6b7280;
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-    .metric-card.gold .metric-val { color: #d4af37; }
-    .metric-card.purple .metric-val { color: #c084fc; }
-    .metric-card.emerald .metric-val { color: #34d399; }
-    .metric-card.rose .metric-val { color: #fb7185; }
+    .metric-card.gold .metric-val { color: #111827; }
+    .metric-card.purple .metric-val { color: #7c3aed; }
+    .metric-card.emerald .metric-val { color: #059669; }
+    .metric-card.rose .metric-val { color: #e11d48; }
 
     /* TOAST ALERTS */
     .toast-alert {
@@ -607,27 +612,36 @@ interface ItemChecklist {
       margin-bottom: 1.5rem;
     }
     .toast-alert.success {
-      background: rgba(16, 185, 129, 0.12);
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      color: #34d399;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
     }
     .toast-alert.error {
-      background: rgba(244, 63, 94, 0.12);
-      border: 1px solid rgba(244, 63, 94, 0.35);
-      color: #fb7185;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
     }
     .toast-icon { font-size: 1.3rem; }
     .toast-body { flex: 1; display: flex; flex-direction: column; font-size: 0.9rem; }
-    .toast-body strong { color: #fff; }
-    .toast-close { background: none; border: none; font-size: 1.4rem; color: inherit; cursor: pointer; }
+    .toast-body strong { color: #111827; }
+    .toast-close {
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      color: inherit;
+      cursor: pointer;
+      opacity: 0.7;
+    }
+    .toast-close:hover { opacity: 1; }
 
     /* PANEL CONTROL & SCANNER */
     .control-card {
-      background: #14141e;
-      border: 1px solid #232333;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.08);
       border-radius: 10px;
       padding: 1.5rem;
       margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
     .search-scanner-bar {
       display: flex;
@@ -644,26 +658,26 @@ interface ItemChecklist {
       position: absolute;
       left: 1rem;
       font-size: 1.2rem;
-      color: #d4af37;
+      color: #6b7280;
     }
     .input-scanner {
       width: 100%;
-      background: #0d0d14;
-      border: 1px solid #33334d;
-      color: #f8fafc;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      color: #111827;
       padding: 0.85rem 1rem 0.85rem 2.8rem;
       border-radius: 8px;
       font-size: 1rem;
       outline: none;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
     .input-scanner:focus {
-      border-color: #d4af37;
-      box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+      border-color: #000000;
+      box-shadow: 0 0 0 1px #000000;
     }
     .btn-search {
-      background: #d4af37;
-      color: #0b0b10;
+      background: #000000;
+      color: #ffffff;
       border: none;
       padding: 0 1.5rem;
       border-radius: 8px;
@@ -671,15 +685,20 @@ interface ItemChecklist {
       cursor: pointer;
       transition: background 0.2s;
     }
-    .btn-search:hover:not(:disabled) { background: #e5c158; }
+    .btn-search:hover:not(:disabled) { background: #1f2937; }
     .btn-search:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-clear-search {
-      background: #242436;
-      color: #cbd5e1;
-      border: 1px solid #3e3e5c;
+      background: #ffffff;
+      color: #4b5563;
+      border: 1px solid #d1d5db;
       padding: 0 1.2rem;
       border-radius: 8px;
       cursor: pointer;
+      font-weight: 500;
+    }
+    .btn-clear-search:hover {
+      background: #f3f4f6;
+      color: #111827;
     }
 
     .filters-row {
@@ -694,15 +713,18 @@ interface ItemChecklist {
       align-items: center;
       gap: 0.6rem;
       font-size: 0.9rem;
-      color: #94a3b8;
+      color: #6b7280;
     }
     .custom-select {
-      background: #0d0d14;
-      border: 1px solid #33334d;
-      color: #f8fafc;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      color: #111827;
       padding: 0.5rem 0.8rem;
       border-radius: 6px;
       outline: none;
+    }
+    .custom-select:focus {
+      border-color: #000000;
     }
     .filter-pills {
       display: flex;
@@ -710,20 +732,20 @@ interface ItemChecklist {
       flex-wrap: wrap;
     }
     .pill-btn {
-      background: #191924;
-      color: #94a3b8;
-      border: 1px solid #2b2b3d;
+      background: #ffffff;
+      color: #6b7280;
+      border: 1px solid #e5e7eb;
       padding: 0.4rem 0.8rem;
       border-radius: 20px;
       font-size: 0.85rem;
       cursor: pointer;
       transition: all 0.2s;
     }
-    .pill-btn:hover { color: #f8fafc; border-color: #555577; }
+    .pill-btn:hover { color: #111827; border-color: #d1d5db; }
     .pill-btn.active {
-      background: #d4af37;
-      color: #0b0b10;
-      border-color: #d4af37;
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
       font-weight: 600;
     }
 
@@ -731,21 +753,22 @@ interface ItemChecklist {
     .loading-state, .empty-state {
       text-align: center;
       padding: 4rem 2rem;
-      background: #14141d;
-      border: 1px dashed #28283a;
+      background: #ffffff;
+      border: 1px dashed #d1d5db;
       border-radius: 10px;
+      color: #6b7280;
     }
     .spinner {
       width: 40px;
       height: 40px;
-      border: 3px solid rgba(212, 175, 55, 0.2);
-      border-top-color: #d4af37;
+      border: 3px solid rgba(0, 0, 0, 0.1);
+      border-top-color: #000000;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
       margin: 0 auto 1rem;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.6; }
+    .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; color: #9ca3af; }
 
     /* GRID DE TARJETAS */
     .reservas-grid {
@@ -754,21 +777,22 @@ interface ItemChecklist {
       gap: 1.5rem;
     }
     .reserva-card {
-      background: #13131d;
-      border: 1px solid #232333;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.08);
       border-radius: 12px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
       transition: border-color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
     .reserva-card:hover {
-      border-color: #3b3b55;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      border-color: #d1d5db;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
     }
     .reserva-card.en-probador {
-      border-color: rgba(192, 132, 252, 0.5);
-      background: linear-gradient(180deg, rgba(192, 132, 252, 0.05) 0%, #13131d 100%);
+      border-color: #c4b5fd;
+      background: #faf5ff;
     }
 
     .card-head {
@@ -776,20 +800,21 @@ interface ItemChecklist {
       justify-content: space-between;
       align-items: center;
       padding: 1.2rem 1.25rem 0.8rem;
-      border-bottom: 1px solid #1e1e2d;
+      border-bottom: 1px solid #f3f4f6;
     }
     .badge-code {
       font-family: monospace;
       font-size: 0.95rem;
       font-weight: 700;
-      color: #f8fafc;
+      color: #111827;
       letter-spacing: 0.05em;
     }
     .appointment-time {
       display: block;
       font-size: 0.8rem;
-      color: #d4af37;
+      color: #6b7280;
       margin-top: 0.2rem;
+      font-weight: 500;
     }
     .status-pill {
       font-size: 0.75rem;
@@ -799,11 +824,12 @@ interface ItemChecklist {
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-    .status-confirmada { background: rgba(212, 175, 55, 0.15); color: #e5c158; border: 1px solid rgba(212, 175, 55, 0.4); }
-    .status-en-probador { background: rgba(192, 132, 252, 0.15); color: #c084fc; border: 1px solid rgba(192, 132, 252, 0.4); }
-    .status-completada { background: rgba(52, 211, 153, 0.15); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.4); }
-    .status-expirada { background: rgba(251, 113, 133, 0.15); color: #fb7185; border: 1px solid rgba(251, 113, 133, 0.4); }
-    .status-default { background: #262635; color: #94a3b8; }
+    .status-confirmada { background: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
+    .status-en-probador { background: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe; }
+    .status-completada { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+    .status-expirada { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+    .status-cancelada { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+    .status-default { background: #f3f4f6; color: #4b5563; border: 1px solid #e5e7eb; }
 
     .card-body {
       padding: 1.25rem;
@@ -819,8 +845,8 @@ interface ItemChecklist {
       width: 44px;
       height: 44px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #d4af37 0%, #8b6b1b 100%);
-      color: #0b0b10;
+      background: #000000;
+      color: #ffffff;
       font-weight: 700;
       font-size: 1.2rem;
       display: flex;
@@ -830,23 +856,24 @@ interface ItemChecklist {
     .client-meta h4 {
       margin: 0;
       font-size: 1.05rem;
-      color: #f8fafc;
+      font-weight: 600;
+      color: #111827;
     }
     .client-meta .email {
       display: block;
       font-size: 0.8rem;
-      color: #94a3b8;
+      color: #6b7280;
     }
     .client-meta .store-name {
       display: block;
       font-size: 0.8rem;
-      color: #cbd5e1;
+      color: #4b5563;
       margin-top: 0.2rem;
     }
 
     .booth-status-box {
-      background: #1a1a28;
-      border: 1px solid #2d2d42;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
       border-radius: 6px;
       padding: 0.6rem 0.8rem;
       margin-bottom: 1rem;
@@ -855,13 +882,13 @@ interface ItemChecklist {
       flex-direction: column;
       gap: 0.3rem;
     }
-    .booth-tag strong, .staff-tag strong { color: #f8fafc; }
-    .booth-tag .icon { color: #c084fc; margin-right: 0.4rem; }
-    .staff-tag .icon { color: #38bdf8; margin-right: 0.4rem; }
+    .booth-tag strong, .staff-tag strong { color: #111827; }
+    .booth-tag .icon { color: #7c3aed; margin-right: 0.4rem; }
+    .staff-tag .icon { color: #0284c7; margin-right: 0.4rem; }
 
     .garments-summary {
-      background: #0d0d14;
-      border: 1px solid #1f1f2d;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
       border-radius: 6px;
       padding: 0.8rem;
       margin-bottom: 0.8rem;
@@ -872,13 +899,14 @@ interface ItemChecklist {
       align-items: center;
       font-size: 0.85rem;
       font-weight: 600;
-      color: #94a3b8;
+      color: #4b5563;
       margin-bottom: 0.6rem;
       padding-bottom: 0.4rem;
-      border-bottom: 1px solid #1a1a27;
+      border-bottom: 1px solid #e5e7eb;
     }
     .anticipo-tag {
-      color: #34d399;
+      color: #059669;
+      font-weight: 600;
       font-size: 0.8rem;
     }
     .garments-mini-list {
@@ -897,12 +925,12 @@ interface ItemChecklist {
       font-size: 0.7rem;
       padding: 0.15rem 0.4rem;
       border-radius: 3px;
-      background: #242436;
-      color: #94a3b8;
+      background: #e5e7eb;
+      color: #374151;
       white-space: nowrap;
     }
-    .garment-indicator.bought { background: rgba(52, 211, 153, 0.2); color: #34d399; }
-    .garment-indicator.tried { background: rgba(192, 132, 252, 0.2); color: #c084fc; }
+    .garment-indicator.bought { background: #dcfce7; color: #166534; }
+    .garment-indicator.tried { background: #f3e8ff; color: #6b21a8; }
     .garment-desc {
       flex: 1;
       display: flex;
@@ -910,36 +938,37 @@ interface ItemChecklist {
       overflow: hidden;
     }
     .garment-desc .p-name {
-      color: #e2e8f0;
+      color: #111827;
+      font-weight: 500;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .garment-desc .p-sku {
       font-size: 0.75rem;
-      color: #71717a;
+      color: #6b7280;
     }
     .garment-price {
       font-family: monospace;
       font-weight: 600;
-      color: #f8fafc;
+      color: #111827;
     }
 
     .notes-snippet {
       font-size: 0.8rem;
-      color: #a1a1aa;
+      color: #713f12;
       font-style: italic;
-      background: rgba(212, 175, 55, 0.05);
-      border-left: 2px solid #d4af37;
+      background: #fefce8;
+      border-left: 2px solid #eab308;
       padding: 0.3rem 0.6rem;
       border-radius: 0 4px 4px 0;
     }
-    .notes-snippet .note-label { font-weight: 600; color: #d4af37; }
+    .notes-snippet .note-label { font-weight: 600; color: #854d0e; }
 
     .card-foot {
       padding: 0.8rem 1.25rem 1.2rem;
-      background: #111119;
-      border-top: 1px solid #1c1c28;
+      background: #fafafa;
+      border-top: 1px solid #f3f4f6;
       display: flex;
       gap: 0.6rem;
     }
@@ -954,30 +983,31 @@ interface ItemChecklist {
       transition: all 0.2s;
       border: none;
     }
-    .btn-action.primary { background: #d4af37; color: #0b0b10; }
-    .btn-action.primary:hover { background: #e5c158; }
-    .btn-action.success { background: #10b981; color: #ffffff; }
-    .btn-action.success:hover { background: #059669; }
+    .btn-action.primary { background: #000000; color: #ffffff; }
+    .btn-action.primary:hover { background: #1f2937; }
+    .btn-action.success { background: #059669; color: #ffffff; }
+    .btn-action.success:hover { background: #047857; }
     .btn-action.danger-outline {
       background: transparent;
-      border: 1px solid #f43f5e;
-      color: #f43f5e;
+      border: 1px solid #fecaca;
+      color: #dc2626;
       flex: 0 0 auto;
       padding: 0.65rem 1rem;
     }
-    .btn-action.danger-outline:hover { background: rgba(244, 63, 94, 0.1); }
+    .btn-action.danger-outline:hover { background: #fef2f2; }
     .btn-action.secondary-outline {
-      background: transparent;
-      border: 1px solid #4a4a66;
-      color: #cbd5e1;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      color: #374151;
       flex: 0 0 auto;
     }
+    .btn-action.secondary-outline:hover { background: #f3f4f6; color: #111827; }
     .btn-action.outline-full {
-      background: #1c1c2b;
-      color: #cbd5e1;
-      border: 1px solid #2d2d42;
+      background: #ffffff;
+      color: #374151;
+      border: 1px solid #d1d5db;
     }
-    .btn-action.outline-full:hover { background: #26263a; color: #fff; }
+    .btn-action.outline-full:hover { background: #f3f4f6; color: #111827; }
 
     /* MODALES BACKDROP & CARDS */
     .modal-backdrop {
@@ -986,7 +1016,7 @@ interface ItemChecklist {
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.5);
       backdrop-filter: blur(4px);
       display: flex;
       align-items: center;
@@ -995,12 +1025,12 @@ interface ItemChecklist {
       padding: 1rem;
     }
     .modal-card {
-      background: #14141e;
-      border: 1px solid #2b2b3f;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       border-radius: 12px;
       width: 100%;
       max-width: 540px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -1012,17 +1042,17 @@ interface ItemChecklist {
       justify-content: space-between;
       align-items: center;
       padding: 1.25rem 1.5rem;
-      border-bottom: 1px solid #232333;
+      border-bottom: 1px solid #f3f4f6;
     }
-    .modal-head h3 { margin: 0; font-size: 1.3rem; color: #f8fafc; }
+    .modal-head h3 { margin: 0; font-size: 1.25rem; font-weight: 600; color: #111827; }
     .modal-close {
       background: none;
       border: none;
       font-size: 1.6rem;
-      color: #94a3b8;
+      color: #6b7280;
       cursor: pointer;
     }
-    .modal-close:hover { color: #fff; }
+    .modal-close:hover { color: #111827; }
     .modal-body {
       padding: 1.5rem;
       overflow-y: auto;
@@ -1030,21 +1060,22 @@ interface ItemChecklist {
     }
     .modal-foot {
       padding: 1rem 1.5rem;
-      border-top: 1px solid #232333;
-      background: #101018;
+      border-top: 1px solid #f3f4f6;
+      background: #fafafa;
       display: flex;
       justify-content: flex-end;
       gap: 0.8rem;
     }
     .btn-cancel {
-      background: #1f1f2d;
-      color: #94a3b8;
-      border: 1px solid #33334d;
+      background: #ffffff;
+      color: #4b5563;
+      border: 1px solid #d1d5db;
       padding: 0.65rem 1.2rem;
       border-radius: 6px;
       font-weight: 500;
       cursor: pointer;
     }
+    .btn-cancel:hover { background: #f3f4f6; color: #111827; }
     .btn-submit {
       border: none;
       padding: 0.65rem 1.5rem;
@@ -1053,19 +1084,22 @@ interface ItemChecklist {
       cursor: pointer;
       transition: all 0.2s;
     }
-    .btn-submit.gold { background: #d4af37; color: #0b0b10; }
-    .btn-submit.emerald { background: #10b981; color: #fff; }
-    .btn-submit.danger { background: #f43f5e; color: #fff; }
+    .btn-submit.gold { background: #000000; color: #ffffff; }
+    .btn-submit.gold:hover:not(:disabled) { background: #1f2937; }
+    .btn-submit.emerald { background: #059669; color: #ffffff; }
+    .btn-submit.emerald:hover:not(:disabled) { background: #047857; }
+    .btn-submit.danger { background: #dc2626; color: #ffffff; }
+    .btn-submit.danger:hover:not(:disabled) { background: #b91c1c; }
     .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .dialog-client-bar {
-      background: #1a1a27;
-      border: 1px solid #2d2d42;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
       border-radius: 6px;
       padding: 0.75rem 1rem;
       margin-bottom: 1.25rem;
       font-size: 0.9rem;
-      color: #cbd5e1;
+      color: #374151;
     }
     .cabin-chips {
       display: flex;
@@ -1075,20 +1109,20 @@ interface ItemChecklist {
       margin-bottom: 1rem;
     }
     .cabin-chip {
-      background: #1d1d2c;
-      color: #cbd5e1;
-      border: 1px solid #35354e;
+      background: #f3f4f6;
+      color: #374151;
+      border: 1px solid #e5e7eb;
       padding: 0.5rem 0.9rem;
       border-radius: 20px;
       font-size: 0.85rem;
       cursor: pointer;
       transition: all 0.2s;
     }
-    .cabin-chip:hover { border-color: #d4af37; color: #fff; }
+    .cabin-chip:hover { border-color: #9ca3af; color: #000000; }
     .cabin-chip.selected {
-      background: rgba(212, 175, 55, 0.2);
-      border-color: #d4af37;
-      color: #d4af37;
+      background: #000000;
+      border-color: #000000;
+      color: #ffffff;
       font-weight: 600;
     }
     .form-group {
@@ -1097,31 +1131,33 @@ interface ItemChecklist {
     .form-group label {
       display: block;
       font-size: 0.85rem;
-      color: #94a3b8;
+      font-weight: 500;
+      color: #374151;
       margin-bottom: 0.4rem;
     }
     .custom-input, .custom-textarea {
       width: 100%;
-      background: #0d0d14;
-      border: 1px solid #33334d;
-      color: #f8fafc;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      color: #111827;
       padding: 0.65rem 0.8rem;
       border-radius: 6px;
       outline: none;
       font-size: 0.9rem;
       box-sizing: border-box;
+      transition: border-color 0.2s;
     }
-    .custom-input:focus, .custom-textarea:focus { border-color: #d4af37; }
+    .custom-input:focus, .custom-textarea:focus { border-color: #000000; }
 
     /* CHECKLIST TABLE */
     .section-hint {
-      color: #94a3b8;
+      color: #6b7280;
       font-size: 0.9rem;
       margin-bottom: 1.2rem;
       line-height: 1.5;
     }
     .checklist-table-wrap {
-      border: 1px solid #232333;
+      border: 1px solid #e5e7eb;
       border-radius: 8px;
       overflow: hidden;
       margin-bottom: 1.5rem;
@@ -1133,23 +1169,24 @@ interface ItemChecklist {
       font-size: 0.9rem;
     }
     .checklist-table th {
-      background: #181824;
-      color: #94a3b8;
+      background: #f9fafb;
+      color: #4b5563;
       padding: 0.8rem 1rem;
       font-weight: 600;
-      border-bottom: 1px solid #262638;
+      border-bottom: 1px solid #e5e7eb;
     }
     .checklist-table td {
       padding: 0.8rem 1rem;
-      border-bottom: 1px solid #1c1c28;
-      color: #e2e8f0;
+      border-bottom: 1px solid #f3f4f6;
+      color: #111827;
     }
     .checklist-table tr.bought-row {
-      background: rgba(16, 185, 129, 0.05);
+      background: #f0fdf4;
     }
-    .sku-sub { font-size: 0.75rem; color: #71717a; }
+    .sku-sub { font-size: 0.75rem; color: #6b7280; }
     .tag-meta {
-      background: #242436;
+      background: #f3f4f6;
+      color: #374151;
       font-size: 0.75rem;
       padding: 0.2rem 0.45rem;
       border-radius: 4px;
@@ -1157,15 +1194,15 @@ interface ItemChecklist {
     }
     .toggle-decision {
       display: inline-flex;
-      background: #101018;
-      border: 1px solid #2e2e42;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
       border-radius: 6px;
       overflow: hidden;
     }
     .dec-btn {
       border: none;
       background: transparent;
-      color: #71717a;
+      color: #6b7280;
       padding: 0.35rem 0.7rem;
       font-size: 0.8rem;
       cursor: pointer;
@@ -1173,17 +1210,17 @@ interface ItemChecklist {
       transition: all 0.2s;
     }
     .dec-btn.buy.active {
-      background: #10b981;
-      color: #fff;
+      background: #059669;
+      color: #ffffff;
     }
     .dec-btn.return.active {
-      background: #64748b;
-      color: #fff;
+      background: #4b5563;
+      color: #ffffff;
     }
     .custom-chk {
       width: 18px;
       height: 18px;
-      accent-color: #d4af37;
+      accent-color: #000000;
       cursor: pointer;
     }
 
@@ -1192,8 +1229,8 @@ interface ItemChecklist {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1.5rem;
-      background: #0e0e15;
-      border: 1px solid #232333;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
       border-radius: 8px;
       padding: 1.25rem;
     }
@@ -1203,7 +1240,7 @@ interface ItemChecklist {
       gap: 0.7rem;
       cursor: pointer;
       font-size: 0.9rem;
-      color: #e2e8f0;
+      color: #111827;
     }
     .totals-box {
       display: flex;
@@ -1211,28 +1248,29 @@ interface ItemChecklist {
       gap: 0.5rem;
       justify-content: center;
       padding-left: 1.5rem;
-      border-left: 1px solid #232333;
+      border-left: 1px solid #e5e7eb;
     }
     .tot-row {
       display: flex;
       justify-content: space-between;
       font-size: 0.95rem;
-      color: #94a3b8;
+      color: #4b5563;
     }
-    .tot-row.anticipo { color: #34d399; }
+    .tot-row.anticipo { color: #059669; font-weight: 600; }
     .tot-divider {
       height: 1px;
-      background: #232333;
+      background: #e5e7eb;
       margin: 0.3rem 0;
     }
     .tot-row.grand-total {
       font-size: 1.15rem;
       font-weight: 700;
-      color: #f8fafc;
+      color: #111827;
     }
     .gold-amount {
-      color: #d4af37;
+      color: #000000;
       font-size: 1.3rem;
+      font-weight: 700;
       font-family: monospace;
     }
 
@@ -1240,15 +1278,15 @@ interface ItemChecklist {
     .warning-box {
       display: flex;
       gap: 1rem;
-      background: rgba(244, 63, 94, 0.1);
-      border: 1px solid rgba(244, 63, 94, 0.3);
+      background: #fef2f2;
+      border: 1px solid #fecaca;
       padding: 1rem;
       border-radius: 8px;
       margin-bottom: 1.25rem;
-      color: #fb7185;
+      color: #991b1b;
     }
     .warn-icon { font-size: 1.8rem; }
-    .warning-box p { margin: 0.3rem 0 0; font-size: 0.85rem; color: #cbd5e1; }
+    .warning-box p { margin: 0.3rem 0 0; font-size: 0.85rem; color: #4b5563; }
 
     /* FICHA DETALLADA */
     .detail-grid {
@@ -1256,16 +1294,18 @@ interface ItemChecklist {
       grid-template-columns: 1fr 1fr;
       gap: 0.7rem;
       font-size: 0.9rem;
-      background: #191926;
-      border: 1px solid #2c2c40;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
       padding: 1rem;
       border-radius: 8px;
       margin-bottom: 1.2rem;
+      color: #111827;
     }
     .qr-preview-box {
       text-align: center;
       padding: 1rem;
       background: #ffffff;
+      border: 1px dashed #d1d5db;
       border-radius: 8px;
       display: inline-block;
       width: 100%;
@@ -1274,7 +1314,7 @@ interface ItemChecklist {
     }
     .qr-token-label {
       display: block;
-      color: #0b0b10;
+      color: #111827;
       font-family: monospace;
       font-weight: 700;
       margin-top: 0.5rem;
@@ -1290,7 +1330,8 @@ interface ItemChecklist {
       display: flex;
       justify-content: space-between;
       padding: 0.5rem 0;
-      border-bottom: 1px solid #232333;
+      border-bottom: 1px solid #f3f4f6;
+      color: #111827;
     }
 
     .text-center { text-align: center; }
@@ -1419,6 +1460,7 @@ export class ReservasGestionPageComponent implements OnInit {
       case 'EN_PROBADOR': return 'status-en-probador';
       case 'COMPLETADA': return 'status-completada';
       case 'EXPIRADA': return 'status-expirada';
+      case 'CANCELADA': return 'status-cancelada';
       default: return 'status-default';
     }
   }

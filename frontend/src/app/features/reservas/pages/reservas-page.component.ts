@@ -25,7 +25,7 @@ interface PrendaEnReserva {
       <!-- HEADER -->
       <header class="reservas-header">
         <div class="header-titles">
-          <div class="subtitle-badge">ATELIER NOIR &bull; CICLO #2 &bull; CU13</div>
+          <div class="subtitle-badge">ATELIER NOIR &bull; RESERVA DE VESTIDOR</div>
           <h1>Reservas para Probador en Boutique</h1>
           <p class="description">
             Apartá prendas exclusivas de alta costura para probarlas en tu boutique favorita con fecha y turno agendado.
@@ -435,10 +435,11 @@ interface PrendaEnReserva {
   `,
   styles: [`
     .atelier-reservas-container {
-      padding: 1.5rem 2rem;
+      padding: 2rem 1.5rem 4rem;
       max-width: 1400px;
       margin: 0 auto;
-      color: #e5e5e5;
+      color: #111827;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
     /* HEADER */
@@ -449,51 +450,61 @@ interface PrendaEnReserva {
       margin-bottom: 2rem;
       gap: 1.5rem;
       flex-wrap: wrap;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     }
     .subtitle-badge {
       font-size: 0.75rem;
       letter-spacing: 2px;
-      color: #d4af37;
+      color: #6b7280;
       margin-bottom: 0.5rem;
       font-weight: 600;
+      text-transform: uppercase;
     }
     .header-titles h1 {
       font-size: 2rem;
-      font-family: 'Cinzel', 'Playfair Display', serif, sans-serif;
-      color: #f3e5ab;
+      font-weight: 700;
+      color: #000000;
       margin: 0 0 0.5rem 0;
-      letter-spacing: 1px;
+      letter-spacing: -0.02em;
     }
     .header-titles .description {
-      color: #999;
-      font-size: 0.9rem;
+      color: #6b7280;
+      font-size: 0.95rem;
       max-width: 650px;
       margin: 0;
+      line-height: 1.5;
     }
 
     /* TABS */
     .tabs-switcher {
-      display: flex;
-      background: #141414;
-      border: 1px solid rgba(212, 175, 55, 0.3);
+      display: inline-flex;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
       border-radius: 8px;
       padding: 4px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
     }
     .tab-btn {
       background: transparent;
       border: none;
-      color: #aaa;
+      color: #6b7280;
       padding: 0.6rem 1.2rem;
       font-size: 0.85rem;
       cursor: pointer;
       border-radius: 6px;
-      transition: all 0.25s ease;
+      transition: all 0.2s ease;
       font-weight: 500;
     }
+    .tab-btn:hover:not(.active) {
+      color: #111827;
+      background: rgba(0, 0, 0, 0.04);
+    }
     .tab-btn.active {
-      background: #d4af37;
-      color: #0a0a0a;
-      font-weight: 700;
+      background: #000000;
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     /* TOASTS */
@@ -507,32 +518,34 @@ interface PrendaEnReserva {
       animation: slideDown 0.3s ease;
     }
     .toast-banner.success {
-      background: rgba(34, 197, 94, 0.12);
-      border: 1px solid rgba(34, 197, 94, 0.4);
-      color: #86efac;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
     }
     .toast-banner.error {
-      background: rgba(239, 68, 68, 0.12);
-      border: 1px solid rgba(239, 68, 68, 0.4);
-      color: #fca5a5;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
     }
     .toast-icon { font-size: 1.3rem; }
-    .toast-body { flex: 1; display: flex; flex-direction: column; }
+    .toast-body { flex: 1; display: flex; flex-direction: column; font-size: 0.9rem; }
     .btn-close-toast {
       background: none;
       border: none;
       color: inherit;
       font-size: 1.3rem;
       cursor: pointer;
+      opacity: 0.7;
     }
+    .btn-close-toast:hover { opacity: 1; }
 
     /* CARDS */
     .atelier-card {
-      background: #111111;
-      border: 1px solid rgba(212, 175, 55, 0.22);
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.08);
       border-radius: 12px;
       padding: 1.75rem;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
     .card-header {
       display: flex;
@@ -540,23 +553,25 @@ interface PrendaEnReserva {
       align-items: center;
       margin-bottom: 1.5rem;
       padding-bottom: 0.75rem;
-      border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     }
     .card-header h3 {
-      font-size: 1.2rem;
-      color: #f3e5ab;
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #111827;
       margin: 0;
-      letter-spacing: 0.5px;
+      letter-spacing: -0.01em;
     }
     .gold-pill {
       font-size: 0.7rem;
-      background: rgba(212, 175, 55, 0.15);
-      color: #d4af37;
+      background: #f3f4f6;
+      color: #374151;
       padding: 0.25rem 0.6rem;
       border-radius: 20px;
-      border: 1px solid rgba(212, 175, 55, 0.3);
+      border: 1px solid #e5e7eb;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
+      font-weight: 600;
     }
 
     /* AGENDAR LAYOUT */
@@ -579,50 +594,57 @@ interface PrendaEnReserva {
     .form-group label {
       display: block;
       font-size: 0.8rem;
-      color: #aaa;
+      font-weight: 500;
+      color: #374151;
       margin-bottom: 0.35rem;
     }
     .atelier-input, .atelier-select, .atelier-textarea {
       width: 100%;
-      background: #181818;
-      border: 1px solid #333;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
       border-radius: 8px;
-      color: #eee;
+      color: #111827;
       padding: 0.65rem 0.85rem;
       font-size: 0.9rem;
       outline: none;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
     .atelier-input:focus, .atelier-select:focus, .atelier-textarea:focus {
-      border-color: #d4af37;
+      border-color: #000000;
+      box-shadow: 0 0 0 1px #000000;
     }
     .input-currency-group {
       display: flex;
-      background: #181818;
-      border: 1px solid #333;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
       border-radius: 8px;
       align-items: center;
       padding: 0 0.75rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-currency-group:focus-within {
+      border-color: #000000;
+      box-shadow: 0 0 0 1px #000000;
     }
     .currency-label {
-      color: #d4af37;
+      color: #374151;
       font-weight: 700;
-      font-size: 1.1rem;
+      font-size: 1rem;
       margin-right: 0.5rem;
     }
     .atelier-input-amount {
       width: 100%;
       background: transparent;
       border: none;
-      color: #f3e5ab;
-      font-size: 1.2rem;
+      color: #111827;
+      font-size: 1.15rem;
       font-weight: 700;
       padding: 0.6rem 0;
       outline: none;
     }
     .sucursal-info-box {
-      background: #0d0d0d;
-      border: 1px solid rgba(212, 175, 55, 0.2);
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
       border-radius: 8px;
       padding: 0.85rem;
       display: flex;
@@ -630,29 +652,29 @@ interface PrendaEnReserva {
       gap: 0.4rem;
       font-size: 0.8rem;
     }
-    .sucursal-info-box .lbl { color: #888; margin-right: 0.5rem; }
-    .sucursal-info-box .val { color: #ddd; }
+    .sucursal-info-box .lbl { color: #6b7280; margin-right: 0.5rem; }
+    .sucursal-info-box .val { color: #111827; font-weight: 500; }
 
     /* PRENDAS CARD */
     .select-sucursal-notice {
       padding: 3rem 1.5rem;
       text-align: center;
-      color: #888;
+      color: #6b7280;
       font-size: 0.95rem;
     }
-    .notice-icon { font-size: 2rem; color: #d4af37; display: block; margin-bottom: 0.5rem; }
+    .notice-icon { font-size: 2rem; color: #111827; display: block; margin-bottom: 0.5rem; }
     .prendas-search-box { margin-bottom: 1rem; }
     .prendas-selector-list {
       max-height: 280px;
       overflow-y: auto;
-      border: 1px solid #222;
+      border: 1px solid #e5e7eb;
       border-radius: 8px;
-      background: #0e0e0e;
+      background: #ffffff;
       margin-bottom: 1.5rem;
     }
     .prenda-mini-card {
       padding: 0.85rem 1rem;
-      border-bottom: 1px solid #1a1a1a;
+      border-bottom: 1px solid #f3f4f6;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -662,17 +684,18 @@ interface PrendaEnReserva {
     .prenda-name {
       display: block;
       font-size: 0.9rem;
-      color: #f3e5ab;
+      font-weight: 600;
+      color: #111827;
       margin-bottom: 0.2rem;
     }
     .prenda-meta {
       display: flex;
       gap: 0.75rem;
       font-size: 0.75rem;
-      color: #888;
+      color: #6b7280;
       margin-bottom: 0.5rem;
     }
-    .prenda-price { color: #d4af37; font-weight: 700; }
+    .prenda-price { color: #111827; font-weight: 700; }
     .variante-picker-row {
       display: flex;
       gap: 0.75rem;
@@ -680,46 +703,50 @@ interface PrendaEnReserva {
     }
     .atelier-select-mini {
       flex: 1;
-      background: #181818;
-      border: 1px solid #333;
-      color: #eee;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      color: #111827;
       padding: 0.4rem 0.6rem;
       font-size: 0.8rem;
       border-radius: 6px;
       outline: none;
     }
+    .atelier-select-mini:focus {
+      border-color: #000000;
+    }
     .btn-add-prenda {
-      background: #222;
-      border: 1px solid #d4af37;
-      color: #d4af37;
+      background: #ffffff;
+      border: 1px solid #111827;
+      color: #111827;
       font-size: 0.75rem;
-      font-weight: 700;
+      font-weight: 600;
       padding: 0.4rem 0.85rem;
       border-radius: 6px;
       cursor: pointer;
       transition: all 0.2s;
     }
     .btn-add-prenda:hover {
-      background: #d4af37;
-      color: #000;
+      background: #000000;
+      color: #ffffff;
     }
 
     /* CESTA DE PRENDAS */
     .prendas-apartadas-box {
-      background: #0a0a0a;
-      border: 1px solid rgba(212, 175, 55, 0.2);
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
       border-radius: 10px;
       padding: 1.25rem;
     }
     .prendas-apartadas-box h4 {
       margin: 0 0 1rem 0;
       font-size: 0.95rem;
-      color: #f3e5ab;
-      letter-spacing: 0.5px;
+      font-weight: 600;
+      color: #111827;
+      letter-spacing: -0.01em;
     }
     .empty-basket {
       text-align: center;
-      color: #666;
+      color: #9ca3af;
       font-size: 0.85rem;
       padding: 1.5rem 0;
     }
@@ -728,28 +755,33 @@ interface PrendaEnReserva {
       align-items: center;
       gap: 1rem;
       padding: 0.75rem 0;
-      border-bottom: 1px solid #1a1a1a;
+      border-bottom: 1px solid #e5e7eb;
       font-size: 0.85rem;
+      color: #111827;
     }
     .basket-item-info { flex: 1; }
-    .basket-item-specs { display: block; color: #777; font-size: 0.75rem; }
+    .basket-item-specs { display: block; color: #6b7280; font-size: 0.75rem; }
     .basket-item-qty {
       display: flex;
       align-items: center;
       gap: 0.3rem;
     }
     .btn-qty {
-      background: #222;
-      border: 1px solid #444;
-      color: #eee;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      color: #111827;
       width: 24px;
       height: 24px;
       border-radius: 4px;
       cursor: pointer;
+      font-weight: 600;
     }
-    .qty-num { min-width: 20px; text-align: center; font-weight: bold; }
+    .btn-qty:hover {
+      background: #f3f4f6;
+    }
+    .qty-num { min-width: 20px; text-align: center; font-weight: 600; }
     .basket-item-subtotal {
-      color: #d4af37;
+      color: #111827;
       font-weight: 700;
       min-width: 70px;
       text-align: right;
@@ -757,23 +789,25 @@ interface PrendaEnReserva {
     .btn-remove-item {
       background: none;
       border: none;
-      color: #ef4444;
+      color: #dc2626;
       font-size: 1.2rem;
       cursor: pointer;
+      opacity: 0.7;
     }
+    .btn-remove-item:hover { opacity: 1; }
     .basket-total-summary {
       margin-top: 1.25rem;
       padding-top: 1rem;
-      border-top: 1px dashed rgba(212, 175, 55, 0.3);
+      border-top: 1px dashed #d1d5db;
     }
     .summary-total-line {
       display: flex;
       justify-content: space-between;
       margin-bottom: 0.5rem;
       font-size: 0.9rem;
-      color: #aaa;
+      color: #4b5563;
     }
-    .gold-amount { color: #f3e5ab; font-size: 1.3rem; font-weight: 700; }
+    .gold-amount { color: #000000; font-size: 1.3rem; font-weight: 700; }
     .btn-confirm-reserva {
       width: 100%;
       margin-top: 1rem;
@@ -793,13 +827,19 @@ interface PrendaEnReserva {
       gap: 1.5rem;
     }
     .reserva-card-luxury {
-      background: #161616;
-      border: 1px solid rgba(212, 175, 55, 0.25);
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.08);
       border-radius: 10px;
       padding: 1.25rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .reserva-card-luxury:hover {
+      border-color: #d1d5db;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
     }
     .card-reserva-header {
       display: flex;
@@ -807,13 +847,16 @@ interface PrendaEnReserva {
       align-items: center;
       margin-bottom: 1rem;
       padding-bottom: 0.5rem;
-      border-bottom: 1px solid #222;
+      border-bottom: 1px solid #f3f4f6;
     }
     .code-badge {
       font-family: monospace;
-      color: #f3e5ab;
+      color: #111827;
       font-weight: 700;
       font-size: 0.85rem;
+      background: #f3f4f6;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
     }
     .status-pill {
       font-size: 0.7rem;
@@ -823,14 +866,14 @@ interface PrendaEnReserva {
       letter-spacing: 0.5px;
     }
     .status-pill.confirmada {
-      background: rgba(34, 197, 94, 0.15);
-      color: #4ade80;
-      border: 1px solid rgba(34, 197, 94, 0.3);
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
     }
     .status-pill.cancelada {
-      background: rgba(239, 68, 68, 0.15);
-      color: #f87171;
-      border: 1px solid rgba(239, 68, 68, 0.3);
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
     }
     .reserva-info-row {
       display: flex;
@@ -838,33 +881,33 @@ interface PrendaEnReserva {
       font-size: 0.85rem;
       margin-bottom: 0.4rem;
     }
-    .reserva-info-row .lbl { color: #888; }
-    .reserva-info-row .val { color: #ddd; }
+    .reserva-info-row .lbl { color: #6b7280; }
+    .reserva-info-row .val { color: #111827; font-weight: 500; }
     .reserva-items-preview {
       margin-top: 0.75rem;
       padding-top: 0.75rem;
-      border-top: 1px solid #222;
+      border-top: 1px solid #f3f4f6;
       font-size: 0.8rem;
     }
-    .items-title { color: #aaa; display: block; margin-bottom: 0.35rem; }
+    .items-title { color: #4b5563; font-weight: 500; display: block; margin-bottom: 0.35rem; }
     .reserva-items-preview ul {
       margin: 0;
       padding-left: 1.2rem;
-      color: #ccc;
+      color: #374151;
     }
-    .tag-specs { color: #777; font-size: 0.7rem; }
+    .tag-specs { color: #6b7280; font-size: 0.7rem; }
     .card-reserva-actions {
       display: flex;
       gap: 0.75rem;
       margin-top: 1.25rem;
       padding-top: 0.75rem;
-      border-top: 1px solid #222;
+      border-top: 1px solid #f3f4f6;
     }
     .btn-action-qr {
       flex: 1;
-      background: #1c1c1c;
-      border: 1px solid rgba(212, 175, 55, 0.4);
-      color: #d4af37;
+      background: #ffffff;
+      border: 1px solid #111827;
+      color: #111827;
       font-weight: 600;
       padding: 0.55rem;
       border-radius: 6px;
@@ -872,25 +915,25 @@ interface PrendaEnReserva {
       cursor: pointer;
       transition: all 0.2s;
     }
-    .btn-action-qr:hover { background: #d4af37; color: #000; }
+    .btn-action-qr:hover { background: #000000; color: #ffffff; }
     .btn-action-cancel {
       background: transparent;
-      border: 1px solid rgba(239, 68, 68, 0.4);
-      color: #f87171;
+      border: 1px solid #fecaca;
+      color: #dc2626;
       padding: 0.55rem 0.85rem;
       border-radius: 6px;
       font-size: 0.8rem;
       cursor: pointer;
       transition: all 0.2s;
     }
-    .btn-action-cancel:hover { background: rgba(239, 68, 68, 0.1); }
+    .btn-action-cancel:hover { background: #fef2f2; }
 
     /* MODAL PASE DE PROBADOR */
     .modal-backdrop {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(5px);
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -898,13 +941,13 @@ interface PrendaEnReserva {
       padding: 1rem;
     }
     .modal-pase-container {
-      background: #111111;
-      border: 1px solid rgba(212, 175, 55, 0.4);
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       border-radius: 12px;
       max-width: 460px;
       width: 100%;
       padding: 1.5rem;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
       animation: zoomIn 0.25s ease;
     }
     .modal-header-actions {
@@ -915,51 +958,55 @@ interface PrendaEnReserva {
     }
     .pase-title {
       font-size: 0.85rem;
-      color: #888;
+      color: #4b5563;
       text-transform: uppercase;
       letter-spacing: 1px;
+      font-weight: 600;
     }
     .btn-close-modal {
       background: none;
       border: none;
-      color: #999;
+      color: #6b7280;
       font-size: 1.5rem;
       cursor: pointer;
     }
+    .btn-close-modal:hover { color: #111827; }
     .pase-slip {
-      background: #fafafa;
-      color: #1a1a1a;
-      border-radius: 6px;
+      background: #ffffff;
+      color: #111827;
+      border-radius: 8px;
       padding: 1.5rem;
-      font-family: 'Courier New', Courier, monospace;
-      border-top: 4px solid #d4af37;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      border: 1px solid #e5e7eb;
+      border-top: 4px solid #000000;
     }
     .pase-brand {
       text-align: center;
       margin-bottom: 0.75rem;
-      border-bottom: 1px dashed #999;
+      border-bottom: 1px dashed #d1d5db;
       padding-bottom: 0.5rem;
     }
     .brand-crest {
-      font-weight: 900;
+      font-weight: 800;
       letter-spacing: 2px;
       font-size: 1.1rem;
+      color: #000000;
     }
-    .brand-sub { font-size: 0.65rem; color: #666; letter-spacing: 1px; }
+    .brand-sub { font-size: 0.65rem; color: #6b7280; letter-spacing: 1px; }
     .pase-status-banner {
       text-align: center;
       padding: 0.35rem;
-      font-weight: 900;
+      font-weight: 700;
       letter-spacing: 1.5px;
       font-size: 0.8rem;
       margin-bottom: 1rem;
       border-radius: 4px;
-      background: #eee;
+      background: #f3f4f6;
     }
     .pase-status-banner.confirmed {
-      background: #e6f7ec;
-      color: #15803d;
-      border: 1px solid #86efac;
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
     }
     .pase-qr-box {
       display: flex;
@@ -967,8 +1014,8 @@ interface PrendaEnReserva {
       align-items: center;
       margin-bottom: 1.25rem;
       padding: 0.75rem;
-      background: #fff;
-      border: 2px dashed #d4af37;
+      background: #fafafa;
+      border: 1px dashed #d1d5db;
       border-radius: 8px;
     }
     .pase-qr-svg {
@@ -978,12 +1025,12 @@ interface PrendaEnReserva {
     .pase-qr-svg ::ng-deep svg { width: 100%; height: 100%; }
     .pase-code-display {
       font-size: 1rem;
-      font-weight: 900;
+      font-weight: 800;
       letter-spacing: 2px;
       margin-top: 0.5rem;
-      color: #000;
+      color: #000000;
     }
-    .pase-scan-hint { font-size: 0.65rem; color: #666; }
+    .pase-scan-hint { font-size: 0.65rem; color: #6b7280; }
     .pase-details-table {
       display: flex;
       flex-direction: column;
@@ -992,20 +1039,20 @@ interface PrendaEnReserva {
       margin-bottom: 1rem;
     }
     .pase-row { display: flex; justify-content: space-between; }
-    .pase-row .lbl { color: #555; }
-    .pase-row .val { color: #000; }
+    .pase-row .lbl { color: #6b7280; }
+    .pase-row .val { color: #111827; font-weight: 600; }
     .pase-prendas-section {
-      border-top: 1px dashed #777;
-      border-bottom: 1px dashed #777;
+      border-top: 1px dashed #e5e7eb;
+      border-bottom: 1px dashed #e5e7eb;
       padding: 0.75rem 0;
       margin-bottom: 1rem;
       font-size: 0.75rem;
     }
-    .prendas-header-lbl { font-weight: 700; margin-bottom: 0.35rem; color: #333; }
+    .prendas-header-lbl { font-weight: 600; margin-bottom: 0.35rem; color: #111827; }
     .pase-prenda-line { display: flex; justify-content: space-between; margin-bottom: 0.2rem; }
     .pase-footer-notes {
       font-size: 0.65rem;
-      color: #666;
+      color: #6b7280;
       text-align: center;
       line-height: 1.3;
     }
@@ -1018,40 +1065,48 @@ interface PrendaEnReserva {
 
     /* GLOBAL BUTTONS */
     .btn-atelier-gold {
-      background: linear-gradient(135deg, #d4af37 0%, #aa820a 100%);
-      color: #0a0a0a;
-      border: none;
-      font-weight: 700;
+      background: #000000;
+      color: #ffffff;
+      border: 1px solid #000000;
+      font-weight: 600;
       font-size: 0.9rem;
       padding: 0.75rem 1.5rem;
       border-radius: 8px;
       cursor: pointer;
-      transition: all 0.25s;
+      transition: all 0.2s;
     }
     .btn-atelier-gold:hover:not(:disabled) {
-      box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
+      background: #1f2937;
+      border-color: #1f2937;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       transform: translateY(-1px);
     }
     .btn-atelier-gold:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-atelier-outline {
-      background: transparent;
-      border: 1px solid rgba(212, 175, 55, 0.5);
-      color: #f3e5ab;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      color: #374151;
       font-weight: 600;
       font-size: 0.85rem;
       padding: 0.65rem 1.25rem;
       border-radius: 8px;
       cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-atelier-outline:hover {
+      background: #f3f4f6;
+      color: #111827;
+      border-color: #9ca3af;
     }
 
-    .highlight-gold { color: #f3e5ab; font-weight: 600; }
+    .highlight-gold { color: #111827; font-weight: 600; }
     .font-bold { font-weight: bold; }
     .spinner-inline {
       display: inline-block;
       width: 16px;
       height: 16px;
-      border: 2px solid rgba(0,0,0,0.2);
-      border-top-color: #000;
+      border: 2px solid rgba(0,0,0,0.15);
+      border-top-color: #000000;
       border-radius: 50%;
       animation: spin 0.6s linear infinite;
       vertical-align: middle;
@@ -1061,13 +1116,13 @@ interface PrendaEnReserva {
       width: 32px;
       height: 32px;
       border-width: 3px;
-      border-top-color: #d4af37;
+      border-top-color: #000000;
       margin-bottom: 1rem;
     }
     .loading-state, .empty-state {
       padding: 3rem;
       text-align: center;
-      color: #888;
+      color: #6b7280;
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
