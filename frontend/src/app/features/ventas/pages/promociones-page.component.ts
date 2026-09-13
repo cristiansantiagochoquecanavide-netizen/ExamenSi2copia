@@ -28,23 +28,24 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
               class="tab-btn"
               [class.active]="activeTab === 'campanas'"
               (click)="activeTab = 'campanas'">
-              <span>%</span> Campa&ntilde;as y Cupones
+              <span class="tab-icon">%</span> Campa&ntilde;as y Cupones
             </button>
             <button 
               type="button"
               class="tab-btn"
               [class.active]="activeTab === 'simulador'"
               (click)="activeTab = 'simulador'">
-              <span>&#9889;</span> Simulador de Canje
-            </button>
-            <button 
-              type="button"
-              *ngIf="activeTab === 'campanas'"
-              (click)="abrirModalNuevaPromo()"
-              class="btn-nueva-campana">
-              <span>+</span> Nueva Campa&ntilde;a
+              <span class="tab-icon">&#9889;</span> Simulador de Canje
             </button>
           </div>
+
+          <button 
+            type="button"
+            *ngIf="activeTab === 'campanas'"
+            (click)="abrirModalNuevaPromo()"
+            class="btn-nueva-campana">
+            <span class="btn-plus-icon">+</span> Nueva Campa&ntilde;a
+          </button>
         </div>
       </header>
 
@@ -634,29 +635,35 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
       border: 1px solid rgba(255, 255, 255, 0.15);
     }
 
-    /* TABS SWITCHER */
-    .tabs-switcher {
+    /* HEADER ACTIONS & TABS */
+    .header-actions {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .tabs-switcher {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
       background: #f3f4f6;
-      padding: 0.35rem;
-      border-radius: 10px;
+      padding: 0.3rem;
+      border-radius: 9px;
       border: 1px solid #e5e7eb;
     }
     .tab-btn {
       background: transparent;
       border: none;
-      color: #4b5563;
+      color: #6b7280;
       font-weight: 600;
       font-size: 0.85rem;
-      padding: 0.55rem 1rem;
-      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      border-radius: 7px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
-      transition: all 0.2s;
+      gap: 0.45rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .tab-btn:hover {
       color: #111827;
@@ -664,25 +671,38 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
     .tab-btn.active {
       background: #ffffff;
       color: #000000;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      font-weight: 700;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+    .tab-icon {
+      font-weight: 700;
+      opacity: 0.85;
     }
     .btn-nueva-campana {
       background: #000000;
       color: #ffffff;
       border: 1px solid #000000;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 0.85rem;
-      padding: 0.55rem 1.1rem;
+      padding: 0.58rem 1.25rem;
       border-radius: 8px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
-      transition: all 0.2s;
+      gap: 0.45rem;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .btn-nueva-campana:hover {
       background: #1f2937;
       border-color: #1f2937;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .btn-plus-icon {
+      font-size: 1.05rem;
+      line-height: 1;
+      font-weight: 700;
     }
 
     /* TOAST ALERTS */
