@@ -8,39 +8,54 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 3rem;
-  border-bottom: var(--border-hairline);
-  background-color: var(--color-surface);
+  padding: 1.25rem 2.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: #ffffff;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
 .logo-link {
   text-decoration: none;
   display: flex;
   align-items: center;
+  gap: 1rem;
+  transition: opacity 0.2s ease;
 }
 
-.logo-serif {
-  font-family: var(--font-serif);
-  font-size: 1.4rem;
-  letter-spacing: 0.15em;
-  font-weight: 500;
-  color: var(--color-primary);
+.logo-link:hover {
+  opacity: 0.82;
 }
 
-.logo-badge {
-  margin-left: 0.75rem;
-  font-size: 0.65rem;
-  letter-spacing: 0.2em;
-  color: var(--color-gold);
-  border: 1px solid var(--color-gold);
-  padding: 2px 6px;
-  vertical-align: middle;
+.brand-icon-svg {
+  height: 36px;
+  width: 42px;
+  display: block;
+  flex-shrink: 0;
+}
+
+.brand-title {
+  font-family: 'Bodoni Moda', 'Playfair Display', 'Didot', Georgia, serif;
+  font-size: 1.55rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: #000000;
+  line-height: 1;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+}
+
+.brand-word-gap {
+  display: inline-block;
+  width: 0.42em;
 }
 
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 /* --- ESTILOS DE MENÚS DESPLEGABLES --- */
@@ -53,38 +68,38 @@
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
-  color: var(--color-on-surface-muted, #888888);
-  font-size: 0.85rem;
+  color: #4b5563;
+  font-size: 0.82rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 0.6rem 0.9rem;
+  padding: 0.6rem 0.85rem;
   display: flex;
   align-items: center;
   gap: 6px;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.2s ease;
 }
 
 .dropdown-trigger:hover,
 .nav-dropdown.active-module .dropdown-trigger {
-  color: var(--color-primary, #ffffff);
-  border-bottom-color: var(--color-gold, #d4af37);
+  color: #000000;
+  border-bottom-color: #000000;
 }
 
 .nav-dropdown.active-module .dropdown-trigger {
-  color: var(--color-gold, #d4af37);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .dropdown-chevron {
   font-size: 0.65rem;
-  color: var(--color-gold, #d4af37);
+  color: #9ca3af;
   transition: transform 0.2s ease;
 }
 
 .nav-dropdown:hover .dropdown-chevron {
   transform: rotate(180deg);
+  color: #000000;
 }
 
 /* Espaciador invisible para evitar que el hover se pierda entre trigger y menú */
@@ -102,18 +117,18 @@
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
-  min-width: 220px;
-  background: #121212;
-  border: 1px solid rgba(212, 175, 55, 0.35);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.85);
-  padding: 0.4rem 0;
+  min-width: 230px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+  padding: 0.5rem 0;
   z-index: 1100;
   border-radius: 0;
 }
 
 .nav-dropdown:hover .dropdown-menu {
   display: block;
-  animation: fadeInMenu 0.18s ease-out;
+  animation: fadeInMenu 0.15s ease-out;
 }
 
 @keyframes fadeInMenu {
@@ -131,12 +146,12 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #a5a5a5;
+  color: #4b5563;
   text-decoration: none;
-  font-size: 0.78rem;
-  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  padding: 0.65rem 1.15rem;
+  padding: 0.7rem 1.25rem;
   margin: 0;
   transition: all 0.15s ease;
   border-bottom: none !important;
@@ -144,61 +159,65 @@
 }
 
 .dropdown-menu a:hover {
-  background: rgba(212, 175, 55, 0.08);
-  color: #ffffff;
-  padding-left: 1.35rem;
-  border-left-color: rgba(212, 175, 55, 0.5);
+  background: #f9fafb;
+  color: #000000;
+  padding-left: 1.4rem;
+  border-left-color: #000000;
 }
 
 .dropdown-menu a.active {
-  color: var(--color-gold, #d4af37);
-  background: rgba(212, 175, 55, 0.12);
-  font-weight: 600;
-  border-left-color: var(--color-gold, #d4af37);
-  padding-left: 1.35rem;
+  color: #000000;
+  background: #f3f4f6;
+  font-weight: 700;
+  border-left-color: #000000;
+  padding-left: 1.4rem;
 }
 
 .menu-icon {
   font-size: 0.85rem;
-  color: var(--color-gold, #d4af37);
+  color: #9ca3af;
   line-height: 1;
 }
 
 .user-auth-zone {
   display: flex;
   align-items: center;
+  gap: 0.85rem;
 }
 
 .user-profile-box {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background: #191919;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 4px 12px;
+  background: #f9fafb;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 4px 14px;
+  border-radius: 9999px;
 }
 
 .user-role-badge {
-  font-size: 0.6rem;
+  font-size: 0.62rem;
   letter-spacing: 0.12em;
-  background: var(--color-gold);
-  color: #000000;
+  background: #000000;
+  color: #ffffff;
   font-weight: 700;
-  padding: 2px 6px;
+  padding: 2px 8px;
+  text-transform: uppercase;
+  border-radius: 9999px;
 }
 
 .user-name {
-  font-size: 0.8rem;
-  color: #ffffff;
-  font-weight: 500;
+  font-size: 0.82rem;
+  color: #111111;
+  font-weight: 600;
 }
 
 .btn-logout {
   background: transparent;
   border: none;
-  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  border-left: 1px solid rgba(0, 0, 0, 0.15);
   padding-left: 0.75rem;
-  color: #888888;
+  color: #6b7280;
   font-size: 0.75rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -207,28 +226,29 @@
 }
 
 .btn-logout:hover {
-  color: #ef4444;
+  color: #dc2626;
 }
 
 .btn-login-nav {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: transparent;
-  border: 1px solid var(--color-gold);
-  color: var(--color-gold);
-  padding: 6px 14px;
+  background: #000000;
+  border: 1px solid #000000;
+  color: #ffffff;
+  padding: 8px 18px;
   font-size: 0.75rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 700;
+  border-radius: 9999px;
   transition: all 0.2s ease;
 }
 
 .btn-login-nav:hover {
-  background: var(--color-gold);
-  color: #000000;
+  background: #262626;
+  border-color: #262626;
 }
 
 .login-dot {
@@ -241,45 +261,44 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  color: #ffffff;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  color: #111111;
   text-decoration: none;
   transition: all 0.2s ease;
-  margin-right: 0.5rem;
 }
 
 .nav-cart-btn:hover {
-  background: rgba(212, 175, 55, 0.15);
-  border-color: var(--color-gold);
+  background: #f9fafb;
+  border-color: #000000;
   transform: translateY(-1px);
 }
 
 .cart-icon {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
 }
 
 .cart-badge {
   position: absolute;
-  top: -4px;
+  top: -6px;
   right: -6px;
-  background: #d4af37;
-  color: #0d0d0d;
-  font-size: 0.68rem;
+  background: #000000;
+  color: #ffffff;
+  font-size: 0.65rem;
   font-weight: 700;
   min-width: 18px;
   height: 18px;
   line-height: 18px;
   text-align: center;
-  border-radius: 9px;
+  border-radius: 9999px;
   padding: 0 4px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
 }
 
 .main-content {
   flex: 1;
   padding: 2rem 3rem;
+  background-color: #ffffff;
 }

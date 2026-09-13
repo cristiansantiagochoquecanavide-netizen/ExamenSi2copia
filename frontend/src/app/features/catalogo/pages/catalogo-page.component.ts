@@ -637,7 +637,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     .search-wrap {
       display: flex;
       align-items: center;
-      gap: 0.6rem;
+      gap: 0.75rem;
       flex-wrap: wrap;
     }
     .search-input-group {
@@ -646,8 +646,8 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       align-items: center;
       background: #ffffff;
       border: 1px solid #d1d5db;
-      border-radius: 8px;
-      padding: 0 0.75rem;
+      border-radius: 9999px;
+      padding: 0 1rem;
       min-width: 260px;
       transition: border-color 0.2s;
     }
@@ -662,7 +662,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     .search-input-field {
       border: none;
       background: transparent;
-      padding: 0.55rem 0.2rem;
+      padding: 0.6rem 0.3rem;
       font-size: 0.85rem;
       color: #111827;
       outline: none;
@@ -675,6 +675,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       font-size: 1.1rem;
       cursor: pointer;
       padding: 0 0.25rem;
+      border-radius: 50%;
     }
     .btn-clear-query:hover { color: #111827; }
 
@@ -682,29 +683,31 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       background: #000000;
       color: #ffffff;
       border: 1px solid #000000;
-      padding: 0.58rem 1.15rem;
+      padding: 0.62rem 1.4rem;
       font-size: 0.8rem;
       font-weight: 700;
       letter-spacing: 0.08em;
-      border-radius: 8px;
+      border-radius: 9999px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 0.35rem;
+      gap: 0.4rem;
       transition: all 0.2s;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     }
     .btn-search-action:hover {
       background: #1f2937;
       border-color: #1f2937;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
     }
     .search-badge-count {
       font-size: 0.72rem;
       font-weight: 700;
       color: #6b7280;
       letter-spacing: 0.08em;
-      padding: 0.3rem 0.6rem;
+      padding: 0.35rem 0.8rem;
       background: #f3f4f6;
-      border-radius: 6px;
+      border-radius: 9999px;
     }
 
     .sector-tag {
@@ -712,10 +715,10 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       font-weight: 800;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      padding: 0.25rem 0.55rem;
+      padding: 0.25rem 0.65rem;
       background: #000000;
       color: #ffffff;
-      border-radius: 2px;
+      border-radius: 9999px;
       margin-left: 0.4rem;
     }
 
@@ -754,52 +757,56 @@ import { Sucursal } from '../../inventario/models/inventario.models';
 
     .action-buttons-group {
       display: flex;
-      gap: 0.75rem;
+      gap: 0.85rem;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     .btn-action-gold {
       background: #000000;
       border: 1px solid #000000;
       color: #ffffff;
-      padding: 0.6rem 1.15rem;
+      padding: 0.65rem 1.4rem;
       font-size: 0.75rem;
       font-weight: 700;
       letter-spacing: 0.12em;
       cursor: pointer;
-      border-radius: 0;
+      border-radius: 9999px;
       transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     }
 
     .btn-action-gold:hover {
       background: #262626;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
     .btn-action-outline {
       background: #ffffff;
       border: 1px solid rgba(0, 0, 0, 0.25);
       color: #000000;
-      padding: 0.6rem 1.15rem;
+      padding: 0.65rem 1.4rem;
       font-size: 0.75rem;
       font-weight: 600;
       letter-spacing: 0.12em;
       cursor: pointer;
-      border-radius: 0;
+      border-radius: 9999px;
       transition: all 0.2s ease;
     }
 
     .btn-action-outline:hover {
       background: #f3f4f6;
+      border-color: #000000;
     }
 
     .btn-refresh {
       background: #ffffff;
       border: 1px solid rgba(0, 0, 0, 0.18);
       color: #374151;
-      padding: 0.6rem 0.95rem;
+      padding: 0.65rem 1.25rem;
       font-size: 0.75rem;
       cursor: pointer;
-      border-radius: 0;
+      border-radius: 9999px;
       font-weight: 600;
     }
 
@@ -1058,12 +1065,12 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       background: #ffffff;
       border: 1px solid rgba(0, 0, 0, 0.25);
       color: #000000;
-      padding: 0.6rem 1rem;
+      padding: 0.6rem 1.3rem;
       font-size: 0.72rem;
       letter-spacing: 0.15em;
       font-weight: 700;
       cursor: pointer;
-      border-radius: 0;
+      border-radius: 9999px;
       transition: all 0.2s ease;
     }
 
@@ -1071,6 +1078,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       background: #000000;
       color: #ffffff;
       border-color: #000000;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     }
 
     /* Modal Styling */
@@ -1215,11 +1223,12 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       background: #ffffff;
       border: 1px solid rgba(0, 0, 0, 0.3);
       color: #000000;
-      padding: 0.5rem;
+      padding: 0.55rem 1.25rem;
       font-size: 0.75rem;
       font-weight: 700;
       cursor: pointer;
-      border-radius: 0;
+      border-radius: 9999px;
+      transition: all 0.2s ease;
     }
 
     .btn-attach:hover {
@@ -1353,13 +1362,13 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       background: #000000;
       color: #ffffff;
       border: 1px solid #000000;
-      padding: 1rem;
+      padding: 0.9rem 1.5rem;
       font-size: 0.78rem;
       letter-spacing: 0.2em;
       font-weight: 700;
       cursor: pointer;
-      border-radius: 0;
-      transition: background 0.2s ease;
+      border-radius: 9999px;
+      transition: background 0.2s ease, box-shadow 0.2s ease;
       text-transform: uppercase;
     }
 
@@ -1443,11 +1452,12 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       background: #ffffff;
       border: 1px solid rgba(0, 0, 0, 0.25);
       color: #374151;
-      padding: 0.75rem 1.25rem;
+      padding: 0.75rem 1.4rem;
       font-size: 0.75rem;
       font-weight: 600;
       cursor: pointer;
-      border-radius: 0;
+      border-radius: 9999px;
+      transition: all 0.2s ease;
     }
 
     .btn-cancel:hover {
@@ -1459,13 +1469,14 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       background: #000000;
       border: 1px solid #000000;
       color: #ffffff;
-      padding: 0.75rem 1.5rem;
+      padding: 0.75rem 1.6rem;
       font-weight: 700;
       font-size: 0.75rem;
       letter-spacing: 0.1em;
       cursor: pointer;
-      border-radius: 0;
+      border-radius: 9999px;
       text-transform: uppercase;
+      transition: all 0.2s ease;
     }
 
     .btn-submit:hover {

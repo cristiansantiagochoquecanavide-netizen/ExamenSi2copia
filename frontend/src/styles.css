@@ -1,50 +1,555 @@
 /* =========================================================
-   ATELIER NOIR ? DESIGN SYSTEM BASE TOKENS (UI-UX-WEB)
+   FASHIONSTORE ? UNIFIED MINIMALIST LIGHT DESIGN SYSTEM
+   Theme: Pure White (#ffffff), Structured Black (#000000),
+   Subtle Gray Accents, Razor-sharp 0px Radius & High Contrast.
    ========================================================= */
 
 :root {
-  --color-canvas: #000000;
-  --color-surface: #131313;
-  --color-surface-dim: #111111;
-  --color-surface-bright: #1f1f1f;
-  --color-surface-container: #1a1a1a;
-  --color-on-surface: #e2e2e2;
-  --color-on-surface-muted: #8e9192;
+  /* Lienzo y Superficies */
+  --color-canvas: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-dim: #f9fafb;
+  --color-surface-bright: #f3f4f6;
+  --color-surface-container: #f9fafb;
   
-  --color-primary: #ffffff;
-  --color-on-primary: #111111;
-  --color-gold: #d4af37;
-  --color-gold-muted: #af8d11;
+  /* Textos y Contraste */
+  --color-on-surface: #111111;
+  --color-on-surface-muted: #4b5563;
+  --color-on-surface-subtle: #6b7280;
+  
+  /* Colores Principales y Accesorios */
+  --color-primary: #000000;
+  --color-on-primary: #ffffff;
+  --color-gold: #000000;
+  --color-gold-muted: #374151;
+  --color-accent-badge: #111111;
 
-  --border-hairline: 1px solid rgba(255, 255, 255, 0.15);
-  --border-radius-sharp: 0px; /* Estricto 0px border-radius */
+  /* Bordes y Formas */
+  --border-hairline: 1px solid rgba(0, 0, 0, 0.1);
+  --border-hairline-subtle: 1px solid rgba(0, 0, 0, 0.06);
+  --border-radius-sharp: 0px;
 
-  --font-serif: 'Bodoni Moda', serif;
-  --font-sans: 'Inter', sans-serif;
+  /* Tipografía */
+  --font-serif: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-label: 'Public Sans', 'Inter', sans-serif;
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  border-radius: 0 !important; /* Regla inquebrantable de forma */
 }
 
-body.atelier-noir-theme {
-  background-color: var(--color-canvas);
-  color: var(--color-on-surface);
+html, body {
+  background-color: #ffffff !important;
+  color: #111111 !important;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
+  min-height: 100vh;
 }
 
-h1, h2, h3, h4, .editorial-heading {
-  font-family: var(--font-serif);
-  font-weight: 400;
-  letter-spacing: -0.01em;
+body.atelier-noir-theme,
+body.fashionstore-light-theme {
+  background-color: #ffffff !important;
+  color: #111111 !important;
+}
+
+/* =========================================================
+   TIPOGRAFÍA ESTRUCTURADA
+   ========================================================= */
+h1, h2, h3, h4, h5, h6, .editorial-heading {
+  font-family: var(--font-sans) !important;
+  font-weight: 700 !important;
+  color: #000000 !important;
+  letter-spacing: -0.02em;
+}
+
+p, span, label, td, th {
+  color: inherit;
 }
 
 button, input, select, textarea {
   font-family: var(--font-sans);
+}
+
+/* =========================================================
+   ADAPTACIÓN GLOBAL DE COMPONENTES Y MÓDULOS ADMIN
+   ========================================================= */
+
+/* Contenedores y Tarjetas */
+.branch-card,
+.card,
+.stat-card,
+.dashboard-card,
+.panel-card,
+.card-panel,
+.pos-card,
+.order-card,
+.user-card,
+.role-card,
+.audit-card {
+  background-color: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  color: #111111 !important;
+  box-shadow: none !important;
+}
+
+.branch-card:hover,
+.card:hover,
+.stat-card:hover,
+.dashboard-card:hover,
+.panel-card:hover,
+.card-panel:hover,
+.pos-card:hover,
+.order-card:hover,
+.user-card:hover,
+.role-card:hover,
+.audit-card:hover {
+  border-color: rgba(0, 0, 0, 0.25) !important;
+}
+
+.spec-val,
+.spec-value,
+.val-txt,
+.col-strong,
+.branch-name,
+.card-title,
+.section-title,
+.stat-value,
+.pos-title,
+.order-title,
+.lead-title,
+.metric-value,
+.price-tag,
+.total-amount {
+  color: #111111 !important;
+}
+
+/* Encabezados y Secciones de Módulos */
+.header-section,
+.module-header,
+.filter-bar,
+.actions-bar {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.eyebrow,
+.pre-title,
+.badge-tag {
+  color: #374151 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.18em !important;
+}
+
+.gold-dot {
+  color: #000000 !important;
+}
+
+.subtitle,
+.module-desc {
+  color: #4b5563 !important;
+  font-weight: 400 !important;
+}
+
+/* Tablas Tabulares de Alta Densidad */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff !important;
+  color: #111111 !important;
+}
+
+table thead tr {
+  background-color: #f9fafb !important;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.15) !important;
+}
+
+table thead tr th {
+  color: #000000 !important;
+  font-weight: 700 !important;
+  font-size: 0.82rem !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase;
+  padding: 1rem !important;
+  border-bottom: none !important;
+}
+
+table tbody tr {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+  transition: background-color 0.15s ease;
+}
+
+table tbody tr:hover {
+  background-color: #f3f4f6 !important;
+}
+
+table tbody tr td {
+  padding: 1rem !important;
+  color: #1f2937 !important;
+  font-size: 0.9rem !important;
+}
+
+/* =========================================================
+   SISTEMA GLOBAL DE BOTONES SEMI-CIRCULARES (PILL / CÁPSULA)
+   Y ESPACIADO VISUAL AMIGABLE UNIFICADO
+   ========================================================= */
+
+/* Curvatura semi-circular (pill) para todos los botones del sistema */
+button:not(.dropdown-trigger):not(.btn-close-banner):not(.toast-close):not(.modal-close):not(.modal-close-btn):not(.btn-clear-query):not(.btn-clear):not(.btn-copy):not(.icon-btn):not(.nav-circle-btn):not(.nav-cart-btn),
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+[role="button"],
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-outline,
+.btn-action-gold,
+.btn-action-outline,
+.btn-action-primary,
+.btn-action-ghost,
+.btn-gold,
+.btn-save,
+.btn-submit,
+.btn-cancel,
+.btn-refresh,
+.btn-card-action,
+.btn-search-action,
+.btn-nueva-campana,
+.btn-submit-modal,
+.btn-action,
+.btn-retry,
+.btn-attach,
+.btn-reserve-lead,
+.btn-primary-cta,
+.btn-secondary-action,
+.btn-vip,
+.btn-concierge,
+.tab-btn,
+.sector-pill,
+.subcat-chip,
+.quick-chip,
+.status-pill,
+.btn-login-nav,
+.page-num,
+.page-next {
+  border-radius: 9999px !important;
+  padding: 0.6rem 1.4rem;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* Botones circulares para iconos / cerrar / carritos */
+.icon-btn,
+.nav-circle-btn,
+.modal-close,
+.modal-close-btn,
+.btn-close-banner,
+.toast-close,
+.btn-clear-query,
+.btn-clear,
+.btn-copy,
+.nav-cart-btn {
+  border-radius: 50% !important;
+}
+
+/* Botones de Acción Primarios (Negro Atelier) */
+.btn-action-gold,
+.btn-gold,
+.btn-primary,
+.btn-action-primary,
+.btn-save,
+.btn-submit,
+.btn-search-action,
+.btn-nueva-campana,
+.btn-submit-modal,
+.btn-primary-cta,
+.btn-vip,
+.sector-pill.active,
+.subcat-chip.active,
+.tab-btn.active {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #000000 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase;
+}
+
+.btn-action-gold:hover,
+.btn-gold:hover,
+.btn-primary:hover,
+.btn-action-primary:hover,
+.btn-save:hover,
+.btn-submit:hover,
+.btn-search-action:hover,
+.btn-nueva-campana:hover,
+.btn-submit-modal:hover,
+.btn-primary-cta:hover,
+.btn-vip:hover {
+  background-color: #262626 !important;
+  border-color: #262626 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Botones Secundarios (Blanco Puro con Borde) */
+.btn-secondary,
+.btn-outline,
+.btn-action-outline,
+.btn-action-ghost,
+.btn-cancel,
+.btn-refresh,
+.btn-card-action,
+.btn-secondary-action,
+.btn-action.test {
+  background-color: #ffffff !important;
+  color: #111111 !important;
+  border: 1px solid rgba(0, 0, 0, 0.22) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.08em !important;
+}
+
+.btn-secondary:hover,
+.btn-outline:hover,
+.btn-action-outline:hover,
+.btn-action-ghost:hover,
+.btn-cancel:hover,
+.btn-refresh:hover,
+.btn-card-action:hover,
+.btn-secondary-action:hover,
+.btn-action.test:hover {
+  background-color: #f9fafb !important;
+  border-color: #000000 !important;
+  color: #000000 !important;
+}
+
+/* Pestañas (Tabs) estilo cápsula amigable */
+.tab-btn {
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  color: #4b5563 !important;
+  font-weight: 600 !important;
+}
+
+.tab-btn:hover {
+  color: #000000 !important;
+  background: #f3f4f6 !important;
+}
+
+.tab-btn.active {
+  background: #000000 !important;
+  border-color: #000000 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+/* Botones compactos dentro de celdas de tabla */
+table td button,
+table td .btn,
+.actions-cell button,
+.actions-cell .btn,
+.btn-action {
+  padding: 0.35rem 0.85rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* =========================================================
+   ESPACIADO Y SEPARACIÓN AMIGABLE ENTRE BOTONES (GLOBAL)
+   ========================================================= */
+
+/* Contenedores flex de botones con separación unificada y holgada */
+.action-buttons-group,
+.actions-bar,
+.button-group,
+.btn-group,
+.modal-actions-footer,
+.modal-footer,
+.modal-foot,
+.form-actions,
+.tab-group,
+.tabs-container,
+.sector-pills,
+.subcategory-chips,
+.chips-wrap,
+.filter-actions,
+.table-actions,
+.quick-actions,
+.search-wrap,
+.filter-selects,
+.tabs-switcher {
+  display: flex !important;
+  align-items: center;
+  gap: 0.75rem !important;
+  flex-wrap: wrap;
+}
+
+/* Separación entre botones hermanos en cualquier flujo inline */
+button + button,
+.btn + .btn,
+button + .btn,
+.btn + button,
+a.btn + a.btn,
+button + a.btn,
+a.btn + button {
+  margin-left: 0.75rem;
+}
+
+/* Evitar doble margen en contenedores que ya aplican flex gap */
+:is([style*="gap"], .action-buttons-group, .actions-bar, .button-group, .btn-group, .modal-actions-footer, .modal-footer, .modal-foot, .form-actions, .sector-pills, .subcategory-chips, .chips-wrap, .search-wrap, .tabs-switcher, .filter-selects) > button + button,
+:is([style*="gap"], .action-buttons-group, .actions-bar, .button-group, .btn-group, .modal-actions-footer, .modal-footer, .modal-foot, .form-actions, .sector-pills, .subcategory-chips, .chips-wrap, .search-wrap, .tabs-switcher, .filter-selects) > .btn + .btn {
+  margin-left: 0;
+}
+
+/* Formularios, Inputs y Selects */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+input[type="search"],
+select,
+textarea,
+.form-input,
+.form-select,
+.form-control,
+.filter-input,
+.filter-select {
+  background-color: #ffffff !important;
+  color: #111111 !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  padding: 0.65rem 0.85rem !important;
+  font-size: 0.9rem !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+.form-input:focus,
+.form-select:focus,
+.form-control:focus,
+.filter-input:focus,
+.filter-select:focus {
+  outline: none !important;
+  border-color: #000000 !important;
+  box-shadow: 0 0 0 1px #000000 !important;
+}
+
+input::placeholder,
+textarea::placeholder,
+.form-input::placeholder {
+  color: #9ca3af !important;
+}
+
+.form-label,
+label {
+  color: #374151 !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+}
+
+/* Badges y Estados */
+.status-badge,
+.badge-status,
+.pill-badge {
+  border-radius: 9999px !important;
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  padding: 4px 10px !important;
+  text-transform: uppercase !important;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  background-color: #f9fafb !important;
+  color: #111111 !important;
+}
+
+.status-active,
+.badge-active {
+  background-color: #f0fdf4 !important;
+  color: #166534 !important;
+  border-color: #bbf7d0 !important;
+}
+
+.status-pending,
+.badge-pending {
+  background-color: #fefce8 !important;
+  color: #854d0e !important;
+  border-color: #fef08a !important;
+}
+
+.status-inactive,
+.status-danger,
+.badge-inactive {
+  background-color: #fef2f2 !important;
+  color: #991b1b !important;
+  border-color: #fecaca !important;
+}
+
+/* Modales y Diálogos */
+.modal-overlay,
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.55) !important;
+  backdrop-filter: blur(6px) !important;
+}
+
+.modal-content,
+.modal-box,
+.modal-dialog {
+  background-color: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  color: #111111 !important;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25) !important;
+}
+
+.modal-content .modal-header,
+.modal-box .modal-header,
+.modal-dialog .modal-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.modal-content .modal-footer,
+.modal-box .modal-footer,
+.modal-dialog .modal-footer {
+  border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Alertas y Notificaciones */
+.alert-success {
+  background-color: #ecfdf5 !important;
+  border: 1px solid #059669 !important;
+  color: #065f46 !important;
+  font-weight: 500 !important;
+}
+
+.alert-error {
+  background-color: #fef2f2 !important;
+  border: 1px solid #dc2626 !important;
+  color: #991b1b !important;
+  font-weight: 500 !important;
+}
+
+.alert-warning {
+  background-color: #fffbeb !important;
+  border: 1px solid #d97706 !important;
+  color: #92400e !important;
+  font-weight: 500 !important;
+}
+
+.alert-info {
+  background-color: #eff6ff !important;
+  border: 1px solid #2563eb !important;
+  color: #1e40af !important;
+  font-weight: 500 !important;
 }

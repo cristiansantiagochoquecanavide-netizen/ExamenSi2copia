@@ -644,10 +644,10 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
     .tabs-switcher {
       display: inline-flex;
       align-items: center;
-      gap: 0.25rem;
+      gap: 0.5rem;
       background: #f3f4f6;
-      padding: 0.3rem;
-      border-radius: 9px;
+      padding: 0.35rem 0.5rem;
+      border-radius: 9999px;
       border: 1px solid #e5e7eb;
     }
     .tab-btn {
@@ -656,8 +656,8 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
       color: #6b7280;
       font-weight: 600;
       font-size: 0.85rem;
-      padding: 0.5rem 1rem;
-      border-radius: 7px;
+      padding: 0.55rem 1.3rem;
+      border-radius: 9999px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
@@ -683,12 +683,12 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
       border: 1px solid #000000;
       font-weight: 700;
       font-size: 0.85rem;
-      padding: 0.58rem 1.25rem;
-      border-radius: 8px;
+      padding: 0.65rem 1.45rem;
+      border-radius: 9999px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 0.45rem;
+      gap: 0.5rem;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -842,9 +842,9 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
     .btn-refresh {
       background: #ffffff;
       border: 1px solid #d1d5db;
-      border-radius: 6px;
-      padding: 0.55rem 0.8rem;
-      font-size: 1rem;
+      border-radius: 9999px;
+      padding: 0.55rem 1.15rem;
+      font-size: 0.95rem;
       color: #4b5563;
       cursor: pointer;
       transition: all 0.2s;
@@ -1041,11 +1041,11 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
     .btn-action {
       font-size: 0.75rem;
       font-weight: 600;
-      padding: 0.35rem 0.65rem;
-      border-radius: 6px;
+      padding: 0.38rem 0.85rem;
+      border-radius: 9999px;
       cursor: pointer;
       transition: all 0.2s;
-      margin-left: 0.4rem;
+      margin-left: 0.6rem;
     }
     .btn-action.test {
       background: #ffffff;
@@ -1176,11 +1176,12 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
       font-size: 0.85rem;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      padding: 0.85rem;
-      border-radius: 8px;
+      padding: 0.85rem 1.6rem;
+      border-radius: 9999px;
       cursor: pointer;
       transition: all 0.2s;
       margin-top: 0.5rem;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     }
     .btn-submit-sim:hover:not(:disabled) {
       background: #1f2937;
@@ -1368,8 +1369,8 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
       color: #374151;
       font-weight: 600;
       font-size: 0.85rem;
-      padding: 0.6rem 1.1rem;
-      border-radius: 8px;
+      padding: 0.65rem 1.4rem;
+      border-radius: 9999px;
       cursor: pointer;
       transition: all 0.2s;
     }
@@ -1380,8 +1381,8 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
       border: 1px solid #000000;
       font-weight: 600;
       font-size: 0.85rem;
-      padding: 0.6rem 1.25rem;
-      border-radius: 8px;
+      padding: 0.65rem 1.5rem;
+      border-radius: 9999px;
       cursor: pointer;
       transition: all 0.2s;
     }
