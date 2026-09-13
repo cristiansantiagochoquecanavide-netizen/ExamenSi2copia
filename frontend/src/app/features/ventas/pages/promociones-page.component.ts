@@ -22,6 +22,13 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
         </div>
 
         <div class="header-actions">
+          <button 
+            type="button"
+            (click)="abrirModalNuevaPromo()"
+            class="btn-nueva-campana">
+            <span class="btn-plus-icon">+</span> Nueva Campa&ntilde;a
+          </button>
+
           <div class="tabs-switcher">
             <button 
               type="button"
@@ -38,14 +45,6 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
               <span class="tab-icon">&#9889;</span> Simulador de Canje
             </button>
           </div>
-
-          <button 
-            type="button"
-            *ngIf="activeTab === 'campanas'"
-            (click)="abrirModalNuevaPromo()"
-            class="btn-nueva-campana">
-            <span class="btn-plus-icon">+</span> Nueva Campa&ntilde;a
-          </button>
         </div>
       </header>
 
@@ -638,9 +637,9 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
     /* HEADER ACTIONS & TABS */
     .header-actions {
       display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.75rem;
     }
     .tabs-switcher {
       display: inline-flex;
