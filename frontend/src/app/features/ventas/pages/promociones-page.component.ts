@@ -28,7 +28,7 @@ import { Promocion, PromocionCreate, ValidarCuponResponse } from '../models/vent
               class="tab-btn"
               [class.active]="activeTab === 'campanas'"
               (click)="activeTab = 'campanas'">
-              <span>&#128179;</span> Campa&ntilde;as y Cupones
+              <span>%</span> Campa&ntilde;as y Cupones
             </button>
             <button 
               type="button"
