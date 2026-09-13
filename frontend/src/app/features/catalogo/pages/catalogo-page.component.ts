@@ -97,15 +97,15 @@ import { Sucursal } from '../../inventario/models/inventario.models';
             </button>
           </div>
 
-          <!-- BUSCADOR A LA DERECHA -->
+          <!-- BUSCADOR A LA DERECHA (FIEL AL MODELO APROBADO) -->
           <div class="search-inline-wrap">
-            <div class="search-input-box">
+            <div class="search-input-container">
               <input
                 type="text"
                 [(ngModel)]="searchQuery"
                 (keyup.enter)="ejecutarBusqueda()"
                 placeholder="Buscar"
-                class="search-input-field"
+                class="search-input-mockup"
               />
               <button 
                 *ngIf="searchQuery" 
@@ -114,8 +114,12 @@ import { Sucursal } from '../../inventario/models/inventario.models';
                 (click)="limpiarBusqueda()" 
                 title="Limpiar búsqueda">&times;</button>
             </div>
-            <button type="button" class="btn-search-pill" (click)="ejecutarBusqueda()">
-              <span class="search-lens-icon">&#128269;</span> Buscar
+            <button type="button" class="btn-search-mockup" (click)="ejecutarBusqueda()">
+              <svg class="search-loupe-svg" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="7"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <span>Buscar</span>
             </button>
           </div>
         </div>
@@ -639,7 +643,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       font-weight: 700;
     }
 
-    /* BUSCADOR A LA DERECHA */
+    /* BUSCADOR A LA DERECHA - EXACTO AL MODELO APROBADO */
     .search-inline-wrap {
       display: flex;
       align-items: center;
@@ -647,65 +651,87 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       margin-left: auto;
     }
 
-    .search-input-box {
+    .search-input-container {
       position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .search-input-mockup {
+      width: 250px !important;
+      height: 40px !important;
+      box-sizing: border-box !important;
+      background: #ffffff !important;
+      border: 1px solid #d1d5db !important;
+      border-radius: 8px !important;
+      padding: 0 1rem !important;
+      font-size: 0.88rem !important;
+      color: #111827 !important;
+      outline: none !important;
+      box-shadow: none !important;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+    }
+    .search-input-mockup:focus {
+      border-color: #000000 !important;
+      box-shadow: 0 0 0 1px #000000 !important;
+    }
+    .search-input-mockup::placeholder {
+      color: #9ca3af !important;
+      font-size: 0.88rem !important;
+    }
+
+    .btn-clear-query {
+      position: absolute;
+      right: 0.65rem;
+      background: none !important;
+      border: none !important;
+      color: #9ca3af !important;
+      font-size: 1.1rem !important;
+      cursor: pointer;
+      padding: 0 0.25rem !important;
+      border-radius: 50% !important;
+      box-shadow: none !important;
       display: flex;
       align-items: center;
-      background: #ffffff;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      padding: 0 0.85rem;
-      width: 250px;
-      transition: border-color 0.2s;
+      justify-content: center;
     }
-    .search-input-box:focus-within {
-      border-color: #000000;
+    .btn-clear-query:hover {
+      color: #111827 !important;
     }
-    .search-input-field {
-      border: none;
-      background: transparent;
-      padding: 0.55rem 0.2rem;
-      font-size: 0.85rem;
-      color: #111827;
-      outline: none;
-      width: 100%;
-    }
-    .search-input-field::placeholder {
-      color: #9ca3af;
-    }
-    .btn-clear-query {
-      background: none;
-      border: none;
-      color: #9ca3af;
-      font-size: 1.1rem;
-      cursor: pointer;
-      padding: 0 0.25rem;
-      border-radius: 50%;
-    }
-    .btn-clear-query:hover { color: #111827; }
 
-    .btn-search-pill {
+    .btn-search-mockup {
       background: #000000 !important;
       color: #ffffff !important;
       border: 1px solid #000000 !important;
       border-radius: 8px !important;
-      padding: 0.55rem 1.25rem !important;
-      font-size: 0.82rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
+      height: 40px !important;
+      box-sizing: border-box !important;
+      padding: 0 1.25rem !important;
+      font-size: 0.88rem !important;
+      font-weight: 500 !important;
+      letter-spacing: 0.02em !important;
+      text-transform: none !important;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      transition: all 0.2s;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 0.5rem !important;
+      transition: all 0.2s ease !important;
+      box-shadow: none !important;
     }
-    .btn-search-pill:hover {
+    .btn-search-mockup:hover {
       background: #1f2937 !important;
       border-color: #1f2937 !important;
     }
-    .search-lens-icon {
-      font-size: 0.85rem;
-      line-height: 1;
+    .btn-search-mockup:active {
+      transform: scale(0.98);
+    }
+    .search-loupe-svg {
+      width: 15px;
+      height: 15px;
+      display: inline-block;
+      flex-shrink: 0;
+      color: #ffffff;
     }
 
     .sector-tag {

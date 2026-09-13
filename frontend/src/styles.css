@@ -198,7 +198,7 @@ table tbody tr td {
    ========================================================= */
 
 /* Curvatura semi-circular (pill) para todos los botones del sistema */
-button:not(.dropdown-trigger):not(.btn-close-banner):not(.toast-close):not(.modal-close):not(.modal-close-btn):not(.btn-clear-query):not(.btn-clear):not(.btn-copy):not(.icon-btn):not(.nav-circle-btn):not(.nav-cart-btn),
+button:not(.dropdown-trigger):not(.btn-close-banner):not(.toast-close):not(.modal-close):not(.modal-close-btn):not(.btn-clear-query):not(.btn-clear):not(.btn-copy):not(.icon-btn):not(.nav-circle-btn):not(.nav-cart-btn):not(.btn-search-mockup):not(.btn-search-pill):not(.btn-search-action),
 input[type="button"],
 input[type="submit"],
 input[type="reset"],
@@ -217,7 +217,6 @@ input[type="reset"],
 .btn-cancel,
 .btn-refresh,
 .btn-card-action,
-.btn-search-action,
 .btn-nueva-campana,
 .btn-submit-modal,
 .btn-action,
@@ -430,7 +429,7 @@ a.btn + button {
 }
 
 /* Formularios, Inputs y Selects */
-input[type="text"],
+input[type="text"]:not(.search-input-mockup),
 input[type="number"],
 input[type="email"],
 input[type="password"],
