@@ -76,8 +76,8 @@ import { Sucursal } from '../../inventario/models/inventario.models';
           </div>
         </div>
 
-        <!-- NIVEL 2: SUBCATEGORÍAS CONTEXTUALES + BUSCADOR DEDICADO -->
-        <div class="subcategories-search-bar">
+        <!-- NIVEL 2: SUBCATEGORÍAS CONTEXTUALES -->
+        <div class="subcategories-bar">
           <div class="subcategory-chips">
             <button 
               type="button" 
@@ -95,8 +95,10 @@ import { Sucursal } from '../../inventario/models/inventario.models';
               {{ cat.nombre }}
             </button>
           </div>
+        </div>
 
-          <!-- BUSCADOR CON BOTÓN EXPLÍCITO -->
+        <!-- BUSCADOR CON BOTÓN EXPLÍCITO EN FILA DEDICADA -->
+        <div class="search-toolbar-row">
           <div class="search-wrap">
             <div class="search-input-group">
               <span class="search-lens-icon">&#128269;</span>
@@ -553,12 +555,12 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       margin-bottom: 2rem;
     }
 
-    /* 2-LEVEL HIERARCHICAL FILTERS & SEARCH */
+    /* 2-LEVEL HIERARCHICAL FILTERS & SEARCH - ESPACIADO GENEROSO DE ALTURA */
     .catalog-controls-section {
-      margin-bottom: 2rem;
+      margin-bottom: 2.75rem;
       display: flex;
       flex-direction: column;
-      gap: 1.25rem;
+      gap: 1.85rem;
     }
 
     /* NIVEL 1: SECTORES (DEPARTAMENTOS) */
@@ -568,7 +570,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     }
     .sector-pills {
       display: flex;
-      gap: 0.65rem;
+      gap: 0.45rem;
       flex-wrap: wrap;
     }
     .sector-pill {
@@ -576,10 +578,10 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       border: 1px solid #d1d5db;
       border-radius: 9999px;
       color: #374151;
-      padding: 0.65rem 1.6rem;
-      font-size: 0.82rem;
+      padding: 0.52rem 1.25rem;
+      font-size: 0.8rem;
       font-weight: 700;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.1em;
       cursor: pointer;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -596,17 +598,14 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
     }
 
-    /* NIVEL 2: SUBCATEGORÍAS & SEARCH */
-    .subcategories-search-bar {
+    /* NIVEL 2: SUBCATEGORÍAS EN FILA DEDICADA */
+    .subcategories-bar {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 1.5rem;
-      flex-wrap: wrap;
     }
     .subcategory-chips {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.38rem;
       flex-wrap: wrap;
       align-items: center;
     }
@@ -615,7 +614,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       border: 1px solid #e5e7eb;
       border-radius: 9999px;
       color: #4b5563;
-      padding: 0.5rem 1.15rem;
+      padding: 0.42rem 0.95rem;
       font-size: 0.78rem;
       font-weight: 600;
       cursor: pointer;
@@ -633,11 +632,15 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       font-weight: 700;
     }
 
-    /* BUSCADOR DEDICADO */
+    /* BUSCADOR EN FILA DEDICADA CON EXCELENTE VISIBILIDAD */
+    .search-toolbar-row {
+      display: flex;
+      align-items: center;
+    }
     .search-wrap {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.55rem;
       flex-wrap: wrap;
     }
     .search-input-group {
@@ -648,7 +651,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       border: 1px solid #d1d5db;
       border-radius: 9999px;
       padding: 0 1rem;
-      min-width: 260px;
+      min-width: 280px;
       transition: border-color 0.2s;
     }
     .search-input-group:focus-within {
@@ -662,7 +665,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     .search-input-field {
       border: none;
       background: transparent;
-      padding: 0.6rem 0.3rem;
+      padding: 0.58rem 0.3rem;
       font-size: 0.85rem;
       color: #111827;
       outline: none;
@@ -683,7 +686,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       background: #000000;
       color: #ffffff;
       border: 1px solid #000000;
-      padding: 0.62rem 1.4rem;
+      padding: 0.58rem 1.35rem;
       font-size: 0.8rem;
       font-weight: 700;
       letter-spacing: 0.08em;
@@ -728,8 +731,8 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       align-items: center;
       background: #f9fafb;
       border: 1px solid rgba(0, 0, 0, 0.08);
-      padding: 0.85rem 1.25rem;
-      margin-bottom: 2rem;
+      padding: 1rem 1.5rem;
+      margin-bottom: 2.5rem;
       flex-wrap: wrap;
       gap: 1rem;
     }
