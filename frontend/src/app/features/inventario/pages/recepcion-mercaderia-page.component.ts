@@ -29,7 +29,7 @@ interface LineaRecepcionForm {
       <section class="editorial-hero">
         <div class="eyebrow">
           <span class="gold-dot">&bull;</span>
-          <span>ABASTECIMIENTO &amp; KARDEX &bull; CASO DE USO #8</span>
+          <span>ABASTECIMIENTO &amp; KARDEX</span>
         </div>
         <h1 class="hero-title">Proveedores y Recepción</h1>
         <p class="hero-description">
@@ -269,7 +269,7 @@ interface LineaRecepcionForm {
           <div class="modal-dialog-large" (click)="$event.stopPropagation()">
             <div class="modal-header">
               <div class="modal-title-group">
-                <span class="modal-eyebrow">INGRESO AL KARDEX DE SUCURSAL &bull; CU8</span>
+                <span class="modal-eyebrow">INGRESO AL KARDEX DE SUCURSAL</span>
                 <h3 class="modal-title">Recepción de Mercadería / Lote</h3>
               </div>
               <button type="button" class="btn-close" (click)="closeModals()">&times;</button>
@@ -472,11 +472,11 @@ interface LineaRecepcionForm {
       padding: 2.5rem 3rem 4rem 3rem;
       max-width: 1440px;
       margin: 0 auto;
-      color: #ffffff;
+      color: #111111;
     }
 
     .editorial-hero {
-      border-bottom: 1px solid #222222;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       padding-bottom: 2rem;
       margin-bottom: 2rem;
     }
@@ -487,27 +487,29 @@ interface LineaRecepcionForm {
       gap: 0.5rem;
       font-size: 0.72rem;
       letter-spacing: 0.25em;
-      color: #d4af37;
+      color: #4b5563;
       text-transform: uppercase;
       margin-bottom: 0.75rem;
+      font-weight: 700;
     }
 
     .gold-dot {
-      color: #d4af37;
+      color: #000000;
     }
 
     .hero-title {
-      font-family: 'Bodoni Moda', serif;
-      font-size: 2.75rem;
-      font-weight: 400;
-      letter-spacing: 0.05em;
+      font-family: 'Inter', sans-serif;
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
       margin: 0 0 0.75rem 0;
+      color: #000000;
     }
 
     .hero-description {
       font-family: 'Inter', sans-serif;
       font-size: 0.95rem;
-      color: #888888;
+      color: #4b5563;
       max-width: 820px;
       line-height: 1.6;
       margin-bottom: 2rem;
@@ -528,32 +530,32 @@ interface LineaRecepcionForm {
 
     .tab-btn {
       background: transparent;
-      border: 1px solid #2a2a2a;
+      border: 1px solid rgba(0, 0, 0, 0.15);
       border-radius: 0;
-      color: #777777;
+      color: #4b5563;
       padding: 0.75rem 1.25rem;
       font-size: 0.78rem;
-      font-weight: 600;
+      font-weight: 700;
       letter-spacing: 0.15em;
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
     .tab-btn:hover {
-      border-color: #555555;
-      color: #cccccc;
+      border-color: #000000;
+      color: #000000;
     }
 
     .tab-btn.active {
-      background: #111111;
-      border-color: #d4af37;
-      color: #d4af37;
+      background: #000000;
+      border-color: #000000;
+      color: #ffffff;
     }
 
     .btn-gold {
-      background: #d4af37;
-      color: #000000;
-      border: 1px solid #d4af37;
+      background: #000000;
+      color: #ffffff;
+      border: 1px solid #000000;
       border-radius: 0;
       padding: 0.75rem 1.5rem;
       font-size: 0.75rem;
@@ -564,40 +566,44 @@ interface LineaRecepcionForm {
     }
 
     .btn-gold:hover {
-      background: #b89628;
+      background: #262626;
+      border-color: #262626;
     }
 
     .btn-refresh {
-      background: transparent;
-      border: 1px solid #333333;
-      color: #888888;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #374151;
       padding: 0.45rem 0.85rem;
       font-size: 0.75rem;
       cursor: pointer;
       border-radius: 0;
+      font-weight: 600;
+      transition: all 0.2s ease;
     }
 
     .btn-refresh:hover {
-      border-color: #d4af37;
-      color: #ffffff;
+      border-color: #000000;
+      color: #000000;
     }
 
     .feedback-banner {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #002b11;
-      border: 1px solid #00aa44;
-      color: #7affaa;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
       padding: 0.85rem 1.25rem;
       margin-bottom: 1.5rem;
       font-size: 0.85rem;
+      font-weight: 600;
     }
 
     .feedback-banner.error {
-      background: #2b0000;
-      border-color: #aa0000;
-      color: #ff7a7a;
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #991b1b;
     }
 
     .btn-close-banner {
@@ -613,19 +619,20 @@ interface LineaRecepcionForm {
       align-items: center;
       gap: 0.75rem;
       padding: 1.5rem;
-      background: #0d0d0d;
-      border: 1px solid #222222;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       font-size: 0.8rem;
       letter-spacing: 0.15em;
-      color: #d4af37;
+      color: #000000;
       margin-bottom: 1.5rem;
+      font-weight: 600;
     }
 
     .spinner {
       width: 14px;
       height: 14px;
-      border: 2px solid #222222;
-      border-top-color: #d4af37;
+      border: 2px solid rgba(0, 0, 0, 0.15);
+      border-top-color: #000000;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
@@ -635,9 +642,10 @@ interface LineaRecepcionForm {
     }
 
     .panel-card {
-      background: #0a0a0a;
-      border: 1px solid #1a1a1a;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 1.75rem;
+      border-radius: 0;
     }
 
     .panel-header {
@@ -650,26 +658,32 @@ interface LineaRecepcionForm {
     }
 
     .panel-title {
-      font-family: 'Bodoni Moda', serif;
-      font-size: 1.4rem;
-      font-weight: 400;
+      font-family: 'Inter', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 700;
       margin: 0 0 0.35rem 0;
-      color: #ffffff;
+      color: #000000;
     }
 
     .panel-hint {
       font-size: 0.82rem;
-      color: #777777;
+      color: #4b5563;
     }
 
     .search-box input {
-      background: #111111;
-      border: 1px solid #282828;
-      color: #ffffff;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
       padding: 0.5rem 0.85rem;
       font-size: 0.8rem;
       outline: none;
       min-width: 280px;
+      border-radius: 0;
+      transition: border-color 0.2s ease;
+    }
+
+    .search-box input:focus {
+      border-color: #000000;
     }
 
     .table-wrap {
@@ -684,82 +698,97 @@ interface LineaRecepcionForm {
     }
 
     .noir-table th {
-      border-bottom: 1px solid #222222;
+      border-bottom: 2px solid rgba(0, 0, 0, 0.12);
+      background: #f9fafb;
       padding: 0.85rem 1rem;
       font-size: 0.72rem;
       letter-spacing: 0.12em;
-      color: #666666;
-      font-weight: 600;
+      color: #000000;
+      font-weight: 700;
+      text-transform: uppercase;
     }
 
     .noir-table td {
-      border-bottom: 1px solid #161616;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
       padding: 1rem;
       vertical-align: middle;
+      color: #1f2937;
+    }
+
+    .noir-table tr:hover td {
+      background: #f9fafb;
     }
 
     .col-id {
-      color: #666666;
+      color: #4b5563;
       font-family: monospace;
       font-size: 0.8rem;
+      font-weight: 600;
     }
 
     .col-strong {
-      font-weight: 600;
-      color: #ffffff;
+      font-weight: 700;
+      color: #000000;
     }
 
     .col-muted {
-      color: #888888;
+      color: #6b7280;
       font-size: 0.82rem;
     }
 
     .col-contact {
       font-size: 0.82rem;
+      color: #111111;
     }
 
     .col-email {
-      color: #888888;
+      color: #6b7280;
       font-size: 0.75rem;
     }
 
     .col-price {
       font-weight: 700;
-      color: #ffffff;
+      color: #000000;
       font-size: 0.95rem;
     }
 
     .currency {
-      color: #d4af37;
+      color: #000000;
       margin-right: 2px;
+      font-weight: 700;
     }
 
     .nit-pill {
       display: inline-block;
       padding: 0.2rem 0.5rem;
-      background: #141414;
-      border: 1px solid #333333;
+      background: #f3f4f6;
+      border: 1px solid rgba(0, 0, 0, 0.15);
       font-family: monospace;
       font-size: 0.78rem;
-      color: #d4af37;
+      color: #000000;
+      font-weight: 700;
+      border-radius: 0;
     }
 
     .doc-badge {
       display: inline-block;
       padding: 0.25rem 0.6rem;
-      background: #141005;
-      border: 1px solid #6b5515;
-      color: #f3e5ab;
+      background: #f3f4f6;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      color: #000000;
       font-weight: 700;
       font-size: 0.78rem;
+      border-radius: 0;
     }
 
     .items-count {
       font-size: 0.75rem;
-      color: #aaaaaa;
-      background: #181818;
+      color: #374151;
+      background: #f3f4f6;
       padding: 0.2rem 0.5rem;
-      border: 1px solid #282828;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      font-weight: 600;
+      border-radius: 0;
     }
 
     .status-dot {
@@ -767,19 +796,20 @@ interface LineaRecepcionForm {
       width: 7px;
       height: 7px;
       border-radius: 50%;
-      background: #444444;
+      background: #9ca3af;
       margin-right: 0.45rem;
     }
 
     .status-dot.active {
-      background: #00cc66;
-      box-shadow: 0 0 6px rgba(0, 204, 102, 0.4);
+      background: #16a34a;
+      box-shadow: 0 0 6px rgba(22, 163, 74, 0.4);
     }
 
     .status-text {
       font-size: 0.75rem;
       letter-spacing: 0.08em;
-      color: #aaaaaa;
+      color: #374151;
+      font-weight: 600;
     }
 
     .action-btn-group {
@@ -789,19 +819,22 @@ interface LineaRecepcionForm {
     }
 
     .btn-action-ghost {
-      background: transparent;
-      border: 1px solid #333333;
-      color: #999999;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
       padding: 0.4rem 0.75rem;
       font-size: 0.72rem;
       cursor: pointer;
       border-radius: 0;
+      font-weight: 700;
+      letter-spacing: 0.05em;
       transition: all 0.2s ease;
     }
 
     .btn-action-ghost:hover {
-      border-color: #d4af37;
-      color: #d4af37;
+      border-color: #000000;
+      background: #000000;
+      color: #ffffff;
     }
 
     .text-right {
@@ -815,7 +848,7 @@ interface LineaRecepcionForm {
     .empty-msg {
       text-align: center;
       padding: 2.5rem;
-      color: #666666;
+      color: #6b7280;
       font-size: 0.85rem;
     }
 
@@ -826,7 +859,7 @@ interface LineaRecepcionForm {
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0, 0, 0, 0.5);
       backdrop-filter: blur(4px);
       display: flex;
       align-items: center;
@@ -835,25 +868,25 @@ interface LineaRecepcionForm {
     }
 
     .modal-dialog {
-      background: #0e0e0e;
-      border: 1px solid #d4af37;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
       border-radius: 0;
       width: 90%;
       max-width: 560px;
       max-height: 90vh;
       overflow-y: auto;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2);
     }
 
     .modal-dialog-large {
-      background: #0e0e0e;
-      border: 1px solid #d4af37;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
       border-radius: 0;
       width: 92%;
       max-width: 900px;
       max-height: 90vh;
       overflow-y: auto;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2);
     }
 
     .modal-header {
@@ -861,30 +894,38 @@ interface LineaRecepcionForm {
       justify-content: space-between;
       align-items: center;
       padding: 1.25rem 1.75rem;
-      border-bottom: 1px solid #222222;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     }
 
     .modal-eyebrow {
       font-size: 0.7rem;
       letter-spacing: 0.15em;
-      color: #d4af37;
+      color: #4b5563;
       display: block;
       margin-bottom: 0.25rem;
+      font-weight: 700;
+      text-transform: uppercase;
     }
 
     .modal-title {
-      font-family: 'Bodoni Moda', serif;
+      font-family: 'Inter', sans-serif;
       font-size: 1.35rem;
+      font-weight: 700;
       margin: 0;
-      color: #ffffff;
+      color: #000000;
     }
 
     .btn-close {
       background: transparent;
       border: none;
-      color: #888888;
+      color: #6b7280;
       font-size: 1.5rem;
       cursor: pointer;
+      transition: color 0.2s ease;
+    }
+
+    .btn-close:hover {
+      color: #000000;
     }
 
     .modal-body, .modal-body-large {
@@ -899,8 +940,9 @@ interface LineaRecepcionForm {
       display: block;
       font-size: 0.72rem;
       letter-spacing: 0.1em;
-      color: #999999;
+      color: #374151;
       text-transform: uppercase;
+      font-weight: 700;
       margin-bottom: 0.45rem;
     }
 
@@ -908,19 +950,21 @@ interface LineaRecepcionForm {
     .form-group select,
     .form-group textarea {
       width: 100%;
-      background: #141414;
-      border: 1px solid #2a2a2a;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
       border-radius: 0;
-      color: #ffffff;
+      color: #000000;
       padding: 0.75rem;
       font-size: 0.85rem;
       outline: none;
       box-sizing: border-box;
+      transition: border-color 0.2s ease;
     }
 
     .form-group input:focus,
-    .form-group select:focus {
-      border-color: #d4af37;
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: #000000;
     }
 
     .form-row {
@@ -943,10 +987,11 @@ interface LineaRecepcionForm {
 
     /* Items section inside modal */
     .items-section {
-      background: #111111;
-      border: 1px solid #222222;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 1.25rem;
       margin-bottom: 1.5rem;
+      border-radius: 0;
     }
 
     .items-section-header {
@@ -959,24 +1004,27 @@ interface LineaRecepcionForm {
     .section-badge {
       font-size: 0.72rem;
       letter-spacing: 0.15em;
-      color: #d4af37;
+      color: #000000;
       font-weight: 700;
+      text-transform: uppercase;
     }
 
     .btn-add-line {
-      background: transparent;
-      border: 1px solid #d4af37;
-      color: #d4af37;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.25);
+      color: #000000;
       font-size: 0.72rem;
-      font-weight: 600;
+      font-weight: 700;
       padding: 0.35rem 0.75rem;
       cursor: pointer;
       border-radius: 0;
+      transition: all 0.2s ease;
     }
 
     .btn-add-line:hover {
-      background: #d4af37;
-      color: #000;
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
     }
 
     .items-table-wrap {
@@ -991,35 +1039,45 @@ interface LineaRecepcionForm {
     }
 
     .items-table th {
-      color: #777;
+      color: #000000;
       font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
       padding: 0.5rem;
       text-align: left;
-      border-bottom: 1px solid #222;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.15);
     }
 
     .items-table td {
       padding: 0.5rem;
-      border-bottom: 1px solid #1a1a1a;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
       vertical-align: middle;
+      color: #1f2937;
     }
 
     .items-table select,
     .items-table input {
-      background: #181818;
-      border: 1px solid #333;
-      color: #fff;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
       padding: 0.45rem;
       font-size: 0.8rem;
       width: 100%;
       box-sizing: border-box;
       outline: none;
+      border-radius: 0;
+      transition: border-color 0.2s ease;
+    }
+
+    .items-table select:focus,
+    .items-table input:focus {
+      border-color: #000000;
     }
 
     .btn-remove-line {
       background: transparent;
       border: none;
-      color: #ff6666;
+      color: #dc2626;
       font-size: 1.2rem;
       cursor: pointer;
     }
@@ -1030,19 +1088,21 @@ interface LineaRecepcionForm {
       align-items: center;
       gap: 1rem;
       padding-top: 0.75rem;
-      border-top: 1px solid #222;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
     }
 
     .total-label {
       font-size: 0.75rem;
       letter-spacing: 0.15em;
-      color: #888;
+      color: #4b5563;
+      font-weight: 700;
+      text-transform: uppercase;
     }
 
     .total-value {
       font-size: 1.3rem;
-      font-weight: 700;
-      color: #ffffff;
+      font-weight: 800;
+      color: #000000;
     }
 
     .modal-actions {
@@ -1053,25 +1113,38 @@ interface LineaRecepcionForm {
     }
 
     .btn-cancel {
-      background: transparent;
-      border: 1px solid #333333;
-      color: #888888;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #374151;
       padding: 0.75rem 1.25rem;
       font-size: 0.75rem;
+      font-weight: 700;
       cursor: pointer;
       border-radius: 0;
+      transition: all 0.2s ease;
+    }
+
+    .btn-cancel:hover {
+      background: #f3f4f6;
+      color: #000000;
     }
 
     .btn-submit {
-      background: #d4af37;
-      border: 1px solid #d4af37;
-      color: #000000;
+      background: #000000;
+      border: 1px solid #000000;
+      color: #ffffff;
       padding: 0.75rem 1.5rem;
       font-weight: 700;
       font-size: 0.75rem;
       letter-spacing: 0.1em;
       cursor: pointer;
       border-radius: 0;
+      transition: all 0.2s ease;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: #262626;
+      border-color: #262626;
     }
 
     .btn-submit:disabled {
@@ -1084,45 +1157,50 @@ interface LineaRecepcionForm {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1.25rem;
-      background: #141414;
+      background: #f9fafb;
       padding: 1.25rem;
-      border: 1px solid #222;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       margin-bottom: 1.25rem;
     }
 
     .sum-label {
       font-size: 0.68rem;
       letter-spacing: 0.12em;
-      color: #777;
+      color: #4b5563;
       display: block;
       margin-bottom: 0.2rem;
+      font-weight: 700;
+      text-transform: uppercase;
     }
 
     .sum-val {
       font-size: 0.95rem;
-      color: #fff;
-      font-weight: 600;
+      color: #000000;
+      font-weight: 700;
     }
 
     .gold-val {
-      color: #d4af37;
+      color: #000000;
       font-size: 1.2rem;
+      font-weight: 800;
     }
 
     .obs-box {
-      background: #111;
-      border-left: 2px solid #d4af37;
+      background: #f9fafb;
+      border-left: 3px solid #000000;
       padding: 0.75rem 1rem;
       font-size: 0.8rem;
-      color: #aaa;
+      color: #374151;
       margin-bottom: 1.25rem;
     }
 
     .items-title {
       font-size: 0.78rem;
       letter-spacing: 0.15em;
-      color: #d4af37;
+      color: #000000;
       margin: 0 0 0.75rem 0;
+      font-weight: 700;
+      text-transform: uppercase;
     }
 
     .items-mini-list {
@@ -1138,20 +1216,20 @@ interface LineaRecepcionForm {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #141414;
-      border: 1px solid #222;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 0.75rem 1rem;
     }
 
     .item-prenda-name {
-      font-weight: 600;
+      font-weight: 700;
       font-size: 0.85rem;
-      color: #fff;
+      color: #000000;
     }
 
     .item-meta {
       font-size: 0.75rem;
-      color: #777;
+      color: #6b7280;
       font-family: monospace;
       margin-top: 0.2rem;
     }
@@ -1164,12 +1242,13 @@ interface LineaRecepcionForm {
       display: block;
       font-weight: 700;
       font-size: 0.85rem;
-      color: #d4af37;
+      color: #000000;
     }
 
     .item-cost {
       font-size: 0.75rem;
-      color: #888;
+      color: #4b5563;
+      font-weight: 600;
     }
   `]
 })
