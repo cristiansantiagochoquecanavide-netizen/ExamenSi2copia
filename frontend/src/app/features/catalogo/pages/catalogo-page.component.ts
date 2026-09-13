@@ -27,51 +27,97 @@ import { Sucursal } from '../../inventario/models/inventario.models';
         <div class="hero-content">
           <div class="editorial-eyebrow">
             <span class="gold-dot">&bull;</span>
-            <span>CATÁLOGO DIGITAL CON AR &bull; CASO DE USO #6 (CU6)</span>
+            <span>CATÁLOGO DIGITAL CON AR</span>
           </div>
-          <h1 class="hero-title">Atelier Noir &bull; Colección</h1>
+          <h1 class="hero-title">Colección</h1>
           <p class="hero-description">
             Sastrería contemporánea, siluetas desestructuradas y tecnología de Realidad Aumentada (AR) con modelos 3D (.glb / .usdz) para probadores virtuales y control de inventario por sucursal.
           </p>
         </div>
 
-        <!-- Filter & Search Bar -->
-        <div class="filter-bar">
-          <div class="filter-chips">
+        <!-- NIVEL 1: SECTORES / DEPARTAMENTOS -->
+        <div class="sector-tabs-bar">
+          <div class="sector-pills">
             <button 
               type="button" 
-              class="chip" 
-              [class.active]="selectedSector() === 'ALL'"
-              (click)="selectedSector.set('ALL')"
-            >
-              TODAS LAS PRENDAS
+              class="sector-pill" 
+              [class.active]="selectedSector() === 'TODAS'"
+              (click)="seleccionarSector('TODAS')">
+              TODAS
             </button>
             <button 
               type="button" 
-              class="chip" 
-              [class.active]="selectedSector() === 'TRENCH'"
-              (click)="selectedSector.set('TRENCH')"
-            >
-              ABRIGOS &amp; TRENCH
+              class="sector-pill" 
+              [class.active]="selectedSector() === 'MUJERES'"
+              (click)="seleccionarSector('MUJERES')">
+              MUJER
             </button>
             <button 
               type="button" 
-              class="chip" 
-              [class.active]="selectedSector() === 'PANT'"
-              (click)="selectedSector.set('PANT')"
-            >
-              PANTALONES &amp; SASTRERÍA
+              class="sector-pill" 
+              [class.active]="selectedSector() === 'HOMBRES'"
+              (click)="seleccionarSector('HOMBRES')">
+              HOMBRE
+            </button>
+            <button 
+              type="button" 
+              class="sector-pill" 
+              [class.active]="selectedSector() === 'NINOS'"
+              (click)="seleccionarSector('NINOS')">
+              NI&Ntilde;OS
+            </button>
+            <button 
+              type="button" 
+              class="sector-pill" 
+              [class.active]="selectedSector() === 'UNISEX'"
+              (click)="seleccionarSector('UNISEX')">
+              UNISEX
+            </button>
+          </div>
+        </div>
+
+        <!-- NIVEL 2: SUBCATEGORÍAS CONTEXTUALES + BUSCADOR DEDICADO -->
+        <div class="subcategories-search-bar">
+          <div class="subcategory-chips">
+            <button 
+              type="button" 
+              class="subcat-chip" 
+              [class.active]="selectedCategoriaId() === 'ALL'"
+              (click)="seleccionarCategoria('ALL')">
+              Todas {{ selectedSector() === 'TODAS' ? '' : ('en ' + (selectedSector() === 'MUJERES' ? 'Mujer' : (selectedSector() === 'HOMBRES' ? 'Hombre' : (selectedSector() === 'NINOS' ? 'Niños' : 'Unisex')))) }}
+            </button>
+            <button 
+              type="button" 
+              *ngFor="let cat of categoriasDelSector()" 
+              class="subcat-chip" 
+              [class.active]="selectedCategoriaId() === cat.id"
+              (click)="seleccionarCategoria(cat.id)">
+              {{ cat.nombre }}
             </button>
           </div>
 
-          <div class="search-box">
-            <input
-              type="text"
-              [(ngModel)]="searchQuery"
-              placeholder="Buscar prenda o SKU..."
-              class="search-input"
-            />
-            <span class="search-badge">{{ filteredPrendas().length }} PRENDAS</span>
+          <!-- BUSCADOR CON BOTÓN EXPLÍCITO -->
+          <div class="search-wrap">
+            <div class="search-input-group">
+              <span class="search-lens-icon">&#128269;</span>
+              <input
+                type="text"
+                [(ngModel)]="searchQuery"
+                (keyup.enter)="ejecutarBusqueda()"
+                placeholder="Buscar prenda, categoría o SKU..."
+                class="search-input-field"
+              />
+              <button 
+                *ngIf="searchQuery" 
+                type="button" 
+                class="btn-clear-query" 
+                (click)="limpiarBusqueda()" 
+                title="Limpiar búsqueda">&times;</button>
+            </div>
+            <button type="button" class="btn-search-action" (click)="ejecutarBusqueda()">
+              Buscar
+            </button>
+            <span class="search-badge-count">{{ filteredPrendas().length }} PRENDAS</span>
           </div>
         </div>
       </section>
@@ -80,7 +126,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       <div class="status-strip">
         <div class="status-left">
           <span class="status-pulse"></span>
-          <span class="status-label">FASTAPI &bull; CU6 CATÁLOGO CON AR &bull; SINCRONIZADO</span>
+          <span class="status-label">CATÁLOGO CON AR &bull; SINCRONIZADO</span>
         </div>
         <div class="action-buttons-group">
           <button type="button" class="btn-action-gold" (click)="openCreatePrendaModal()">
@@ -149,6 +195,9 @@ import { Sucursal } from '../../inventario/models/inventario.models';
                   <!-- Badges Overlay -->
                   <div class="badge-overlay">
                     <span class="category-tag">{{ prenda.categoria?.nombre || 'COLECCIÓN' }}</span>
+                    @if (prenda.categoria?.sector && prenda.categoria?.sector !== 'UNISEX') {
+                      <span class="sector-tag">{{ prenda.categoria?.sector === 'MUJERES' ? 'MUJER' : (prenda.categoria?.sector === 'HOMBRES' ? 'HOMBRE' : (prenda.categoria?.sector === 'NINOS' ? 'NIÑOS' : prenda.categoria?.sector)) }}</span>
+                    }
                     @if (has3DModel(prenda)) {
                       <span class="ar-badge">
                         <span class="ar-icon">&diams;</span> 3D AR READY
@@ -200,7 +249,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
         }
       }
 
-      <!-- ================= MODAL DETALLE & AR (CU6) ================= -->
+      <!-- ================= MODAL DETALLE & AR ================= -->
       @if (selectedPrenda(); as prenda) {
         <div class="modal-backdrop" (click)="closeDetail()">
           <div class="modal-container" (click)="$event.stopPropagation()">
@@ -293,7 +342,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
         </div>
       }
 
-      <!-- ================= MODAL REGISTRAR PRENDA (CU6) ================= -->
+      <!-- ================= MODAL REGISTRAR PRENDA ================= -->
       @if (showCreateModal()) {
         <div class="modal-backdrop" (click)="showCreateModal.set(false)">
           <div class="modal-dialog-large" (click)="$event.stopPropagation()">
@@ -390,12 +439,12 @@ import { Sucursal } from '../../inventario/models/inventario.models';
         </div>
       }
 
-      <!-- ================= MODAL AJUSTE DE INVENTARIO (CU6) ================= -->
+      <!-- ================= MODAL AJUSTE DE INVENTARIO ================= -->
       @if (showAjusteModal()) {
         <div class="modal-backdrop" (click)="showAjusteModal.set(false)">
           <div class="modal-dialog" (click)="$event.stopPropagation()">
             <div class="modal-header">
-              <h3 class="modal-title">Ajuste de Inventario por Sucursal (CU6)</h3>
+              <h3 class="modal-title">Ajuste de Inventario por Sucursal</h3>
               <button type="button" class="modal-close" (click)="showAjusteModal.set(false)">&times;</button>
             </div>
             <form (ngSubmit)="saveAjuste()" class="modal-body">
@@ -460,12 +509,13 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       max-width: 1400px;
       margin: 0 auto;
       padding: 2.5rem 3rem 4rem 3rem;
-      color: #ffffff;
+      color: #111111;
+      background-color: #ffffff;
     }
 
     .editorial-hero {
       padding: 0 0 2.5rem 0;
-      border-bottom: 1px solid #222222;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       margin-bottom: 2rem;
     }
 
@@ -475,101 +525,206 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       gap: 0.5rem;
       font-size: 0.72rem;
       letter-spacing: 0.25em;
-      color: #d4af37;
+      color: #374151;
+      font-weight: 700;
       text-transform: uppercase;
       margin-bottom: 0.75rem;
     }
 
     .gold-dot {
-      color: #d4af37;
+      color: #000000;
     }
 
     .hero-title {
-      font-family: 'Bodoni Moda', serif;
-      font-size: 2.75rem;
-      font-weight: 400;
-      letter-spacing: 0.05em;
+      font-family: 'Inter', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
       margin: 0 0 0.75rem 0;
+      color: #000000;
     }
 
     .hero-description {
       font-family: 'Inter', sans-serif;
       font-size: 0.95rem;
-      color: #888888;
+      color: #4b5563;
       max-width: 800px;
       line-height: 1.6;
       margin-bottom: 2rem;
     }
 
-    .filter-bar {
+    /* 2-LEVEL HIERARCHICAL FILTERS & SEARCH */
+    .catalog-controls-section {
+      margin-bottom: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* NIVEL 1: SECTORES (DEPARTAMENTOS) */
+    .sector-tabs-bar {
+      display: flex;
+      align-items: center;
+    }
+    .sector-pills {
+      display: flex;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+    .sector-pill {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 9999px;
+      color: #374151;
+      padding: 0.65rem 1.6rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+    .sector-pill:hover {
+      border-color: #000000;
+      color: #000000;
+      background: #f9fafb;
+    }
+    .sector-pill.active {
+      background: #000000;
+      border-color: #000000;
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+    }
+
+    /* NIVEL 2: SUBCATEGORÍAS & SEARCH */
+    .subcategories-search-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 1.5rem;
       flex-wrap: wrap;
     }
-
-    .filter-chips {
+    .subcategory-chips {
       display: flex;
       gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
     }
-
-    .chip {
-      background: transparent;
-      border: 1px solid #2a2a2a;
-      border-radius: 0;
-      color: #777777;
-      padding: 0.75rem 1.25rem;
+    .subcat-chip {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 9999px;
+      color: #4b5563;
+      padding: 0.5rem 1.15rem;
       font-size: 0.78rem;
       font-weight: 600;
-      letter-spacing: 0.15em;
       cursor: pointer;
       transition: all 0.2s ease;
     }
-
-    .chip:hover {
-      border-color: #555555;
-      color: #cccccc;
+    .subcat-chip:hover {
+      border-color: #9ca3af;
+      color: #111827;
+      background: #f9fafb;
+    }
+    .subcat-chip.active {
+      background: #000000;
+      border-color: #000000;
+      color: #ffffff;
+      font-weight: 700;
     }
 
-    .chip.active {
-      background: #111111;
-      border-color: #d4af37;
-      color: #d4af37;
-    }
-
-    .search-box {
+    /* BUSCADOR DEDICADO */
+    .search-wrap {
       display: flex;
       align-items: center;
-      background: #0d0d0d;
-      border: 1px solid #222222;
-      padding: 0.25rem 0.75rem;
+      gap: 0.6rem;
+      flex-wrap: wrap;
     }
-
-    .search-input {
-      background: transparent;
-      border: none;
-      color: #ffffff;
-      padding: 0.5rem;
+    .search-input-group {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 0 0.75rem;
+      min-width: 260px;
+      transition: border-color 0.2s;
+    }
+    .search-input-group:focus-within {
+      border-color: #000000;
+    }
+    .search-lens-icon {
       font-size: 0.85rem;
+      color: #9ca3af;
+      margin-right: 0.4rem;
+    }
+    .search-input-field {
+      border: none;
+      background: transparent;
+      padding: 0.55rem 0.2rem;
+      font-size: 0.85rem;
+      color: #111827;
       outline: none;
-      min-width: 240px;
+      width: 100%;
+    }
+    .btn-clear-query {
+      background: none;
+      border: none;
+      color: #9ca3af;
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 0 0.25rem;
+    }
+    .btn-clear-query:hover { color: #111827; }
+
+    .btn-search-action {
+      background: #000000;
+      color: #ffffff;
+      border: 1px solid #000000;
+      padding: 0.58rem 1.15rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.2s;
+    }
+    .btn-search-action:hover {
+      background: #1f2937;
+      border-color: #1f2937;
+    }
+    .search-badge-count {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #6b7280;
+      letter-spacing: 0.08em;
+      padding: 0.3rem 0.6rem;
+      background: #f3f4f6;
+      border-radius: 6px;
     }
 
-    .search-badge {
-      font-size: 0.7rem;
-      color: #777777;
+    .sector-tag {
+      font-size: 0.62rem;
+      font-weight: 800;
       letter-spacing: 0.1em;
-      padding-left: 0.5rem;
-      border-left: 1px solid #222222;
+      text-transform: uppercase;
+      padding: 0.25rem 0.55rem;
+      background: #000000;
+      color: #ffffff;
+      border-radius: 2px;
+      margin-left: 0.4rem;
     }
 
     .status-strip {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #0d0d0d;
-      border: 1px solid #222222;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.08);
       padding: 0.85rem 1.25rem;
       margin-bottom: 2rem;
       flex-wrap: wrap;
@@ -586,14 +741,15 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: #00cc66;
-      box-shadow: 0 0 8px rgba(0, 204, 102, 0.6);
+      background: #059669;
+      box-shadow: 0 0 6px rgba(5, 150, 105, 0.4);
     }
 
     .status-label {
       font-size: 0.75rem;
       letter-spacing: 0.15em;
-      color: #aaaaaa;
+      color: #374151;
+      font-weight: 600;
     }
 
     .action-buttons-group {
@@ -603,10 +759,10 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     }
 
     .btn-action-gold {
-      background: #d4af37;
-      border: 1px solid #d4af37;
-      color: #000000;
-      padding: 0.5rem 1rem;
+      background: #000000;
+      border: 1px solid #000000;
+      color: #ffffff;
+      padding: 0.6rem 1.15rem;
       font-size: 0.75rem;
       font-weight: 700;
       letter-spacing: 0.12em;
@@ -616,14 +772,14 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     }
 
     .btn-action-gold:hover {
-      background: #b89628;
+      background: #262626;
     }
 
     .btn-action-outline {
-      background: transparent;
-      border: 1px solid #d4af37;
-      color: #d4af37;
-      padding: 0.5rem 1rem;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.25);
+      color: #000000;
+      padding: 0.6rem 1.15rem;
       font-size: 0.75rem;
       font-weight: 600;
       letter-spacing: 0.12em;
@@ -633,40 +789,41 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     }
 
     .btn-action-outline:hover {
-      background: rgba(212, 175, 55, 0.1);
+      background: #f3f4f6;
     }
 
     .btn-refresh {
-      background: transparent;
-      border: 1px solid #333333;
-      color: #888888;
-      padding: 0.5rem 0.85rem;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.18);
+      color: #374151;
+      padding: 0.6rem 0.95rem;
       font-size: 0.75rem;
       cursor: pointer;
       border-radius: 0;
+      font-weight: 600;
     }
 
     .btn-refresh:hover {
-      color: #ffffff;
-      border-color: #555555;
+      color: #000000;
+      border-color: #000000;
     }
 
     .feedback-banner {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #002b11;
-      border: 1px solid #00aa44;
-      color: #7affaa;
+      background: #ecfdf5;
+      border: 1px solid #059669;
+      color: #065f46;
       padding: 0.85rem 1.25rem;
       margin-bottom: 1.5rem;
       font-size: 0.85rem;
     }
 
     .feedback-banner.error {
-      background: #2b0000;
-      border-color: #aa0000;
-      color: #ff7a7a;
+      background: #fef2f2;
+      border-color: #dc2626;
+      color: #991b1b;
     }
 
     .btn-close-banner {
@@ -678,15 +835,15 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     }
 
     .alert-box {
-      background: #240b0b;
-      border: 1px solid #771111;
+      background: #fef2f2;
+      border: 1px solid #dc2626;
       padding: 1.5rem;
       margin-bottom: 2rem;
     }
 
     .alert-title {
       font-weight: 700;
-      color: #ff6666;
+      color: #991b1b;
       font-size: 0.85rem;
       letter-spacing: 0.1em;
       display: block;
@@ -695,17 +852,18 @@ import { Sucursal } from '../../inventario/models/inventario.models';
 
     .alert-desc {
       font-size: 0.85rem;
-      color: #cccccc;
+      color: #4b5563;
       margin-bottom: 1rem;
     }
 
     .btn-retry {
-      background: transparent;
-      border: 1px solid #ff6666;
-      color: #ff6666;
+      background: #ffffff;
+      border: 1px solid #dc2626;
+      color: #dc2626;
       padding: 0.5rem 1rem;
       font-size: 0.75rem;
       cursor: pointer;
+      font-weight: 600;
     }
 
     /* Products Grid */
@@ -716,8 +874,8 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     }
 
     .product-card {
-      background: #0d0d0d;
-      border: 1px solid #1c1c1c;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -725,7 +883,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     }
 
     .product-card:hover {
-      border-color: #333333;
+      border-color: rgba(0, 0, 0, 0.3);
     }
 
     .image-wrapper {
@@ -733,7 +891,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       height: 420px;
       overflow: hidden;
       cursor: pointer;
-      background: #141414;
+      background: #f9fafb;
     }
 
     .product-image {
@@ -757,19 +915,20 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     }
 
     .category-tag {
-      background: rgba(0, 0, 0, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
       font-size: 0.68rem;
       letter-spacing: 0.15em;
       padding: 0.25rem 0.65rem;
       text-transform: uppercase;
-      color: #ffffff;
+      color: #111111;
+      font-weight: 700;
     }
 
     .ar-badge {
-      background: #100c02;
-      border: 1px solid #d4af37;
-      color: #d4af37;
+      background: #000000;
+      border: 1px solid #000000;
+      color: #ffffff;
       font-size: 0.68rem;
       letter-spacing: 0.15em;
       padding: 0.25rem 0.65rem;
@@ -781,11 +940,12 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       bottom: 0;
       left: 0;
       right: 0;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(255, 255, 255, 0.95);
       padding: 0.85rem;
       text-align: center;
       transform: translateY(100%);
       transition: transform 0.3s ease;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
     }
 
     .image-wrapper:hover .hover-action-overlay {
@@ -795,8 +955,8 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     .hover-btn {
       font-size: 0.75rem;
       letter-spacing: 0.2em;
-      color: #d4af37;
-      font-weight: 600;
+      color: #000000;
+      font-weight: 700;
     }
 
     .product-info {
@@ -811,26 +971,27 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       justify-content: space-between;
       margin-bottom: 0.5rem;
       font-size: 0.72rem;
-      color: #666666;
+      color: #6b7280;
       font-family: monospace;
     }
 
     .product-title {
-      font-family: 'Bodoni Moda', serif;
-      font-size: 1.4rem;
-      font-weight: 400;
+      font-family: 'Inter', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
       margin: 0 0 0.75rem 0;
-      color: #ffffff;
+      color: #000000;
       cursor: pointer;
+      transition: color 0.2s ease;
     }
 
     .product-title:hover {
-      color: #d4af37;
+      color: #4b5563;
     }
 
     .product-desc {
       font-size: 0.85rem;
-      color: #888888;
+      color: #4b5563;
       line-height: 1.5;
       margin-bottom: 1.25rem;
       flex: 1;
@@ -846,7 +1007,9 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     .variants-label {
       font-size: 0.7rem;
       letter-spacing: 0.1em;
-      color: #666666;
+      color: #6b7280;
+      font-weight: 600;
+      text-transform: uppercase;
     }
 
     .size-chips {
@@ -859,17 +1022,18 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       min-width: 26px;
       text-align: center;
       padding: 0.2rem 0.4rem;
-      background: #1a1a1a;
-      border: 1px solid #333333;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.15);
       font-size: 0.72rem;
-      color: #cccccc;
+      color: #111111;
+      font-weight: 600;
     }
 
     .card-footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-top: 1px solid #1a1a1a;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
       padding-top: 1.25rem;
     }
 
@@ -878,34 +1042,35 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     }
 
     .currency {
-      color: #d4af37;
+      color: #000000;
       margin-right: 2px;
       font-size: 0.9rem;
+      font-weight: 700;
     }
 
     .price-value {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: #ffffff;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #000000;
     }
 
     .btn-card-action {
-      background: transparent;
-      border: 1px solid #333333;
-      color: #d4af37;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.25);
+      color: #000000;
       padding: 0.6rem 1rem;
       font-size: 0.72rem;
       letter-spacing: 0.15em;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       border-radius: 0;
       transition: all 0.2s ease;
     }
 
     .btn-card-action:hover {
-      background: #d4af37;
-      color: #000000;
-      border-color: #d4af37;
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
     }
 
     /* Modal Styling */
@@ -915,7 +1080,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0, 0, 0, 0.5);
       backdrop-filter: blur(4px);
       display: flex;
       align-items: center;
@@ -924,36 +1089,36 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     }
 
     .modal-container {
-      background: #0e0e0e;
-      border: 1px solid #d4af37;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
       border-radius: 0;
       width: 90%;
       max-width: 960px;
       max-height: 90vh;
       overflow-y: auto;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
     }
 
     .modal-dialog {
-      background: #0e0e0e;
-      border: 1px solid #d4af37;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
       border-radius: 0;
       width: 90%;
       max-width: 560px;
       max-height: 90vh;
       overflow-y: auto;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
     }
 
     .modal-dialog-large {
-      background: #0e0e0e;
-      border: 1px solid #d4af37;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
       border-radius: 0;
       width: 90%;
       max-width: 800px;
       max-height: 90vh;
       overflow-y: auto;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
     }
 
     .modal-header {
@@ -961,32 +1126,37 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       justify-content: space-between;
       align-items: center;
       padding: 1.25rem 2rem;
-      border-bottom: 1px solid #222222;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     }
 
     .modal-eyebrow {
       font-size: 0.72rem;
       letter-spacing: 0.15em;
-      color: #d4af37;
+      color: #4b5563;
+      font-weight: 700;
       text-transform: uppercase;
       display: block;
       margin-bottom: 0.25rem;
     }
 
     .modal-title {
-      font-family: 'Bodoni Moda', serif;
-      font-size: 1.5rem;
-      font-weight: 400;
+      font-family: 'Inter', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
       margin: 0;
-      color: #ffffff;
+      color: #000000;
     }
 
     .modal-close {
       background: transparent;
       border: none;
-      color: #888888;
+      color: #6b7280;
       font-size: 1.75rem;
       cursor: pointer;
+    }
+
+    .modal-close:hover {
+      color: #000000;
     }
 
     .modal-body {
@@ -1004,23 +1174,24 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       width: 100%;
       height: 380px;
       object-fit: cover;
-      border: 1px solid #222222;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       margin-bottom: 1rem;
     }
 
     .multimedia-add-box {
-      background: #141414;
-      border: 1px solid #282828;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 1rem;
     }
 
     .add-box-title {
       font-size: 0.75rem;
       letter-spacing: 0.12em;
-      color: #d4af37;
+      color: #000000;
       display: block;
       margin-bottom: 0.5rem;
-      font-weight: 600;
+      font-weight: 700;
+      text-transform: uppercase;
     }
 
     .add-box-row {
@@ -1031,9 +1202,9 @@ import { Sucursal } from '../../inventario/models/inventario.models';
 
     .add-box-row select,
     .add-box-row input {
-      background: #0a0a0a;
-      border: 1px solid #333333;
-      color: #ffffff;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #111111;
       padding: 0.5rem;
       font-size: 0.8rem;
       border-radius: 0;
@@ -1041,31 +1212,32 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     }
 
     .btn-attach {
-      background: #1a1a1a;
-      border: 1px solid #d4af37;
-      color: #d4af37;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.3);
+      color: #000000;
       padding: 0.5rem;
       font-size: 0.75rem;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       border-radius: 0;
     }
 
     .btn-attach:hover {
-      background: #d4af37;
-      color: #000;
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
     }
 
     .modal-desc {
       font-size: 0.9rem;
       line-height: 1.6;
-      color: #aaaaaa;
+      color: #4b5563;
       margin-bottom: 1.5rem;
     }
 
     .modal-price-box {
-      background: #111111;
-      border: 1px solid #222222;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 1rem 1.25rem;
       display: flex;
       justify-content: space-between;
@@ -1076,18 +1248,20 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     .modal-price-label {
       font-size: 0.75rem;
       letter-spacing: 0.15em;
-      color: #888888;
+      color: #6b7280;
+      font-weight: 600;
+      text-transform: uppercase;
     }
 
     .modal-price-value {
       font-size: 1.4rem;
-      font-weight: 700;
-      color: #ffffff;
+      font-weight: 800;
+      color: #000000;
     }
 
     .ar-section {
-      background: #121008;
-      border: 1px solid #4a3d16;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 1.25rem;
       margin-bottom: 1.5rem;
     }
@@ -1095,13 +1269,15 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     .ar-section-title {
       font-size: 0.78rem;
       letter-spacing: 0.15em;
-      color: #d4af37;
+      color: #000000;
+      font-weight: 700;
       margin: 0 0 0.5rem 0;
+      text-transform: uppercase;
     }
 
     .ar-note {
       font-size: 0.8rem;
-      color: #888888;
+      color: #6b7280;
       margin-bottom: 1rem;
     }
 
@@ -1109,8 +1285,8 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #080808;
-      border: 1px solid #222222;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 0.75rem 1rem;
       margin-bottom: 0.5rem;
     }
@@ -1119,32 +1295,33 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       font-size: 0.7rem;
       font-family: monospace;
       padding: 0.2rem 0.4rem;
-      background: #2a2000;
-      color: #d4af37;
-      border: 1px solid #5a4500;
+      background: #f3f4f6;
+      color: #111111;
+      border: 1px solid rgba(0, 0, 0, 0.2);
       margin-right: 0.5rem;
+      font-weight: 700;
     }
 
     .ar-model-type {
       font-size: 0.78rem;
-      color: #bbbbbb;
+      color: #4b5563;
+      font-weight: 600;
     }
 
     .ar-link {
-      color: #d4af37;
+      color: #000000;
       font-size: 0.75rem;
-      text-decoration: none;
-      letter-spacing: 0.08em;
-    }
-
-    .ar-link:hover {
       text-decoration: underline;
+      letter-spacing: 0.08em;
+      font-weight: 700;
     }
 
     .section-subtitle {
       font-size: 0.75rem;
       letter-spacing: 0.15em;
-      color: #888888;
+      color: #374151;
+      font-weight: 700;
+      text-transform: uppercase;
       margin: 0 0 0.75rem 0;
     }
 
@@ -1159,22 +1336,23 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       display: flex;
       justify-content: space-between;
       padding: 0.5rem 0.85rem;
-      background: #141414;
-      border: 1px solid #252525;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.08);
       font-size: 0.8rem;
+      color: #111111;
     }
 
     .v-sku {
-      color: #666666;
+      color: #6b7280;
       font-family: monospace;
       font-size: 0.75rem;
     }
 
     .btn-reserve-lead {
       width: 100%;
-      background: #d4af37;
-      color: #000000;
-      border: 1px solid #d4af37;
+      background: #000000;
+      color: #ffffff;
+      border: 1px solid #000000;
       padding: 1rem;
       font-size: 0.78rem;
       letter-spacing: 0.2em;
@@ -1182,10 +1360,11 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       cursor: pointer;
       border-radius: 0;
       transition: background 0.2s ease;
+      text-transform: uppercase;
     }
 
     .btn-reserve-lead:hover {
-      background: #b89628;
+      background: #262626;
     }
 
     /* Form rows */
@@ -1197,7 +1376,8 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       display: block;
       font-size: 0.72rem;
       letter-spacing: 0.1em;
-      color: #999999;
+      color: #374151;
+      font-weight: 600;
       text-transform: uppercase;
       margin-bottom: 0.45rem;
     }
@@ -1206,10 +1386,10 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     .form-group select,
     .form-group textarea {
       width: 100%;
-      background: #141414;
-      border: 1px solid #2a2a2a;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
       border-radius: 0;
-      color: #ffffff;
+      color: #111111;
       padding: 0.75rem;
       font-size: 0.85rem;
       outline: none;
@@ -1219,7 +1399,8 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     .form-group input:focus,
     .form-group select:focus,
     .form-group textarea:focus {
-      border-color: #d4af37;
+      border-color: #000000;
+      box-shadow: 0 0 0 1px #000000;
     }
 
     .form-row-2 {
@@ -1235,8 +1416,8 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     }
 
     .ar-inputs-box {
-      background: #121008;
-      border: 1px solid #3d3110;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 1.25rem;
       margin-bottom: 1.5rem;
     }
@@ -1244,10 +1425,11 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     .ar-box-title {
       font-size: 0.78rem;
       letter-spacing: 0.12em;
-      color: #d4af37;
+      color: #000000;
       display: block;
       margin-bottom: 1rem;
-      font-weight: 600;
+      font-weight: 700;
+      text-transform: uppercase;
     }
 
     .modal-actions-footer {
@@ -1258,29 +1440,40 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     }
 
     .btn-cancel {
-      background: transparent;
-      border: 1px solid #333333;
-      color: #888888;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.25);
+      color: #374151;
       padding: 0.75rem 1.25rem;
       font-size: 0.75rem;
+      font-weight: 600;
       cursor: pointer;
       border-radius: 0;
     }
 
-    .btn-submit {
-      background: #d4af37;
-      border: 1px solid #d4af37;
+    .btn-cancel:hover {
+      background: #f3f4f6;
       color: #000000;
+    }
+
+    .btn-submit {
+      background: #000000;
+      border: 1px solid #000000;
+      color: #ffffff;
       padding: 0.75rem 1.5rem;
       font-weight: 700;
       font-size: 0.75rem;
       letter-spacing: 0.1em;
       cursor: pointer;
       border-radius: 0;
+      text-transform: uppercase;
+    }
+
+    .btn-submit:hover {
+      background: #262626;
     }
 
     .btn-submit:disabled {
-      opacity: 0.5;
+      opacity: 0.4;
       cursor: not-allowed;
     }
 
@@ -1292,7 +1485,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     }
 
     .skeleton-card {
-      background: #111;
+      background: #f3f4f6;
       height: 480px;
     }
 
@@ -1302,13 +1495,14 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     }
 
     .empty-title {
-      font-family: 'Bodoni Moda', serif;
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
       font-size: 1.5rem;
-      color: #666;
+      color: #111111;
     }
 
     .empty-text {
-      color: #444;
+      color: #6b7280;
       font-size: 0.85rem;
     }
   `]
@@ -1329,8 +1523,10 @@ export class CatalogoPageComponent implements OnInit {
   feedbackMsg = signal<string | null>(null);
   feedbackIsError = signal<boolean>(false);
 
-  selectedSector = signal<string>('ALL');
+  selectedSector = signal<'TODAS' | 'MUJERES' | 'HOMBRES' | 'NINOS' | 'UNISEX'>('TODAS');
+  selectedCategoriaId = signal<number | 'ALL'>('ALL');
   searchQuery = '';
+  searchTermActive = signal<string>('');
   selectedPrenda = signal<Prenda | null>(null);
 
   // Modals visibility
@@ -1367,27 +1563,59 @@ export class CatalogoPageComponent implements OnInit {
     es_portada: false
   };
 
+  categoriasDelSector = computed(() => {
+    const sector = this.selectedSector();
+    const cats = this.categorias();
+    if (sector === 'TODAS') return cats;
+    return cats.filter(c => c.sector === sector || c.sector === 'UNISEX');
+  });
+
   filteredPrendas = computed(() => {
     let list = this.prendas();
     const sector = this.selectedSector();
-    const query = this.searchQuery.trim().toLowerCase();
+    const catId = this.selectedCategoriaId();
+    const query = this.searchTermActive();
 
-    if (sector === 'TRENCH') {
-      list = list.filter(p => p.sku.toLowerCase().includes('trench') || p.nombre.toLowerCase().includes('trench'));
-    } else if (sector === 'PANT') {
-      list = list.filter(p => p.sku.toLowerCase().includes('pant') || p.nombre.toLowerCase().includes('pant'));
+    // 1. Filtrar por Sector (Audiencia / Departamento)
+    if (sector !== 'TODAS') {
+      list = list.filter(p => p.categoria?.sector === sector || p.categoria?.sector === 'UNISEX');
     }
 
+    // 2. Filtrar por Categoría específica
+    if (catId !== 'ALL') {
+      list = list.filter(p => p.categoria_id === catId);
+    }
+
+    // 3. Filtrar por búsqueda activa
     if (query) {
       list = list.filter(p =>
         p.nombre.toLowerCase().includes(query) ||
         p.sku.toLowerCase().includes(query) ||
-        p.descripcion.toLowerCase().includes(query)
+        p.descripcion.toLowerCase().includes(query) ||
+        (p.categoria?.nombre && p.categoria.nombre.toLowerCase().includes(query))
       );
     }
 
     return list;
   });
+
+  seleccionarSector(sector: 'TODAS' | 'MUJERES' | 'HOMBRES' | 'NINOS' | 'UNISEX'): void {
+    this.selectedSector.set(sector);
+    this.selectedCategoriaId.set('ALL');
+  }
+
+  seleccionarCategoria(catId: number | 'ALL'): void {
+    this.selectedCategoriaId.set(catId);
+  }
+
+  ejecutarBusqueda(): void {
+    this.searchTermActive.set(this.searchQuery.trim().toLowerCase());
+  }
+
+  limpiarBusqueda(): void {
+    this.searchQuery = '';
+    this.searchTermActive.set('');
+  }
 
   ngOnInit(): void {
     this.loadPrendas();
