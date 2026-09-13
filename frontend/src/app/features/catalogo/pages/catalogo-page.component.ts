@@ -34,57 +34,58 @@ import { Sucursal } from '../../inventario/models/inventario.models';
             Sastrería contemporánea, siluetas desestructuradas y tecnología de Realidad Aumentada (AR) con modelos 3D (.glb / .usdz) para probadores virtuales y control de inventario por sucursal.
           </p>
         </div>
+      </section>
 
-        <!-- NIVEL 1: SECTORES / DEPARTAMENTOS -->
-        <div class="sector-tabs-bar">
-          <div class="sector-pills">
-            <button 
-              type="button" 
-              class="sector-pill" 
-              [class.active]="selectedSector() === 'TODAS'"
-              (click)="seleccionarSector('TODAS')">
-              TODAS
-            </button>
-            <button 
-              type="button" 
-              class="sector-pill" 
-              [class.active]="selectedSector() === 'MUJERES'"
-              (click)="seleccionarSector('MUJERES')">
-              MUJER
-            </button>
-            <button 
-              type="button" 
-              class="sector-pill" 
-              [class.active]="selectedSector() === 'HOMBRES'"
-              (click)="seleccionarSector('HOMBRES')">
-              HOMBRE
-            </button>
-            <button 
-              type="button" 
-              class="sector-pill" 
-              [class.active]="selectedSector() === 'NINOS'"
-              (click)="seleccionarSector('NINOS')">
-              NI&Ntilde;OS
-            </button>
-            <button 
-              type="button" 
-              class="sector-pill" 
-              [class.active]="selectedSector() === 'UNISEX'"
-              (click)="seleccionarSector('UNISEX')">
-              UNISEX
-            </button>
-          </div>
+      <!-- SECCIÓN DE CONTROLES (2 FILAS FIEL AL MOCKUP) -->
+      <section class="catalog-filters-container">
+        <!-- FILA 1: SECTORES / DEPARTAMENTOS -->
+        <div class="row-sectors">
+          <button 
+            type="button" 
+            class="sector-pill" 
+            [class.active]="selectedSector() === 'TODAS'"
+            (click)="seleccionarSector('TODAS')">
+            TODAS
+          </button>
+          <button 
+            type="button" 
+            class="sector-pill" 
+            [class.active]="selectedSector() === 'MUJERES'"
+            (click)="seleccionarSector('MUJERES')">
+            MUJER
+          </button>
+          <button 
+            type="button" 
+            class="sector-pill" 
+            [class.active]="selectedSector() === 'HOMBRES'"
+            (click)="seleccionarSector('HOMBRES')">
+            HOMBRE
+          </button>
+          <button 
+            type="button" 
+            class="sector-pill" 
+            [class.active]="selectedSector() === 'NINOS'"
+            (click)="seleccionarSector('NINOS')">
+            NI&Ntilde;OS
+          </button>
+          <button 
+            type="button" 
+            class="sector-pill" 
+            [class.active]="selectedSector() === 'UNISEX'"
+            (click)="seleccionarSector('UNISEX')">
+            UNISEX
+          </button>
         </div>
 
-        <!-- NIVEL 2: SUBCATEGORÍAS CONTEXTUALES -->
-        <div class="subcategories-bar">
-          <div class="subcategory-chips">
+        <!-- FILA 2: SUBCATEGORÍAS A LA IZQUIERDA + BUSCADOR A LA DERECHA -->
+        <div class="row-subcats-and-search">
+          <div class="subcat-chips-group">
             <button 
               type="button" 
               class="subcat-chip" 
               [class.active]="selectedCategoriaId() === 'ALL'"
               (click)="seleccionarCategoria('ALL')">
-              Todas {{ selectedSector() === 'TODAS' ? '' : ('en ' + (selectedSector() === 'MUJERES' ? 'Mujer' : (selectedSector() === 'HOMBRES' ? 'Hombre' : (selectedSector() === 'NINOS' ? 'Niños' : 'Unisex')))) }}
+              Todas
             </button>
             <button 
               type="button" 
@@ -95,18 +96,15 @@ import { Sucursal } from '../../inventario/models/inventario.models';
               {{ cat.nombre }}
             </button>
           </div>
-        </div>
 
-        <!-- BUSCADOR CON BOTÓN EXPLÍCITO EN FILA DEDICADA -->
-        <div class="search-toolbar-row">
-          <div class="search-wrap">
-            <div class="search-input-group">
-              <span class="search-lens-icon">&#128269;</span>
+          <!-- BUSCADOR A LA DERECHA -->
+          <div class="search-inline-wrap">
+            <div class="search-input-box">
               <input
                 type="text"
                 [(ngModel)]="searchQuery"
                 (keyup.enter)="ejecutarBusqueda()"
-                placeholder="Buscar prenda, categoría o SKU..."
+                placeholder="Buscar"
                 class="search-input-field"
               />
               <button 
@@ -116,10 +114,9 @@ import { Sucursal } from '../../inventario/models/inventario.models';
                 (click)="limpiarBusqueda()" 
                 title="Limpiar búsqueda">&times;</button>
             </div>
-            <button type="button" class="btn-search-action" (click)="ejecutarBusqueda()">
-              Buscar
+            <button type="button" class="btn-search-pill" (click)="ejecutarBusqueda()">
+              <span class="search-lens-icon">&#128269;</span> Buscar
             </button>
-            <span class="search-badge-count">{{ filteredPrendas().length }} PRENDAS</span>
           </div>
         </div>
       </section>
@@ -555,35 +552,37 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       margin-bottom: 2rem;
     }
 
-    /* 2-LEVEL HIERARCHICAL FILTERS & SEARCH - ESPACIADO GENEROSO DE ALTURA */
-    .catalog-controls-section {
+    /* CONTROLES DEL CATÁLOGO: 2 FILAS FIEL AL MOCKUP APROBADO */
+    .catalog-filters-container {
+      margin-top: 1.5rem;
       margin-bottom: 2.75rem;
       display: flex;
       flex-direction: column;
-      gap: 1.85rem;
+      gap: 1.25rem; /* DISTANCIA VERTICAL CLARA: FILA 1 Y FILA 2 NUNCA CHOCAN */
     }
 
-    /* NIVEL 1: SECTORES (DEPARTAMENTOS) */
-    .sector-tabs-bar {
+    /* FILA 1: SECTORES */
+    .row-sectors {
       display: flex;
       align-items: center;
-    }
-    .sector-pills {
-      display: flex;
-      gap: 0.45rem;
+      gap: 0.5rem;
       flex-wrap: wrap;
     }
+
     .sector-pill {
       background: #ffffff;
       border: 1px solid #d1d5db;
       border-radius: 9999px;
-      color: #374151;
-      padding: 0.52rem 1.25rem;
-      font-size: 0.8rem;
+      color: #111111;
+      padding: 0.55rem 1.45rem;
+      font-size: 0.82rem;
       font-weight: 700;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.08em;
       cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
     }
     .sector-pill:hover {
@@ -592,84 +591,87 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       background: #f9fafb;
     }
     .sector-pill.active {
-      background: #000000;
-      border-color: #000000;
-      color: #ffffff;
+      background: #000000 !important;
+      border-color: #000000 !important;
+      color: #ffffff !important;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
     }
 
-    /* NIVEL 2: SUBCATEGORÍAS EN FILA DEDICADA */
-    .subcategories-bar {
+    /* FILA 2: SUBCATEGORÍAS A LA IZQUIERDA + BUSCADOR A LA DERECHA */
+    .row-subcats-and-search {
       display: flex;
       align-items: center;
-    }
-    .subcategory-chips {
-      display: flex;
-      gap: 0.38rem;
+      justify-content: space-between;
+      gap: 1.5rem;
       flex-wrap: wrap;
-      align-items: center;
     }
+
+    .subcat-chips-group {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
+
     .subcat-chip {
       background: #ffffff;
-      border: 1px solid #e5e7eb;
+      border: 1px solid #d1d5db;
       border-radius: 9999px;
-      color: #4b5563;
-      padding: 0.42rem 0.95rem;
-      font-size: 0.78rem;
+      color: #374151;
+      padding: 0.48rem 1.15rem;
+      font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       transition: all 0.2s ease;
     }
     .subcat-chip:hover {
-      border-color: #9ca3af;
-      color: #111827;
+      border-color: #000000;
+      color: #000000;
       background: #f9fafb;
     }
     .subcat-chip.active {
-      background: #000000;
-      border-color: #000000;
-      color: #ffffff;
+      background: #000000 !important;
+      border-color: #000000 !important;
+      color: #ffffff !important;
       font-weight: 700;
     }
 
-    /* BUSCADOR EN FILA DEDICADA CON EXCELENTE VISIBILIDAD */
-    .search-toolbar-row {
+    /* BUSCADOR A LA DERECHA */
+    .search-inline-wrap {
       display: flex;
       align-items: center;
+      gap: 0.5rem;
+      margin-left: auto;
     }
-    .search-wrap {
-      display: flex;
-      align-items: center;
-      gap: 0.55rem;
-      flex-wrap: wrap;
-    }
-    .search-input-group {
+
+    .search-input-box {
       position: relative;
       display: flex;
       align-items: center;
       background: #ffffff;
       border: 1px solid #d1d5db;
-      border-radius: 9999px;
-      padding: 0 1rem;
-      min-width: 280px;
+      border-radius: 8px;
+      padding: 0 0.85rem;
+      width: 250px;
       transition: border-color 0.2s;
     }
-    .search-input-group:focus-within {
+    .search-input-box:focus-within {
       border-color: #000000;
-    }
-    .search-lens-icon {
-      font-size: 0.85rem;
-      color: #9ca3af;
-      margin-right: 0.4rem;
     }
     .search-input-field {
       border: none;
       background: transparent;
-      padding: 0.58rem 0.3rem;
+      padding: 0.55rem 0.2rem;
       font-size: 0.85rem;
       color: #111827;
       outline: none;
       width: 100%;
+    }
+    .search-input-field::placeholder {
+      color: #9ca3af;
     }
     .btn-clear-query {
       background: none;
@@ -682,35 +684,28 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     }
     .btn-clear-query:hover { color: #111827; }
 
-    .btn-search-action {
-      background: #000000;
-      color: #ffffff;
-      border: 1px solid #000000;
-      padding: 0.58rem 1.35rem;
-      font-size: 0.8rem;
+    .btn-search-pill {
+      background: #000000 !important;
+      color: #ffffff !important;
+      border: 1px solid #000000 !important;
+      border-radius: 8px !important;
+      padding: 0.55rem 1.25rem !important;
+      font-size: 0.82rem;
       font-weight: 700;
-      letter-spacing: 0.08em;
-      border-radius: 9999px;
+      letter-spacing: 0.05em;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
       transition: all 0.2s;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     }
-    .btn-search-action:hover {
-      background: #1f2937;
-      border-color: #1f2937;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+    .btn-search-pill:hover {
+      background: #1f2937 !important;
+      border-color: #1f2937 !important;
     }
-    .search-badge-count {
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: #6b7280;
-      letter-spacing: 0.08em;
-      padding: 0.35rem 0.8rem;
-      background: #f3f4f6;
-      border-radius: 9999px;
+    .search-lens-icon {
+      font-size: 0.85rem;
+      line-height: 1;
     }
 
     .sector-tag {
