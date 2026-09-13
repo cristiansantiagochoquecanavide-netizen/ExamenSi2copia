@@ -38,62 +38,43 @@ import { Sucursal } from '../../inventario/models/inventario.models';
 
       <!-- SECCIÓN DE CONTROLES (2 FILAS FIEL AL MOCKUP) -->
       <section class="catalog-filters-container">
-        <!-- FILA 1: SECTORES / DEPARTAMENTOS -->
-        <div class="row-sectors">
-          <button 
-            type="button" 
-            class="sector-pill" 
-            [class.active]="selectedSector() === 'TODAS'"
-            (click)="seleccionarSector('TODAS')">
-            TODAS
-          </button>
-          <button 
-            type="button" 
-            class="sector-pill" 
-            [class.active]="selectedSector() === 'MUJERES'"
-            (click)="seleccionarSector('MUJERES')">
-            MUJER
-          </button>
-          <button 
-            type="button" 
-            class="sector-pill" 
-            [class.active]="selectedSector() === 'HOMBRES'"
-            (click)="seleccionarSector('HOMBRES')">
-            HOMBRE
-          </button>
-          <button 
-            type="button" 
-            class="sector-pill" 
-            [class.active]="selectedSector() === 'NINOS'"
-            (click)="seleccionarSector('NINOS')">
-            NI&Ntilde;OS
-          </button>
-          <button 
-            type="button" 
-            class="sector-pill" 
-            [class.active]="selectedSector() === 'UNISEX'"
-            (click)="seleccionarSector('UNISEX')">
-            UNISEX
-          </button>
-        </div>
-
-        <!-- FILA 2: SUBCATEGORÍAS A LA IZQUIERDA + BUSCADOR A LA DERECHA -->
-        <div class="row-subcats-and-search">
-          <div class="subcat-chips-group">
+        <!-- FILA 1: SECTORES A LA IZQUIERDA + BUSCADOR A LA DERECHA -->
+        <div class="row-sectors-and-search">
+          <div class="sector-pills-group">
             <button 
               type="button" 
-              class="subcat-chip" 
-              [class.active]="selectedCategoriaId() === 'ALL'"
-              (click)="seleccionarCategoria('ALL')">
-              Todas
+              class="sector-pill" 
+              [class.active]="selectedSector() === 'TODAS'"
+              (click)="seleccionarSector('TODAS')">
+              TODAS
             </button>
             <button 
               type="button" 
-              *ngFor="let cat of categoriasDelSector()" 
-              class="subcat-chip" 
-              [class.active]="selectedCategoriaId() === cat.id"
-              (click)="seleccionarCategoria(cat.id)">
-              {{ cat.nombre }}
+              class="sector-pill" 
+              [class.active]="selectedSector() === 'MUJERES'"
+              (click)="seleccionarSector('MUJERES')">
+              MUJER
+            </button>
+            <button 
+              type="button" 
+              class="sector-pill" 
+              [class.active]="selectedSector() === 'HOMBRES'"
+              (click)="seleccionarSector('HOMBRES')">
+              HOMBRE
+            </button>
+            <button 
+              type="button" 
+              class="sector-pill" 
+              [class.active]="selectedSector() === 'NINOS'"
+              (click)="seleccionarSector('NINOS')">
+              NI&Ntilde;OS
+            </button>
+            <button 
+              type="button" 
+              class="sector-pill" 
+              [class.active]="selectedSector() === 'UNISEX'"
+              (click)="seleccionarSector('UNISEX')">
+              UNISEX
             </button>
           </div>
 
@@ -120,6 +101,27 @@ import { Sucursal } from '../../inventario/models/inventario.models';
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
               <span>Buscar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- FILA 2: SUBCATEGORÍAS CON ESPACIO COMPLETO -->
+        <div class="row-subcats">
+          <div class="subcat-chips-group">
+            <button 
+              type="button" 
+              class="subcat-chip" 
+              [class.active]="selectedCategoriaId() === 'ALL'"
+              (click)="seleccionarCategoria('ALL')">
+              Todas
+            </button>
+            <button 
+              type="button" 
+              *ngFor="let cat of categoriasDelSector()" 
+              class="subcat-chip" 
+              [class.active]="selectedCategoriaId() === cat.id"
+              (click)="seleccionarCategoria(cat.id)">
+              {{ cat.nombre }}
             </button>
           </div>
         </div>
@@ -565,8 +567,16 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       gap: 1.25rem; /* DISTANCIA VERTICAL CLARA: FILA 1 Y FILA 2 NUNCA CHOCAN */
     }
 
-    /* FILA 1: SECTORES */
-    .row-sectors {
+    /* FILA 1: SECTORES A LA IZQUIERDA + BUSCADOR A LA DERECHA */
+    .row-sectors-and-search {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .sector-pills-group {
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -601,13 +611,11 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
     }
 
-    /* FILA 2: SUBCATEGORÍAS A LA IZQUIERDA + BUSCADOR A LA DERECHA */
-    .row-subcats-and-search {
+    /* FILA 2: SUBCATEGORÍAS CON ESPACIO COMPLETO */
+    .row-subcats {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 1.5rem;
-      flex-wrap: wrap;
+      width: 100%;
     }
 
     .subcat-chips-group {
