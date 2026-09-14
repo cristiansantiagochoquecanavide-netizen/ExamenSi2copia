@@ -1088,8 +1088,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       -webkit-box-orient: vertical;
       overflow: hidden;
       text-overflow: ellipsis;
-      min-height: 3.65em;
-      max-height: 3.65em;
+      height: 4.35em; /* 3 líneas completas exactas (3 * 1.45em) sin corte de letras */
       margin-bottom: 1.15rem;
     }
 
