@@ -187,7 +187,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
           <div class="products-grid">
             @for (prenda of filteredPrendas(); track prenda.id) {
               <article class="product-card">
-                <!-- Image Wrapper -->
+                <!-- Image Wrapper (Relación de aspecto fija con object-fit: cover) -->
                 <div class="image-wrapper" (click)="openDetail(prenda)">
                   <img
                     [src]="getPortadaUrl(prenda)"
@@ -197,12 +197,10 @@ import { Sucursal } from '../../inventario/models/inventario.models';
                     (error)="handleImageError($event)"
                   />
                   
-                  <!-- Badges Overlay -->
+                  <!-- Badges Overlay (Semicirculares superpuestos en esquina superior izquierda) -->
                   <div class="badge-overlay">
-                    <span class="category-tag">{{ prenda.categoria?.nombre || 'COLECCIÓN' }}</span>
-                    @if (prenda.categoria?.sector && prenda.categoria?.sector !== 'UNISEX') {
-                      <span class="sector-tag">{{ prenda.categoria?.sector === 'MUJERES' ? 'MUJER' : (prenda.categoria?.sector === 'HOMBRES' ? 'HOMBRE' : (prenda.categoria?.sector === 'NINOS' ? 'NIÑOS' : prenda.categoria?.sector)) }}</span>
-                    }
+                    <span class="badge-category">{{ prenda.categoria?.nombre || 'COLECCIÓN' }}</span>
+                    <span class="badge-sex">{{ getSectorLabel(prenda) }}</span>
                     @if (has3DModel(prenda)) {
                       <span class="ar-badge">
                         <span class="ar-icon">&diams;</span> 3D AR READY
@@ -217,26 +215,34 @@ import { Sucursal } from '../../inventario/models/inventario.models';
 
                 <!-- Product Info -->
                 <div class="product-info">
+                  <!-- Fila Superior: SKU y Temporada/Colección -->
                   <div class="meta-row">
                     <span class="sku-tag">{{ prenda.sku }}</span>
-                    <span class="season-tag">{{ prenda.temporada?.nombre || 'SS-2026' }}</span>
+                    <span class="season-tag">{{ prenda.temporada?.nombre || 'Primavera-Verano 2026' }}</span>
                   </div>
 
-                  <h2 class="product-title" (click)="openDetail(prenda)">{{ prenda.nombre }}</h2>
+                  <!-- Nombre Comercial en Negritas -->
+                  <h2 class="product-title font-bold" (click)="openDetail(prenda)">{{ prenda.nombre }}</h2>
                   
+                  <!-- Descripción de la Prenda (Altura y líneas uniformes) -->
                   <p class="product-desc">{{ prenda.descripcion }}</p>
 
-                  <!-- Available Sizes -->
+                  <!-- Tallas en Cajas Cuadradas/Rectangulares -->
                   <div class="variants-row">
                     <span class="variants-label">TALLAS:</span>
                     <div class="size-chips">
-                      @for (talla of getUniqueSizes(prenda); track talla) {
-                        <span class="size-chip">{{ talla }}</span>
+                      @for (talla of getSizesWithStock(prenda); track talla.codigo) {
+                        <span 
+                          class="size-chip" 
+                          [class.size-disabled]="!talla.disponible"
+                          [title]="talla.disponible ? 'Talla ' + talla.codigo : 'Talla ' + talla.codigo + ' (Agotada)'">
+                          {{ talla.codigo }}
+                        </span>
                       }
                     </div>
                   </div>
 
-                  <!-- Card Footer -->
+                  <!-- Card Footer: Precio e Hipervínculo/Botón de Acción -->
                   <div class="card-footer">
                     <div class="price-container">
                       <span class="currency">$</span>
@@ -927,7 +933,8 @@ import { Sucursal } from '../../inventario/models/inventario.models';
 
     .image-wrapper {
       position: relative;
-      height: 420px;
+      width: 100%;
+      aspect-ratio: 3 / 4;
       overflow: hidden;
       cursor: pointer;
       background: #f9fafb;
@@ -937,6 +944,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       width: 100%;
       height: 100%;
       object-fit: cover;
+      object-position: center top;
       transition: transform 0.4s ease;
     }
 
@@ -944,34 +952,64 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       transform: scale(1.03);
     }
 
+    /* Badges Superpuestos Semicirculares (Categoría y Sexo en esquina superior izquierda) */
     .badge-overlay {
       position: absolute;
       top: 1rem;
       left: 1rem;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      align-items: flex-start;
+      gap: 0.45rem;
+      z-index: 5;
+      pointer-events: none;
     }
 
-    .category-tag {
-      background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.15);
-      font-size: 0.68rem;
-      letter-spacing: 0.15em;
-      padding: 0.25rem 0.65rem;
-      text-transform: uppercase;
-      color: #111111;
-      font-weight: 700;
+    .badge-category {
+      background: #ffffff !important;
+      border: 1px solid rgba(0, 0, 0, 0.12) !important;
+      border-radius: 9999px !important;
+      color: #000000 !important;
+      font-size: 0.65rem !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.08em !important;
+      text-transform: uppercase !important;
+      padding: 0.32rem 0.85rem !important;
+      width: fit-content !important;
+      max-width: max-content !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+      line-height: 1 !important;
+    }
+
+    .badge-sex {
+      background: #000000 !important;
+      border: 1px solid #000000 !important;
+      border-radius: 9999px !important;
+      color: #ffffff !important;
+      font-size: 0.65rem !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.08em !important;
+      text-transform: uppercase !important;
+      padding: 0.32rem 0.85rem !important;
+      width: fit-content !important;
+      max-width: max-content !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+      line-height: 1 !important;
     }
 
     .ar-badge {
-      background: #000000;
-      border: 1px solid #000000;
-      color: #ffffff;
-      font-size: 0.68rem;
-      letter-spacing: 0.15em;
-      padding: 0.25rem 0.65rem;
-      font-weight: 700;
+      background: rgba(0, 0, 0, 0.78) !important;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.25) !important;
+      border-radius: 9999px !important;
+      color: #ffffff !important;
+      font-size: 0.62rem !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.08em !important;
+      padding: 0.3rem 0.75rem !important;
+      width: fit-content !important;
+      max-width: max-content !important;
+      line-height: 1 !important;
     }
 
     .hover-action-overlay {
@@ -1008,64 +1046,98 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     .meta-row {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 0.5rem;
+      align-items: center;
+      margin-bottom: 0.45rem;
       font-size: 0.72rem;
       color: #6b7280;
-      font-family: monospace;
+      font-family: monospace, sans-serif;
+      letter-spacing: 0.02em;
+    }
+
+    .sku-tag {
+      color: #6b7280;
+      font-weight: 600;
+    }
+
+    .season-tag {
+      color: #6b7280;
+      font-weight: 500;
     }
 
     .product-title {
       font-family: 'Inter', sans-serif;
-      font-size: 1.25rem;
-      font-weight: 700;
-      margin: 0 0 0.75rem 0;
+      font-size: 1.22rem;
+      font-weight: 800 !important;
+      margin: 0 0 0.65rem 0;
       color: #000000;
       cursor: pointer;
+      line-height: 1.3;
       transition: color 0.2s ease;
     }
 
     .product-title:hover {
-      color: #4b5563;
+      color: #374151;
     }
 
     .product-desc {
-      font-size: 0.85rem;
+      font-size: 0.83rem;
       color: #4b5563;
-      line-height: 1.5;
-      margin-bottom: 1.25rem;
-      flex: 1;
+      line-height: 1.45;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-height: 3.65em;
+      max-height: 3.65em;
+      margin-bottom: 1.15rem;
     }
 
     .variants-row {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 1.5rem;
+      gap: 0.65rem;
+      margin-bottom: 1.35rem;
     }
 
     .variants-label {
-      font-size: 0.7rem;
-      letter-spacing: 0.1em;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
       color: #6b7280;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
     }
 
     .size-chips {
       display: flex;
+      align-items: center;
       gap: 0.35rem;
     }
 
     .size-chip {
-      display: inline-block;
-      min-width: 26px;
-      text-align: center;
-      padding: 0.2rem 0.4rem;
-      background: #f9fafb;
-      border: 1px solid rgba(0, 0, 0, 0.15);
-      font-size: 0.72rem;
-      color: #111111;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      height: 28px;
+      box-sizing: border-box;
+      padding: 0 6px;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 3px;
+      font-size: 0.78rem;
       font-weight: 600;
+      color: #111827;
+      transition: all 0.15s ease;
+    }
+
+    .size-chip.size-disabled {
+      background: #f9fafb;
+      border-color: #e5e7eb;
+      color: #9ca3af;
+      text-decoration: line-through;
+      opacity: 0.6;
+      cursor: not-allowed;
     }
 
     .card-footer {
@@ -1073,44 +1145,60 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       justify-content: space-between;
       align-items: center;
       border-top: 1px solid rgba(0, 0, 0, 0.08);
-      padding-top: 1.25rem;
+      padding-top: 1.15rem;
+      margin-top: auto;
     }
 
     .price-container {
+      display: flex;
+      align-items: baseline;
+      gap: 0.35rem;
       font-family: 'Inter', sans-serif;
+    }
+
+    .price-original {
+      font-size: 0.95rem;
+      color: #9ca3af;
+      text-decoration: line-through;
+      font-weight: 500;
     }
 
     .currency {
       color: #000000;
-      margin-right: 2px;
-      font-size: 0.9rem;
-      font-weight: 700;
+      margin-right: 1px;
+      font-size: 1.1rem;
+      font-weight: 800;
     }
 
     .price-value {
       font-size: 1.35rem;
       font-weight: 800;
       color: #000000;
+      letter-spacing: -0.02em;
     }
 
     .btn-card-action {
-      background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.25);
-      color: #000000;
-      padding: 0.6rem 1.3rem;
-      font-size: 0.72rem;
-      letter-spacing: 0.15em;
-      font-weight: 700;
+      background: #ffffff !important;
+      border: 1px solid #111111 !important;
+      color: #111111 !important;
+      padding: 0.52rem 1.2rem !important;
+      font-size: 0.72rem !important;
+      letter-spacing: 0.08em !important;
+      font-weight: 700 !important;
       cursor: pointer;
-      border-radius: 9999px;
-      transition: all 0.2s ease;
+      border-radius: 9999px !important;
+      text-transform: uppercase !important;
+      transition: all 0.2s ease !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
     }
 
     .btn-card-action:hover {
-      background: #000000;
-      color: #ffffff;
-      border-color: #000000;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      background: #000000 !important;
+      color: #ffffff !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
 
     /* Modal Styling */
@@ -1851,12 +1939,30 @@ export class CatalogoPageComponent implements OnInit {
     return prenda.multimedia?.filter(m => m.tipo === 'MODELO_3D_GLB' || m.tipo === 'MODELO_3D_USDZ') ?? [];
   }
 
-  getUniqueSizes(prenda: Prenda): string[] {
-    if (!prenda.variantes) return ['S', 'M', 'L'];
-    const sizes = prenda.variantes
-      .map(v => v.talla?.codigo)
-      .filter((v): v is string => !!v);
-    return Array.from(new Set(sizes));
+  getSectorLabel(prenda: Prenda): string {
+    const s = prenda.categoria?.sector;
+    if (!s || s === 'MUJERES') return 'MUJER';
+    if (s === 'HOMBRES') return 'HOMBRE';
+    if (s === 'NINOS') return 'NIÑOS';
+    return s;
+  }
+
+  getSizesWithStock(prenda: Prenda): { codigo: string; disponible: boolean }[] {
+    const standardSizes = ['S', 'M', 'L'];
+    const activeCodes = new Set(
+      (prenda.variantes || [])
+        .filter(v => v.activo && v.talla?.codigo)
+        .map(v => v.talla!.codigo)
+    );
+    prenda.variantes?.forEach(v => {
+      if (v.talla?.codigo && !standardSizes.includes(v.talla.codigo)) {
+        standardSizes.push(v.talla.codigo);
+      }
+    });
+    return standardSizes.map(code => ({
+      codigo: code,
+      disponible: activeCodes.has(code)
+    }));
   }
 
   handleImageError(event: Event): void {
