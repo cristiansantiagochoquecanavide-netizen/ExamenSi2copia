@@ -84,6 +84,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
               <input
                 type="text"
                 [(ngModel)]="searchQuery"
+                (ngModelChange)="onSearchChange($event)"
                 (keyup.enter)="ejecutarBusqueda()"
                 placeholder="Buscar"
                 class="search-input-mockup"
@@ -1736,6 +1737,11 @@ export class CatalogoPageComponent implements OnInit {
 
   seleccionarCategoria(catId: number | 'ALL'): void {
     this.selectedCategoriaId.set(catId);
+  }
+
+  onSearchChange(val: string): void {
+    this.searchQuery = val;
+    this.searchTermActive.set(val.trim().toLowerCase());
   }
 
   ejecutarBusqueda(): void {
