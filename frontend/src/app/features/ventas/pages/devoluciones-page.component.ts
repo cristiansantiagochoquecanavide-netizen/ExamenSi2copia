@@ -560,7 +560,7 @@ interface ItemDevolucionRow {
   styles: [`
     :host {
       display: block;
-      color: var(--color-on-surface, #f5f5f5);
+      color: #111111;
     }
     .devoluciones-container {
       padding: 1.5rem 0 3rem 0;
@@ -572,7 +572,7 @@ interface ItemDevolucionRow {
       justify-content: space-between;
       align-items: flex-start;
       margin-bottom: 2rem;
-      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       padding-bottom: 1.5rem;
       flex-wrap: wrap;
       gap: 1.5rem;
@@ -580,64 +580,73 @@ interface ItemDevolucionRow {
     .luxury-badge {
       font-size: 0.7rem;
       letter-spacing: 0.15em;
-      color: #d4af37;
-      border: 1px solid rgba(212, 175, 55, 0.4);
+      color: #4b5563;
+      border: 1px solid rgba(0, 0, 0, 0.15);
       padding: 3px 8px;
       display: inline-block;
       margin-bottom: 0.5rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      border-radius: 0;
     }
     .page-title {
       font-size: 2.2rem;
-      font-family: serif;
-      letter-spacing: 0.02em;
+      font-family: 'Inter', sans-serif;
+      font-weight: 800;
+      letter-spacing: -0.02em;
       margin: 0 0 0.5rem 0;
-      color: #ffffff;
+      color: #000000;
     }
     .subtitle {
-      color: #a0a0a0;
+      color: #4b5563;
       font-size: 0.95rem;
       margin: 0;
     }
     .branch-selector-card {
-      background: #141414;
-      border: 1px solid rgba(212, 175, 55, 0.3);
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
       padding: 1rem 1.25rem;
       min-width: 280px;
+      border-radius: 0;
     }
     .branch-label {
       display: block;
       font-size: 0.7rem;
       letter-spacing: 0.1em;
-      color: #d4af37;
+      color: #4b5563;
+      font-weight: 700;
       margin-bottom: 0.5rem;
+      text-transform: uppercase;
     }
     .tabs-bar {
       display: flex;
       gap: 0.5rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       margin-bottom: 2rem;
     }
     .tab-btn {
       background: transparent;
       border: none;
       border-bottom: 2px solid transparent;
-      color: #888888;
+      color: #4b5563;
       padding: 0.8rem 1.5rem;
       font-size: 0.85rem;
+      font-weight: 700;
       letter-spacing: 0.08em;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 0.5rem;
       transition: all 0.2s;
+      border-radius: 0;
     }
     .tab-btn:hover {
-      color: #ffffff;
+      color: #000000;
     }
     .tab-btn.active {
-      color: #d4af37;
-      border-bottom-color: #d4af37;
-      background: rgba(212, 175, 55, 0.05);
+      color: #000000;
+      border-bottom-color: #000000;
+      background: #f9fafb;
     }
     .tab-dot {
       font-size: 1.2rem;
@@ -654,19 +663,22 @@ interface ItemDevolucionRow {
       }
     }
     .card-noir {
-      background: #141414;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 1.5rem;
       margin-bottom: 1.5rem;
+      border-radius: 0;
     }
     .card-title {
+      font-family: 'Inter', sans-serif;
       font-size: 1.1rem;
-      color: #ffffff;
+      font-weight: 700;
+      color: #000000;
       margin: 0 0 0.35rem 0;
-      letter-spacing: 0.02em;
+      letter-spacing: -0.01em;
     }
     .card-desc {
-      color: #888888;
+      color: #4b5563;
       font-size: 0.85rem;
       margin: 0 0 1.25rem 0;
     }
@@ -676,46 +688,56 @@ interface ItemDevolucionRow {
     }
     .input-luxury {
       flex: 1;
-      background: #0a0a0a;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #ffffff;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
       padding: 0.75rem 1rem;
       font-size: 0.95rem;
       outline: none;
+      border-radius: 0;
       transition: border-color 0.2s;
     }
     .input-luxury:focus {
-      border-color: #d4af37;
+      border-color: #000000;
     }
     .select-luxury {
       width: 100%;
-      background: #0a0a0a;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #ffffff;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
       padding: 0.65rem 0.75rem;
       font-size: 0.9rem;
       outline: none;
+      border-radius: 0;
+      transition: border-color 0.2s;
+    }
+    .select-luxury:focus {
+      border-color: #000000;
     }
     .select-mini {
-      background: #0a0a0a;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #ffffff;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
       padding: 0.35rem 0.5rem;
       font-size: 0.8rem;
+      border-radius: 0;
+      outline: none;
     }
     .btn-gold {
-      background: #d4af37;
-      color: #0a0a0a;
-      border: none;
+      background: #000000;
+      color: #ffffff;
+      border: 1px solid #000000;
       padding: 0 1.5rem;
       font-size: 0.85rem;
-      font-weight: 600;
+      font-weight: 700;
       letter-spacing: 0.05em;
       cursor: pointer;
-      transition: opacity 0.2s;
+      border-radius: 0;
+      transition: background-color 0.2s;
     }
     .btn-gold:hover:not(:disabled) {
-      opacity: 0.9;
+      background: #262626;
+      border-color: #262626;
     }
     .btn-gold:disabled {
       opacity: 0.4;
@@ -724,13 +746,15 @@ interface ItemDevolucionRow {
     .quick-fill-zone {
       margin-top: 1rem;
       padding-top: 1rem;
-      border-top: 1px dashed rgba(255, 255, 255, 0.08);
+      border-top: 1px dashed rgba(0, 0, 0, 0.15);
     }
     .quick-label {
       font-size: 0.75rem;
-      color: #888888;
+      color: #4b5563;
+      font-weight: 700;
       display: block;
       margin-bottom: 0.5rem;
+      text-transform: uppercase;
     }
     .quick-tags {
       display: flex;
@@ -738,34 +762,39 @@ interface ItemDevolucionRow {
       gap: 0.5rem;
     }
     .btn-tag {
-      background: #1a1a1a;
-      border: 1px solid rgba(212, 175, 55, 0.3);
-      color: #d4af37;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
       font-size: 0.75rem;
+      font-weight: 600;
       padding: 3px 8px;
       cursor: pointer;
+      border-radius: 0;
       transition: all 0.15s;
     }
     .btn-tag:hover {
-      background: #d4af37;
-      color: #0a0a0a;
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
     }
     .alert-error {
-      background: rgba(220, 53, 69, 0.15);
-      border: 1px solid #dc3545;
-      color: #ff8b94;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
       padding: 0.75rem 1rem;
       margin-top: 1rem;
       font-size: 0.85rem;
+      font-weight: 600;
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      border-radius: 0;
     }
     .ticket-header-flex {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       padding-bottom: 1.25rem;
       margin-bottom: 1.25rem;
       flex-wrap: wrap;
@@ -773,47 +802,53 @@ interface ItemDevolucionRow {
     }
     .ticket-status-badge {
       font-size: 0.65rem;
-      background: rgba(40, 167, 69, 0.15);
-      color: #28a745;
-      border: 1px solid #28a745;
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
       padding: 2px 6px;
       letter-spacing: 0.1em;
       display: inline-block;
       margin-bottom: 0.25rem;
+      font-weight: 700;
+      border-radius: 0;
     }
     .ticket-code {
       font-size: 1.4rem;
       font-family: monospace;
-      color: #ffffff;
+      color: #000000;
+      font-weight: 700;
       margin: 0 0 0.25rem 0;
     }
     .ticket-meta {
       font-size: 0.8rem;
-      color: #888888;
+      color: #4b5563;
       margin: 0;
     }
     .ticket-customer-box {
-      background: #0a0a0a;
-      border: 1px solid rgba(212, 175, 55, 0.2);
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 0.75rem 1rem;
       text-align: right;
+      border-radius: 0;
     }
     .cust-label {
       display: block;
       font-size: 0.65rem;
-      color: #d4af37;
+      color: #4b5563;
+      font-weight: 700;
       letter-spacing: 0.1em;
+      text-transform: uppercase;
     }
     .cust-name {
       display: block;
       font-size: 0.95rem;
-      font-weight: 600;
-      color: #ffffff;
+      font-weight: 700;
+      color: #000000;
     }
     .cust-nit {
       display: block;
       font-size: 0.8rem;
-      color: #888888;
+      color: #6b7280;
     }
     .operation-type-selector {
       display: grid;
@@ -827,25 +862,27 @@ interface ItemDevolucionRow {
       }
     }
     .op-option {
-      background: #0a0a0a;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
       padding: 1rem;
       cursor: pointer;
       display: flex;
       gap: 0.75rem;
+      border-radius: 0;
       transition: all 0.2s;
     }
     .op-option:hover {
-      border-color: rgba(212, 175, 55, 0.4);
+      border-color: #000000;
     }
     .op-option.selected {
-      border-color: #d4af37;
-      background: rgba(212, 175, 55, 0.05);
+      border-color: #000000;
+      background: #f9fafb;
+      box-shadow: 0 0 0 1px #000000;
     }
     .op-radio {
       width: 18px;
       height: 18px;
-      border: 1px solid #d4af37;
+      border: 1px solid #000000;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -856,18 +893,19 @@ interface ItemDevolucionRow {
     .op-radio-dot {
       width: 8px;
       height: 8px;
-      background: #d4af37;
+      background: #000000;
       border-radius: 50%;
     }
     .op-title {
       display: block;
       font-size: 0.85rem;
-      color: #ffffff;
+      font-weight: 700;
+      color: #000000;
       margin-bottom: 0.25rem;
     }
     .op-desc {
       font-size: 0.75rem;
-      color: #888888;
+      color: #4b5563;
       margin: 0;
     }
     .table-title-zone {
@@ -877,14 +915,17 @@ interface ItemDevolucionRow {
       margin-bottom: 0.75rem;
     }
     .section-title {
+      font-family: 'Inter', sans-serif;
       font-size: 0.95rem;
-      color: #d4af37;
+      font-weight: 700;
+      color: #000000;
       margin: 0;
       letter-spacing: 0.05em;
+      text-transform: uppercase;
     }
     .legend-note {
       font-size: 0.75rem;
-      color: #666666;
+      color: #6b7280;
     }
     .table-wrapper {
       overflow-x: auto;
@@ -895,61 +936,73 @@ interface ItemDevolucionRow {
       font-size: 0.85rem;
     }
     .luxury-table th {
-      background: #0a0a0a;
-      color: #888888;
-      font-weight: 500;
+      background: #f9fafb;
+      color: #000000;
+      font-weight: 700;
       letter-spacing: 0.05em;
       padding: 0.75rem 1rem;
       text-align: left;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 2px solid rgba(0, 0, 0, 0.12);
+      text-transform: uppercase;
     }
     .luxury-table td {
       padding: 0.85rem 1rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
       vertical-align: middle;
+      color: #1f2937;
     }
     .row-active {
-      background: rgba(212, 175, 55, 0.03);
+      background: #f9fafb;
     }
     .sub-sku {
       display: block;
       font-size: 0.7rem;
-      color: #888888;
+      color: #6b7280;
       font-family: monospace;
     }
     .badge-attr {
-      background: #1a1a1a;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: #f3f4f6;
+      border: 1px solid rgba(0, 0, 0, 0.12);
       font-size: 0.75rem;
+      font-weight: 600;
+      color: #000000;
       padding: 2px 6px;
       margin-right: 4px;
       display: inline-block;
+      border-radius: 0;
     }
     .badge-disp {
       font-size: 0.75rem;
-      background: rgba(40, 167, 69, 0.1);
-      color: #28a745;
-      border: 1px solid rgba(40, 167, 69, 0.3);
+      font-weight: 700;
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
       padding: 2px 8px;
+      border-radius: 0;
     }
     .badge-disp.zero {
-      background: rgba(220, 53, 69, 0.1);
-      color: #dc3545;
-      border-color: rgba(220, 53, 69, 0.3);
+      background: #fef2f2;
+      color: #991b1b;
+      border-color: #fecaca;
     }
     .qty-control {
       display: inline-flex;
       align-items: center;
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(0, 0, 0, 0.2);
     }
     .btn-qty {
-      background: #1a1a1a;
+      background: #ffffff;
       border: none;
-      color: #ffffff;
+      color: #000000;
       width: 26px;
       height: 26px;
       cursor: pointer;
       font-weight: bold;
+      transition: background-color 0.2s;
+    }
+    .btn-qty:hover:not(:disabled) {
+      background: #000000;
+      color: #ffffff;
     }
     .btn-qty:disabled {
       opacity: 0.2;
@@ -959,54 +1012,63 @@ interface ItemDevolucionRow {
       padding: 0 8px;
       min-width: 24px;
       text-align: center;
-      font-weight: 600;
+      font-weight: 700;
+      color: #000000;
     }
     .selected-cambio-box {
-      background: #0a0a0a;
-      border: 1px dashed #d4af37;
+      background: #f9fafb;
+      border: 1px dashed rgba(0, 0, 0, 0.3);
       padding: 0.4rem 0.6rem;
       font-size: 0.75rem;
+      border-radius: 0;
     }
     .cambio-name {
       display: block;
-      font-weight: 600;
-      color: #ffffff;
+      font-weight: 700;
+      color: #000000;
     }
     .cambio-sku {
       display: block;
-      color: #888888;
+      color: #6b7280;
       font-family: monospace;
     }
     .cambio-price {
       display: block;
-      color: #d4af37;
+      color: #000000;
+      font-weight: 700;
     }
     .btn-link-mini {
       background: none;
       border: none;
-      color: #d4af37;
+      color: #000000;
       text-decoration: underline;
       cursor: pointer;
       padding: 0;
       font-size: 0.75rem;
+      font-weight: 700;
     }
     .btn-select-cambio {
-      background: #1a1a1a;
-      border: 1px dashed rgba(212, 175, 55, 0.5);
-      color: #d4af37;
+      background: #ffffff;
+      border: 1px dashed rgba(0, 0, 0, 0.3);
+      color: #000000;
       padding: 0.4rem 0.75rem;
       font-size: 0.75rem;
+      font-weight: 600;
       cursor: pointer;
+      border-radius: 0;
+      transition: all 0.2s;
     }
     .btn-select-cambio:hover {
-      background: rgba(212, 175, 55, 0.1);
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
     }
     .dash-text {
-      color: #555555;
+      color: #9ca3af;
     }
     .col-strong {
-      font-weight: 600;
-      color: #ffffff;
+      font-weight: 700;
+      color: #000000;
     }
     .text-right { text-align: right; }
     .text-center { text-align: center; }
@@ -1022,24 +1084,33 @@ interface ItemDevolucionRow {
     .field-label {
       display: block;
       font-size: 0.75rem;
+      font-weight: 700;
       letter-spacing: 0.05em;
-      color: #888888;
+      color: #4b5563;
       margin-bottom: 0.5rem;
+      text-transform: uppercase;
     }
     .textarea-luxury {
       width: 100%;
-      background: #0a0a0a;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #ffffff;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
       padding: 0.65rem;
       font-size: 0.85rem;
       outline: none;
+      border-radius: 0;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+    .textarea-luxury:focus {
+      border-color: #000000;
     }
     .summary-breakdown {
-      background: #0a0a0a;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 1.25rem;
       margin-bottom: 1.25rem;
+      border-radius: 0;
     }
     .breakdown-row {
       display: flex;
@@ -1047,11 +1118,11 @@ interface ItemDevolucionRow {
       font-size: 0.85rem;
       margin-bottom: 0.65rem;
     }
-    .muted-lbl { color: #888888; }
-    .val-txt { font-weight: 600; color: #ffffff; }
+    .muted-lbl { color: #4b5563; font-weight: 600; }
+    .val-txt { font-weight: 700; color: #000000; }
     .divider-gold {
       height: 1px;
-      background: rgba(212, 175, 55, 0.2);
+      background: rgba(0, 0, 0, 0.1);
       margin: 0.75rem 0;
     }
     .balance-row {
@@ -1059,48 +1130,52 @@ interface ItemDevolucionRow {
       margin-bottom: 0.75rem;
     }
     .balance-lbl {
-      color: #d4af37;
-      font-weight: 600;
+      color: #000000;
+      font-weight: 700;
     }
     .balance-val {
-      font-weight: 700;
-      font-family: monospace;
-      color: #ffffff;
+      font-weight: 800;
+      font-family: 'Inter', sans-serif;
+      color: #000000;
     }
-    .balance-val.credit { color: #28a745; }
-    .balance-val.charge { color: #d4af37; }
+    .balance-val.credit { color: #16a34a; }
+    .balance-val.charge { color: #000000; }
     .balance-badge {
       font-size: 0.7rem;
+      font-weight: 700;
       letter-spacing: 0.08em;
       text-align: center;
       padding: 4px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #a0a0a0;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      color: #4b5563;
+      border-radius: 0;
     }
     .badge-credit {
-      border-color: #28a745;
-      color: #28a745;
-      background: rgba(40, 167, 69, 0.08);
+      border-color: #bbf7d0;
+      color: #166534;
+      background: #f0fdf4;
     }
     .badge-charge {
-      border-color: #d4af37;
-      color: #d4af37;
-      background: rgba(212, 175, 55, 0.08);
+      border-color: rgba(0, 0, 0, 0.2);
+      color: #000000;
+      background: #f3f4f6;
     }
     .btn-confirm-op {
       width: 100%;
-      background: #d4af37;
-      color: #0a0a0a;
-      border: none;
+      background: #000000;
+      color: #ffffff;
+      border: 1px solid #000000;
       padding: 1rem;
       font-size: 0.95rem;
       font-weight: 700;
       letter-spacing: 0.08em;
       cursor: pointer;
-      transition: opacity 0.2s;
+      border-radius: 0;
+      transition: background-color 0.2s;
     }
     .btn-confirm-op:hover:not(:disabled) {
-      opacity: 0.9;
+      background: #262626;
+      border-color: #262626;
     }
     .btn-confirm-op:disabled {
       opacity: 0.3;
@@ -1120,44 +1195,51 @@ interface ItemDevolucionRow {
       display: flex;
       gap: 0.75rem;
     }
-    .col-gold { color: #d4af37; font-family: monospace; }
-    .col-time { font-size: 0.8rem; color: #888888; }
-    .sub-ticket { font-family: monospace; font-size: 0.8rem; color: #a0a0a0; }
+    .col-gold { color: #000000; font-family: monospace; font-weight: 700; }
+    .col-time { font-size: 0.8rem; color: #6b7280; }
+    .sub-ticket { font-family: monospace; font-size: 0.8rem; color: #6b7280; }
     .type-badge {
       font-size: 0.7rem;
+      font-weight: 700;
       padding: 2px 6px;
-      background: rgba(255, 255, 255, 0.1);
-      color: #ffffff;
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: #f3f4f6;
+      color: #000000;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: 0;
     }
     .type-badge.badge-cambio {
-      background: rgba(212, 175, 55, 0.15);
-      color: #d4af37;
-      border-color: #d4af37;
+      background: #f9fafb;
+      color: #000000;
+      border-color: rgba(0, 0, 0, 0.3);
     }
     .btn-action-view {
-      background: transparent;
-      border: 1px solid rgba(212, 175, 55, 0.4);
-      color: #d4af37;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
       font-size: 0.75rem;
+      font-weight: 700;
       padding: 3px 10px;
       cursor: pointer;
+      border-radius: 0;
+      transition: all 0.2s;
     }
     .btn-action-view:hover {
-      background: #d4af37;
-      color: #0a0a0a;
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
     }
     .empty-msg {
       text-align: center;
       padding: 3rem 0;
-      color: #666666;
+      color: #6b7280;
     }
 
     /* MODAL CAMBIO */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1165,10 +1247,12 @@ interface ItemDevolucionRow {
       padding: 1rem;
     }
     .modal-content {
-      background: #141414;
-      border: 1px solid rgba(212, 175, 55, 0.4);
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
       max-height: 90vh;
       overflow-y: auto;
+      border-radius: 0;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2);
     }
     .modal-cambio {
       width: 100%;
@@ -1180,20 +1264,26 @@ interface ItemDevolucionRow {
       justify-content: space-between;
       align-items: center;
       margin-bottom: 1.25rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       padding-bottom: 0.75rem;
     }
     .modal-title {
+      font-family: 'Inter', sans-serif;
       font-size: 1.2rem;
-      color: #ffffff;
+      font-weight: 700;
+      color: #000000;
       margin: 0;
     }
     .btn-close {
       background: none;
       border: none;
-      color: #ffffff;
+      color: #6b7280;
       font-size: 1.5rem;
       cursor: pointer;
+      transition: color 0.2s;
+    }
+    .btn-close:hover {
+      color: #000000;
     }
     .modal-search {
       margin-bottom: 1.25rem;
@@ -1206,33 +1296,37 @@ interface ItemDevolucionRow {
       overflow-y: auto;
     }
     .catalog-card {
-      background: #0a0a0a;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 1rem;
+      border-radius: 0;
     }
     .cat-title {
       display: block;
       font-size: 0.9rem;
-      color: #ffffff;
+      font-weight: 700;
+      color: #000000;
       margin-bottom: 0.25rem;
     }
     .cat-price {
       display: block;
-      color: #d4af37;
-      font-weight: 600;
+      color: #000000;
+      font-weight: 800;
       font-size: 0.95rem;
     }
     .cat-sec {
       display: block;
       font-size: 0.75rem;
-      color: #666666;
+      color: #6b7280;
       margin-bottom: 0.75rem;
     }
     .var-title {
       display: block;
       font-size: 0.7rem;
-      color: #888888;
+      font-weight: 700;
+      color: #4b5563;
       margin-bottom: 0.4rem;
+      text-transform: uppercase;
     }
     .var-chips {
       display: flex;
@@ -1240,22 +1334,26 @@ interface ItemDevolucionRow {
       gap: 0.4rem;
     }
     .chip-var {
-      background: #1a1a1a;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #ffffff;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      color: #000000;
       padding: 3px 6px;
       font-size: 0.7rem;
+      font-weight: 600;
       cursor: pointer;
+      border-radius: 0;
+      transition: all 0.2s;
     }
     .chip-var:hover:not(:disabled) {
-      border-color: #d4af37;
-      background: rgba(212, 175, 55, 0.1);
+      border-color: #000000;
+      background: #000000;
+      color: #ffffff;
     }
     .chip-var:disabled {
       opacity: 0.25;
       cursor: not-allowed;
     }
-    .chip-stock { color: #28a745; font-size: 0.65rem; }
+    .chip-stock { color: #16a34a; font-size: 0.65rem; font-weight: 700; }
 
     /* COMPROBANTE TÉRMICO DE LUJO */
     .receipt-modal {
@@ -1264,17 +1362,19 @@ interface ItemDevolucionRow {
       padding: 1.5rem;
     }
     .thermal-receipt {
-      background: #ffffff;
+      background: #fcfcfc;
       color: #000000;
       font-family: 'Courier New', Courier, monospace;
       padding: 1.5rem;
       font-size: 0.85rem;
+      border: 1px dashed rgba(0, 0, 0, 0.2);
     }
     .receipt-header {
       text-align: center;
     }
     .receipt-brand {
       display: block;
+      font-family: 'Inter', sans-serif;
       font-size: 1.4rem;
       font-weight: 800;
       letter-spacing: 0.1em;
@@ -1284,6 +1384,7 @@ interface ItemDevolucionRow {
       font-size: 0.7rem;
       letter-spacing: 0.05em;
       margin-top: 2px;
+      color: #4b5563;
     }
     .receipt-type {
       margin: 0.5rem 0;
@@ -1299,6 +1400,7 @@ interface ItemDevolucionRow {
       margin: 0.5rem 0;
       text-align: center;
       letter-spacing: -1px;
+      color: #9ca3af;
     }
     .receipt-section-label {
       font-weight: bold;
@@ -1358,16 +1460,29 @@ interface ItemDevolucionRow {
       flex: 1;
       background: #000000;
       color: #ffffff;
-      border: none;
+      border: 1px solid #000000;
       padding: 0.75rem;
       font-weight: bold;
       cursor: pointer;
+      border-radius: 0;
+      transition: background-color 0.2s;
+    }
+    .btn-print:hover {
+      background: #262626;
     }
     .btn-cancel {
-      background: #cccccc;
-      border: none;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #374151;
       padding: 0.75rem 1rem;
       cursor: pointer;
+      border-radius: 0;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-cancel:hover {
+      background: #f3f4f6;
+      color: #000000;
     }
   `]
 })

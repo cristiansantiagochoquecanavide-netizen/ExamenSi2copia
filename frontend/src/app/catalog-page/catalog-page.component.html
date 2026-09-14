@@ -1,0 +1,440 @@
+<div class="storefront-container catalog-container">
+  <!-- Top Navigation Bar (Shared Minimalist Header) -->
+  <header class="top-nav">
+    <div class="nav-content">
+      <a routerLink="/landing" class="brand-logo">
+        FASHIONSTORE
+      </a>
+
+      <nav class="nav-menu" [class.open]="mobileMenuOpen">
+        <a routerLink="/catalogo" class="nav-item active">Colección</a>
+        <a routerLink="/landing" class="nav-item">Vestidor AR</a>
+        <a routerLink="/catalogo" class="nav-item">Novedades</a>
+        <a (click)="openSessionModal()" class="nav-item cursor-pointer">Acerca</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button type="button" class="icon-btn" aria-label="Buscar">
+          <span class="material-symbols-outlined">search</span>
+        </button>
+        <button type="button" class="icon-btn" aria-label="Cuenta" routerLink="/login">
+          <span class="material-symbols-outlined">person</span>
+        </button>
+        <button type="button" class="icon-btn bag-btn" aria-label="Bolsa de compra" routerLink="/ventas/checkout">
+          <span class="material-symbols-outlined">shopping_bag</span>
+          <span class="bag-badge">{{ (cartService.count$ | async) || 2 }}</span>
+        </button>
+        <button type="button" class="mobile-toggle-btn" aria-label="Menú" (click)="toggleMobileMenu()">
+          <span class="material-symbols-outlined">{{ mobileMenuOpen ? 'close' : 'menu' }}</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notificación flotante de compra -->
+  @if (addedToCartNotification) {
+    <div class="toast-notification">
+      <span class="material-symbols-outlined">check_circle</span>
+      <span>{{ addedToCartNotification }}</span>
+    </div>
+  }
+
+  <main class="main-canvas">
+    <!-- BREADCRUMB & HEADER SECTION -->
+    <section class="catalog-header-section">
+      <nav aria-label="Breadcrumb" class="breadcrumb-nav">
+        <a routerLink="/landing" class="crumb-link">INICIO</a>
+        <span class="crumb-sep">/</span>
+        <span class="crumb-current">CATÁLOGO</span>
+      </nav>
+
+      <div class="header-content-row">
+        <div class="header-texts">
+          <div class="title-with-counter">
+            <h1 class="catalog-title">Catálogo</h1>
+            <span class="counter-badge">[ {{ filteredProducts.length }} PIEZAS EXCLUSIVAS ]</span>
+          </div>
+          <p class="catalog-subtitle">
+            Prendas confeccionadas con patrones biométricos listos para simulación en vestidor AR. Arquitectura textil contemporánea concebida para una caída impecable.
+          </p>
+        </div>
+
+        <div class="pipeline-badge-box">
+          <span class="pipeline-badge">
+            <span class="pipeline-dot"></span>
+            AR PIPELINE V2.4 ACTIVO
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- FILTERING & SORT CONTROL BAR -->
+    <section class="filters-section">
+      <!-- Primary Category Tabs & AR Switch -->
+      <div class="category-tabs-row">
+        <div class="category-pills">
+          <button
+            type="button"
+            class="pill-btn"
+            [class.active]="selectedCategory === 'Todos'"
+            (click)="setCategory('Todos')"
+          >
+            Todos ({{ categoryCounts['Todos'] }})
+          </button>
+          <button
+            type="button"
+            class="pill-btn"
+            [class.active]="selectedCategory === 'Abrigos'"
+            (click)="setCategory('Abrigos')"
+          >
+            Abrigos ({{ categoryCounts['Abrigos'] }})
+          </button>
+          <button
+            type="button"
+            class="pill-btn"
+            [class.active]="selectedCategory === 'Sastrería'"
+            (click)="setCategory('Sastrería')"
+          >
+            Sastrería ({{ categoryCounts['Sastrería'] }})
+          </button>
+          <button
+            type="button"
+            class="pill-btn"
+            [class.active]="selectedCategory === 'Vestidos'"
+            (click)="setCategory('Vestidos')"
+          >
+            Vestidos ({{ categoryCounts['Vestidos'] }})
+          </button>
+          <button
+            type="button"
+            class="pill-btn"
+            [class.active]="selectedCategory === 'Calzado'"
+            (click)="setCategory('Calzado')"
+          >
+            Calzado ({{ categoryCounts['Calzado'] }})
+          </button>
+        </div>
+
+        <!-- AR Toggle Switch -->
+        <label class="ar-toggle-label">
+          <span class="ar-toggle-text">Filtro AR Ready</span>
+          <div class="switch-wrap">
+            <input
+              type="checkbox"
+              [(ngModel)]="arFilterOnly"
+              class="switch-input"
+            />
+            <span class="switch-slider"></span>
+          </div>
+        </label>
+      </div>
+
+      <!-- Secondary Refinement Bar (Sizes, Sort, Clear) -->
+      <div class="refinement-row">
+        <!-- Size Selector -->
+        <div class="size-filter-group">
+          <span class="filter-label">Talla:</span>
+          <button
+            type="button"
+            class="size-pill"
+            [class.active]="selectedSize === 'XS'"
+            (click)="toggleSize('XS')"
+          >
+            XS
+          </button>
+          <button
+            type="button"
+            class="size-pill"
+            [class.active]="selectedSize === 'S'"
+            (click)="toggleSize('S')"
+          >
+            S
+          </button>
+          <button
+            type="button"
+            class="size-pill"
+            [class.active]="selectedSize === 'M'"
+            (click)="toggleSize('M')"
+          >
+            M
+          </button>
+          <button
+            type="button"
+            class="size-pill"
+            [class.active]="selectedSize === 'L'"
+            (click)="toggleSize('L')"
+          >
+            L
+          </button>
+        </div>
+
+        <!-- Sort & Reset Actions -->
+        <div class="sort-actions-group">
+          <div class="sort-select-box">
+            <label for="catalog-sort" class="filter-label">Ordenar:</label>
+            <select
+              id="catalog-sort"
+              [(ngModel)]="sortBy"
+              class="minimal-select"
+            >
+              <option value="Novedades">Novedades</option>
+              <option value="Precio: Menor a Mayor">Precio: Menor a Mayor</option>
+              <option value="Precio: Mayor a Menor">Precio: Mayor a Menor</option>
+              <option value="Destacados AR">Destacados AR</option>
+            </select>
+          </div>
+
+          <button type="button" class="btn-clear-filters" (click)="limpiarFiltros()">
+            Limpiar filtros
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- EDITORIAL PRODUCT GRID -->
+    <section class="products-grid-section">
+      @if (filteredProducts.length === 0) {
+        <div class="empty-state">
+          <span class="material-symbols-outlined">inventory_2</span>
+          <h3>No se encontraron piezas con los filtros seleccionados</h3>
+          <button type="button" class="btn-primary-cta" (click)="limpiarFiltros()">
+            Restablecer Filtros
+          </button>
+        </div>
+      } @else {
+        <div class="editorial-grid">
+          @for (product of filteredProducts; track product.id) {
+            <article class="product-card group">
+              <!-- Media Frame -->
+              <div class="card-media">
+                <img
+                  [src]="product.imageUrl"
+                  [alt]="product.name"
+                  class="product-image"
+                />
+
+                <!-- AR Ready Badge -->
+                @if (product.isArReady) {
+                  <div class="ar-status-badge">
+                    <span class="pulse-dot"></span>
+                    <span>AR READY</span>
+                  </div>
+                }
+
+                <!-- Wishlist Action -->
+                <button
+                  type="button"
+                  class="card-wishlist-btn"
+                  [class.active]="product.wishlist"
+                  (click)="toggleWishlist(product)"
+                  aria-label="Favorito"
+                >
+                  <span class="material-symbols-outlined">{{ product.wishlist ? 'favorite' : 'favorite_border' }}</span>
+                </button>
+
+                <!-- Slide-up AR action -->
+                <div class="hover-action-overlay">
+                  <button
+                    type="button"
+                    class="btn-try-ar"
+                    (click)="openArModal(product)"
+                  >
+                    <span class="material-symbols-outlined">view_in_ar</span>
+                    <span>Probar en Vestidor AR</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Product Details -->
+              <div class="card-details">
+                <div class="card-title-price">
+                  <h3 class="product-title">{{ product.name }}</h3>
+                  <span class="product-price">€ {{ product.price | number:'1.0-0' }}</span>
+                </div>
+
+                <p class="product-material">{{ product.material }}</p>
+
+                <!-- Color Swatches & Quick Add -->
+                <div class="swatches-and-add">
+                  <div class="color-swatches">
+                    @for (color of product.colors; track color; let i = $index) {
+                      <button
+                        type="button"
+                        class="swatch-circle"
+                        [style.background-color]="color"
+                        [class.selected]="product.activeColorIndex === i"
+                        (click)="selectColor(product, i)"
+                        [attr.aria-label]="'Color ' + (i + 1)"
+                      ></button>
+                    }
+                  </div>
+
+                  <button
+                    type="button"
+                    class="quick-bag-btn"
+                    (click)="addToBag(product)"
+                    title="Añadir a la bolsa"
+                  >
+                    <span class="material-symbols-outlined">add</span>
+                  </button>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- PAGINATION SECTION -->
+    <section class="pagination-section">
+      <span class="pagination-summary">
+        Mostrando 1-{{ filteredProducts.length }} de {{ products.length }} piezas
+      </span>
+
+      <div class="pagination-controls">
+        <button type="button" class="page-num active">1</button>
+        <button type="button" class="page-num">2</button>
+        <button type="button" class="page-num">3</button>
+        <button type="button" class="page-next">Siguiente &rarr;</button>
+      </div>
+    </section>
+
+    <!-- VIP STYLING CONCIERGE BANNER -->
+    <section class="concierge-section">
+      <div class="concierge-card">
+        <div class="concierge-text">
+          <span class="concierge-pretitle">EXPERIENCIA PERSONALIZADA</span>
+          <h3 class="concierge-title">¿Buscas una asesoría a medida? Reserva una sesión privada con nuestro estilista 3D.</h3>
+          <p class="concierge-sub">Calibración biométrica y pruebas de caída digital en tiempo real con simulación de tejidos en alta fidelidad.</p>
+        </div>
+        <button type="button" class="btn-concierge" (click)="openSessionModal()">
+          Agendar Cita Privada
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- LUXURY FOOTER -->
+  <footer class="store-footer">
+    <div class="footer-wrapper">
+      <div class="footer-brand">
+        <span class="brand-name">FASHIONSTORE</span>
+        <span class="sep">|</span>
+        <p class="copy">&copy; 2025 FashionStore. Experiencia de lujo aumentada.</p>
+      </div>
+
+      <div class="footer-links">
+        <a href="#privacidad">Privacidad</a>
+        <a href="#terminos">Términos y Condiciones</a>
+        <a href="#atencion">Atención al Cliente</a>
+        <a routerLink="/landing" class="active-link">Vestidores AR</a>
+        <a href="#sostenibilidad">Sostenibilidad</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- MODAL DE SIMULACIÓN AR INTERACTIVO -->
+  @if (isArModalOpen && selectedProductForAR) {
+    <div class="modal-backdrop" (click)="closeArModal()">
+      <div class="ar-modal-box" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <div class="modal-title-group">
+            <span class="modal-pretitle">VESTIDOR DE REALIDAD AUMENTADA &bull; MODO CINÉTICO</span>
+            <h3 class="modal-title">{{ selectedProductForAR.name }}</h3>
+          </div>
+          <button type="button" class="modal-close-btn" (click)="closeArModal()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </header>
+
+        <div class="modal-body">
+          <div class="modal-ar-preview">
+            <img [src]="selectedProductForAR.imageUrl" [alt]="selectedProductForAR.name" class="modal-preview-img" />
+            <div class="ar-scanning-line"></div>
+            <div class="ar-telemetry-badge">
+              <span>CALCE BIOMÉTRICO: ACTIVO [ 0.2mm TOLERANCIA ]</span>
+            </div>
+          </div>
+
+          <div class="modal-ar-details">
+            <div class="telemetry-box">
+              <span class="tel-label">Material &amp; Fibra</span>
+              <p class="tel-val">{{ selectedProductForAR.material }}</p>
+            </div>
+            <div class="telemetry-box">
+              <span class="tel-label">Comportamiento en Movimiento</span>
+              <p class="tel-val">{{ selectedProductForAR.description }}</p>
+            </div>
+            <div class="telemetry-box">
+              <span class="tel-label">Tallas Disponibles para AR</span>
+              <div class="modal-size-row">
+                @for (size of selectedProductForAR.sizes; track size) {
+                  <span class="modal-size-pill">{{ size }}</span>
+                }
+              </div>
+            </div>
+            <div class="telemetry-box">
+              <span class="tel-label">Inversión</span>
+              <p class="tel-price">€ {{ selectedProductForAR.price | number:'1.0-0' }}</p>
+            </div>
+
+            <div class="modal-action-row">
+              <button type="button" class="btn-primary-cta" (click)="addToBag(selectedProductForAR); closeArModal()">
+                Añadir a la Bolsa
+              </button>
+              <button type="button" class="btn-secondary-action" (click)="closeArModal()">
+                Cerrar Vestidor
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL DE CITA PRIVADA -->
+  @if (isSessionModalOpen) {
+    <div class="modal-backdrop" (click)="closeSessionModal()">
+      <div class="ar-modal-box session-modal" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <div class="modal-title-group">
+            <span class="modal-pretitle">ASESORÍA PRIVADA</span>
+            <h3 class="modal-title">Agendar Cita con Estilista 3D</h3>
+          </div>
+          <button type="button" class="modal-close-btn" (click)="closeSessionModal()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </header>
+
+        <div class="modal-body session-body">
+          @if (!sessionConfirmed) {
+            <p class="session-instruction">
+              Recibe asesoría personalizada de drapeado textil, silueta y armonización cromática con nuestro equipo de estilismo digital.
+            </p>
+            <div class="form-group">
+              <label>Fecha sugerida</label>
+              <input type="date" value="2025-10-20" class="minimal-input" />
+            </div>
+            <div class="form-group">
+              <label>Tipo de sesión</label>
+              <select class="minimal-input">
+                <option>Ajuste de Sastrería &amp; Abrigos AR</option>
+                <option>Colección Alta Costura y Eventos</option>
+                <option>Calibración Biométrica Completa</option>
+              </select>
+            </div>
+            <button type="button" class="btn-primary-cta w-full" (click)="confirmSession()">
+              Confirmar Cita Privada
+            </button>
+          } @else {
+            <div class="confirmation-box">
+              <span class="material-symbols-outlined success-icon">check_circle</span>
+              <h4>Cita confirmada con éxito</h4>
+              <p>Tu estilista asignado se contactará contigo para iniciar el enlace AR.</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

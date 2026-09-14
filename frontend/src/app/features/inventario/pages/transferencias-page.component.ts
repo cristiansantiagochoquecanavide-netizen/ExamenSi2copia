@@ -525,7 +525,7 @@ interface LineaTransferenciaForm {
       padding: 2.5rem 3rem;
       max-width: 1400px;
       margin: 0 auto;
-      color: #ffffff;
+      color: #111111;
     }
 
     .editorial-hero {
@@ -539,13 +539,13 @@ interface LineaTransferenciaForm {
       font-size: 0.75rem;
       font-weight: 700;
       letter-spacing: 0.2em;
-      color: #d4af37;
+      color: #4b5563;
       text-transform: uppercase;
       margin-bottom: 0.5rem;
     }
 
     .gold-dot {
-      color: #d4af37;
+      color: #000000;
     }
 
     .hero-main-row {
@@ -557,39 +557,41 @@ interface LineaTransferenciaForm {
     }
 
     .hero-title {
-      font-family: 'Bodoni Moda', 'Playfair Display', serif;
-      font-size: 2.4rem;
-      font-weight: 600;
-      letter-spacing: 0.02em;
+      font-family: 'Inter', sans-serif;
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
       margin: 0 0 0.5rem 0;
-      color: #ffffff;
+      color: #000000;
     }
 
     .hero-description {
+      font-family: 'Inter', sans-serif;
       font-size: 0.95rem;
-      color: #9e9e9e;
+      color: #4b5563;
       line-height: 1.6;
       max-width: 800px;
       margin: 0;
     }
 
     .btn-gold {
-      background: #d4af37;
-      color: #000000;
+      background: #000000;
+      color: #ffffff;
       font-size: 0.8rem;
       font-weight: 700;
       letter-spacing: 0.12em;
       text-transform: uppercase;
       padding: 0.9rem 1.8rem;
-      border: 1px solid #d4af37;
+      border: 1px solid #000000;
       cursor: pointer;
       transition: all 0.2s ease;
       white-space: nowrap;
+      border-radius: 0;
     }
 
     .btn-gold:hover {
-      background: #f0c742;
-      border-color: #f0c742;
+      background: #262626;
+      border-color: #262626;
       transform: translateY(-1px);
     }
 
@@ -602,42 +604,44 @@ interface LineaTransferenciaForm {
     }
 
     .kpi-card {
-      background: #0c0c0c;
-      border: 1px solid #1f1f1f;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 1.25rem;
       display: flex;
       flex-direction: column;
+      border-radius: 0;
     }
 
     .kpi-label {
       font-size: 0.7rem;
       font-weight: 700;
       letter-spacing: 0.15em;
-      color: #7a7a7a;
+      color: #4b5563;
       text-transform: uppercase;
       margin-bottom: 0.4rem;
     }
 
     .kpi-value {
-      font-family: 'Bodoni Moda', serif;
+      font-family: 'Inter', sans-serif;
       font-size: 2rem;
-      font-weight: 600;
-      color: #d4af37;
+      font-weight: 800;
+      color: #000000;
       line-height: 1.1;
       margin-bottom: 0.25rem;
     }
 
     .kpi-sub {
       font-size: 0.75rem;
-      color: #555555;
+      color: #6b7280;
+      font-weight: 500;
     }
 
     .highlight-amber .kpi-value {
-      color: #ffaa33;
+      color: #d97706;
     }
 
     .highlight-green .kpi-value {
-      color: #44dd88;
+      color: #16a34a;
     }
 
     /* Filters row */
@@ -646,7 +650,7 @@ interface LineaTransferenciaForm {
       justify-content: space-between;
       align-items: center;
       gap: 1.5rem;
-      border-bottom: 1px solid #1f1f1f;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       padding-bottom: 1rem;
     }
 
@@ -658,22 +662,23 @@ interface LineaTransferenciaForm {
     .filter-tab-btn {
       background: transparent;
       border: none;
-      color: #7a7a7a;
+      color: #4b5563;
       font-size: 0.78rem;
       font-weight: 700;
       letter-spacing: 0.1em;
       padding: 0.5rem 1rem;
       cursor: pointer;
       transition: all 0.2s;
+      border-radius: 0;
     }
 
     .filter-tab-btn:hover {
-      color: #ffffff;
+      color: #000000;
     }
 
     .filter-tab-btn.active {
-      color: #d4af37;
-      border-bottom: 2px solid #d4af37;
+      color: #000000;
+      border-bottom: 2px solid #000000;
     }
 
     .filter-select-group {
@@ -686,22 +691,31 @@ interface LineaTransferenciaForm {
       font-size: 0.7rem;
       font-weight: 700;
       letter-spacing: 0.1em;
-      color: #7a7a7a;
+      color: #4b5563;
+      text-transform: uppercase;
     }
 
     .filter-select {
-      background: #0c0c0c;
-      border: 1px solid #2a2a2a;
-      color: #ffffff;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
       padding: 0.45rem 0.85rem;
       font-size: 0.8rem;
+      border-radius: 0;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .filter-select:focus {
+      border-color: #000000;
     }
 
     /* Table Panel */
     .panel-card {
-      background: #080808;
-      border: 1px solid #1a1a1a;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 2rem;
+      border-radius: 0;
     }
 
     .panel-header {
@@ -709,16 +723,16 @@ interface LineaTransferenciaForm {
     }
 
     .panel-title {
-      font-family: 'Bodoni Moda', serif;
-      font-size: 1.4rem;
-      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 700;
       margin: 0 0 0.25rem 0;
-      color: #ffffff;
+      color: #000000;
     }
 
     .panel-hint {
       font-size: 0.82rem;
-      color: #7a7a7a;
+      color: #4b5563;
     }
 
     .table-responsive {
@@ -736,34 +750,37 @@ interface LineaTransferenciaForm {
       font-size: 0.7rem;
       font-weight: 700;
       letter-spacing: 0.15em;
-      color: #888888;
+      color: #000000;
       padding: 0.85rem 1rem;
-      border-bottom: 1px solid #222222;
-      background: #0f0f0f;
+      border-bottom: 2px solid rgba(0, 0, 0, 0.12);
+      background: #f9fafb;
+      text-transform: uppercase;
     }
 
     .editorial-table td {
       padding: 1rem;
-      border-bottom: 1px solid #171717;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
       vertical-align: middle;
+      color: #1f2937;
     }
 
     .editorial-table tr:hover td {
-      background: #111111;
+      background: #f9fafb;
     }
 
     .code-badge {
       font-family: monospace;
       font-size: 0.82rem;
       font-weight: 700;
-      color: #d4af37;
-      background: #1a1608;
+      color: #000000;
+      background: #f3f4f6;
       padding: 0.25rem 0.6rem;
-      border: 1px solid #3d320e;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: 0;
     }
 
     .col-date {
-      color: #888888;
+      color: #6b7280;
       font-size: 0.8rem;
     }
 
@@ -771,24 +788,28 @@ interface LineaTransferenciaForm {
       display: inline-block;
       font-size: 0.82rem;
       padding: 0.2rem 0.6rem;
-      background: #141414;
-      border: 1px solid #262626;
-      color: #dcdcdc;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      color: #111111;
+      font-weight: 600;
+      border-radius: 0;
     }
 
     .branch-pill.origin {
-      border-left: 2px solid #ffaa33;
+      border-left: 3px solid #f59e0b;
     }
 
     .branch-pill.dest {
-      border-left: 2px solid #44dd88;
+      border-left: 3px solid #10b981;
     }
 
     .units-badge {
       font-weight: 700;
-      color: #ffffff;
-      background: #1f1f1f;
+      color: #000000;
+      background: #f3f4f6;
+      border: 1px solid rgba(0, 0, 0, 0.12);
       padding: 0.25rem 0.65rem;
+      border-radius: 0;
     }
 
     .status-badge {
@@ -797,24 +818,26 @@ interface LineaTransferenciaForm {
       font-weight: 700;
       letter-spacing: 0.1em;
       padding: 0.3rem 0.75rem;
+      border-radius: 0;
+      text-transform: uppercase;
     }
 
     .badge-amber {
-      background: #2b1f05;
-      color: #ffaa33;
-      border: 1px solid #664408;
+      background: #fffbeb;
+      color: #b45309;
+      border: 1px solid #fde68a;
     }
 
     .badge-green {
-      background: #072614;
-      color: #44dd88;
-      border: 1px solid #0f522b;
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
     }
 
     .badge-red {
-      background: #2b0808;
-      color: #ff5555;
-      border: 1px solid #5a1111;
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
     }
 
     .col-actions {
@@ -824,46 +847,54 @@ interface LineaTransferenciaForm {
     }
 
     .btn-action-view {
-      background: transparent;
-      border: 1px solid #333333;
-      color: #dcdcdc;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
       font-size: 0.72rem;
       font-weight: 700;
       padding: 0.4rem 0.75rem;
       cursor: pointer;
+      border-radius: 0;
+      transition: all 0.2s ease;
     }
 
     .btn-action-view:hover {
-      border-color: #d4af37;
-      color: #d4af37;
+      border-color: #000000;
+      background: #000000;
+      color: #ffffff;
     }
 
     .btn-action-receive {
-      background: #0f522b;
-      border: 1px solid #1aa355;
+      background: #16a34a;
+      border: 1px solid #16a34a;
       color: #ffffff;
       font-size: 0.72rem;
       font-weight: 700;
       padding: 0.4rem 0.75rem;
       cursor: pointer;
+      border-radius: 0;
+      transition: all 0.2s ease;
     }
 
     .btn-action-receive:hover {
-      background: #1aa355;
+      background: #15803d;
+      border-color: #15803d;
     }
 
     .btn-action-cancel {
-      background: transparent;
-      border: 1px solid #5a1111;
-      color: #ff6666;
+      background: #ffffff;
+      border: 1px solid #dc2626;
+      color: #dc2626;
       font-size: 0.72rem;
       font-weight: 700;
       padding: 0.4rem 0.75rem;
       cursor: pointer;
+      border-radius: 0;
+      transition: all 0.2s ease;
     }
 
     .btn-action-cancel:hover {
-      background: #5a1111;
+      background: #dc2626;
       color: #ffffff;
     }
 
@@ -874,7 +905,7 @@ interface LineaTransferenciaForm {
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0, 0, 0, 0.5);
       backdrop-filter: blur(4px);
       z-index: 1000;
       display: flex;
@@ -884,28 +915,30 @@ interface LineaTransferenciaForm {
     }
 
     .modal-dialog-large {
-      background: #0a0a0a;
-      border: 1px solid #2d2d2d;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
       width: 100%;
       max-width: 950px;
       max-height: 90vh;
       overflow-y: auto;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2);
+      border-radius: 0;
     }
 
     .modal-dialog {
-      background: #0a0a0a;
-      border: 1px solid #2d2d2d;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
       width: 100%;
       max-width: 650px;
       max-height: 90vh;
       overflow-y: auto;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2);
+      border-radius: 0;
     }
 
     .modal-header {
       padding: 1.5rem 2rem;
-      border-bottom: 1px solid #1f1f1f;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
@@ -915,24 +948,29 @@ interface LineaTransferenciaForm {
       font-size: 0.7rem;
       font-weight: 700;
       letter-spacing: 0.15em;
-      color: #d4af37;
+      color: #4b5563;
       text-transform: uppercase;
     }
 
     .modal-title {
-      font-family: 'Bodoni Moda', serif;
-      font-size: 1.5rem;
-      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
       margin: 0.25rem 0 0 0;
-      color: #ffffff;
+      color: #000000;
     }
 
     .btn-close {
       background: transparent;
       border: none;
-      color: #888888;
+      color: #6b7280;
       font-size: 1.5rem;
       cursor: pointer;
+      transition: color 0.2s ease;
+    }
+
+    .btn-close:hover {
+      color: #000000;
     }
 
     .modal-body {
@@ -955,27 +993,29 @@ interface LineaTransferenciaForm {
       font-size: 0.7rem;
       font-weight: 700;
       letter-spacing: 0.12em;
-      color: #aaaaaa;
+      color: #374151;
       margin-bottom: 0.4rem;
+      text-transform: uppercase;
     }
 
     .form-input {
-      background: #111111;
-      border: 1px solid #2a2a2a;
-      color: #ffffff;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
       padding: 0.75rem 1rem;
       font-size: 0.85rem;
       outline: none;
+      border-radius: 0;
       transition: border-color 0.2s;
     }
 
     .form-input:focus {
-      border-color: #d4af37;
+      border-color: #000000;
     }
 
     .input-hint {
       font-size: 0.72rem;
-      color: #666666;
+      color: #6b7280;
       margin-top: 0.35rem;
     }
 
@@ -989,16 +1029,18 @@ interface LineaTransferenciaForm {
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      background: #111111;
-      border: 1px solid #222222;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.15);
       padding: 0.75rem 1rem;
       cursor: pointer;
       transition: all 0.2s;
+      border-radius: 0;
     }
 
     .radio-card.selected {
-      border-color: #d4af37;
-      background: #19160a;
+      border-color: #000000;
+      background: #ffffff;
+      box-shadow: 0 0 0 1px #000000;
     }
 
     .radio-title {
@@ -1006,21 +1048,22 @@ interface LineaTransferenciaForm {
       font-size: 0.75rem;
       font-weight: 700;
       letter-spacing: 0.1em;
-      color: #ffffff;
+      color: #000000;
     }
 
     .radio-sub {
       display: block;
       font-size: 0.7rem;
-      color: #888888;
+      color: #4b5563;
     }
 
     /* Transfer Lines Section */
     .transfer-lines-section {
-      background: #0f0f0f;
-      border: 1px solid #222222;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 1.5rem;
       margin-top: 1.5rem;
+      border-radius: 0;
     }
 
     .lines-header {
@@ -1031,29 +1074,41 @@ interface LineaTransferenciaForm {
     }
 
     .lines-title {
-      font-family: 'Bodoni Moda', serif;
+      font-family: 'Inter', sans-serif;
       font-size: 1.15rem;
+      font-weight: 700;
       margin: 0 0 0.2rem 0;
+      color: #000000;
     }
 
     .lines-hint {
       font-size: 0.75rem;
-      color: #777777;
+      color: #4b5563;
     }
 
     .btn-add-line {
-      background: #1f1a09;
-      border: 1px solid #d4af37;
-      color: #d4af37;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.25);
+      color: #000000;
       font-size: 0.72rem;
       font-weight: 700;
       letter-spacing: 0.1em;
       padding: 0.5rem 1rem;
       cursor: pointer;
+      border-radius: 0;
+      transition: all 0.2s ease;
+    }
+
+    .btn-add-line:hover {
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
     }
 
     .nested-table th {
-      background: #141414;
+      background: #f3f4f6;
+      color: #000000;
+      font-weight: 700;
     }
 
     .stock-avail-badge {
@@ -1061,27 +1116,28 @@ interface LineaTransferenciaForm {
       font-size: 0.75rem;
       font-weight: 700;
       padding: 0.25rem 0.6rem;
-      background: #0f2b17;
-      color: #66e099;
-      border: 1px solid #1d572f;
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+      border-radius: 0;
     }
 
     .stock-avail-badge.low {
-      background: #332007;
-      color: #ffaa33;
-      border-color: #66400e;
+      background: #fffbeb;
+      color: #b45309;
+      border-color: #fde68a;
     }
 
     .stock-avail-badge.zero {
-      background: #330808;
-      color: #ff6666;
-      border-color: #661111;
+      background: #fef2f2;
+      color: #991b1b;
+      border-color: #fecaca;
     }
 
     .btn-remove-line {
       background: transparent;
       border: none;
-      color: #ff5555;
+      color: #dc2626;
       font-size: 1.25rem;
       cursor: pointer;
     }
@@ -1092,7 +1148,7 @@ interface LineaTransferenciaForm {
       align-items: center;
       gap: 1.25rem;
       padding-top: 1rem;
-      border-top: 1px solid #222222;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
       margin-top: 1rem;
     }
 
@@ -1100,14 +1156,15 @@ interface LineaTransferenciaForm {
       font-size: 0.75rem;
       font-weight: 700;
       letter-spacing: 0.12em;
-      color: #999999;
+      color: #4b5563;
+      text-transform: uppercase;
     }
 
     .total-value {
-      font-family: 'Bodoni Moda', serif;
+      font-family: 'Inter', sans-serif;
       font-size: 1.3rem;
-      font-weight: 600;
-      color: #d4af37;
+      font-weight: 800;
+      color: #000000;
     }
 
     .modal-actions {
@@ -1115,29 +1172,43 @@ interface LineaTransferenciaForm {
       justify-content: flex-end;
       gap: 1rem;
       padding: 1.5rem 2rem;
-      border-top: 1px solid #1f1f1f;
-      background: #080808;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      background: #f9fafb;
     }
 
     .btn-cancel {
-      background: transparent;
-      border: 1px solid #333333;
-      color: #aaaaaa;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #374151;
       font-size: 0.78rem;
       font-weight: 700;
       padding: 0.75rem 1.5rem;
       cursor: pointer;
+      border-radius: 0;
+      transition: all 0.2s ease;
+    }
+
+    .btn-cancel:hover {
+      background: #f3f4f6;
+      color: #000000;
     }
 
     .btn-submit {
-      background: #d4af37;
-      border: 1px solid #d4af37;
-      color: #000000;
+      background: #000000;
+      border: 1px solid #000000;
+      color: #ffffff;
       font-size: 0.78rem;
       font-weight: 700;
       letter-spacing: 0.1em;
       padding: 0.75rem 1.75rem;
       cursor: pointer;
+      border-radius: 0;
+      transition: all 0.2s ease;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: #262626;
+      border-color: #262626;
     }
 
     .btn-submit:disabled {
@@ -1154,9 +1225,10 @@ interface LineaTransferenciaForm {
     }
 
     .sum-box {
-      background: #111111;
-      border: 1px solid #222222;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 1rem;
+      border-radius: 0;
     }
 
     .sum-label {
@@ -1164,29 +1236,33 @@ interface LineaTransferenciaForm {
       font-size: 0.68rem;
       font-weight: 700;
       letter-spacing: 0.12em;
-      color: #777777;
+      color: #4b5563;
       margin-bottom: 0.35rem;
+      text-transform: uppercase;
     }
 
     .sum-val {
       font-size: 0.95rem;
-      font-weight: 500;
+      font-weight: 700;
+      color: #000000;
     }
 
     .gold-val {
-      font-family: 'Bodoni Moda', serif;
+      font-family: 'Inter', sans-serif;
       font-size: 1.2rem;
-      color: #d4af37;
+      color: #000000;
+      font-weight: 800;
     }
 
     .timeline-box {
-      background: #0e0e0e;
-      border: 1px solid #1f1f1f;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 1.25rem;
       margin-bottom: 1.5rem;
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
+      border-radius: 0;
     }
 
     .timeline-step {
@@ -1199,39 +1275,46 @@ interface LineaTransferenciaForm {
       width: 10px;
       height: 10px;
       border-radius: 50%;
-      background: #d4af37;
+      background: #000000;
       margin-top: 5px;
       flex-shrink: 0;
     }
 
     .timeline-step.pending .step-dot {
-      background: #555555;
+      background: #9ca3af;
     }
 
     .step-info {
       font-size: 0.85rem;
+      color: #000000;
+      font-weight: 600;
     }
 
     .step-sub {
       display: block;
       font-size: 0.75rem;
-      color: #777777;
+      color: #6b7280;
       margin-top: 0.2rem;
+      font-weight: normal;
     }
 
     .obs-box {
-      background: #111111;
-      border-left: 2px solid #d4af37;
+      background: #f9fafb;
+      border-left: 3px solid #000000;
       padding: 0.75rem 1rem;
       font-size: 0.82rem;
-      color: #cccccc;
+      color: #374151;
       margin-bottom: 1.5rem;
     }
 
     .items-title {
-      font-family: 'Bodoni Moda', serif;
+      font-family: 'Inter', sans-serif;
       font-size: 1.1rem;
+      font-weight: 700;
       margin: 1.5rem 0 0.75rem 0;
+      color: #000000;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     .items-mini-list {
@@ -1246,20 +1329,23 @@ interface LineaTransferenciaForm {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #121212;
-      border: 1px solid #202020;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 0.75rem 1rem;
+      border-radius: 0;
     }
 
     .item-prenda-name {
-      font-weight: 600;
+      font-weight: 700;
       font-size: 0.88rem;
+      color: #000000;
     }
 
     .item-meta {
       font-size: 0.75rem;
-      color: #7a7a7a;
+      color: #6b7280;
       margin-top: 0.15rem;
+      font-family: monospace;
     }
 
     .item-units-side {
@@ -1269,32 +1355,34 @@ interface LineaTransferenciaForm {
     }
 
     .item-units-val {
-      font-family: 'Bodoni Moda', serif;
+      font-family: 'Inter', sans-serif;
       font-size: 1.2rem;
-      font-weight: 600;
-      color: #d4af37;
+      font-weight: 800;
+      color: #000000;
     }
 
     .item-units-lbl {
       font-size: 0.7rem;
-      color: #888888;
+      color: #6b7280;
+      font-weight: 600;
     }
 
     .feedback-banner {
-      background: #072614;
-      border: 1px solid #1aa355;
-      color: #7affb0;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
       padding: 0.85rem 1.25rem;
       margin-bottom: 1.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      font-weight: 600;
     }
 
     .feedback-banner.error {
-      background: #2b0808;
-      border-color: #aa1111;
-      color: #ff7a7a;
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #991b1b;
     }
 
     .btn-close-banner {
@@ -1311,15 +1399,16 @@ interface LineaTransferenciaForm {
       gap: 0.75rem;
       padding: 1.5rem;
       font-size: 0.8rem;
-      color: #d4af37;
+      color: #000000;
       letter-spacing: 0.1em;
+      font-weight: 600;
     }
 
     .spinner {
       width: 16px;
       height: 16px;
-      border: 2px solid #333333;
-      border-top-color: #d4af37;
+      border: 2px solid rgba(0, 0, 0, 0.15);
+      border-top-color: #000000;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
@@ -1331,13 +1420,13 @@ interface LineaTransferenciaForm {
     .empty-state {
       text-align: center;
       padding: 3rem 1rem;
-      color: #666666;
+      color: #6b7280;
     }
 
     .text-center { text-align: center; }
     .text-right { text-align: right; }
-    .text-amber { color: #ffaa33; }
-    .text-red { color: #ff5555; }
+    .text-amber { color: #d97706; }
+    .text-red { color: #dc2626; }
     .mt-2 { margin-top: 0.5rem; }
   `]
 })

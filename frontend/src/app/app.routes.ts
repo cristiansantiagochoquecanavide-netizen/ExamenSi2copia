@@ -35,6 +35,10 @@ export const routes: Routes = [
     loadChildren: () => import('./features/ia-asistente/ia-asistente.routes').then(m => m.IA_ASISTENTE_ROUTES)
   },
   {
+    path: 'landing',
+    loadComponent: () => import('./landing-page/landing-page.component').then(m => m.LandingPageComponent)
+  },
+  {
     path: '**',
     redirectTo: 'catalogo'
   }

@@ -20,7 +20,7 @@ class UsuariosScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Perfil de cliente, credenciales JWT, gestion de sesiones',
+              'Perfil de cliente, credenciales JWT, gestión de sesiones',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppTheme.mutedColor,
                   ),
@@ -29,16 +29,25 @@ class UsuariosScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppTheme.surfaceColor,
-                border: Border.all(color: AppTheme.borderColor),
+                color: AppTheme.surfaceContainer,
+                border: Border.all(color: const Color(0xFFE5E7EB)),
                 borderRadius: BorderRadius.zero,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('MODULO MOVIL LISTO', style: Theme.of(context).textTheme.labelSmall),
+                  Text(
+                    'MÓDULO MÓVIL LISTO',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1.2,
+                        ),
+                  ),
                   const SizedBox(height: 8),
-                  const Text('Arquitectura Feature-Driven enlazada al Backend FastAPI.'),
+                  Text(
+                    'Arquitectura Feature-Driven enlazada al Backend FastAPI.',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
                 ],
               ),
             ),

@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InventarioService } from '../services/inventario.service';
@@ -249,11 +249,13 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
       max-width: 1400px;
       margin: 0 auto;
       padding-bottom: 4rem;
+      background-color: #ffffff;
+      color: #111111;
     }
 
     .header-section {
       padding: 1.5rem 0 2rem 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       margin-bottom: 2rem;
     }
 
@@ -263,25 +265,29 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
       gap: 0.5rem;
       font-size: 0.75rem;
       letter-spacing: 0.2em;
-      color: var(--color-gold);
+      color: #374151;
+      font-weight: 700;
       margin-bottom: 0.5rem;
+      text-transform: uppercase;
     }
 
     .gold-dot {
-      color: var(--color-gold);
+      color: #000000;
       font-size: 1.2rem;
     }
 
     .page-title {
-      font-family: var(--font-serif);
-      font-size: 3rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 2.75rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
       text-transform: uppercase;
-      color: var(--color-primary);
+      color: #000000;
       margin-bottom: 0.5rem;
     }
 
     .subtitle {
-      color: var(--color-on-surface-muted);
+      color: #4b5563;
       font-size: 0.95rem;
     }
 
@@ -300,63 +306,76 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
     }
 
     .tab-btn {
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #aaaaaa;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.18);
+      color: #4b5563;
       padding: 0.65rem 1.4rem;
       font-size: 0.75rem;
+      font-weight: 600;
       letter-spacing: 0.12em;
       cursor: pointer;
       transition: all 0.2s ease;
+      border-radius: 0;
+    }
+
+    .tab-btn:hover {
+      background: #f3f4f6;
+      color: #000000;
+      border-color: #000000;
     }
 
     .tab-btn.active {
-      background: var(--color-gold);
-      border-color: var(--color-gold);
-      color: #000000;
+      background: #000000;
+      border-color: #000000;
+      color: #ffffff;
       font-weight: 700;
     }
 
     .btn-action-gold {
-      background: #ffffff;
-      color: #000000;
-      border: none;
+      background: #000000;
+      color: #ffffff;
+      border: 1px solid #000000;
       padding: 0.75rem 1.5rem;
       font-size: 0.75rem;
       font-weight: 700;
       letter-spacing: 0.15em;
+      text-transform: uppercase;
       cursor: pointer;
+      border-radius: 0;
       transition: all 0.2s ease;
     }
 
     .btn-action-gold:hover {
-      background: var(--color-gold);
+      background: #262626;
     }
 
     .alert-success {
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid #10b981;
-      color: #34d399;
+      background: #ecfdf5;
+      border: 1px solid #059669;
+      color: #065f46;
       padding: 0.8rem 1.2rem;
       margin-bottom: 1.5rem;
       font-size: 0.85rem;
+      font-weight: 500;
     }
 
     .alert-error {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid #ef4444;
-      color: #f87171;
+      background: #fef2f2;
+      border: 1px solid #dc2626;
+      color: #991b1b;
       padding: 0.8rem 1.2rem;
       margin-bottom: 1.5rem;
       font-size: 0.85rem;
+      font-weight: 500;
     }
 
     .loading-box {
       text-align: center;
       padding: 4rem;
-      color: var(--color-gold);
+      color: #4b5563;
       letter-spacing: 0.15em;
       font-size: 0.85rem;
+      font-weight: 600;
     }
 
     .branches-grid {
@@ -366,17 +385,19 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
     }
 
     .branch-card {
-      background: #111111;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 1.75rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       transition: border-color 0.2s ease;
+      box-shadow: none;
+      border-radius: 0;
     }
 
     .branch-card:hover {
-      border-color: var(--color-gold);
+      border-color: rgba(0, 0, 0, 0.3);
     }
 
     .branch-card-header {
@@ -389,48 +410,53 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
     .city-tag {
       font-size: 0.65rem;
       letter-spacing: 0.15em;
-      color: var(--color-gold);
+      color: #374151;
       text-transform: uppercase;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .branch-name {
-      font-family: var(--font-serif);
-      font-size: 1.5rem;
-      color: #ffffff;
+      font-family: 'Inter', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #000000;
       margin-top: 2px;
     }
 
     .status-indicator {
-      font-size: 0.6rem;
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid #10b981;
-      color: #10b981;
+      font-size: 0.62rem;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
       font-weight: 700;
-      padding: 2px 6px;
+      padding: 2px 7px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border-radius: 0;
     }
 
     .status-indicator.inactive {
-      background: rgba(239, 68, 68, 0.15);
-      border-color: #ef4444;
-      color: #ef4444;
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #991b1b;
     }
 
     .branch-address {
       font-size: 0.85rem;
-      color: #aaaaaa;
+      color: #4b5563;
       margin-bottom: 1.25rem;
       line-height: 1.4;
     }
 
     .branch-specs-box {
-      background: #090909;
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.08);
       padding: 1rem;
       margin-bottom: 1.25rem;
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
+      border-radius: 0;
     }
 
     .spec-row {
@@ -440,39 +466,46 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
     }
 
     .spec-label {
-      color: var(--color-on-surface-muted);
+      color: #6b7280;
       letter-spacing: 0.08em;
+      font-weight: 600;
+      text-transform: uppercase;
     }
 
     .spec-val {
-      color: #ffffff;
-      font-weight: 500;
+      color: #111111;
+      font-weight: 700;
     }
 
     .spec-val.gold {
-      color: var(--color-gold);
+      color: #000000;
+      font-weight: 700;
     }
 
     .card-footer {
       padding-top: 1rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
     }
 
     .btn-edit-branch {
       width: 100%;
-      background: transparent;
-      border: 1px solid var(--color-gold);
-      color: var(--color-gold);
-      padding: 0.6rem;
-      font-size: 0.7rem;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.25);
+      color: #000000;
+      padding: 0.65rem;
+      font-size: 0.72rem;
       letter-spacing: 0.15em;
-      font-weight: 600;
+      font-weight: 700;
+      text-transform: uppercase;
       cursor: pointer;
+      border-radius: 0;
+      transition: all 0.2s ease;
     }
 
     .btn-edit-branch:hover {
-      background: var(--color-gold);
-      color: #000000;
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
     }
 
     /* Cities Grid */
@@ -483,40 +516,46 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
     }
 
     .city-card {
-      background: #111111;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 1.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      border-radius: 0;
     }
 
     .city-code {
       font-size: 0.7rem;
       font-family: monospace;
-      color: var(--color-gold);
+      color: #6b7280;
+      font-weight: 700;
       display: block;
     }
 
     .city-name {
-      font-family: var(--font-serif);
-      font-size: 1.3rem;
-      color: #ffffff;
+      font-family: 'Inter', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #000000;
     }
 
     .status-pill {
       font-size: 0.65rem;
-      color: #34d399;
-      border: 1px solid #10b981;
-      padding: 2px 6px;
+      color: #166534;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      padding: 2px 7px;
+      font-weight: 700;
+      border-radius: 0;
     }
 
     /* Modals */
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.88);
-      backdrop-filter: blur(8px);
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
       z-index: 1000;
       display: flex;
       align-items: center;
@@ -525,13 +564,15 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
     }
 
     .modal-container {
-      background: #111111;
-      border: 1px solid var(--color-gold);
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
       max-width: 750px;
       width: 100%;
       max-height: 90vh;
       display: flex;
       flex-direction: column;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+      border-radius: 0;
     }
 
     .modal-container.sm {
@@ -540,7 +581,7 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
 
     .modal-header {
       padding: 1.5rem 2rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
@@ -549,21 +590,28 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
     .modal-eyebrow {
       font-size: 0.65rem;
       letter-spacing: 0.2em;
-      color: var(--color-gold);
+      color: #4b5563;
+      font-weight: 700;
+      text-transform: uppercase;
     }
 
     .modal-title {
-      font-family: var(--font-serif);
-      font-size: 2rem;
-      color: #ffffff;
+      font-family: 'Inter', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #000000;
     }
 
     .btn-close {
       background: transparent;
       border: none;
-      color: #888888;
+      color: #6b7280;
       font-size: 2rem;
       cursor: pointer;
+    }
+
+    .btn-close:hover {
+      color: #000000;
     }
 
     .modal-form {
@@ -594,55 +642,68 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
     }
 
     .form-label {
-      font-size: 0.7rem;
+      font-size: 0.72rem;
       letter-spacing: 0.12em;
-      color: var(--color-on-surface-muted);
+      color: #374151;
+      font-weight: 600;
+      text-transform: uppercase;
     }
 
     .form-input {
-      background: #0d0d0d;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #ffffff;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #111111;
       padding: 0.75rem 1rem;
       font-size: 0.85rem;
+      border-radius: 0;
     }
 
     .form-input:focus {
       outline: none;
-      border-color: var(--color-gold);
+      border-color: #000000;
+      box-shadow: 0 0 0 1px #000000;
     }
 
     .modal-footer {
       padding: 1.25rem 2rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
       display: flex;
       justify-content: flex-end;
       gap: 1rem;
     }
 
     .btn-cancel {
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #ffffff;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.25);
+      color: #374151;
       padding: 0.75rem 1.5rem;
       font-size: 0.75rem;
+      font-weight: 600;
       letter-spacing: 0.15em;
       cursor: pointer;
+      border-radius: 0;
+    }
+
+    .btn-cancel:hover {
+      background: #f3f4f6;
+      color: #000000;
     }
 
     .btn-save {
-      background: #ffffff;
-      color: #000000;
-      border: none;
+      background: #000000;
+      color: #ffffff;
+      border: 1px solid #000000;
       padding: 0.75rem 2rem;
       font-size: 0.75rem;
       font-weight: 700;
       letter-spacing: 0.15em;
       cursor: pointer;
+      border-radius: 0;
+      text-transform: uppercase;
     }
 
     .btn-save:hover:not(:disabled) {
-      background: var(--color-gold);
+      background: #262626;
     }
   `]
 })

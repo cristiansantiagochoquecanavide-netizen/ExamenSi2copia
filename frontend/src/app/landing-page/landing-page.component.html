@@ -1,0 +1,360 @@
+<div class="storefront-container landing-container">
+  <!-- Top Navigation Bar (Shared Minimalist Header) -->
+  <header class="top-nav">
+    <div class="nav-content">
+      <a routerLink="/landing" class="brand-logo">
+        FASHIONSTORE
+      </a>
+
+      <nav class="nav-menu" [class.open]="mobileMenuOpen">
+        <a routerLink="/catalogo" class="nav-item">Colección</a>
+        <a routerLink="/landing" class="nav-item active">Vestidor AR</a>
+        <a routerLink="/catalogo" class="nav-item">Novedades</a>
+        <a (click)="openSessionModal()" class="nav-item cursor-pointer">Acerca</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button type="button" class="icon-btn" aria-label="Buscar" (click)="explorarTienda()">
+          <span class="material-symbols-outlined">search</span>
+        </button>
+        <button type="button" class="icon-btn" aria-label="Cuenta" routerLink="/login">
+          <span class="material-symbols-outlined">person</span>
+        </button>
+        <button type="button" class="icon-btn bag-btn" aria-label="Bolsa de compra" routerLink="/catalogo">
+          <span class="material-symbols-outlined">shopping_bag</span>
+          <span class="bag-dot"></span>
+        </button>
+        <button type="button" class="mobile-toggle-btn" aria-label="Menú" (click)="toggleMobileMenu()">
+          <span class="material-symbols-outlined">{{ mobileMenuOpen ? 'close' : 'menu' }}</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO SECTION -->
+    <section class="hero-section">
+      <div class="hero-wrapper">
+        <div class="hero-grid">
+          <!-- Text Narrative Column -->
+          <div class="hero-narrative">
+            <div class="tech-badge">
+              <span class="pulse-indicator"></span>
+              <span class="tech-badge-label">SARTORIAL TECH STUDIO &bull; 2025</span>
+            </div>
+
+            <div class="title-block">
+              <h1 class="main-title">
+                Vestidores de <span class="bold-line">Realidad Aumentada</span>
+              </h1>
+              <p class="main-description">
+                Experimenta la caída orgánica de la seda, el peso de la lana virgen y una simulación milimétrica de cada prenda sobre tu propia silueta antes de concebir tu orden.
+              </p>
+            </div>
+
+            <!-- Action Cluster -->
+            <div class="action-cluster">
+              <a (click)="explorarTienda()" class="btn-primary-cta" role="button">
+                Explorar tienda
+              </a>
+              <button type="button" class="btn-secondary-action" (click)="openArModal()">
+                <span>Lanzar Escáner 3D</span>
+                <span class="material-symbols-outlined">arrow_forward</span>
+              </button>
+            </div>
+
+            <!-- Spec Micro Indicators -->
+            <div class="micro-indicators">
+              <div class="indicator-item">
+                <p class="indicator-val">0.2<span class="unit">mm</span></p>
+                <p class="indicator-label">Tolerancia Textil</p>
+              </div>
+              <div class="indicator-item">
+                <p class="indicator-val">60<span class="unit">fps</span></p>
+                <p class="indicator-label">Render Cinético</p>
+              </div>
+              <div class="indicator-item">
+                <p class="indicator-val">100%</p>
+                <p class="indicator-label">Alta Fidelidad</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Editorial Imagery Column -->
+          <div class="hero-imagery">
+            <div class="image-frame group">
+              <img
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYol-RVh89k_pIiGjtDbYZnKU1ssCufEXp08ssdCj-Q5w-hiKcQ09SnDzNLRK3HsWx20FT27gy94Gaqqo0BkQx_R52PwoXbvF18KP4YJmCIY1YnOc0odUGboz8BnJAbhJ7xkk3X7EyVIR4Hug472eBiKURodPK4zitOH7Zo8dkY3dVJFLSQXjYLKD5uMpIlaU8Wz2eJoAGgsfHzk9bVKdF0yPOHskqbKQOLxaAkKRmOSZ0D5QVXWJEk5iX4rFXb_1Q8xzU8oS8qrE"
+                alt="Alta Costura Vestidor AR Colección"
+                class="hero-photo"
+              />
+              <!-- Floating Spatial Anchor Badge -->
+              <div class="spatial-badge">
+                <div class="spatial-info">
+                  <div class="spatial-icon-box">
+                    <span class="material-symbols-outlined">view_in_ar</span>
+                  </div>
+                  <div>
+                    <p class="spatial-title">Abrigo Sculptural No. 04</p>
+                    <p class="spatial-sub">Lana cashmere pura &bull; Draping virtual activo</p>
+                  </div>
+                </div>
+                <span class="spatial-status">Activo</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ANATOMÍA DEL VESTIDOR (3-column feature grid) -->
+    <section class="anatomy-section">
+      <div class="section-wrapper">
+        <div class="anatomy-header">
+          <div>
+            <span class="section-pretitle">Ingeniería Digital</span>
+            <h2 class="section-title">
+              La anatomía del <span class="font-medium">vestidor contemporáneo</span>
+            </h2>
+          </div>
+          <p class="anatomy-subtext">
+            Eliminamos la incertidumbre de talla mediante sensores de profundidad y algoritmos de tensión física de fibra.
+          </p>
+        </div>
+
+        <div class="anatomy-grid">
+          <!-- Pillar 1 -->
+          <article class="pillar-card">
+            <div class="pillar-content">
+              <span class="material-symbols-outlined pillar-icon">view_in_ar</span>
+              <span class="pillar-step">01 / Tecnología Láser</span>
+              <h3 class="pillar-heading">Prueba Virtual Instantánea</h3>
+              <p class="pillar-desc">
+                Reflejo cinético en tiempo real. Visualiza cómo responde el tejido ante el movimiento natural de tus pasos, giros y caídas de luz ambiental.
+              </p>
+            </div>
+            <div class="pillar-footer">
+              <span class="pillar-badge">3D Mirror Sync</span>
+            </div>
+          </article>
+
+          <!-- Pillar 2 -->
+          <article class="pillar-card">
+            <div class="pillar-content">
+              <span class="material-symbols-outlined pillar-icon">straighten</span>
+              <span class="pillar-step">02 / Calibración</span>
+              <h3 class="pillar-heading">Precisión Biométrica</h3>
+              <p class="pillar-desc">
+                Mapeo volumétrico milimétrico del torso, hombros y extremidades. Reemplaza las tablas de medidas estandarizadas por un patrón estrictamente personalizado.
+              </p>
+            </div>
+            <div class="pillar-footer">
+              <span class="pillar-badge">Custom Body Map</span>
+            </div>
+          </article>
+
+          <!-- Pillar 3 -->
+          <article class="pillar-card">
+            <div class="pillar-content">
+              <span class="material-symbols-outlined pillar-icon">diamond</span>
+              <span class="pillar-step">03 / Pasarela</span>
+              <h3 class="pillar-heading">Colección Alta Costura</h3>
+              <p class="pillar-desc">
+                Acceso exclusivo a prendas de desfile y ediciones limitadas directamente digitalizadas desde el taller de París para su ensayo en casa.
+              </p>
+            </div>
+            <div class="pillar-footer">
+              <span class="pillar-badge">Runway Archive</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- PIEZAS DISPONIBLES PARA AR (Carrusel Editorial) -->
+    <section class="curated-section" id="piezas-ar">
+      <div class="section-wrapper">
+        <div class="curated-header">
+          <div>
+            <span class="section-pretitle">Pre-Lanzamiento</span>
+            <h2 class="section-title">Piezas Disponibles para AR</h2>
+          </div>
+          <div class="carousel-nav">
+            <button type="button" class="nav-circle-btn" aria-label="Anterior" (click)="prevSlide()">
+              <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <button type="button" class="nav-circle-btn" aria-label="Siguiente" (click)="nextSlide()">
+              <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="curated-grid">
+          @for (piece of visiblePieces; track piece.id) {
+            <article class="ar-card">
+              <div class="ar-card-media">
+                <img [src]="piece.imageUrl" [alt]="piece.name" class="ar-card-img" />
+                <span class="ar-pill">AR READY</span>
+                <button
+                  type="button"
+                  class="wishlist-btn"
+                  [class.active]="piece.wishlist"
+                  (click)="toggleWishlist(piece)"
+                  aria-label="Favorito"
+                >
+                  <span class="material-symbols-outlined">{{ piece.wishlist ? 'favorite' : 'favorite_border' }}</span>
+                </button>
+              </div>
+
+              <div class="ar-card-body">
+                <div class="ar-card-info">
+                  <h3 class="ar-card-title">{{ piece.name }}</h3>
+                  <p class="ar-card-material">{{ piece.material }}</p>
+                </div>
+                <p class="ar-card-price">€ {{ piece.price | number:'1.0-0' }}</p>
+              </div>
+
+              <button type="button" class="ar-try-btn" (click)="openArModal(piece)">
+                <span class="material-symbols-outlined">view_in_ar</span>
+                <span>Probar en AR</span>
+              </button>
+            </article>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- PRIVATE VIP SESSION BANNER -->
+    <section class="vip-invite-section">
+      <div class="section-wrapper">
+        <div class="vip-box">
+          <div class="vip-text">
+            <span class="vip-pretitle">CITA PRIVADA</span>
+            <h3 class="vip-title">¿Deseas una sesión guiada con un estilista virtual?</h3>
+            <p class="vip-desc">Disfruta de asesoramiento de caída y colorimetría en vivo dentro del vestidor AR.</p>
+          </div>
+          <button type="button" class="btn-vip" (click)="openSessionModal()">
+            Reservar Sesión
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- LUXURY FOOTER -->
+  <footer class="store-footer">
+    <div class="footer-wrapper">
+      <div class="footer-brand">
+        <span class="brand-name">FASHIONSTORE</span>
+        <span class="sep">|</span>
+        <p class="copy">&copy; 2025 FashionStore. Experiencia de lujo aumentada.</p>
+      </div>
+
+      <div class="footer-links">
+        <a href="#privacidad">Privacidad</a>
+        <a href="#terminos">Términos y Condiciones</a>
+        <a href="#atencion">Atención al Cliente</a>
+        <a routerLink="/landing" class="active-link">Vestidores AR</a>
+        <a href="#sostenibilidad">Sostenibilidad</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- MODAL DE SIMULACIÓN AR INTERACTIVO -->
+  @if (isArModalOpen && selectedArPiece) {
+    <div class="modal-backdrop" (click)="closeArModal()">
+      <div class="ar-modal-box" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <div class="modal-title-group">
+            <span class="modal-pretitle">SIMULACIÓN VIRTUAL AR &bull; 60 FPS</span>
+            <h3 class="modal-title">{{ selectedArPiece.name }}</h3>
+          </div>
+          <button type="button" class="modal-close-btn" (click)="closeArModal()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </header>
+
+        <div class="modal-body">
+          <div class="modal-ar-preview">
+            <img [src]="selectedArPiece.imageUrl" [alt]="selectedArPiece.name" class="modal-preview-img" />
+            <div class="ar-scanning-line"></div>
+            <div class="ar-telemetry-badge">
+              <span>MALLA BIOMÉTRICA: 99.8% FIT</span>
+            </div>
+          </div>
+
+          <div class="modal-ar-details">
+            <div class="telemetry-box">
+              <span class="tel-label">Composición Textil</span>
+              <p class="tel-val">{{ selectedArPiece.material }}</p>
+            </div>
+            <div class="telemetry-box">
+              <span class="tel-label">Comportamiento Físico</span>
+              <p class="tel-val">{{ selectedArPiece.drapeDetail }}</p>
+            </div>
+            <div class="telemetry-box">
+              <span class="tel-label">Precio Exclusivo</span>
+              <p class="tel-price">€ {{ selectedArPiece.price | number:'1.0-0' }}</p>
+            </div>
+
+            <div class="modal-action-row">
+              <button type="button" class="btn-primary-cta" (click)="explorarTienda()">
+                Ver en Catálogo
+              </button>
+              <button type="button" class="btn-secondary-action" (click)="closeArModal()">
+                Finalizar Prueba
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL DE RESERVA DE CITA PRIVADA -->
+  @if (isSessionModalOpen) {
+    <div class="modal-backdrop" (click)="closeSessionModal()">
+      <div class="ar-modal-box session-modal" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <div class="modal-title-group">
+            <span class="modal-pretitle">ATELIER PRIVADO</span>
+            <h3 class="modal-title">Reserva tu Sesión AR Personalizada</h3>
+          </div>
+          <button type="button" class="modal-close-btn" (click)="closeSessionModal()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </header>
+
+        <div class="modal-body session-body">
+          @if (!sessionConfirmed) {
+            <p class="session-instruction">
+              Un estilista del atelier guiará tu sesión en vivo sincronizando los sensores de caída textil con tu dispositivo.
+            </p>
+            <div class="form-group">
+              <label>Fecha sugerida</label>
+              <input type="date" value="2025-10-15" class="minimal-input" />
+            </div>
+            <div class="form-group">
+              <label>Prenda de interés prioritario</label>
+              <select class="minimal-input">
+                <option>Abrigo Sculptural No. 04</option>
+                <option>Americana Estructurada 'Noir'</option>
+                <option>Vestido Plisado Arquitectura</option>
+                <option>Trench Escultural Modular</option>
+              </select>
+            </div>
+            <button type="button" class="btn-primary-cta w-full" (click)="confirmSession()">
+              Confirmar Cita Privada
+            </button>
+          } @else {
+            <div class="confirmation-box">
+              <span class="material-symbols-outlined success-icon">check_circle</span>
+              <h4>Cita confirmada exitosamente</h4>
+              <p>Te hemos enviado la clave de enlace 3D Mirror Sync a tu correo.</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

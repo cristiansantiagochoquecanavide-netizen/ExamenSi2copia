@@ -1,0 +1,20 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Borde exterior dorado biselado de alta costura -->
+  <polygon points="24,13 76,13 95,40 50,88 5,40" stroke="#c5a880" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round" fill="#ffffff"/>
+  
+  <!-- Contorno negro principal del diamante tallado -->
+  <polygon points="26,16 74,16 92,40 50,84 8,40" stroke="#000000" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+  
+  <!-- Cinturón horizontal (Girdle) -->
+  <line x1="8" y1="40" x2="92" y2="40" stroke="#000000" stroke-width="2.2" stroke-linecap="round"/>
+  
+  <!-- Facetas superiores de la corona (Crown) -->
+  <line x1="26" y1="16" x2="34" y2="40" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+  <line x1="74" y1="16" x2="66" y2="40" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+  <line x1="50" y1="16" x2="34" y2="40" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+  <line x1="50" y1="16" x2="66" y2="40" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Facetas inferiores del pabellón (Pavilion) -->
+  <line x1="50" y1="84" x2="34" y2="40" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+  <line x1="50" y1="84" x2="66" y2="40" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+</svg>

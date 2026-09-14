@@ -21,7 +21,7 @@ class VestidorArScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Camara de Realidad Aumentada para prueba de prendas de alta costura.',
+              'Cámara de Realidad Aumentada para prueba de prendas de alta costura.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppTheme.mutedColor),
               textAlign: TextAlign.center,
             ),

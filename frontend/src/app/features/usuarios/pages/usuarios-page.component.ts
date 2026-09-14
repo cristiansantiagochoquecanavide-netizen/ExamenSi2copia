@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsuariosService } from '../services/usuarios.service';
@@ -359,12 +359,15 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     .usuarios-container {
       max-width: 1400px;
       margin: 0 auto;
-      padding-bottom: 4rem;
+      padding: 2rem 1.5rem 4rem;
+      background-color: #ffffff;
+      color: #111111;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
     .header-section {
-      padding: 1.5rem 0 2rem 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0 0 2rem 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       margin-bottom: 2rem;
     }
 
@@ -373,27 +376,32 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       align-items: center;
       gap: 0.5rem;
       font-size: 0.75rem;
-      letter-spacing: 0.2em;
-      color: var(--color-gold);
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: #374151;
       margin-bottom: 0.5rem;
+      text-transform: uppercase;
     }
 
     .gold-dot {
-      color: var(--color-gold);
-      font-size: 1.2rem;
+      color: #000000;
+      font-size: 1.1rem;
     }
 
     .page-title {
-      font-family: var(--font-serif);
-      font-size: 3rem;
-      text-transform: uppercase;
-      color: var(--color-primary);
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #000000;
       margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
     }
 
     .subtitle {
-      color: var(--color-on-surface-muted);
+      color: #4b5563;
       font-size: 0.95rem;
+      line-height: 1.5;
+      max-width: 700px;
     }
 
     .actions-bar {
@@ -411,25 +419,29 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     }
 
     .chip {
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #aaaaaa;
-      padding: 0.6rem 1.2rem;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.18);
+      color: #4b5563;
+      padding: 0.6rem 1.25rem;
       font-size: 0.75rem;
-      letter-spacing: 0.12em;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      border-radius: 0;
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
-    .chip:hover, .chip.active {
-      border-color: var(--color-gold);
-      color: #ffffff;
+    .chip:hover {
+      color: #000000;
+      border-color: #000000;
+      background: #f9fafb;
     }
 
     .chip.active {
-      background: rgba(212, 175, 55, 0.15);
-      color: var(--color-gold);
-      font-weight: 600;
+      background: #000000;
+      border-color: #000000;
+      color: #ffffff;
+      font-weight: 700;
     }
 
     .header-buttons {
@@ -438,87 +450,100 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     }
 
     .btn-create-personal {
-      background: var(--color-gold);
-      color: #000000;
-      border: none;
-      padding: 0.8rem 1.4rem;
+      background: #000000;
+      color: #ffffff;
+      border: 1px solid #000000;
+      padding: 0.75rem 1.4rem;
       font-size: 0.75rem;
       font-weight: 700;
-      letter-spacing: 0.15em;
+      border-radius: 0;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
     .btn-create-personal:hover {
-      background: #ffffff;
+      background: #262626;
+      border-color: #262626;
     }
 
     .btn-create-cliente {
-      background: transparent;
-      border: 1px solid #ffffff;
-      color: #ffffff;
-      padding: 0.8rem 1.4rem;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.25);
+      color: #000000;
+      padding: 0.75rem 1.4rem;
       font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.15em;
+      font-weight: 700;
+      border-radius: 0;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
     .btn-create-cliente:hover {
-      background: #ffffff;
-      color: #000000;
+      background: #f3f4f6;
+      border-color: #000000;
     }
 
     .alert-success {
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid #10b981;
-      color: #34d399;
+      background: #ecfdf5;
+      border: 1px solid #059669;
+      color: #065f46;
       padding: 0.8rem 1.2rem;
+      border-radius: 0;
       margin-bottom: 1.5rem;
       font-size: 0.85rem;
+      font-weight: 500;
     }
 
     .alert-error {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid #ef4444;
-      color: #f87171;
+      background: #fef2f2;
+      border: 1px solid #dc2626;
+      color: #991b1b;
       padding: 0.8rem 1.2rem;
+      border-radius: 0;
       margin-bottom: 1.5rem;
       font-size: 0.85rem;
+      font-weight: 500;
     }
 
     .loading-box {
       text-align: center;
       padding: 4rem;
-      color: var(--color-gold);
-      letter-spacing: 0.15em;
+      color: #4b5563;
+      letter-spacing: 0.12em;
       font-size: 0.85rem;
+      font-weight: 600;
     }
 
     .users-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
-      gap: 2rem;
+      grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+      gap: 1.5rem;
     }
 
     .user-card {
-      background: #111111;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 1.75rem;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 0;
+      padding: 1.5rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       transition: border-color 0.2s ease;
+      box-shadow: none;
     }
 
     .user-card:hover {
-      border-color: var(--color-gold);
+      border-color: rgba(0, 0, 0, 0.3);
     }
 
     .user-card.blocked {
-      opacity: 0.7;
-      border-left: 3px solid #ef4444;
+      opacity: 0.85;
+      border-left: 4px solid #ef4444;
+      background: #ffffff;
     }
 
     .user-card-header {
@@ -531,14 +556,15 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     .avatar-monogram {
       width: 44px;
       height: 44px;
-      background: #1a1a1a;
-      border: 1px solid var(--color-gold);
-      color: var(--color-gold);
+      border-radius: 0;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      color: #000000;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 700;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
     }
 
     .user-main-info {
@@ -546,71 +572,79 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     }
 
     .user-fullname {
-      font-family: var(--font-serif);
-      font-size: 1.3rem;
-      color: #ffffff;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #000000;
       margin-bottom: 2px;
+      letter-spacing: -0.01em;
     }
 
     .user-email {
-      font-size: 0.75rem;
-      color: #888888;
+      font-size: 0.8rem;
+      color: #6b7280;
       font-family: monospace;
     }
 
     .status-pill {
       font-size: 0.65rem;
       font-weight: 700;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.08em;
       padding: 3px 8px;
+      border-radius: 0;
+      text-transform: uppercase;
     }
 
     .status-pill[data-status="ACTIVO"] {
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid #10b981;
-      color: #10b981;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
     }
 
     .status-pill[data-status="INACTIVO"] {
-      background: rgba(156, 163, 175, 0.15);
-      border: 1px solid #9ca3af;
-      color: #9ca3af;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      color: #4b5563;
     }
 
     .status-pill[data-status="BLOQUEADO"] {
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid #ef4444;
-      color: #ef4444;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
     }
 
     .user-details-strip {
-      background: #090909;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      padding: 1rem;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 0;
+      padding: 1rem 1.25rem;
       margin-bottom: 1.25rem;
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
+      gap: 0.5rem;
     }
 
     .detail-item {
       display: flex;
       justify-content: space-between;
-      font-size: 0.75rem;
+      font-size: 0.8rem;
     }
 
     .detail-lbl {
-      color: var(--color-on-surface-muted);
-      letter-spacing: 0.08em;
+      color: #6b7280;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-size: 0.72rem;
     }
 
     .detail-val {
-      color: #ffffff;
-      font-weight: 500;
+      color: #111111;
+      font-weight: 600;
     }
 
     .detail-val.gold {
-      color: var(--color-gold);
+      color: #000000;
+      font-weight: 700;
     }
 
     .card-footer {
@@ -618,7 +652,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       justify-content: space-between;
       align-items: center;
       padding-top: 1rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
       flex-wrap: wrap;
       gap: 0.75rem;
     }
@@ -630,100 +664,124 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     }
 
     .action-caption {
-      font-size: 0.6rem;
-      letter-spacing: 0.1em;
-      color: #666666;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #6b7280;
+      text-transform: uppercase;
     }
 
     .state-buttons {
       display: flex;
-      gap: 4px;
+      gap: 6px;
     }
 
     .btn-state {
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #888888;
-      font-size: 0.6rem;
-      padding: 2px 6px;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      color: #4b5563;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 0;
       cursor: pointer;
+      transition: all 0.2s;
     }
 
     .btn-state:hover:not(:disabled) {
-      color: #ffffff;
-      border-color: #ffffff;
+      background: #f3f4f6;
+      color: #000000;
+      border-color: #000000;
     }
 
     .btn-state:disabled {
-      opacity: 0.3;
+      opacity: 0.35;
       cursor: not-allowed;
     }
 
     .btn-edit-user {
-      background: transparent;
-      border: 1px solid var(--color-gold);
-      color: var(--color-gold);
-      padding: 0.5rem 1rem;
-      font-size: 0.7rem;
-      letter-spacing: 0.15em;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.25);
+      color: #000000;
+      padding: 0.55rem 1.1rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border-radius: 0;
       cursor: pointer;
+      transition: all 0.2s;
     }
 
     .btn-edit-user:hover {
-      background: var(--color-gold);
-      color: #000000;
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
     }
 
     /* Modal Styling */
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.88);
-      backdrop-filter: blur(8px);
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
       z-index: 1000;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 2rem;
+      padding: 1.5rem;
     }
 
     .modal-container {
-      background: #111111;
-      border: 1px solid var(--color-gold);
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: 0;
       max-width: 750px;
       width: 100%;
       max-height: 90vh;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
     }
 
     .modal-header {
-      padding: 1.5rem 2rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1.25rem 1.75rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
     }
 
     .modal-eyebrow {
-      font-size: 0.65rem;
-      letter-spacing: 0.2em;
-      color: var(--color-gold);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: #374151;
+      text-transform: uppercase;
     }
 
     .modal-title {
-      font-family: var(--font-serif);
-      font-size: 2rem;
-      color: #ffffff;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #000000;
+      margin: 0.25rem 0 0;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
     }
 
     .btn-close {
       background: transparent;
       border: none;
-      color: #888888;
-      font-size: 2rem;
+      color: #6b7280;
+      font-size: 1.8rem;
       cursor: pointer;
+    }
+
+    .btn-close:hover {
+      color: #000000;
     }
 
     .modal-form {
@@ -733,7 +791,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     }
 
     .modal-body {
-      padding: 2rem;
+      padding: 1.75rem;
       overflow-y: auto;
     }
 
@@ -754,55 +812,72 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     }
 
     .form-label {
-      font-size: 0.7rem;
-      letter-spacing: 0.12em;
-      color: var(--color-on-surface-muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #374151;
+      text-transform: uppercase;
     }
 
     .form-input {
-      background: #0d0d0d;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #ffffff;
-      padding: 0.75rem 1rem;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      border-radius: 0;
+      color: #111111;
+      padding: 0.65rem 0.85rem;
       font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
     }
 
     .form-input:focus {
-      outline: none;
-      border-color: var(--color-gold);
+      border-color: #000000;
     }
 
     .modal-footer {
-      padding: 1.25rem 2rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1.25rem 1.75rem;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      background: #ffffff;
       display: flex;
       justify-content: flex-end;
-      gap: 1rem;
+      gap: 0.75rem;
     }
 
     .btn-cancel {
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #ffffff;
-      padding: 0.75rem 1.5rem;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
+      padding: 0.65rem 1.25rem;
       font-size: 0.75rem;
-      letter-spacing: 0.15em;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border-radius: 0;
       cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-cancel:hover {
+      background: #f3f4f6;
+      border-color: #000000;
     }
 
     .btn-save {
-      background: #ffffff;
-      color: #000000;
-      border: none;
-      padding: 0.75rem 2rem;
+      background: #000000;
+      color: #ffffff;
+      border: 1px solid #000000;
+      padding: 0.65rem 1.5rem;
       font-size: 0.75rem;
       font-weight: 700;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border-radius: 0;
       cursor: pointer;
+      transition: all 0.2s;
     }
 
     .btn-save:hover:not(:disabled) {
-      background: var(--color-gold);
+      background: #262626;
     }
   `]
 })

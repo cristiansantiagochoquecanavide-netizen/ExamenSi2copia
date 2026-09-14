@@ -43,6 +43,10 @@ ENV/
 .pub/
 /build/
 **/build/
+.gradle/
+**/.gradle/
+.kotlin/
+**/.kotlin/
 
 # Environment Variables
 .env

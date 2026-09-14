@@ -444,11 +444,12 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
       padding: 2.5rem 3rem;
       max-width: 1440px;
       margin: 0 auto;
-      color: #ffffff;
+      color: #111111;
+      background-color: #ffffff;
     }
 
     .param-hero {
-      border-bottom: 1px solid #222222;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       padding-bottom: 2rem;
       margin-bottom: 2rem;
     }
@@ -459,27 +460,29 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
       gap: 0.5rem;
       font-size: 0.72rem;
       letter-spacing: 0.25em;
-      color: #d4af37;
+      color: #374151;
+      font-weight: 700;
       text-transform: uppercase;
       margin-bottom: 0.75rem;
     }
 
     .gold-dot {
-      color: #d4af37;
+      color: #000000;
     }
 
     .hero-title {
-      font-family: 'Bodoni Moda', serif;
+      font-family: 'Inter', sans-serif;
       font-size: 2.5rem;
-      font-weight: 400;
-      letter-spacing: 0.05em;
+      font-weight: 800;
+      letter-spacing: -0.02em;
       margin: 0 0 0.75rem 0;
+      color: #000000;
     }
 
     .hero-desc {
       font-family: 'Inter', sans-serif;
       font-size: 0.95rem;
-      color: #888888;
+      color: #4b5563;
       max-width: 800px;
       line-height: 1.6;
       margin-bottom: 2rem;
@@ -499,64 +502,68 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
     }
 
     .tab-btn {
-      background: transparent;
-      border: 1px solid #2a2a2a;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.18);
       border-radius: 0;
-      color: #777777;
+      color: #4b5563;
       padding: 0.75rem 1.25rem;
       font-size: 0.78rem;
       font-weight: 600;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.12em;
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
     .tab-btn:hover {
-      border-color: #555555;
-      color: #cccccc;
+      border-color: #000000;
+      color: #000000;
+      background: #f3f4f6;
     }
 
     .tab-btn.active {
-      background: #111111;
-      border-color: #d4af37;
-      color: #d4af37;
+      background: #000000;
+      border-color: #000000;
+      color: #ffffff;
+      font-weight: 700;
     }
 
     .btn-gold {
-      background: #d4af37;
-      color: #000000;
-      border: 1px solid #d4af37;
+      background: #000000;
+      color: #ffffff;
+      border: 1px solid #000000;
       border-radius: 0;
       padding: 0.75rem 1.5rem;
       font-size: 0.75rem;
       font-weight: 700;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
     .btn-gold:hover {
-      background: #b89628;
-      border-color: #b89628;
+      background: #262626;
+      border-color: #262626;
     }
 
     .feedback-banner {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #002b11;
-      border: 1px solid #00aa44;
-      color: #7affaa;
+      background: #ecfdf5;
+      border: 1px solid #059669;
+      color: #065f46;
       padding: 0.85rem 1.25rem;
       margin-bottom: 1.5rem;
       font-size: 0.85rem;
       border-radius: 0;
+      font-weight: 500;
     }
 
     .feedback-banner.error {
-      background: #2b0000;
-      border-color: #aa0000;
-      color: #ff7a7a;
+      background: #fef2f2;
+      border-color: #dc2626;
+      color: #991b1b;
     }
 
     .btn-close-banner {
@@ -572,19 +579,20 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
       align-items: center;
       gap: 0.75rem;
       padding: 1.5rem;
-      background: #0d0d0d;
-      border: 1px solid #222222;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.08);
       font-size: 0.8rem;
       letter-spacing: 0.15em;
-      color: #d4af37;
+      color: #374151;
+      font-weight: 600;
       margin-bottom: 1.5rem;
     }
 
     .spinner {
       width: 14px;
       height: 14px;
-      border: 2px solid #222222;
-      border-top-color: #d4af37;
+      border: 2px solid rgba(0, 0, 0, 0.15);
+      border-top-color: #000000;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
@@ -594,26 +602,29 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
     }
 
     .card-panel {
-      background: #0a0a0a;
-      border: 1px solid #1a1a1a;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 1.75rem;
+      box-shadow: none;
     }
 
     .panel-header {
       margin-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      padding-bottom: 1rem;
     }
 
     .panel-title {
-      font-family: 'Bodoni Moda', serif;
-      font-size: 1.35rem;
-      font-weight: 400;
+      font-family: 'Inter', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
       margin: 0 0 0.35rem 0;
-      color: #ffffff;
+      color: #000000;
     }
 
     .panel-hint {
       font-size: 0.82rem;
-      color: #777777;
+      color: #6b7280;
     }
 
     .table-wrap {
@@ -625,36 +636,45 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
       border-collapse: collapse;
       font-size: 0.85rem;
       text-align: left;
+      background: #ffffff;
+      color: #111111;
     }
 
     .noir-table th {
-      border-bottom: 1px solid #222222;
+      border-bottom: 2px solid rgba(0, 0, 0, 0.12);
       padding: 0.85rem 1rem;
-      font-size: 0.72rem;
-      letter-spacing: 0.12em;
-      color: #666666;
-      font-weight: 600;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      color: #000000;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: #f9fafb;
     }
 
     .noir-table td {
-      border-bottom: 1px solid #161616;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
       padding: 1rem;
       vertical-align: middle;
+      color: #1f2937;
+    }
+
+    .noir-table tbody tr:hover {
+      background-color: #f9fafb;
     }
 
     .col-id {
-      color: #666666;
+      color: #6b7280;
       font-family: monospace;
       font-size: 0.8rem;
     }
 
     .col-strong {
-      font-weight: 600;
-      color: #ffffff;
+      font-weight: 700;
+      color: #000000;
     }
 
     .col-muted {
-      color: #888888;
+      color: #4b5563;
       font-size: 0.82rem;
     }
 
@@ -667,9 +687,10 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
       padding: 0.25rem 0.65rem;
       font-size: 0.7rem;
       letter-spacing: 0.1em;
-      background: #161616;
-      border: 1px solid #333333;
-      color: #cccccc;
+      background: #000000;
+      border: 1px solid #000000;
+      color: #ffffff;
+      font-weight: 700;
       border-radius: 0;
     }
 
@@ -678,9 +699,9 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
       min-width: 38px;
       text-align: center;
       padding: 0.35rem 0.65rem;
-      background: #111111;
-      border: 1px solid #d4af37;
-      color: #d4af37;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
       font-weight: 700;
       font-size: 0.85rem;
     }
@@ -688,10 +709,10 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
     .season-code {
       display: inline-block;
       padding: 0.25rem 0.65rem;
-      background: #1a1505;
-      border: 1px solid #705510;
-      color: #f3e5ab;
-      font-weight: 600;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
+      font-weight: 700;
       font-size: 0.75rem;
     }
 
@@ -700,35 +721,38 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
       width: 7px;
       height: 7px;
       border-radius: 50%;
-      background: #444444;
+      background: #9ca3af;
       margin-right: 0.45rem;
     }
 
     .status-dot.active {
-      background: #00cc66;
-      box-shadow: 0 0 6px rgba(0, 204, 102, 0.4);
+      background: #059669;
+      box-shadow: 0 0 6px rgba(5, 150, 105, 0.4);
     }
 
     .status-text {
       font-size: 0.75rem;
       letter-spacing: 0.08em;
-      color: #aaaaaa;
+      color: #374151;
+      font-weight: 600;
     }
 
     .btn-action-ghost {
-      background: transparent;
-      border: 1px solid #333333;
-      color: #999999;
-      padding: 0.4rem 0.85rem;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.25);
+      color: #374151;
+      padding: 0.45rem 0.95rem;
       font-size: 0.72rem;
+      font-weight: 600;
       cursor: pointer;
       border-radius: 0;
       transition: all 0.2s ease;
     }
 
     .btn-action-ghost:hover {
-      border-color: #d4af37;
-      color: #d4af37;
+      background: #f3f4f6;
+      color: #000000;
+      border-color: #000000;
     }
 
     /* Colors Grid */
@@ -739,8 +763,8 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
     }
 
     .color-card {
-      background: #111111;
-      border: 1px solid #222222;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -749,7 +773,7 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
     .swatch {
       height: 100px;
       width: 100%;
-      border-bottom: 1px solid #222222;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     }
 
     .color-info {
@@ -758,10 +782,10 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
     }
 
     .color-name {
-      font-weight: 600;
+      font-weight: 700;
       font-size: 0.95rem;
       margin-bottom: 0.45rem;
-      color: #ffffff;
+      color: #000000;
     }
 
     .color-codes {
@@ -770,11 +794,12 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
       gap: 0.2rem;
       font-family: monospace;
       font-size: 0.75rem;
-      color: #888888;
+      color: #6b7280;
     }
 
     .code-hex {
-      color: #d4af37;
+      color: #000000;
+      font-weight: 700;
     }
 
     .color-footer {
@@ -782,14 +807,14 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
       justify-content: space-between;
       align-items: center;
       padding: 0.75rem 1rem;
-      border-top: 1px solid #1c1c1c;
-      background: #0d0d0d;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      background: #f9fafb;
     }
 
     .empty-msg {
       text-align: center;
       padding: 2.5rem;
-      color: #666666;
+      color: #6b7280;
       font-size: 0.85rem;
     }
 
@@ -800,7 +825,7 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0, 0, 0, 0.5);
       backdrop-filter: blur(4px);
       display: flex;
       align-items: center;
@@ -809,12 +834,12 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
     }
 
     .modal-dialog {
-      background: #0e0e0e;
-      border: 1px solid #d4af37;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
       border-radius: 0;
       width: 90%;
       max-width: 500px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
     }
 
     .modal-header {
@@ -822,22 +847,27 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
       justify-content: space-between;
       align-items: center;
       padding: 1.25rem 1.5rem;
-      border-bottom: 1px solid #222222;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     }
 
     .modal-title {
-      font-family: 'Bodoni Moda', serif;
+      font-family: 'Inter', sans-serif;
       font-size: 1.25rem;
+      font-weight: 700;
       margin: 0;
-      color: #d4af37;
+      color: #000000;
     }
 
     .btn-close {
       background: transparent;
       border: none;
-      color: #888888;
+      color: #6b7280;
       font-size: 1.5rem;
       cursor: pointer;
+    }
+
+    .btn-close:hover {
+      color: #000000;
     }
 
     .modal-body {
@@ -852,7 +882,8 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
       display: block;
       font-size: 0.72rem;
       letter-spacing: 0.1em;
-      color: #999999;
+      color: #374151;
+      font-weight: 600;
       text-transform: uppercase;
       margin-bottom: 0.45rem;
     }
@@ -863,10 +894,10 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
     .form-group select,
     .form-group textarea {
       width: 100%;
-      background: #141414;
-      border: 1px solid #2a2a2a;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
       border-radius: 0;
-      color: #ffffff;
+      color: #111111;
       padding: 0.75rem;
       font-size: 0.85rem;
       outline: none;
@@ -876,7 +907,8 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
     .form-group input:focus,
     .form-group select:focus,
     .form-group textarea:focus {
-      border-color: #d4af37;
+      border-color: #000000;
+      box-shadow: 0 0 0 1px #000000;
     }
 
     .color-picker-input {
@@ -889,7 +921,7 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
       width: 44px;
       height: 44px;
       padding: 0;
-      border: 1px solid #333333;
+      border: 1px solid rgba(0, 0, 0, 0.2);
       background: transparent;
       cursor: pointer;
       border-radius: 0;
@@ -909,29 +941,40 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
     }
 
     .btn-cancel {
-      background: transparent;
-      border: 1px solid #333333;
-      color: #888888;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.25);
+      color: #374151;
       padding: 0.75rem 1.25rem;
       font-size: 0.75rem;
+      font-weight: 600;
       cursor: pointer;
       border-radius: 0;
     }
 
-    .btn-submit {
-      background: #d4af37;
-      border: 1px solid #d4af37;
+    .btn-cancel:hover {
+      background: #f3f4f6;
       color: #000000;
+    }
+
+    .btn-submit {
+      background: #000000;
+      border: 1px solid #000000;
+      color: #ffffff;
       padding: 0.75rem 1.5rem;
       font-weight: 700;
       font-size: 0.75rem;
       letter-spacing: 0.1em;
       cursor: pointer;
       border-radius: 0;
+      text-transform: uppercase;
+    }
+
+    .btn-submit:hover {
+      background: #262626;
     }
 
     .btn-submit:disabled {
-      opacity: 0.5;
+      opacity: 0.4;
       cursor: not-allowed;
     }
   `]

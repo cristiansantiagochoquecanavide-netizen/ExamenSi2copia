@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../theme/app_theme.dart';
+import '../../core/theme/app_theme.dart';
+import 'diamond_logo.dart';
 
 class AtelierScaffold extends StatelessWidget {
   final Widget child;
@@ -18,33 +19,34 @@ class AtelierScaffold extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppTheme.surfaceColor,
         elevation: 0,
+        scrolledUnderElevation: 0,
         title: Row(
           children: [
+            const DiamondLogo(size: 26),
+            const SizedBox(width: 10),
             Text(
-              'FASHIONSTORE',
+              'FASHION',
               style: Theme.of(context).textTheme.displayMedium?.copyWith(
                     fontSize: 18,
                     letterSpacing: 2.0,
+                    fontWeight: FontWeight.w600,
                   ),
             ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                border: Border.all(color: AppTheme.goldAccent),
-                borderRadius: BorderRadius.zero,
-              ),
-              child: Text(
-                'NOIR',
-                style: Theme.of(context).textTheme.labelSmall,
-              ),
+            const SizedBox(width: 7),
+            Text(
+              'STORE',
+              style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                    fontSize: 18,
+                    letterSpacing: 2.0,
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
           ],
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
           child: Container(
-            color: AppTheme.borderColor,
+            color: const Color(0xFFE5E7EB),
             height: 1.0,
           ),
         ),
@@ -53,7 +55,7 @@ class AtelierScaffold extends StatelessWidget {
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: AppTheme.surfaceColor,
-          border: Border(top: BorderSide(color: AppTheme.borderColor, width: 1.0)),
+          border: Border(top: BorderSide(color: Color(0xFFE5E7EB), width: 1.0)),
         ),
         child: BottomNavigationBar(
           backgroundColor: AppTheme.surfaceColor,
@@ -64,7 +66,7 @@ class AtelierScaffold extends StatelessWidget {
           elevation: 0,
           onTap: (index) => _onItemTapped(index, context),
           items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.checkroom), label: 'Cat?logo'),
+            BottomNavigationBarItem(icon: Icon(Icons.checkroom), label: 'Catálogo'),
             BottomNavigationBarItem(icon: Icon(Icons.view_in_ar), label: 'Vestidor AR'),
             BottomNavigationBarItem(icon: Icon(Icons.event_seat), label: 'Reservas'),
             BottomNavigationBarItem(icon: Icon(Icons.shopping_bag_outlined), label: 'Bolsa'),

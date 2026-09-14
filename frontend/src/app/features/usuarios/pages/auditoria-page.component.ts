@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuditoriaService } from '../services/auditoria.service';
@@ -165,12 +165,14 @@ import { BitacoraAuditoriaResponse } from '../models/usuarios.models';
     .auditoria-container {
       max-width: 1400px;
       margin: 0 auto;
-      padding-bottom: 4rem;
+      padding: 2rem 1.5rem 4rem;
+      color: #111827;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
     .header-section {
-      padding: 1.5rem 0 2rem 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0 0 2rem 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
       margin-bottom: 2rem;
     }
 
@@ -179,27 +181,31 @@ import { BitacoraAuditoriaResponse } from '../models/usuarios.models';
       align-items: center;
       gap: 0.5rem;
       font-size: 0.75rem;
-      letter-spacing: 0.2em;
-      color: var(--color-gold);
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      color: #6b7280;
       margin-bottom: 0.5rem;
+      text-transform: uppercase;
     }
 
     .gold-dot {
-      color: var(--color-gold);
-      font-size: 1.2rem;
+      color: #111827;
+      font-size: 1rem;
     }
 
     .page-title {
-      font-family: var(--font-serif);
-      font-size: 3rem;
-      text-transform: uppercase;
-      color: var(--color-primary);
+      font-size: 2.25rem;
+      font-weight: 700;
+      color: #000000;
       margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
     }
 
     .subtitle {
-      color: var(--color-on-surface-muted);
+      color: #6b7280;
       font-size: 0.95rem;
+      line-height: 1.5;
+      max-width: 700px;
     }
 
     .filters-bar {
@@ -217,45 +223,51 @@ import { BitacoraAuditoriaResponse } from '../models/usuarios.models';
     }
 
     .filter-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
-      color: var(--color-gold);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: #374151;
     }
 
     .filter-select, .filter-input {
-      background: #111111;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #ffffff;
-      padding: 0.6rem 1rem;
-      font-size: 0.8rem;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      color: #111827;
+      padding: 0.65rem 1rem;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
     }
 
     .filter-select:focus, .filter-input:focus {
-      outline: none;
-      border-color: var(--color-gold);
+      border-color: #000000;
     }
 
     .btn-refresh {
-      background: transparent;
-      border: 1px solid var(--color-gold);
-      color: var(--color-gold);
-      padding: 0.6rem 1.2rem;
-      font-size: 0.75rem;
-      letter-spacing: 0.12em;
+      background: #ffffff;
+      border: 1px solid #111827;
+      color: #111827;
+      padding: 0.65rem 1.25rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 6px;
+      letter-spacing: 0.05em;
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
     .btn-refresh:hover {
-      background: var(--color-gold);
-      color: #000000;
+      background: #000000;
+      color: #ffffff;
     }
 
     .alert-error {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid #ef4444;
-      color: #f87171;
-      padding: 0.8rem 1.2rem;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      padding: 0.85rem 1.2rem;
+      border-radius: 8px;
       margin-bottom: 1.5rem;
       font-size: 0.85rem;
     }
@@ -263,99 +275,109 @@ import { BitacoraAuditoriaResponse } from '../models/usuarios.models';
     .loading-box {
       text-align: center;
       padding: 4rem;
-      color: var(--color-gold);
-      letter-spacing: 0.15em;
-      font-size: 0.85rem;
+      color: #6b7280;
+      font-size: 0.9rem;
+      font-weight: 500;
     }
 
     .timeline-wrapper {
-      background: #111111;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 12px;
       overflow-x: auto;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
     .audit-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
     }
 
     .audit-table th {
-      background: #0d0d0d;
-      color: var(--color-on-surface-muted);
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
-      padding: 1rem 1.2rem;
+      background: #f9fafb;
+      color: #4b5563;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      padding: 0.85rem 1.2rem;
       text-align: left;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid #e5e7eb;
+      text-transform: uppercase;
     }
 
     .audit-row {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid #f3f4f6;
       transition: background-color 0.15s ease;
     }
 
     .audit-row:hover {
-      background: #171717;
+      background: #fafafa;
     }
 
     .audit-table td {
       padding: 0.9rem 1.2rem;
-      color: #cccccc;
+      color: #374151;
     }
 
     .timestamp-cell .date-txt {
       font-family: monospace;
-      color: #888888;
-      font-size: 0.75rem;
+      color: #6b7280;
+      font-size: 0.8rem;
     }
 
     .modulo-badge {
-      font-size: 0.65rem;
+      font-size: 0.7rem;
       font-weight: 700;
-      letter-spacing: 0.1em;
-      padding: 2px 6px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      background: #1c1c1c;
-      color: #ffffff;
+      letter-spacing: 0.05em;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid #e5e7eb;
+      background: #f3f4f6;
+      color: #374151;
+      text-transform: uppercase;
     }
 
     .modulo-badge[data-mod="usuarios"] {
-      border-color: #60a5fa;
-      color: #60a5fa;
+      border-color: #bfdbfe;
+      background: #eff6ff;
+      color: #1d4ed8;
     }
 
     .modulo-badge[data-mod="inventario"] {
-      border-color: #34d399;
-      color: #34d399;
+      border-color: #bbf7d0;
+      background: #f0fdf4;
+      color: #15803d;
     }
 
     .modulo-badge[data-mod="catalogo"] {
-      border-color: var(--color-gold);
-      color: var(--color-gold);
+      border-color: #fed7aa;
+      background: #fff7ed;
+      color: #c2410c;
     }
 
     .accion-tag {
       font-family: monospace;
-      color: #ffffff;
+      color: #111827;
       font-weight: 600;
+      font-size: 0.8rem;
     }
 
     .user-email {
-      color: #e5e5e5;
+      color: #111827;
       font-family: monospace;
-      font-size: 0.75rem;
+      font-size: 0.8rem;
     }
 
     .ip-cell code {
-      font-size: 0.75rem;
-      color: #888888;
+      font-size: 0.8rem;
+      color: #6b7280;
     }
 
     .detail-cell {
       max-width: 320px;
       line-height: 1.4;
-      color: #aaaaaa;
+      color: #4b5563;
     }
 
     .text-right {
@@ -363,84 +385,97 @@ import { BitacoraAuditoriaResponse } from '../models/usuarios.models';
     }
 
     .btn-diff {
-      background: transparent;
-      border: 1px solid var(--color-gold);
-      color: var(--color-gold);
-      font-size: 0.65rem;
-      letter-spacing: 0.1em;
-      padding: 3px 8px;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      color: #111827;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 4px;
       cursor: pointer;
+      transition: all 0.2s;
     }
 
     .btn-diff:hover {
-      background: var(--color-gold);
-      color: #000000;
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
     }
 
     .no-diff {
-      color: #444444;
+      color: #9ca3af;
     }
 
     /* Modal Diff */
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.88);
-      backdrop-filter: blur(8px);
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
       z-index: 1000;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 2rem;
+      padding: 1.5rem;
     }
 
     .modal-container {
-      background: #111111;
-      border: 1px solid var(--color-gold);
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
       max-width: 900px;
       width: 100%;
       max-height: 90vh;
       display: flex;
       flex-direction: column;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      overflow: hidden;
     }
 
     .modal-header {
-      padding: 1.5rem 2rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1.25rem 1.75rem;
+      border-bottom: 1px solid #f3f4f6;
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
     }
 
     .modal-eyebrow {
-      font-size: 0.65rem;
-      letter-spacing: 0.2em;
-      color: var(--color-gold);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: #6b7280;
+      text-transform: uppercase;
     }
 
     .modal-title {
-      font-family: var(--font-serif);
-      font-size: 1.8rem;
-      color: #ffffff;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #000000;
       margin: 4px 0;
+      letter-spacing: -0.01em;
     }
 
     .modal-meta {
-      font-size: 0.75rem;
-      color: #888888;
+      font-size: 0.8rem;
+      color: #6b7280;
       font-family: monospace;
     }
 
     .btn-close {
       background: transparent;
       border: none;
-      color: #888888;
-      font-size: 2rem;
+      color: #6b7280;
+      font-size: 1.8rem;
       cursor: pointer;
     }
 
+    .btn-close:hover {
+      color: #111827;
+    }
+
     .modal-body {
-      padding: 2rem;
+      padding: 1.75rem;
       overflow-y: auto;
     }
 
@@ -457,18 +492,21 @@ import { BitacoraAuditoriaResponse } from '../models/usuarios.models';
     }
 
     .pane-title {
-      font-size: 0.7rem;
-      letter-spacing: 0.15em;
-      color: var(--color-on-surface-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: #4b5563;
+      text-transform: uppercase;
     }
 
     .json-viewer {
-      background: #050505;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
       padding: 1rem;
       font-family: monospace;
       font-size: 0.75rem;
-      color: #cccccc;
+      color: #111827;
       white-space: pre-wrap;
       word-break: break-all;
       max-height: 350px;
@@ -476,43 +514,51 @@ import { BitacoraAuditoriaResponse } from '../models/usuarios.models';
     }
 
     .json-viewer.highlight {
-      border-color: rgba(212, 175, 55, 0.4);
-      color: var(--color-gold);
+      border-color: #000000;
+      background: #fafafa;
     }
 
     .modal-footer {
-      padding: 1rem 2rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1rem 1.75rem;
+      border-top: 1px solid #f3f4f6;
+      background: #fafafa;
       display: flex;
       justify-content: flex-end;
     }
 
     .btn-close-modal {
-      background: var(--color-gold);
-      color: #000000;
-      border: none;
-      padding: 0.7rem 1.5rem;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.15em;
+      background: #000000;
+      color: #ffffff;
+      border: 1px solid #000000;
+      padding: 0.65rem 1.5rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 6px;
       cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-close-modal:hover {
+      background: #1f2937;
     }
 
     .empty-state {
       text-align: center;
       padding: 4rem 2rem;
-      border: 1px dashed rgba(255, 255, 255, 0.15);
+      border: 1px dashed #d1d5db;
+      border-radius: 10px;
+      background: #ffffff;
     }
 
     .empty-title {
-      font-family: var(--font-serif);
-      font-size: 1.8rem;
-      color: #ffffff;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #111827;
       margin-bottom: 0.5rem;
     }
 
     .empty-desc {
-      color: var(--color-on-surface-muted);
+      color: #6b7280;
     }
   `]
 })

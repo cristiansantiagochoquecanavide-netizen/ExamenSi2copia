@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RolesService } from '../services/roles.service';
@@ -207,12 +207,15 @@ interface ModuloPermisos {
     .roles-container {
       max-width: 1400px;
       margin: 0 auto;
-      padding-bottom: 4rem;
+      padding: 2rem 1.5rem 4rem;
+      background-color: #ffffff;
+      color: #111111;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
     .header-section {
-      padding: 1.5rem 0 2rem 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0 0 2rem 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       margin-bottom: 2rem;
     }
 
@@ -221,27 +224,32 @@ interface ModuloPermisos {
       align-items: center;
       gap: 0.5rem;
       font-size: 0.75rem;
-      letter-spacing: 0.2em;
-      color: var(--color-gold);
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: #374151;
       margin-bottom: 0.5rem;
+      text-transform: uppercase;
     }
 
     .gold-dot {
-      color: var(--color-gold);
-      font-size: 1.2rem;
+      color: #000000;
+      font-size: 1.1rem;
     }
 
     .page-title {
-      font-family: var(--font-serif);
-      font-size: 3rem;
-      text-transform: uppercase;
-      color: var(--color-primary);
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #000000;
       margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
     }
 
     .subtitle {
-      color: var(--color-on-surface-muted);
+      color: #4b5563;
       font-size: 0.95rem;
+      line-height: 1.5;
+      max-width: 700px;
     }
 
     .actions-bar {
@@ -249,81 +257,96 @@ interface ModuloPermisos {
       justify-content: space-between;
       align-items: center;
       margin-top: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
 
     .btn-create {
-      background: var(--color-gold);
-      color: #000000;
-      border: none;
-      padding: 0.8rem 1.5rem;
+      background: #000000;
+      color: #ffffff;
+      border: 1px solid #000000;
+      padding: 0.75rem 1.4rem;
       font-size: 0.75rem;
       font-weight: 700;
-      letter-spacing: 0.15em;
+      border-radius: 0;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
     .btn-create:hover {
-      background: #ffffff;
-      color: #000000;
+      background: #262626;
+      border-color: #262626;
     }
 
     .roles-count {
       font-size: 0.75rem;
-      letter-spacing: 0.15em;
-      color: var(--color-gold);
-      border: 1px solid rgba(212, 175, 55, 0.3);
+      letter-spacing: 0.1em;
+      font-weight: 700;
+      color: #374151;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
       padding: 6px 12px;
+      border-radius: 0;
+      text-transform: uppercase;
     }
 
     .alert-success {
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid #10b981;
-      color: #34d399;
+      background: #ecfdf5;
+      border: 1px solid #059669;
+      color: #065f46;
       padding: 0.8rem 1.2rem;
+      border-radius: 0;
       margin-bottom: 1.5rem;
       font-size: 0.85rem;
+      font-weight: 500;
     }
 
     .alert-error {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid #ef4444;
-      color: #f87171;
+      background: #fef2f2;
+      border: 1px solid #dc2626;
+      color: #991b1b;
       padding: 0.8rem 1.2rem;
+      border-radius: 0;
       margin-bottom: 1.5rem;
       font-size: 0.85rem;
+      font-weight: 500;
     }
 
     .loading-box {
       text-align: center;
       padding: 4rem;
-      color: var(--color-gold);
-      letter-spacing: 0.15em;
+      color: #4b5563;
+      letter-spacing: 0.12em;
       font-size: 0.85rem;
+      font-weight: 600;
     }
 
     .roles-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
-      gap: 2rem;
+      grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+      gap: 1.5rem;
     }
 
     .role-card {
-      background: #111111;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 1.75rem;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 0;
+      padding: 1.5rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       transition: border-color 0.2s ease;
+      box-shadow: none;
     }
 
     .role-card:hover {
-      border-color: var(--color-gold);
+      border-color: rgba(0, 0, 0, 0.3);
     }
 
     .role-card.system-role {
-      border-left: 3px solid var(--color-gold);
+      border-left: 4px solid #000000;
     }
 
     .role-card-header {
@@ -331,52 +354,62 @@ interface ModuloPermisos {
       justify-content: space-between;
       align-items: flex-start;
       margin-bottom: 0.75rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     }
 
     .role-id {
-      font-size: 0.65rem;
+      font-size: 0.7rem;
       font-family: monospace;
-      color: var(--color-gold);
+      color: #6b7280;
       display: block;
     }
 
     .role-name {
-      font-family: var(--font-serif);
-      font-size: 1.6rem;
-      color: #ffffff;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #000000;
+      margin: 0;
     }
 
     .badge-system {
-      background: rgba(212, 175, 55, 0.2);
-      border: 1px solid var(--color-gold);
-      color: var(--color-gold);
-      font-size: 0.6rem;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.18);
+      color: #000000;
+      font-size: 0.65rem;
       font-weight: 700;
-      letter-spacing: 0.15em;
-      padding: 2px 6px;
+      letter-spacing: 0.1em;
+      padding: 3px 8px;
+      border-radius: 0;
+      text-transform: uppercase;
     }
 
     .badge-custom {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #cccccc;
-      font-size: 0.6rem;
-      letter-spacing: 0.15em;
-      padding: 2px 6px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 3px 8px;
+      border-radius: 0;
+      text-transform: uppercase;
     }
 
     .role-desc {
       font-size: 0.85rem;
-      color: #888888;
-      margin-bottom: 1.5rem;
+      color: #4b5563;
+      margin-bottom: 1.25rem;
       line-height: 1.4;
+      min-height: 2.5rem;
     }
 
     .permissions-summary {
-      background: #090909;
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 0;
       padding: 1rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
     }
 
     .perm-header {
@@ -384,14 +417,16 @@ interface ModuloPermisos {
     }
 
     .perm-title {
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
-      color: var(--color-on-surface-muted);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #374151;
+      text-transform: uppercase;
     }
 
     .empty-perm {
       font-size: 0.8rem;
-      color: #555555;
+      color: #9ca3af;
       font-style: italic;
     }
 
@@ -402,105 +437,123 @@ interface ModuloPermisos {
     }
 
     .perm-chip {
-      font-size: 0.65rem;
+      font-size: 0.7rem;
       font-family: monospace;
-      background: #181818;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #dddddd;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      color: #111111;
       padding: 2px 7px;
+      border-radius: 0;
     }
 
     .card-footer {
       display: flex;
       gap: 0.75rem;
       padding-top: 1rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
     }
 
     .btn-edit {
       flex: 1;
-      background: transparent;
-      border: 1px solid var(--color-gold);
-      color: var(--color-gold);
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.25);
+      color: #000000;
       padding: 0.6rem;
-      font-size: 0.7rem;
-      letter-spacing: 0.15em;
-      font-weight: 600;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border-radius: 0;
       cursor: pointer;
       transition: all 0.2s ease;
+      text-align: center;
     }
 
     .btn-edit:hover {
-      background: var(--color-gold);
-      color: #000000;
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
     }
 
     .btn-delete {
-      background: transparent;
-      border: 1px solid #ef4444;
-      color: #ef4444;
+      background: #ffffff;
+      border: 1px solid #fecaca;
+      color: #dc2626;
       padding: 0.6rem 1rem;
-      font-size: 0.7rem;
-      letter-spacing: 0.15em;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border-radius: 0;
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
     .btn-delete:hover {
-      background: #ef4444;
-      color: #ffffff;
+      background: #fef2f2;
     }
 
     /* Modal */
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.88);
-      backdrop-filter: blur(8px);
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
       z-index: 1000;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 2rem;
+      padding: 1.5rem;
     }
 
     .modal-container {
-      background: #111111;
-      border: 1px solid var(--color-gold);
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: 0;
       max-width: 850px;
       width: 100%;
       max-height: 90vh;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
     }
 
     .modal-header {
-      padding: 1.5rem 2rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1.25rem 1.75rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
     }
 
     .modal-eyebrow {
-      font-size: 0.65rem;
-      letter-spacing: 0.2em;
-      color: var(--color-gold);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: #374151;
+      text-transform: uppercase;
     }
 
     .modal-title {
-      font-family: var(--font-serif);
-      font-size: 2rem;
-      color: #ffffff;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #000000;
+      margin: 0.25rem 0 0;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
     }
 
     .btn-close {
       background: transparent;
       border: none;
-      color: #888888;
-      font-size: 2rem;
+      color: #6b7280;
+      font-size: 1.8rem;
       cursor: pointer;
+    }
+
+    .btn-close:hover {
+      color: #000000;
     }
 
     .modal-form {
@@ -511,7 +564,7 @@ interface ModuloPermisos {
     }
 
     .modal-body {
-      padding: 2rem;
+      padding: 1.75rem;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -525,28 +578,33 @@ interface ModuloPermisos {
     }
 
     .form-label {
-      font-size: 0.7rem;
-      letter-spacing: 0.12em;
-      color: var(--color-on-surface-muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #374151;
+      text-transform: uppercase;
     }
 
     .form-input {
-      background: #0d0d0d;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #ffffff;
-      padding: 0.8rem 1rem;
-      font-size: 0.9rem;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      border-radius: 0;
+      color: #111111;
+      padding: 0.7rem 0.85rem;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
     }
 
     .form-input:focus {
-      outline: none;
-      border-color: var(--color-gold);
+      border-color: #000000;
     }
 
     .permissions-matrix-section {
-      background: #090909;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 1.5rem;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 0;
+      padding: 1.25rem;
     }
 
     .matrix-header {
@@ -555,18 +613,21 @@ interface ModuloPermisos {
       align-items: center;
       margin-bottom: 1.25rem;
       padding-bottom: 0.75rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     }
 
     .matrix-title {
       font-size: 0.75rem;
-      letter-spacing: 0.15em;
-      color: var(--color-gold);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #000000;
+      text-transform: uppercase;
     }
 
     .matrix-counter {
       font-size: 0.75rem;
-      color: #ffffff;
+      font-weight: 600;
+      color: #6b7280;
       font-family: monospace;
     }
 
@@ -577,8 +638,9 @@ interface ModuloPermisos {
     }
 
     .module-block {
-      background: #141414;
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 0;
       padding: 1rem;
     }
 
@@ -590,24 +652,30 @@ interface ModuloPermisos {
     }
 
     .module-name {
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       font-weight: 700;
-      letter-spacing: 0.15em;
-      color: var(--color-primary);
+      letter-spacing: 0.05em;
+      color: #000000;
+      text-transform: uppercase;
     }
 
     .btn-toggle-module {
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #aaaaaa;
-      font-size: 0.65rem;
-      padding: 2px 8px;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #374151;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      padding: 3px 8px;
+      border-radius: 0;
       cursor: pointer;
+      transition: all 0.2s;
     }
 
     .btn-toggle-module:hover {
-      color: var(--color-gold);
-      border-color: var(--color-gold);
+      color: #000000;
+      border-color: #000000;
+      background: #f3f4f6;
     }
 
     .permissions-list {
@@ -617,8 +685,9 @@ interface ModuloPermisos {
     }
 
     .checkbox-label {
-      background: #0c0c0c;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 0;
       padding: 0.6rem 0.8rem;
       display: flex;
       align-items: flex-start;
@@ -628,12 +697,12 @@ interface ModuloPermisos {
     }
 
     .checkbox-label.checked {
-      background: #1c180b;
-      border-color: var(--color-gold);
+      background: #f0fdf4;
+      border-color: #86efac;
     }
 
     .custom-checkbox {
-      accent-color: var(--color-gold);
+      accent-color: #000000;
       margin-top: 3px;
     }
 
@@ -645,47 +714,59 @@ interface ModuloPermisos {
     .perm-code {
       font-size: 0.75rem;
       font-family: monospace;
-      color: #ffffff;
+      color: #111111;
       font-weight: 600;
     }
 
     .perm-desc {
       font-size: 0.7rem;
-      color: #888888;
+      color: #6b7280;
     }
 
     .modal-footer {
-      padding: 1.5rem 2rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1.25rem 1.75rem;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      background: #ffffff;
       display: flex;
       justify-content: flex-end;
-      gap: 1rem;
+      gap: 0.75rem;
     }
 
     .btn-cancel {
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #ffffff;
-      padding: 0.8rem 1.5rem;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
+      padding: 0.65rem 1.25rem;
       font-size: 0.75rem;
-      letter-spacing: 0.15em;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border-radius: 0;
       cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-cancel:hover {
+      background: #f3f4f6;
+      border-color: #000000;
     }
 
     .btn-save {
-      background: #ffffff;
-      color: #000000;
-      border: none;
-      padding: 0.8rem 2rem;
+      background: #000000;
+      color: #ffffff;
+      border: 1px solid #000000;
+      padding: 0.65rem 1.5rem;
       font-size: 0.75rem;
       font-weight: 700;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border-radius: 0;
       cursor: pointer;
+      transition: all 0.2s;
     }
 
     .btn-save:hover:not(:disabled) {
-      background: var(--color-gold);
-      color: #000000;
+      background: #262626;
     }
 
     .btn-save:disabled {

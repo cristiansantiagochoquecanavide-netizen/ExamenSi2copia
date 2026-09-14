@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FashionStore | Experiencia de Lujo Aumentada</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800&amp;family=Public+Sans:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-container-lowest": "#ffffff",
+            "error": "#ba1a1a",
+            "secondary-fixed-dim": "#abaab4",
+            "surface-container-highest": "#e2e2e2",
+            "on-primary": "#e2e2e2",
+            "on-secondary": "#ffffff",
+            "on-secondary-fixed-variant": "#3a3b43",
+            "on-secondary-fixed": "#1a1b22",
+            "on-tertiary-fixed-variant": "#e2e2e3",
+            "surface": "#f9f9f9",
+            "secondary": "#5d5e66",
+            "on-secondary-container": "#1a1b22",
+            "surface-container-high": "#e8e8e8",
+            "on-primary-fixed-variant": "#e2e2e2",
+            "inverse-surface": "#2f3131",
+            "outline-variant": "#c6c6c6",
+            "on-surface": "#1a1c1c",
+            "inverse-on-surface": "#f0f1f1",
+            "inverse-primary": "#c6c6c6",
+            "error-container": "#ffdad6",
+            "background": "#f9f9f9",
+            "tertiary": "#3a3c3d",
+            "on-error-container": "#410002",
+            "tertiary-container": "#737576",
+            "surface-variant": "#e2e2e2",
+            "on-primary-fixed": "#ffffff",
+            "tertiary-fixed-dim": "#454748",
+            "on-tertiary-container": "#ffffff",
+            "on-primary-container": "#ffffff",
+            "primary": "#000000",
+            "on-surface-variant": "#474747",
+            "surface-dim": "#dadada",
+            "primary-fixed-dim": "#474747",
+            "surface-bright": "#f9f9f9",
+            "primary-container": "#3b3b3b",
+            "on-tertiary-fixed": "#ffffff",
+            "secondary-container": "#d4d3dd",
+            "on-error": "#ffffff",
+            "on-background": "#1a1c1c",
+            "primary-fixed": "#5e5e5e",
+            "surface-tint": "#5e5e5e",
+            "tertiary-fixed": "#5d5e60",
+            "surface-container-low": "#f3f3f4",
+            "surface-container": "#eeeeee",
+            "on-tertiary": "#e2e2e3",
+            "outline": "#777777",
+            "secondary-fixed": "#c6c5cf"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {},
+          "fontFamily": {
+            "headline": ["Inter", "sans-serif"],
+            "display": ["Inter", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "label": ["Public Sans", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+</head>
+<body class="bg-surface-container-lowest text-on-surface font-body antialiased min-h-screen flex flex-col selection:bg-primary selection:text-surface-container-lowest">
+<!-- TopNavBar (Shared Component) -->
+<header class="w-full sticky top-0 z-50 bg-surface/90 backdrop-blur-md border-b border-outline-variant/30">
+<div class="flex justify-between items-center px-8 md:px-16 h-20 max-w-7xl mx-auto w-full">
+<!-- Brand Logo -->
+<a class="font-headline text-lg font-bold tracking-tight uppercase text-primary" href="#">
+        FashionStore
+      </a>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center space-x-10 font-headline uppercase text-xs tracking-widest">
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">
+          Colección
+        </a>
+<a class="text-primary font-semibold border-b border-primary pb-1" href="#">
+          Vestidor AR
+        </a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">
+          Novedades
+        </a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">
+          Acerca
+        </a>
+</nav>
+<!-- Trailing Action Icons -->
+<div class="flex items-center space-x-6 text-primary">
+<button aria-label="Buscar" class="hover:opacity-60 transition-opacity duration-200 flex items-center" type="button">
+<span class="material-symbols-outlined text-[22px]">search</span>
+</button>
+<button aria-label="Cuenta" class="hover:opacity-60 transition-opacity duration-200 flex items-center" type="button">
+<span class="material-symbols-outlined text-[22px]">person</span>
+</button>
+<button aria-label="Bolsa de compra" class="hover:opacity-60 transition-opacity duration-200 flex items-center relative" type="button">
+<span class="material-symbols-outlined text-[22px]">shopping_bag</span>
+<span class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-primary"></span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow">
+<!-- Hero Section -->
+<section class="relative w-full overflow-hidden border-b border-outline-variant/20 bg-surface-container-lowest">
+<div class="max-w-7xl mx-auto px-8 md:px-16 py-12 md:py-20">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+<!-- Text Narrative Column -->
+<div class="lg:col-span-6 flex flex-col justify-center pr-0 lg:pr-8 space-y-8 z-10">
+<div class="inline-flex items-center space-x-3">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="font-label text-xs tracking-[0.25em] text-secondary uppercase font-semibold">
+                Sartorial Tech Studio • 2025
+              </span>
+</div>
+<div class="space-y-4">
+<h1 class="font-headline text-4xl sm:text-5xl lg:text-6xl font-light tracking-tight text-primary leading-[1.08]">
+                Vestidores de <span class="font-bold block mt-1">Realidad Aumentada</span>
+</h1>
+<p class="font-body text-secondary text-base sm:text-lg font-light leading-relaxed max-w-xl pt-2">
+                Experimenta la caída orgánica de la seda, el peso de la lana virgen y una simulación milimétrica de cada prenda sobre tu propia silueta antes de concebir tu orden.
+              </p>
+</div>
+<!-- Action Cluster -->
+<div class="pt-4 flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
+<a class="w-full sm:w-auto inline-flex justify-center items-center px-10 py-4 bg-primary text-surface-container-lowest font-headline text-xs tracking-widest uppercase font-semibold hover:bg-primary/85 transition-all duration-300" href="#catalogo">
+                Explorar tienda
+              </a>
+<button class="group inline-flex items-center space-x-2 text-primary font-headline text-xs tracking-widest uppercase font-medium py-3 border-b border-transparent hover:border-primary transition-all" type="button">
+<span>Lanzar Escáner 3D</span>
+<span class="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+<!-- Spec Micro Indicators -->
+<div class="grid grid-cols-3 gap-6 pt-10 border-t border-outline-variant/30">
+<div>
+<p class="font-headline text-2xl font-light text-primary">0.2<span class="text-xs ml-0.5">mm</span></p>
+<p class="font-label text-[11px] uppercase tracking-wider text-secondary mt-1">Tolerancia Textil</p>
+</div>
+<div>
+<p class="font-headline text-2xl font-light text-primary">60<span class="text-xs ml-0.5">fps</span></p>
+<p class="font-label text-[11px] uppercase tracking-wider text-secondary mt-1">Render Cinético</p>
+</div>
+<div>
+<p class="font-headline text-2xl font-light text-primary">100%</p>
+<p class="font-label text-[11px] uppercase tracking-wider text-secondary mt-1">Alta Fidelidad</p>
+</div>
+</div>
+</div>
+<!-- Editorial Imagery Column -->
+<div class="lg:col-span-6 relative flex justify-center items-center">
+<div class="relative w-full aspect-[4/5] max-w-lg lg:max-w-none overflow-hidden bg-surface-container-low group">
+<!-- Provided Editorial Hero Image -->
+<img alt="Alta Costura Vestidor AR Colección" class="w-full h-full object-cover object-center grayscale-[20%] group-hover:scale-105 transition-transform duration-700 ease-out" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYol-RVh89k_pIiGjtDbYZnKU1ssCufEXp08ssdCj-Q5w-hiKcQ09SnDzNLRK3HsWx20FT27gy94Gaqqo0BkQx_R52PwoXbvF18KP4YJmCIY1YnOc0odUGboz8BnJAbhJ7xkk3X7EyVIR4Hug472eBiKURodPK4zitOH7Zo8dkY3dVJFLSQXjYLKD5uMpIlaU8Wz2eJoAGgsfHzk9bVKdF0yPOHskqbKQOLxaAkKRmOSZ0D5QVXWJEk5iX4rFXb_1Q8xzU8oS8qrE"/>
+<!-- Floating Spatial Anchor Badge -->
+<div class="absolute bottom-6 left-6 right-6 p-4 bg-surface-container-lowest/90 backdrop-blur-md border border-outline-variant/30 flex items-center justify-between">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 rounded-full border border-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-sm text-primary">view_in_ar</span>
+</div>
+<div>
+<p class="font-headline text-xs font-semibold text-primary uppercase tracking-wider">Abrigo Sculptural No. 04</p>
+<p class="font-body text-[11px] text-secondary">Lana cashmere pura • Draping virtual activo</p>
+</div>
+</div>
+<span class="font-label text-[10px] uppercase font-bold tracking-widest px-2 py-1 bg-surface-container text-primary">
+                  Activo
+                </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- AR Fitting Experience Pillars (Hairline Grid System) -->
+<section class="w-full bg-surface-container-lowest py-24 border-b border-outline-variant/30">
+<div class="max-w-7xl mx-auto px-8 md:px-16">
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+<div>
+<span class="font-label text-xs uppercase tracking-[0.2em] text-secondary font-medium block mb-2">Ingeniería Digital</span>
+<h2 class="font-headline text-3xl md:text-4xl font-light tracking-tight text-primary">
+              La anatomía del <span class="font-medium">vestidor contemporáneo</span>
+</h2>
+</div>
+<p class="font-body text-secondary text-sm max-w-sm font-light leading-relaxed">
+            Eliminamos la incertidumbre de talla mediante sensores de profundidad y algoritmos de tensión física de fibra.
+          </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-0 border-t border-l border-outline-variant/30">
+<!-- Feature 1 -->
+<div class="p-10 md:p-12 border-r border-b border-outline-variant/30 flex flex-col justify-between hover:bg-surface-container-low/40 transition-colors duration-300">
+<div>
+<span class="material-symbols-outlined text-3xl font-light text-primary mb-8 block">view_in_ar</span>
+<span class="font-label text-[11px] uppercase tracking-widest text-secondary font-semibold">01 / Tecnología Láser</span>
+<h3 class="font-headline text-xl font-medium tracking-tight text-primary mt-3 mb-4">
+                Prueba Virtual Instantánea
+              </h3>
+<p class="font-body text-sm text-secondary font-light leading-relaxed">
+                Reflejo cinético en tiempo real. Visualiza cómo responde el tejido ante el movimiento natural de tus pasos, giros y caídas de luz ambiental.
+              </p>
+</div>
+<div class="pt-8">
+<span class="inline-flex items-center text-xs uppercase tracking-widest font-headline font-semibold text-primary">
+                3D Mirror Sync
+              </span>
+</div>
+</div>
+<!-- Feature 2 -->
+<div class="p-10 md:p-12 border-r border-b border-outline-variant/30 flex flex-col justify-between hover:bg-surface-container-low/40 transition-colors duration-300">
+<div>
+<span class="material-symbols-outlined text-3xl font-light text-primary mb-8 block">straighten</span>
+<span class="font-label text-[11px] uppercase tracking-widest text-secondary font-semibold">02 / Calibración</span>
+<h3 class="font-headline text-xl font-medium tracking-tight text-primary mt-3 mb-4">
+                Precisión Biométrica
+              </h3>
+<p class="font-body text-sm text-secondary font-light leading-relaxed">
+                Mapeo volumétrico milimétrico del torso, hombros y extremidades. Reemplaza las tablas de medidas estandarizadas por un patrón estrictamente personalizado.
+              </p>
+</div>
+<div class="pt-8">
+<span class="inline-flex items-center text-xs uppercase tracking-widest font-headline font-semibold text-primary">
+                Custom Body Map
+              </span>
+</div>
+</div>
+<!-- Feature 3 -->
+<div class="p-10 md:p-12 border-r border-b border-outline-variant/30 flex flex-col justify-between hover:bg-surface-container-low/40 transition-colors duration-300">
+<div>
+<span class="material-symbols-outlined text-3xl font-light text-primary mb-8 block">diamond</span>
+<span class="font-label text-[11px] uppercase tracking-widest text-secondary font-semibold">03 / Pasarela</span>
+<h3 class="font-headline text-xl font-medium tracking-tight text-primary mt-3 mb-4">
+                Colección Alta Costura
+              </h3>
+<p class="font-body text-sm text-secondary font-light leading-relaxed">
+                Acceso exclusivo a prendas de desfile y ediciones limitadas directamente digitalizadas desde el taller de París para su ensayo en casa.
+              </p>
+</div>
+<div class="pt-8">
+<span class="inline-flex items-center text-xs uppercase tracking-widest font-headline font-semibold text-primary">
+                Runway Archive
+              </span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Curated Editorial Showcase Strip -->
+<section class="w-full bg-surface-container-low/30 py-24" id="catalogo">
+<div class="max-w-7xl mx-auto px-8 md:px-16">
+<div class="flex flex-col sm:flex-row sm:items-baseline justify-between mb-12">
+<div>
+<span class="font-label text-xs uppercase tracking-[0.2em] text-secondary font-medium">Pre-Lanzamiento</span>
+<h2 class="font-headline text-2xl md:text-3xl font-light text-primary mt-1 tracking-tight">Piezas Disponibles para AR</h2>
+</div>
+<div class="mt-4 sm:mt-0 flex space-x-2">
+<button aria-label="Anterior" class="w-10 h-10 border border-outline-variant/40 flex items-center justify-center hover:border-primary transition-colors" type="button">
+<span class="material-symbols-outlined text-base">arrow_back</span>
+</button>
+<button aria-label="Siguiente" class="w-10 h-10 border border-outline-variant/40 flex items-center justify-center hover:border-primary transition-colors" type="button">
+<span class="material-symbols-outlined text-base">arrow_forward</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Card 1 -->
+<div class="group flex flex-col bg-surface-container-lowest border border-outline-variant/20 p-4 transition-all duration-300 hover:border-primary/40">
+<div class="relative w-full aspect-[3/4] overflow-hidden bg-surface-container mb-4">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Editorial luxury minimalist fashion portrait of a model wearing a structural pure black woolen blazer with clean geometric lapels. The lighting is crisp and museum-grade with soft architectural shadows on a pristine neutral studio wall. High fashion elegance matching a monochrome palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjogABFmF-uQcsPi0fwzb-TM1aNyfo4jx_DcHcGWFAyRHy9BeBIHVF1x9fOg6yXorHEqoTnUhBz7_OXxD57ul0tliA5s6jf6HFntNsWdNbeoXdoPC92uS4O7cyrvT-jiDLdWPQoip-KHiH6krNhlzxoLFSYQNiEdoKoAOogXBafrYbea7sFh26XnsGi85-wOW86ssJLEQIEFVUS-I45D7j5mNNia18pMSCeyk6C-LI-17U1P_kpQID3QN4Eq39BN78BZBSUUZTTmY"/>
+<span class="absolute top-3 left-3 bg-surface-container-lowest/90 px-2 py-1 text-[10px] font-label uppercase tracking-widest text-primary font-bold">
+                AR Ready
+              </span>
+</div>
+<div class="flex justify-between items-start pt-2">
+<div>
+<h4 class="font-headline text-sm font-medium text-primary">Americana Estructurada 'Noir'</h4>
+<p class="font-body text-xs text-secondary mt-1">Lana virgen peinada</p>
+</div>
+<p class="font-headline text-sm font-semibold text-primary">€ 1.450</p>
+</div>
+<button class="mt-4 w-full py-2.5 border border-outline-variant/40 hover:border-primary hover:bg-primary hover:text-surface-container-lowest font-headline text-[11px] uppercase tracking-widest font-medium transition-all duration-200 flex items-center justify-center space-x-2" type="button">
+<span class="material-symbols-outlined text-sm">view_in_ar</span>
+<span>Probar en AR</span>
+</button>
+</div>
+<!-- Card 2 -->
+<div class="group flex flex-col bg-surface-container-lowest border border-outline-variant/20 p-4 transition-all duration-300 hover:border-primary/40">
+<div class="relative w-full aspect-[3/4] overflow-hidden bg-surface-container mb-4">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="High-end fashion editorial shoot capturing a draped ivory silk crepe dress on an elegant model standing in a white concrete modernist gallery. The lighting is soft and airy with natural gentle gradation. Monochromatic, ultra-minimalist styling with subtle, sophisticated contours." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_-DsqBg_7ZHJgYu4abo4zwYWxhm7yVVEcojwFOhCX4qDzqc9IJyHtUEGpE5JbhbfEqyajp6tjLlwB2onotO_ofssuABRw_26DEoCO6_DkAXGyHwloXO_-NBUOlb17Pz699E8OlV3UYl0NofZIKe7VXA6ejKsTfP3XLYndWyutUZDYEF7MEOOphDgcTM9bX-asITaBkqXWY611jLuCByRPyN1lh15dBYxnYlYdVckBBunebS-L0y6nM1wCpkCv72psCaYH6EPUT4A"/>
+<span class="absolute top-3 left-3 bg-surface-container-lowest/90 px-2 py-1 text-[10px] font-label uppercase tracking-widest text-primary font-bold">
+                AR Ready
+              </span>
+</div>
+<div class="flex justify-between items-start pt-2">
+<div>
+<h4 class="font-headline text-sm font-medium text-primary">Vestido Plisado Arquitectura</h4>
+<p class="font-body text-xs text-secondary mt-1">Seda orgánica fluida</p>
+</div>
+<p class="font-headline text-sm font-semibold text-primary">€ 1.890</p>
+</div>
+<button class="mt-4 w-full py-2.5 border border-outline-variant/40 hover:border-primary hover:bg-primary hover:text-surface-container-lowest font-headline text-[11px] uppercase tracking-widest font-medium transition-all duration-200 flex items-center justify-center space-x-2" type="button">
+<span class="material-symbols-outlined text-sm">view_in_ar</span>
+<span>Probar en AR</span>
+</button>
+</div>
+<!-- Card 3 -->
+<div class="group flex flex-col bg-surface-container-lowest border border-outline-variant/20 p-4 transition-all duration-300 hover:border-primary/40">
+<div class="relative w-full aspect-[3/4] overflow-hidden bg-surface-container mb-4">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Avant-garde minimalist trench coat crafted from matte technical fabric in bone white on a graceful model. Clean architectural perspective in an empty bright atrium with subtle diffuse shadows. High-fashion quiet luxury aesthetic focused on precision lines and pure texture." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA07pWbLVRPZIJtdvG-AEQcYW5ktkihmu3zhyC01hNxdcLlJqZCqEo3iQmawzpa6Q-RU8z5yLsqgzqNc6iffM2WAreLFGpXL27o8lbvsSBB6rliNmWrCOXFafXoOPw_ohSongZuyavdZX4LVL04r5_diUp1lRwAIdeBZhIKXd3CzwrvQf34e5Vhx3uXWeDpgfeDDg85cuOT9E_mFEoL5T5oKRwD43Y-32Ary5XYEcEzKFGaJblkbv5fOun2XSptlBjEP35PMi4s8pU"/>
+<span class="absolute top-3 left-3 bg-surface-container-lowest/90 px-2 py-1 text-[10px] font-label uppercase tracking-widest text-primary font-bold">
+                AR Ready
+              </span>
+</div>
+<div class="flex justify-between items-start pt-2">
+<div>
+<h4 class="font-headline text-sm font-medium text-primary">Trench Escultural Modular</h4>
+<p class="font-body text-xs text-secondary mt-1">Gabardina técnica mate</p>
+</div>
+<p class="font-headline text-sm font-semibold text-primary">€ 2.100</p>
+</div>
+<button class="mt-4 w-full py-2.5 border border-outline-variant/40 hover:border-primary hover:bg-primary hover:text-surface-container-lowest font-headline text-[11px] uppercase tracking-widest font-medium transition-all duration-200 flex items-center justify-center space-x-2" type="button">
+<span class="material-symbols-outlined text-sm">view_in_ar</span>
+<span>Probar en AR</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- AR Fitting Interactive Invite Strip -->
+<section class="w-full border-t border-outline-variant/30 py-20 bg-surface-container-lowest">
+<div class="max-w-7xl mx-auto px-8 md:px-16">
+<div class="flex flex-col md:flex-row justify-between items-center bg-surface-container-low p-10 md:p-14 border border-outline-variant/20">
+<div class="space-y-2 max-w-xl text-center md:text-left mb-6 md:mb-0">
+<span class="font-label text-[11px] uppercase tracking-[0.25em] text-secondary font-semibold">Cita Privada</span>
+<h3 class="font-headline text-2xl md:text-3xl font-light text-primary">¿Deseas una sesión guiada con un estilista virtual?</h3>
+<p class="font-body text-secondary text-sm font-light">Disfruta de asesoramiento de caída y colorimetría en vivo dentro del vestidor AR.</p>
+</div>
+<button class="px-8 py-3.5 bg-primary text-surface-container-lowest font-headline text-xs tracking-widest uppercase font-medium hover:bg-primary/80 transition-colors" type="button">
+            Reservar Sesión
+          </button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer (Shared Component) -->
+<footer class="w-full mt-auto bg-surface-container-low border-t border-outline-variant/30">
+<div class="flex flex-col md:flex-row justify-between items-center gap-6 px-8 md:px-16 py-12 max-w-7xl mx-auto w-full">
+<!-- Copyright and Brand note -->
+<div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 text-center sm:text-left">
+<span class="font-headline text-sm font-bold tracking-widest uppercase text-primary">FashionStore</span>
+<span class="hidden sm:inline text-outline-variant">|</span>
+<p class="font-body text-xs text-on-surface-variant">© 2024 FashionStore. Experiencia de lujo aumentada.</p>
+</div>
+<!-- Footer Links -->
+<div class="flex flex-wrap justify-center items-center gap-x-8 gap-y-3 font-body text-xs text-on-surface-variant">
+<a class="hover:text-primary transition-colors duration-150" href="#">Privacidad</a>
+<a class="hover:text-primary transition-colors duration-150" href="#">Términos y Condiciones</a>
+<a class="hover:text-primary transition-colors duration-150" href="#">Atención al Cliente</a>
+<a class="text-primary underline font-medium" href="#">Vestidores AR</a>
+<a class="hover:text-primary transition-colors duration-150" href="#">Sostenibilidad</a>
+</div>
+</div>
+</footer>
+</body></html>

@@ -537,7 +537,7 @@ type TabPOS = 'POS' | 'HISTORIAL';
       padding: 1.5rem 2rem;
       max-width: 1550px;
       margin: 0 auto;
-      color: #ffffff;
+      color: #111111;
       min-height: calc(100vh - 70px);
     }
 
@@ -549,7 +549,7 @@ type TabPOS = 'POS' | 'HISTORIAL';
       gap: 1.5rem;
       padding-bottom: 1.25rem;
       margin-bottom: 1.5rem;
-      border-bottom: 1px solid #1f1f1f;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     }
 
     .pos-badge {
@@ -559,45 +559,49 @@ type TabPOS = 'POS' | 'HISTORIAL';
       font-size: 0.72rem;
       font-weight: 700;
       letter-spacing: 0.15em;
-      color: #d4af37;
+      color: #4b5563;
       text-transform: uppercase;
       margin-bottom: 0.25rem;
     }
 
-    .gold-dot { color: #d4af37; }
+    .gold-dot { color: #000000; }
 
     .pos-title {
-      font-family: 'Bodoni Moda', serif;
+      font-family: 'Inter', sans-serif;
       font-size: 1.8rem;
-      font-weight: 600;
+      font-weight: 800;
+      letter-spacing: -0.02em;
       margin: 0;
-      color: #ffffff;
+      color: #000000;
     }
 
     .branch-selector-box {
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      background: #0f0f0f;
-      border: 1px solid #292929;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
       padding: 0.5rem 1rem;
+      border-radius: 0;
     }
 
     .branch-lbl {
       font-size: 0.7rem;
       font-weight: 700;
       letter-spacing: 0.12em;
-      color: #888888;
+      color: #4b5563;
+      text-transform: uppercase;
     }
 
     .branch-select {
-      background: #141414;
-      border: 1px solid #333333;
-      color: #d4af37;
-      font-weight: 600;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      color: #000000;
+      font-weight: 700;
       font-size: 0.85rem;
       padding: 0.35rem 0.75rem;
       outline: none;
+      border-radius: 0;
     }
 
     .topbar-right {
@@ -615,38 +619,41 @@ type TabPOS = 'POS' | 'HISTORIAL';
       font-size: 0.65rem;
       font-weight: 700;
       letter-spacing: 0.15em;
-      color: #ffaa33;
+      color: #4b5563;
+      text-transform: uppercase;
     }
 
     .cashier-name {
       font-size: 0.85rem;
-      font-weight: 600;
-      color: #ffffff;
+      font-weight: 700;
+      color: #000000;
     }
 
     .nav-tabs-switch {
       display: flex;
-      gap: 0.5rem;
-      background: #0f0f0f;
+      gap: 0.25rem;
+      background: #f3f4f6;
       padding: 0.25rem;
-      border: 1px solid #222222;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 0;
     }
 
     .tab-switch-btn {
       background: transparent;
       border: none;
-      color: #888888;
+      color: #4b5563;
       font-size: 0.72rem;
       font-weight: 700;
       letter-spacing: 0.1em;
       padding: 0.5rem 0.85rem;
       cursor: pointer;
-      transition: all 0.2s;
+      border-radius: 0;
+      transition: all 0.2s ease;
     }
 
     .tab-switch-btn.active {
-      background: #d4af37;
-      color: #000000;
+      background: #000000;
+      color: #ffffff;
     }
 
     /* POS Main 2-Column Grid */
@@ -659,12 +666,13 @@ type TabPOS = 'POS' | 'HISTORIAL';
 
     /* Left Panel: Catalog */
     .pos-catalog-panel {
-      background: #080808;
-      border: 1px solid #1a1a1a;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 1.5rem;
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
+      border-radius: 0;
     }
 
     .panel-header-search {
@@ -679,17 +687,19 @@ type TabPOS = 'POS' | 'HISTORIAL';
 
     .search-input {
       width: 100%;
-      background: #111111;
-      border: 1px solid #282828;
-      color: #ffffff;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
       padding: 0.75rem 1rem;
       font-size: 0.9rem;
       outline: none;
       box-sizing: border-box;
+      border-radius: 0;
+      transition: border-color 0.2s ease;
     }
 
     .search-input:focus {
-      border-color: #d4af37;
+      border-color: #000000;
     }
 
     .btn-clear-search {
@@ -699,7 +709,7 @@ type TabPOS = 'POS' | 'HISTORIAL';
       transform: translateY(-50%);
       background: transparent;
       border: none;
-      color: #888888;
+      color: #6b7280;
       font-size: 1.25rem;
       cursor: pointer;
     }
@@ -712,22 +722,28 @@ type TabPOS = 'POS' | 'HISTORIAL';
     }
 
     .cat-pill {
-      background: #121212;
-      border: 1px solid #222222;
-      color: #888888;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.18);
+      color: #4b5563;
       font-size: 0.7rem;
       font-weight: 700;
       letter-spacing: 0.1em;
-      padding: 0.35rem 0.75rem;
+      padding: 0.4rem 0.85rem;
       cursor: pointer;
       white-space: nowrap;
+      border-radius: 0;
       transition: all 0.2s;
     }
 
+    .cat-pill:hover {
+      border-color: #000000;
+      color: #000000;
+    }
+
     .cat-pill.active {
-      background: #1e190a;
-      border-color: #d4af37;
-      color: #d4af37;
+      background: #000000;
+      border-color: #000000;
+      color: #ffffff;
     }
 
     .catalog-items-grid {
@@ -740,16 +756,17 @@ type TabPOS = 'POS' | 'HISTORIAL';
     }
 
     .prenda-card {
-      background: #0f0f0f;
-      border: 1px solid #202020;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 1.15rem;
       display: flex;
       flex-direction: column;
+      border-radius: 0;
       transition: border-color 0.2s;
     }
 
     .prenda-card:hover {
-      border-color: #333333;
+      border-color: rgba(0, 0, 0, 0.3);
     }
 
     .prenda-header {
@@ -761,28 +778,30 @@ type TabPOS = 'POS' | 'HISTORIAL';
 
     .prenda-sku {
       font-size: 0.7rem;
-      color: #777777;
+      color: #6b7280;
       font-family: monospace;
+      font-weight: 600;
     }
 
     .prenda-price {
-      font-family: 'Bodoni Moda', serif;
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #d4af37;
+      font-family: 'Inter', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #000000;
     }
 
     .prenda-name {
+      font-family: 'Inter', sans-serif;
       font-size: 0.95rem;
-      font-weight: 600;
+      font-weight: 700;
       margin: 0 0 0.2rem 0;
-      color: #ffffff;
+      color: #000000;
       line-height: 1.3;
     }
 
     .prenda-cat {
       font-size: 0.72rem;
-      color: #888888;
+      color: #6b7280;
       margin-bottom: 0.85rem;
     }
 
@@ -797,90 +816,99 @@ type TabPOS = 'POS' | 'HISTORIAL';
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #141414;
-      border: 1px solid #262626;
-      color: #cccccc;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      color: #111111;
       padding: 0.45rem 0.75rem;
       font-size: 0.78rem;
       cursor: pointer;
+      border-radius: 0;
       transition: all 0.15s;
     }
 
     .variant-btn:hover:not(:disabled) {
-      background: #1f1b0a;
-      border-color: #d4af37;
+      background: #000000;
+      border-color: #000000;
+      color: #ffffff;
+    }
+
+    .variant-btn:hover:not(:disabled) .var-badge,
+    .variant-btn:hover:not(:disabled) .var-color,
+    .variant-btn:hover:not(:disabled) .var-stock {
       color: #ffffff;
     }
 
     .variant-btn:disabled {
       opacity: 0.45;
       cursor: not-allowed;
-      border-color: #1a1a1a;
+      border-color: rgba(0, 0, 0, 0.06);
+      background: #f3f4f6;
     }
 
     .var-badge {
       font-weight: 700;
-      color: #d4af37;
+      color: #000000;
     }
 
     .var-color {
       font-size: 0.72rem;
-      color: #888888;
+      color: #4b5563;
     }
 
     .var-stock {
       font-size: 0.7rem;
       font-weight: 700;
-      color: #44dd88;
+      color: #16a34a;
     }
 
     .var-stock.zero {
-      color: #ff5555;
+      color: #dc2626;
     }
 
     .empty-catalog {
       grid-column: 1 / -1;
       text-align: center;
       padding: 3rem 1rem;
-      color: #666666;
+      color: #6b7280;
     }
 
     /* Right Panel: Ticket & Register */
     .pos-ticket-panel {
-      background: #0a0a0a;
-      border: 1px solid #262626;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       display: flex;
       flex-direction: column;
       max-height: calc(100vh - 120px);
+      border-radius: 0;
     }
 
     .ticket-header {
       padding: 1.25rem 1.5rem;
-      border-bottom: 1px solid #1a1a1a;
-      background: #0e0e0e;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      background: #f9fafb;
     }
 
     .ticket-eyebrow {
       font-size: 0.65rem;
       font-weight: 700;
       letter-spacing: 0.15em;
-      color: #d4af37;
+      color: #4b5563;
       text-transform: uppercase;
     }
 
     .ticket-title {
-      font-family: 'Bodoni Moda', serif;
-      font-size: 1.4rem;
-      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 700;
       margin: 0.2rem 0 0 0;
-      color: #ffffff;
+      color: #000000;
     }
 
     /* Customer Section */
     .customer-section {
       padding: 1rem 1.5rem;
-      background: #121212;
-      border-bottom: 1px solid #1a1a1a;
+      background: #ffffff;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     }
 
     .customer-quick-row {
@@ -894,17 +922,26 @@ type TabPOS = 'POS' | 'HISTORIAL';
       font-size: 0.68rem;
       font-weight: 700;
       letter-spacing: 0.12em;
-      color: #888888;
+      color: #4b5563;
+      text-transform: uppercase;
     }
 
     .btn-quick-consumer {
-      background: transparent;
-      border: 1px solid #333333;
-      color: #d4af37;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
       font-size: 0.68rem;
       font-weight: 700;
       padding: 0.2rem 0.5rem;
       cursor: pointer;
+      border-radius: 0;
+      transition: all 0.2s;
+    }
+
+    .btn-quick-consumer:hover {
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
     }
 
     .customer-fields {
@@ -914,16 +951,18 @@ type TabPOS = 'POS' | 'HISTORIAL';
     }
 
     .cust-input {
-      background: #0a0a0a;
-      border: 1px solid #2a2a2a;
-      color: #ffffff;
-      padding: 0.45rem 0.65rem;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
+      padding: 0.5rem 0.65rem;
       font-size: 0.8rem;
       outline: none;
+      border-radius: 0;
+      transition: border-color 0.2s ease;
     }
 
     .cust-input:focus {
-      border-color: #d4af37;
+      border-color: #000000;
     }
 
     /* Ticket Items List */
@@ -940,12 +979,12 @@ type TabPOS = 'POS' | 'HISTORIAL';
     .empty-ticket {
       text-align: center;
       padding: 3rem 1rem;
-      color: #555555;
+      color: #6b7280;
     }
 
     .ticket-icon {
       font-size: 2rem;
-      color: #333333;
+      color: #9ca3af;
     }
 
     .ticket-item-row {
@@ -953,9 +992,10 @@ type TabPOS = 'POS' | 'HISTORIAL';
       justify-content: space-between;
       align-items: center;
       gap: 0.75rem;
-      background: #101010;
-      border: 1px solid #1d1d1d;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.08);
       padding: 0.75rem 1rem;
+      border-radius: 0;
     }
 
     .item-info {
@@ -964,20 +1004,20 @@ type TabPOS = 'POS' | 'HISTORIAL';
 
     .item-name {
       font-size: 0.85rem;
-      font-weight: 600;
-      color: #ffffff;
+      font-weight: 700;
+      color: #000000;
     }
 
     .item-sub {
       font-size: 0.72rem;
-      color: #777777;
+      color: #6b7280;
       margin: 0.15rem 0;
     }
 
     .item-unit-cost {
       font-size: 0.75rem;
-      color: #d4af37;
-      font-weight: 500;
+      color: #000000;
+      font-weight: 700;
     }
 
     .item-qty-controls {
@@ -987,9 +1027,9 @@ type TabPOS = 'POS' | 'HISTORIAL';
     }
 
     .btn-qty {
-      background: #1a1a1a;
-      border: 1px solid #333333;
-      color: #ffffff;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
       width: 26px;
       height: 26px;
       font-size: 0.9rem;
@@ -998,6 +1038,14 @@ type TabPOS = 'POS' | 'HISTORIAL';
       display: flex;
       align-items: center;
       justify-content: center;
+      border-radius: 0;
+      transition: all 0.2s;
+    }
+
+    .btn-qty:hover:not(:disabled) {
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
     }
 
     .btn-qty:disabled {
@@ -1010,6 +1058,7 @@ type TabPOS = 'POS' | 'HISTORIAL';
       font-size: 0.85rem;
       width: 24px;
       text-align: center;
+      color: #000000;
     }
 
     .item-subtotal-side {
@@ -1020,24 +1069,24 @@ type TabPOS = 'POS' | 'HISTORIAL';
     }
 
     .item-subtotal-val {
-      font-family: 'Bodoni Moda', serif;
+      font-family: 'Inter', sans-serif;
       font-size: 1rem;
-      font-weight: 600;
-      color: #ffffff;
+      font-weight: 700;
+      color: #000000;
     }
 
     .btn-remove-item {
       background: transparent;
       border: none;
-      color: #ff5555;
+      color: #dc2626;
       font-size: 1.25rem;
       cursor: pointer;
     }
 
     /* Checkout & Totals */
     .ticket-checkout-section {
-      background: #0d0d0d;
-      border-top: 1px solid #1f1f1f;
+      background: #f9fafb;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
       padding: 1.25rem 1.5rem;
     }
 
@@ -1052,7 +1101,8 @@ type TabPOS = 'POS' | 'HISTORIAL';
       display: flex;
       justify-content: space-between;
       font-size: 0.82rem;
-      color: #aaaaaa;
+      color: #4b5563;
+      font-weight: 600;
     }
 
     .discount-line {
@@ -1061,29 +1111,35 @@ type TabPOS = 'POS' | 'HISTORIAL';
 
     .discount-input {
       width: 80px;
-      background: #141414;
-      border: 1px solid #333333;
-      color: #ffaa33;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
       padding: 0.25rem 0.5rem;
       text-align: right;
       font-weight: 700;
       font-size: 0.82rem;
+      border-radius: 0;
+      outline: none;
+    }
+
+    .discount-input:focus {
+      border-color: #000000;
     }
 
     .grand-total {
       padding-top: 0.5rem;
-      border-top: 1px solid #222222;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
       font-size: 0.95rem;
-      font-weight: 700;
-      color: #ffffff;
+      font-weight: 800;
+      color: #000000;
       align-items: baseline;
     }
 
     .grand-total-val {
-      font-family: 'Bodoni Moda', serif;
+      font-family: 'Inter', sans-serif;
       font-size: 1.6rem;
-      font-weight: 600;
-      color: #d4af37;
+      font-weight: 800;
+      color: #000000;
     }
 
     /* Payment Tabs */
@@ -1095,28 +1151,35 @@ type TabPOS = 'POS' | 'HISTORIAL';
     }
 
     .pay-tab {
-      background: #141414;
-      border: 1px solid #262626;
-      color: #888888;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.18);
+      color: #4b5563;
       font-size: 0.7rem;
       font-weight: 700;
       letter-spacing: 0.1em;
       padding: 0.6rem 0.5rem;
       cursor: pointer;
+      border-radius: 0;
       transition: all 0.2s;
     }
 
+    .pay-tab:hover {
+      border-color: #000000;
+      color: #000000;
+    }
+
     .pay-tab.active {
-      background: #1c1708;
-      border-color: #d4af37;
-      color: #d4af37;
+      background: #000000;
+      border-color: #000000;
+      color: #ffffff;
     }
 
     .cash-calc-panel {
-      background: #121212;
-      border: 1px solid #222222;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 0.85rem;
       margin-bottom: 1rem;
+      border-radius: 0;
     }
 
     .cash-input-row {
@@ -1130,19 +1193,26 @@ type TabPOS = 'POS' | 'HISTORIAL';
       font-size: 0.68rem;
       font-weight: 700;
       letter-spacing: 0.1em;
-      color: #aaaaaa;
+      color: #4b5563;
+      text-transform: uppercase;
     }
 
     .cash-input {
       width: 110px;
-      background: #080808;
-      border: 1px solid #333333;
-      color: #44dd88;
-      font-family: 'Bodoni Moda', serif;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
+      font-family: 'Inter', sans-serif;
       font-size: 1.1rem;
-      font-weight: 600;
+      font-weight: 700;
       padding: 0.35rem 0.65rem;
       text-align: right;
+      border-radius: 0;
+      outline: none;
+    }
+
+    .cash-input:focus {
+      border-color: #000000;
     }
 
     .quick-cash-chips {
@@ -1152,17 +1222,21 @@ type TabPOS = 'POS' | 'HISTORIAL';
     }
 
     .cash-chip {
-      background: #1a1a1a;
-      border: 1px solid #2d2d2d;
-      color: #dcdcdc;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.18);
+      color: #374151;
       font-size: 0.68rem;
+      font-weight: 700;
       padding: 0.3rem 0.5rem;
       cursor: pointer;
+      border-radius: 0;
+      transition: all 0.2s;
     }
 
     .cash-chip:hover {
-      border-color: #d4af37;
-      color: #d4af37;
+      border-color: #000000;
+      background: #000000;
+      color: #ffffff;
     }
 
     .change-calc-row {
@@ -1170,50 +1244,59 @@ type TabPOS = 'POS' | 'HISTORIAL';
       justify-content: space-between;
       align-items: center;
       padding-top: 0.5rem;
-      border-top: 1px solid #202020;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
       font-size: 0.8rem;
       font-weight: 700;
-      color: #44dd88;
+      color: #16a34a;
     }
 
     .change-calc-row.negative {
-      color: #ff5555;
+      color: #dc2626;
     }
 
     .change-val {
-      font-family: 'Bodoni Moda', serif;
+      font-family: 'Inter', sans-serif;
       font-size: 1.2rem;
+      font-weight: 800;
     }
 
     .card-ref-panel {
-      background: #121212;
-      border: 1px solid #222222;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 0.85rem;
       margin-bottom: 1rem;
       display: flex;
       flex-direction: column;
       gap: 0.4rem;
+      border-radius: 0;
     }
 
     .form-input {
-      background: #080808;
-      border: 1px solid #333333;
-      color: #ffffff;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
       padding: 0.5rem 0.75rem;
       font-size: 0.82rem;
+      border-radius: 0;
+      outline: none;
+    }
+
+    .form-input:focus {
+      border-color: #000000;
     }
 
     .card-hint {
       font-size: 0.68rem;
-      color: #777777;
+      color: #6b7280;
     }
 
     .qr-panel {
-      background: #121212;
-      border: 1px solid #222222;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 0.85rem;
       margin-bottom: 1rem;
       text-align: center;
+      border-radius: 0;
     }
 
     .qr-box {
@@ -1226,6 +1309,7 @@ type TabPOS = 'POS' | 'HISTORIAL';
       width: 140px;
       height: 140px;
       background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
       color: #000000;
       display: flex;
       flex-direction: column;
@@ -1252,20 +1336,21 @@ type TabPOS = 'POS' | 'HISTORIAL';
 
     .btn-checkout {
       width: 100%;
-      background: #d4af37;
-      border: 1px solid #d4af37;
-      color: #000000;
+      background: #000000;
+      border: 1px solid #000000;
+      color: #ffffff;
       font-size: 0.85rem;
       font-weight: 700;
       letter-spacing: 0.1em;
       padding: 0.95rem;
       cursor: pointer;
+      border-radius: 0;
       transition: all 0.2s;
     }
 
     .btn-checkout:hover:not(:disabled) {
-      background: #f0c742;
-      border-color: #f0c742;
+      background: #262626;
+      border-color: #262626;
     }
 
     .btn-checkout:disabled {
@@ -1275,9 +1360,10 @@ type TabPOS = 'POS' | 'HISTORIAL';
 
     /* History Tab */
     .panel-card {
-      background: #080808;
-      border: 1px solid #1a1a1a;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 2rem;
+      border-radius: 0;
     }
 
     .panel-header-history {
@@ -1288,14 +1374,16 @@ type TabPOS = 'POS' | 'HISTORIAL';
     }
 
     .panel-title {
-      font-family: 'Bodoni Moda', serif;
+      font-family: 'Inter', sans-serif;
       font-size: 1.5rem;
+      font-weight: 700;
       margin: 0 0 0.25rem 0;
+      color: #000000;
     }
 
     .panel-hint {
       font-size: 0.8rem;
-      color: #777777;
+      color: #6b7280;
     }
 
     .history-metrics {
@@ -1304,28 +1392,32 @@ type TabPOS = 'POS' | 'HISTORIAL';
     }
 
     .metric-pill {
-      background: #111111;
-      border: 1px solid #222222;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       padding: 0.6rem 1rem;
       display: flex;
       flex-direction: column;
+      border-radius: 0;
     }
 
     .gold-pill .m-val {
-      color: #d4af37;
+      color: #000000;
+      font-weight: 800;
     }
 
     .m-lbl {
       font-size: 0.65rem;
       font-weight: 700;
       letter-spacing: 0.1em;
-      color: #888888;
+      color: #4b5563;
+      text-transform: uppercase;
     }
 
     .m-val {
-      font-family: 'Bodoni Moda', serif;
+      font-family: 'Inter', sans-serif;
       font-size: 1.3rem;
-      font-weight: 600;
+      font-weight: 800;
+      color: #000000;
     }
 
     .table-responsive {
@@ -1343,37 +1435,44 @@ type TabPOS = 'POS' | 'HISTORIAL';
       font-size: 0.7rem;
       font-weight: 700;
       letter-spacing: 0.15em;
-      color: #888888;
+      color: #000000;
       padding: 0.85rem 1rem;
-      border-bottom: 1px solid #222222;
-      background: #0f0f0f;
+      border-bottom: 2px solid rgba(0, 0, 0, 0.12);
+      background: #f9fafb;
+      text-transform: uppercase;
     }
 
     .editorial-table td {
       padding: 0.9rem 1rem;
-      border-bottom: 1px solid #171717;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
       vertical-align: middle;
+      color: #1f2937;
+    }
+
+    .editorial-table tr:hover td {
+      background: #f9fafb;
     }
 
     .code-badge {
       font-family: monospace;
       font-size: 0.8rem;
       font-weight: 700;
-      color: #d4af37;
-      background: #1a1608;
+      color: #000000;
+      background: #f3f4f6;
       padding: 0.2rem 0.5rem;
-      border: 1px solid #3d320e;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: 0;
     }
 
     .col-time {
-      color: #888888;
+      color: #6b7280;
       font-size: 0.8rem;
     }
 
     .sub-nit {
       display: block;
       font-size: 0.72rem;
-      color: #777777;
+      color: #6b7280;
     }
 
     .pay-badge {
@@ -1381,24 +1480,28 @@ type TabPOS = 'POS' | 'HISTORIAL';
       font-size: 0.68rem;
       font-weight: 700;
       padding: 0.2rem 0.5rem;
-      background: #141414;
-      border: 1px solid #2a2a2a;
-      color: #ffaa33;
+      background: #f3f4f6;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      color: #000000;
+      border-radius: 0;
     }
 
     .btn-action-view {
-      background: transparent;
-      border: 1px solid #333333;
-      color: #dcdcdc;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
       font-size: 0.72rem;
       font-weight: 700;
       padding: 0.35rem 0.65rem;
       cursor: pointer;
+      border-radius: 0;
+      transition: all 0.2s;
     }
 
     .btn-action-view:hover {
-      border-color: #d4af37;
-      color: #d4af37;
+      border-color: #000000;
+      background: #000000;
+      color: #ffffff;
     }
 
     /* Modal Backdrop & Receipt Thermal View */
@@ -1408,7 +1511,7 @@ type TabPOS = 'POS' | 'HISTORIAL';
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0, 0, 0, 0.5);
       backdrop-filter: blur(4px);
       z-index: 1000;
       display: flex;
@@ -1418,25 +1521,26 @@ type TabPOS = 'POS' | 'HISTORIAL';
     }
 
     .receipt-dialog {
-      background: #141414;
-      border: 1px solid #333333;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
       padding: 1.5rem;
       max-width: 400px;
       width: 100%;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2);
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
+      border-radius: 0;
     }
 
     .receipt-paper {
-      background: #fbfbfb;
+      background: #fcfcfc;
       color: #111111;
       padding: 1.5rem;
       font-family: 'Courier New', Courier, monospace;
       font-size: 0.8rem;
       line-height: 1.4;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      border: 1px dashed rgba(0, 0, 0, 0.2);
     }
 
     .receipt-brand {
@@ -1445,9 +1549,9 @@ type TabPOS = 'POS' | 'HISTORIAL';
     }
 
     .receipt-logo {
-      font-family: 'Bodoni Moda', serif;
+      font-family: 'Inter', sans-serif;
       font-size: 1.3rem;
-      font-weight: 700;
+      font-weight: 800;
       margin: 0;
       letter-spacing: 0.05em;
     }
@@ -1462,13 +1566,14 @@ type TabPOS = 'POS' | 'HISTORIAL';
     .receipt-sub, .receipt-addr {
       display: block;
       font-size: 0.68rem;
-      color: #444444;
+      color: #4b5563;
     }
 
     .receipt-divider {
       text-align: center;
       margin: 0.4rem 0;
       font-size: 0.75rem;
+      color: #9ca3af;
     }
 
     .receipt-meta {
@@ -1494,7 +1599,7 @@ type TabPOS = 'POS' | 'HISTORIAL';
 
     .receipt-item-sub {
       font-size: 0.65rem;
-      color: #666666;
+      color: #6b7280;
     }
 
     .receipt-totals {
@@ -1526,7 +1631,7 @@ type TabPOS = 'POS' | 'HISTORIAL';
 
     .receipt-legal {
       font-size: 0.6rem;
-      color: #555555;
+      color: #6b7280;
       margin: 0;
     }
 
@@ -1537,42 +1642,56 @@ type TabPOS = 'POS' | 'HISTORIAL';
 
     .btn-print {
       flex: 1;
-      background: #d4af37;
-      border: 1px solid #d4af37;
-      color: #000000;
-      font-weight: 700;
-      font-size: 0.75rem;
-      padding: 0.65rem;
-      cursor: pointer;
-    }
-
-    .btn-new-sale {
-      flex: 1;
-      background: #222222;
-      border: 1px solid #444444;
+      background: #000000;
+      border: 1px solid #000000;
       color: #ffffff;
       font-weight: 700;
       font-size: 0.75rem;
       padding: 0.65rem;
       cursor: pointer;
+      border-radius: 0;
+      transition: all 0.2s;
+    }
+
+    .btn-print:hover {
+      background: #262626;
+      border-color: #262626;
+    }
+
+    .btn-new-sale {
+      flex: 1;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 0.65rem;
+      cursor: pointer;
+      border-radius: 0;
+      transition: all 0.2s;
+    }
+
+    .btn-new-sale:hover {
+      background: #f3f4f6;
     }
 
     .feedback-banner {
-      background: #072614;
-      border: 1px solid #1aa355;
-      color: #7affb0;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
       padding: 0.75rem 1.25rem;
       margin-bottom: 1.25rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-size: 0.85rem;
+      font-weight: 600;
     }
 
     .feedback-banner.error {
-      background: #2b0808;
-      border-color: #aa1111;
-      color: #ff7a7a;
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #991b1b;
     }
 
     .btn-close-banner {
@@ -1586,12 +1705,12 @@ type TabPOS = 'POS' | 'HISTORIAL';
     .empty-state {
       text-align: center;
       padding: 2.5rem;
-      color: #666666;
+      color: #6b7280;
     }
 
     .text-center { text-align: center; }
     .text-right { text-align: right; }
-    .col-strong { font-weight: 700; color: #ffffff; }
+    .col-strong { font-weight: 700; color: #000000; }
   `]
 })
 export class VentasPosPageComponent implements OnInit {

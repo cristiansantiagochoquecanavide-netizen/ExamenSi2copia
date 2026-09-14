@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FashionStore - Inventario &amp; Stock AR</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Public+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary-fixed-dim": "#474747",
+            "on-primary": "#e2e2e2",
+            "secondary-fixed-dim": "#abaab4",
+            "secondary": "#5d5e66",
+            "primary-container": "#3b3b3b",
+            "surface-dim": "#dadada",
+            "inverse-surface": "#2f3131",
+            "outline": "#777777",
+            "on-tertiary-fixed": "#ffffff",
+            "tertiary": "#3a3c3d",
+            "on-tertiary-container": "#ffffff",
+            "on-secondary": "#ffffff",
+            "surface-bright": "#f9f9f9",
+            "outline-variant": "#c6c6c6",
+            "on-background": "#1a1c1c",
+            "primary-fixed": "#5e5e5e",
+            "error": "#ba1a1a",
+            "surface-container-low": "#f3f3f4",
+            "inverse-primary": "#c6c6c6",
+            "inverse-on-surface": "#f0f1f1",
+            "secondary-container": "#d4d3dd",
+            "on-tertiary": "#e2e2e3",
+            "tertiary-fixed-dim": "#454748",
+            "secondary-fixed": "#c6c5cf",
+            "on-secondary-fixed-variant": "#3a3b43",
+            "on-secondary-container": "#1a1b22",
+            "surface-container-lowest": "#ffffff",
+            "surface-variant": "#e2e2e2",
+            "surface-tint": "#5e5e5e",
+            "on-primary-fixed-variant": "#e2e2e2",
+            "on-primary-container": "#ffffff",
+            "on-error-container": "#410002",
+            "on-primary-fixed": "#ffffff",
+            "background": "#f9f9f9",
+            "tertiary-fixed": "#5d5e60",
+            "on-tertiary-fixed-variant": "#e2e2e3",
+            "error-container": "#ffdad6",
+            "surface": "#f9f9f9",
+            "primary": "#000000",
+            "on-surface-variant": "#474747",
+            "tertiary-container": "#737576",
+            "surface-container-high": "#e8e8e8",
+            "surface-container": "#eeeeee",
+            "on-surface": "#1a1c1c",
+            "on-secondary-fixed": "#1a1b22",
+            "on-error": "#ffffff",
+            "surface-container-highest": "#e2e2e2"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "fontFamily": {
+            "headline": ["Inter", "sans-serif"],
+            "display": ["Inter", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "label": ["Public Sans", "sans-serif"]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f9f9f9;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #c6c6c6;
+    }
+  </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface font-body antialiased selection:bg-primary selection:text-white min-h-screen flex flex-col">
+<!-- TOP APP BAR (Shared Component: TopNavBar) -->
+<header class="w-full sticky top-0 z-50 bg-surface dark:bg-background border-b border-outline-variant/30 dark:border-outline-variant/10">
+<div class="flex justify-between items-center px-8 md:px-16 h-20 max-w-7xl mx-auto w-full">
+<!-- Brand & Admin Breadcrumb Anchor -->
+<div class="flex items-center space-x-6">
+<a class="font-headline text-lg font-bold tracking-tight uppercase text-primary dark:text-on-background" href="#">
+          FashionStore
+        </a>
+<div class="hidden lg:flex items-center space-x-3 text-xs tracking-widest uppercase border-l border-outline-variant/40 pl-6 text-on-surface-variant font-label">
+<span class="px-2 py-0.5 bg-surface-container text-on-surface text-[10px] font-semibold tracking-wider">ADMIN / INVENTARIO</span>
+<span class="flex items-center gap-1.5 text-[11px] normal-case text-on-surface-variant font-normal">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600 inline-block animate-pulse"></span>
+            Almacén Central París &amp; Sucursales
+          </span>
+</div>
+</div>
+<!-- Navigation Links from Shared Components JSON -->
+<nav class="hidden md:flex items-center space-x-8 font-headline tracking-widest uppercase text-xs">
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">Colección</a>
+<a class="text-primary font-semibold border-b border-primary pb-1" href="#">Vestidor AR</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">Novedades</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">Acerca</a>
+</nav>
+<!-- Trailing Action Icons -->
+<div class="flex items-center space-x-5 text-primary">
+<div class="hidden xl:flex items-center gap-1.5 px-2.5 py-1 border border-outline-variant/40 rounded text-[11px] font-mono tracking-tight text-on-surface-variant bg-surface-bright">
+<span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>
+          AR Sync: 60 FPS
+        </div>
+<button class="p-1 hover:opacity-70 transition-opacity" title="Buscar">
+<span class="material-symbols-outlined text-[20px]" data-icon="search">search</span>
+</button>
+<button class="p-1 hover:opacity-70 transition-opacity" title="Perfil">
+<span class="material-symbols-outlined text-[20px]" data-icon="person">person</span>
+</button>
+<button class="p-1 hover:opacity-70 transition-opacity relative" title="Bolsa">
+<span class="material-symbols-outlined text-[20px]" data-icon="shopping_bag">shopping_bag</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+<div class="w-8 h-8 rounded bg-primary text-white text-xs font-headline font-semibold flex items-center justify-center tracking-tighter">
+          AD
+        </div>
+</div>
+</div>
+</header>
+<!-- SUB-NAVIGATION BAR (Admin Secondary Level) -->
+<div class="border-b border-outline-variant/30 bg-surface-container-lowest">
+<div class="max-w-7xl mx-auto px-8 md:px-16 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
+<nav class="flex space-x-8 overflow-x-auto custom-scrollbar pt-4 md:pt-0 font-label text-xs tracking-wider uppercase font-medium">
+<a class="py-4 border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors" href="#">Resumen</a>
+<a class="py-4 border-b-2 border-primary text-primary font-semibold" href="#">Inventario &amp; Stock AR</a>
+<a class="py-4 border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors" href="#">Ventas &amp; POS</a>
+<a class="py-4 border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors" href="#">Probadores &amp; Citas</a>
+<a class="py-4 border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors" href="#">Usuarios</a>
+<a class="py-4 border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors" href="#">Auditoría</a>
+</nav>
+<div class="flex items-center space-x-3 py-3 md:py-0">
+<button class="px-3.5 py-1.5 border border-outline-variant text-[11px] font-label font-medium uppercase tracking-wider text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">download</span>
+          Exportar CSV
+        </button>
+<button class="px-3.5 py-1.5 border border-outline-variant text-[11px] font-label font-medium uppercase tracking-wider text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">view_in_ar</span>
+          Sincronizar AR
+        </button>
+<button class="px-4 py-1.5 bg-primary text-white text-[11px] font-label font-medium uppercase tracking-widest hover:bg-neutral-800 transition-colors flex items-center gap-1.5 shadow-sm">
+<span class="material-symbols-outlined text-sm">add</span>
+          Nueva Prenda
+        </button>
+</div>
+</div>
+</div>
+<!-- MAIN CANVAS -->
+<main class="flex-grow max-w-7xl mx-auto w-full px-8 md:px-16 py-8">
+<!-- PAGE HEADER -->
+<section class="mb-8 flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-6 border-b border-outline-variant/30">
+<div>
+<span class="text-[10px] font-label tracking-[0.25em] uppercase text-on-surface-variant font-semibold block mb-1">
+          GESTIÓN DE STOCK &amp; ACTIVOS DIGITALES VOLUMÉTRICOS
+        </span>
+<h1 class="text-3xl lg:text-4xl font-headline font-semibold text-on-surface tracking-tight">
+          Control de Inventario &amp; Modelos 3D
+        </h1>
+<p class="text-xs text-on-surface-variant mt-2 font-body flex flex-wrap items-center gap-2">
+<span>24 Prendas Exclusivas</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span>1.420 Unidades Físicas en Circulación</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span class="font-mono text-neutral-500">Última sincronización LiDAR: hace 12 min</span>
+</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="px-4 py-2 text-xs font-label uppercase tracking-widest border border-outline-variant/60 hover:border-primary text-on-surface transition-colors flex items-center gap-2 bg-surface-container-lowest">
+<span class="material-symbols-outlined text-base">upload_file</span>
+          Importar Lote (glTF / CSV)
+        </button>
+<button class="px-4 py-2 text-xs font-label uppercase tracking-widest border border-outline-variant/60 hover:border-primary text-on-surface transition-colors flex items-center gap-2 bg-surface-container-lowest">
+<span class="material-symbols-outlined text-base">filter_center_focus</span>
+          Calibrar Malla AR 3D
+        </button>
+</div>
+</section>
+<!-- METRICS & HIGHLIGHTS BENTO -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+<!-- Metric 1 -->
+<div class="p-5 border border-outline-variant/40 bg-surface-bright flex flex-col justify-between">
+<div class="flex justify-between items-start mb-3">
+<span class="text-[11px] font-label uppercase tracking-widest text-on-surface-variant font-medium">Stock Óptimo</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600 mr-1.5"></span> 75%
+          </span>
+</div>
+<div>
+<div class="text-2xl font-headline font-semibold text-on-surface tracking-tight">18 <span class="text-sm font-normal text-on-surface-variant">modelos</span></div>
+<p class="text-[11px] text-on-surface-variant mt-1">Disponibilidad en París, Milán y Madrid</p>
+</div>
+</div>
+<!-- Metric 2 -->
+<div class="p-5 border border-outline-variant/40 bg-surface-bright flex flex-col justify-between">
+<div class="flex justify-between items-start mb-3">
+<span class="text-[11px] font-label uppercase tracking-widest text-on-surface-variant font-medium">Stock Crítico</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono bg-amber-50 text-amber-800 border border-amber-200">
+            Alerta Reabastecimiento
+          </span>
+</div>
+<div>
+<div class="text-2xl font-headline font-semibold text-on-surface tracking-tight">3 <span class="text-sm font-normal text-on-surface-variant">modelos</span></div>
+<p class="text-[11px] text-on-surface-variant mt-1">&lt; 10 unidades por referencia</p>
+</div>
+</div>
+<!-- Metric 3 -->
+<div class="p-5 border border-outline-variant/40 bg-surface-bright flex flex-col justify-between">
+<div class="flex justify-between items-start mb-3">
+<span class="text-[11px] font-label uppercase tracking-widest text-on-surface-variant font-medium">Bajo Pedido / Haute Couture</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono bg-surface-container text-on-surface border border-outline-variant/50">
+            Atelier Only
+          </span>
+</div>
+<div>
+<div class="text-2xl font-headline font-semibold text-on-surface tracking-tight">3 <span class="text-sm font-normal text-on-surface-variant">referencias</span></div>
+<p class="text-[11px] text-on-surface-variant mt-1">Producción a medida por cita VIP</p>
+</div>
+</div>
+<!-- Metric 4 -->
+<div class="p-5 border border-outline-variant/40 bg-surface-bright flex flex-col justify-between">
+<div class="flex justify-between items-start mb-3">
+<span class="text-[11px] font-label uppercase tracking-widest text-on-surface-variant font-medium">Digitalización AR</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono bg-neutral-900 text-white">
+            100% Ready
+          </span>
+</div>
+<div>
+<div class="text-2xl font-headline font-semibold text-on-surface tracking-tight">24 / 24 <span class="text-sm font-normal text-on-surface-variant">mallas activas</span></div>
+<p class="text-[11px] text-on-surface-variant mt-1">Calibrado LiDAR 4K + PBR Textures</p>
+</div>
+</div>
+</section>
+<!-- SEARCH, FILTER BAR & VIEW TOGGLE -->
+<div class="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4 mb-6">
+<!-- Search Input -->
+<div class="relative flex-grow max-w-xl">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-lg">search</span>
+<input class="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant/60 text-xs font-body focus:border-primary focus:ring-0 placeholder:text-on-surface-variant/50 transition-colors" placeholder="Buscar por SKU, nombre de prenda, tejido o tag..." type="text"/>
+</div>
+<!-- Filter Capsules -->
+<div class="flex flex-wrap items-center gap-2">
+<button class="px-3.5 py-1.5 text-xs font-label uppercase tracking-wider bg-primary text-white">Todos (24)</button>
+<button class="px-3.5 py-1.5 text-xs font-label uppercase tracking-wider bg-surface-container-low text-on-surface-variant hover:bg-surface-container transition-colors">Abrigos (6)</button>
+<button class="px-3.5 py-1.5 text-xs font-label uppercase tracking-wider bg-surface-container-low text-on-surface-variant hover:bg-surface-container transition-colors">Sastrería (8)</button>
+<button class="px-3.5 py-1.5 text-xs font-label uppercase tracking-wider bg-surface-container-low text-on-surface-variant hover:bg-surface-container transition-colors">Vestidos (5)</button>
+<button class="px-3.5 py-1.5 text-xs font-label uppercase tracking-wider bg-surface-container-low text-on-surface-variant hover:bg-surface-container transition-colors">Calzado (5)</button>
+<div class="h-5 w-[1px] bg-outline-variant/50 mx-1 hidden sm:block"></div>
+<!-- AR Switch -->
+<label class="inline-flex items-center cursor-pointer select-none text-xs font-label uppercase tracking-wider text-on-surface-variant pl-2">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<span class="relative w-7 h-4 bg-surface-container peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary mr-2"></span>
+          Solo AR Ready
+        </label>
+</div>
+</div>
+<!-- MAIN INTERACTIVE WORKSPACE: TABLE + DETAIL INSPECTOR -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+<!-- INVENTORY TABLE CLUSTER (xl:col-span-8 or 9) -->
+<div class="xl:col-span-8 border border-outline-variant/40 bg-surface-container-lowest overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+<div class="overflow-x-auto custom-scrollbar">
+<table class="w-full text-left border-collapse font-body">
+<thead>
+<tr class="border-b border-outline-variant/40 bg-surface-bright text-[10px] font-label font-semibold text-on-surface-variant uppercase tracking-widest">
+<th class="py-3 px-4 w-10">
+<input class="w-3.5 h-3.5 border-outline-variant text-primary rounded focus:ring-0" type="checkbox"/>
+</th>
+<th class="py-3 px-4">Prenda &amp; Código SKU</th>
+<th class="py-3 px-4">Categoría</th>
+<th class="py-3 px-4">Tallas Disponibles</th>
+<th class="py-3 px-4">Stock Físico</th>
+<th class="py-3 px-4">Gemelo AR 3D</th>
+<th class="py-3 px-4 text-right">Acciones</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/20 text-xs">
+<!-- Item 1 (Selected Row) -->
+<tr class="bg-surface-container-low/40 hover:bg-surface-container-low transition-colors group cursor-pointer">
+<td class="py-4 px-4">
+<input checked="" class="w-3.5 h-3.5 border-outline-variant text-primary rounded focus:ring-0" type="checkbox"/>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-3.5">
+<div class="w-12 h-16 bg-surface-container shrink-0 overflow-hidden relative border border-outline-variant/40">
+<img class="w-full h-full object-cover object-top" data-alt="An editorial high fashion full-length white sculptural cashmere wool coat displayed in an ultra minimalist contemporary gallery setting with clean architectural white walls and subtle grey concrete floor. The silhouette is sharp and structured with an exaggerated collar, avant-garde tailoring, bathed in diffused high key natural lighting emphasizing fabric texture." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbc6hZ_7k_4dQbFfioCupP9hJkzWqVhbr1OjCSz94I0_nqoLR5lc01tmFuX6l3hsMjFYLLW0O8Fy_UgH4faj88Ocyx_CHO3AtXGWu5A9-v45Vg5pePJhABqkdvUYr-Sj8z5PYBXHsnq7Kum-57_v12D0yaGcaxtGBmBZ2OyaqwWkPIZVcTgu_8m8CG9vpw5t6Usoz8y0icaoC9Dz-k88iUWyDqu_Xb0pTAIz93ARwISqycUAHrskwtae_KZcLbjCMvc2zcgEasBpE"/>
+<span class="absolute bottom-0 right-0 bg-primary text-[8px] font-mono text-white px-1">AR</span>
+</div>
+<div>
+<span class="font-headline font-semibold text-on-surface text-sm block leading-tight">Abrigo Sculptural No. 04</span>
+<span class="font-mono text-[11px] text-on-surface-variant tracking-tight block mt-0.5">#FS-COAT-0492</span>
+<span class="text-[10px] text-neutral-400 font-label">Lana cashmere pura 580g/m²</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-4 font-label text-on-surface">
+<span class="text-[11px]">Abrigos de Autor</span>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-1.5 font-mono text-[10px]">
+<span class="px-1.5 py-0.5 border border-outline-variant/60 bg-surface-bright">XS (4)</span>
+<span class="px-1.5 py-0.5 border border-primary bg-primary text-white font-medium">S (12)</span>
+<span class="px-1.5 py-0.5 border border-outline-variant/60 bg-surface-bright">M (8)</span>
+<span class="px-1.5 py-0.5 border border-outline-variant/30 text-neutral-400">L (2)</span>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="font-headline font-semibold text-on-surface text-sm">26 <span class="text-[11px] font-normal text-on-surface-variant">uds</span></div>
+<div class="w-20 bg-surface-container h-1 mt-1.5 overflow-hidden">
+<div class="bg-primary h-full" style="width: 78%;"></div>
+</div>
+<span class="text-[10px] text-on-surface-variant mt-1 block font-mono">3 tiendas</span>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col gap-1">
+<span class="inline-flex items-center text-[10px] font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.5 border border-emerald-200 w-fit">
+<span class="w-1 h-1 rounded-full bg-emerald-600 mr-1.5 animate-ping"></span>
+                      Activo 60 FPS
+                    </span>
+<span class="text-[10px] font-mono text-neutral-400">glTF 4K • 0.2mm mesh</span>
+</div>
+</td>
+<td class="py-4 px-4 text-right whitespace-nowrap">
+<div class="flex items-center justify-end gap-1.5">
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Ajustar Stock">
+<span class="material-symbols-outlined text-base">tune</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Inspección 3D">
+<span class="material-symbols-outlined text-base">view_in_ar</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Opciones">
+<span class="material-symbols-outlined text-base">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Item 2 -->
+<tr class="hover:bg-surface-bright transition-colors group">
+<td class="py-4 px-4">
+<input class="w-3.5 h-3.5 border-outline-variant text-primary rounded focus:ring-0" type="checkbox"/>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-3.5">
+<div class="w-12 h-16 bg-surface-container shrink-0 overflow-hidden relative border border-outline-variant/40">
+<img class="w-full h-full object-cover object-top" data-alt="Editorial luxury women wearing an architectural pleated silk high fashion dress in pristine ivory white tone. Clean straight modern lines, high neckline and sculpted origami draping. High-key modern photography aesthetic against a spotless minimalist interior with gentle shadow play." src="https://lh3.googleusercontent.com/aida-public/AB6AXuByRTsm8WEIDjhjEZeWYYszY-p2-YwL0MsaV3zBWvYokTNa6v7Nu51kYa1eUDpJPsXwNIlFuX6VVgybOfr8zWsebFWi6gWWbKJB57scVsg5b5mHDEv-Pw0cSNBNx6L2ZjC38mNOy2RfDLYAXDP6DiU0eDldeJApq0BrFLsoRgk4RIVsdv7mKO6QWgnxRy5oUi_WRSWUDeO2Dj610sjIk9lvsnK8RCuyUXsI-BVvYE2Ewm3B2GUz9CqyevtCvS4lgWPgT-mbnX7zEcs"/>
+<span class="absolute bottom-0 right-0 bg-primary text-[8px] font-mono text-white px-1">AR</span>
+</div>
+<div>
+<span class="font-headline font-semibold text-on-surface text-sm block leading-tight">Vestido Plisado Arquitectura</span>
+<span class="font-mono text-[11px] text-on-surface-variant tracking-tight block mt-0.5">#FS-DRS-0118</span>
+<span class="text-[10px] text-neutral-400 font-label">Seda orgánica plisada al calor</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-4 font-label text-on-surface">
+<span class="text-[11px]">Vestidos de Noche</span>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-1.5 font-mono text-[10px]">
+<span class="px-1.5 py-0.5 border border-outline-variant/60 bg-surface-bright">36 (4)</span>
+<span class="px-1.5 py-0.5 border border-outline-variant/60 bg-surface-bright">38 (7)</span>
+<span class="px-1.5 py-0.5 border border-outline-variant/60 bg-surface-bright">40 (3)</span>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="font-headline font-semibold text-on-surface text-sm">14 <span class="text-[11px] font-normal text-on-surface-variant">uds</span></div>
+<div class="w-20 bg-surface-container h-1 mt-1.5 overflow-hidden">
+<div class="bg-primary h-full" style="width: 45%;"></div>
+</div>
+<span class="text-[10px] text-on-surface-variant mt-1 block font-mono">París &amp; Milán</span>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col gap-1">
+<span class="inline-flex items-center text-[10px] font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.5 border border-emerald-200 w-fit">
+<span class="w-1 h-1 rounded-full bg-emerald-600 mr-1.5"></span>
+                      Activo 60 FPS
+                    </span>
+<span class="text-[10px] font-mono text-neutral-400">USDZ / glTF • Cloth Sim</span>
+</div>
+</td>
+<td class="py-4 px-4 text-right whitespace-nowrap">
+<div class="flex items-center justify-end gap-1.5">
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Ajustar Stock">
+<span class="material-symbols-outlined text-base">tune</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Inspección 3D">
+<span class="material-symbols-outlined text-base">view_in_ar</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Opciones">
+<span class="material-symbols-outlined text-base">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Item 3 -->
+<tr class="hover:bg-surface-bright transition-colors group">
+<td class="py-4 px-4">
+<input class="w-3.5 h-3.5 border-outline-variant text-primary rounded focus:ring-0" type="checkbox"/>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-3.5">
+<div class="w-12 h-16 bg-surface-container shrink-0 overflow-hidden relative border border-outline-variant/40">
+<img class="w-full h-full object-cover object-top" data-alt="Editorial fashion lookbook photograph showing a tailored black sculpted oversized blazer with architectural shoulder pads and sharp razor cut lapels. Studio setting with soft high-contrast light reflections on rich matte wool fabric. Sophisticated luxury monochrome aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfHZiJEDmhZuuGdMJuyBo0-aptAjXZjyubdLEqESLfdqzKpYT4en5ZZysO23LEaMRmRrNJ0DCjexct11i31xSAIFt0OqSXSD5uda48PnZY6cNG8hAh3b0INPw2Tph662tN2w6RXtVbtb45FuH9RDV_MkPijXicazmtszeylKXUqU4oY2JKkmv9eIHXOAYV0dyImslQMN2Pg_9PB4iIXnGNuqmQReH9Raf3gs9T5Zk4HG9r9afK5Xbp4OnG-IRBo9vjs2ZFhQBsCyI"/>
+<span class="absolute bottom-0 right-0 bg-primary text-[8px] font-mono text-white px-1">AR</span>
+</div>
+<div>
+<span class="font-headline font-semibold text-on-surface text-sm block leading-tight">Americana Estructurada Noir</span>
+<span class="font-mono text-[11px] text-on-surface-variant tracking-tight block mt-0.5">#FS-BLZ-0205</span>
+<span class="text-[10px] text-neutral-400 font-label">Lana fría super 140s italiana</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-4 font-label text-on-surface">
+<span class="text-[11px]">Sastrería Contemporánea</span>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-1.5 font-mono text-[10px]">
+<span class="px-1.5 py-0.5 border border-outline-variant/60 bg-surface-bright">46 (8)</span>
+<span class="px-1.5 py-0.5 border border-outline-variant/60 bg-surface-bright">48 (16)</span>
+<span class="px-1.5 py-0.5 border border-outline-variant/60 bg-surface-bright">50 (14)</span>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="font-headline font-semibold text-on-surface text-sm">38 <span class="text-[11px] font-normal text-on-surface-variant">uds</span></div>
+<div class="w-20 bg-surface-container h-1 mt-1.5 overflow-hidden">
+<div class="bg-primary h-full" style="width: 90%;"></div>
+</div>
+<span class="text-[10px] text-on-surface-variant mt-1 block font-mono">Central + 3 Tiendas</span>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col gap-1">
+<span class="inline-flex items-center text-[10px] font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.5 border border-emerald-200 w-fit">
+<span class="w-1 h-1 rounded-full bg-emerald-600 mr-1.5"></span>
+                      Activo 60 FPS
+                    </span>
+<span class="text-[10px] font-mono text-neutral-400">LiDAR Refined • Occlusion</span>
+</div>
+</td>
+<td class="py-4 px-4 text-right whitespace-nowrap">
+<div class="flex items-center justify-end gap-1.5">
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Ajustar Stock">
+<span class="material-symbols-outlined text-base">tune</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Inspección 3D">
+<span class="material-symbols-outlined text-base">view_in_ar</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Opciones">
+<span class="material-symbols-outlined text-base">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Item 4 (Critical Stock) -->
+<tr class="hover:bg-surface-bright transition-colors group">
+<td class="py-4 px-4">
+<input class="w-3.5 h-3.5 border-outline-variant text-primary rounded focus:ring-0" type="checkbox"/>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-3.5">
+<div class="w-12 h-16 bg-surface-container shrink-0 overflow-hidden relative border border-outline-variant/40">
+<img class="w-full h-full object-cover object-top" data-alt="Editorial luxury minimalist trench coat featuring asymmetric overlapping panels in bone white structured technical gabardine. Avant-garde fashion photoshoot against a stark white architectural museum backdrop. Sharp high-fashion lighting celebrating texture and modern silhouette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCn56knEXXbA0cBh5o4hnvSNM4NJnGYWjnXbJxg4o2H9RN3pnkpaacyUTkufeU_i2TdklFxDr3XB5hlMEvNIM-6VIKbAu_-zBHwDZJbKYWnsQHTFxsRC3TiOXLL2pQabu1zTi0-fh9LFJNWYgRzwmsZL5f53-6Jtb1kWhbZFbrx642qjuC9wFzmBEiKqyjYfNyZu08wvzNZR47D7ZJ0titd5iM8IxiQfDv0M85ISAH10fWzi8NT5U2G0l38I1FvCz0IOT_6qR4vK3g"/>
+<span class="absolute bottom-0 right-0 bg-primary text-[8px] font-mono text-white px-1">AR</span>
+</div>
+<div>
+<span class="font-headline font-semibold text-on-surface text-sm block leading-tight">Trench Escultural Modular</span>
+<span class="font-mono text-[11px] text-amber-700 font-semibold tracking-tight block mt-0.5">#FS-TRN-0884</span>
+<span class="text-[10px] text-neutral-400 font-label">Gabardina técnica impermeable</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-4 font-label text-on-surface">
+<span class="text-[11px]">Abrigos de Autor</span>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-1.5 font-mono text-[10px]">
+<span class="px-1.5 py-0.5 border border-amber-300 bg-amber-50 text-amber-900 font-medium">S (2)</span>
+<span class="px-1.5 py-0.5 border border-amber-300 bg-amber-50 text-amber-900 font-medium">M (4)</span>
+<span class="px-1.5 py-0.5 border border-amber-300 bg-amber-50 text-amber-900 font-medium">L (2)</span>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="font-headline font-semibold text-amber-800 text-sm flex items-center gap-1.5">
+                    8 <span class="text-[11px] font-normal text-amber-700">uds</span>
+<span class="text-[9px] uppercase px-1 bg-amber-100 text-amber-900 border border-amber-300 font-mono">Bajo</span>
+</div>
+<div class="w-20 bg-surface-container h-1 mt-1.5 overflow-hidden">
+<div class="bg-amber-600 h-full" style="width: 25%;"></div>
+</div>
+<span class="text-[10px] text-on-surface-variant mt-1 block font-mono">Solo París Central</span>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col gap-1">
+<span class="inline-flex items-center text-[10px] font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.5 border border-emerald-200 w-fit">
+<span class="w-1 h-1 rounded-full bg-emerald-600 mr-1.5"></span>
+                      Activo 60 FPS
+                    </span>
+<span class="text-[10px] font-mono text-neutral-400">glTF 4K • Modular rig</span>
+</div>
+</td>
+<td class="py-4 px-4 text-right whitespace-nowrap">
+<div class="flex items-center justify-end gap-1.5">
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Ajustar Stock">
+<span class="material-symbols-outlined text-base">tune</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Inspección 3D">
+<span class="material-symbols-outlined text-base">view_in_ar</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Opciones">
+<span class="material-symbols-outlined text-base">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Item 5 -->
+<tr class="hover:bg-surface-bright transition-colors group">
+<td class="py-4 px-4">
+<input class="w-3.5 h-3.5 border-outline-variant text-primary rounded focus:ring-0" type="checkbox"/>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-3.5">
+<div class="w-12 h-16 bg-surface-container shrink-0 overflow-hidden relative border border-outline-variant/40">
+<img class="w-full h-full object-cover object-top" data-alt="Editorial look of high-waisted tailored sartorial trousers with pleats in dark charcoal wool. Minimalist high-end model posing in a pristine white art gallery interior. Clean shadows, architectural elegance, and subtle textures." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3zVELKjQunkXE5LC_Nt_RmHI5IGQhgvim-h58_kJajj6WI6gs4o_ZdGj8n0nQeXket-tuNnyXJT0u5J75lNIQDf-aX4pWLKJj8olnrn9CXE33Q4Fa0AoZfnA-FsJ1qgrTlw7Jh-I0UhH6OTu38wi99WbjK3G5UnlhDzZW_bv3AY4iV3QYRPcJQaKBPP3f4l0s7zIejqWc-nhMDB-DZ0i9hUkEQ3gPdcflyXZs4fV2wWHznn0vW3BGYwOnU-M3O0nE0qvEuQyiPTI"/>
+<span class="absolute bottom-0 right-0 bg-primary text-[8px] font-mono text-white px-1">AR</span>
+</div>
+<div>
+<span class="font-headline font-semibold text-on-surface text-sm block leading-tight">Pantalón Sartorial Deconstruido</span>
+<span class="font-mono text-[11px] text-on-surface-variant tracking-tight block mt-0.5">#FS-PNT-1903</span>
+<span class="text-[10px] text-neutral-400 font-label">Lana fría 260g/m² con caída fluida</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-4 font-label text-on-surface">
+<span class="text-[11px]">Sastrería Contemporánea</span>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-1.5 font-mono text-[10px]">
+<span class="px-1.5 py-0.5 border border-outline-variant/60 bg-surface-bright">38 (10)</span>
+<span class="px-1.5 py-0.5 border border-outline-variant/60 bg-surface-bright">40 (18)</span>
+<span class="px-1.5 py-0.5 border border-outline-variant/60 bg-surface-bright">42 (14)</span>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="font-headline font-semibold text-on-surface text-sm">42 <span class="text-[11px] font-normal text-on-surface-variant">uds</span></div>
+<div class="w-20 bg-surface-container h-1 mt-1.5 overflow-hidden">
+<div class="bg-primary h-full" style="width: 85%;"></div>
+</div>
+<span class="text-[10px] text-on-surface-variant mt-1 block font-mono">Todas las sedes</span>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col gap-1">
+<span class="inline-flex items-center text-[10px] font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.5 border border-emerald-200 w-fit">
+<span class="w-1 h-1 rounded-full bg-emerald-600 mr-1.5"></span>
+                      Activo 60 FPS
+                    </span>
+<span class="text-[10px] font-mono text-neutral-400">Physics Dynamic Bones</span>
+</div>
+</td>
+<td class="py-4 px-4 text-right whitespace-nowrap">
+<div class="flex items-center justify-end gap-1.5">
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Ajustar Stock">
+<span class="material-symbols-outlined text-base">tune</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Inspección 3D">
+<span class="material-symbols-outlined text-base">view_in_ar</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Opciones">
+<span class="material-symbols-outlined text-base">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Item 6 (Custom / Atelier Order) -->
+<tr class="hover:bg-surface-bright transition-colors group">
+<td class="py-4 px-4">
+<input class="w-3.5 h-3.5 border-outline-variant text-primary rounded focus:ring-0" type="checkbox"/>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-3.5">
+<div class="w-12 h-16 bg-surface-container shrink-0 overflow-hidden relative border border-outline-variant/40">
+<img class="w-full h-full object-cover object-top" data-alt="Avant-garde column evening gown in pure optic white crepe fabric. Structural shoulder accents with long pure floor-length drape, shot in a brutalist bright gallery with minimalist aesthetic. Ultra clean crisp high-fashion editorial styling." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5UqNoqSkJZrnjTaBwLmXoJvDuiO8FbHi0nl--uWM6TSI1prIOvB3s3jhWRx3Y-HecPnM3UWlcs4cT4ACdwR8cALAGR0IKx9hi0jolDAb04sx_cYg88dpFDExD8JSCT_IJMzOkuKpvZFMn1A2OQnKxBSuMMPb96ZBxbeygDh_3lkTDbvYKPMrm4R7TJplMnamvbGw2spy8DLVlJWMlB5uFX2-eJuEkRWmMj4rlW4gyzr1Cn5tzTSneJCmK2brvW7q6Bw-jSLLEKHw"/>
+<span class="absolute bottom-0 right-0 bg-neutral-700 text-[8px] font-mono text-white px-1">CAL</span>
+</div>
+<div>
+<span class="font-headline font-semibold text-on-surface text-sm block leading-tight">Vestido Minimalista Columna</span>
+<span class="font-mono text-[11px] text-on-surface-variant tracking-tight block mt-0.5">#FS-DRS-0530</span>
+<span class="text-[10px] text-neutral-400 font-label">Crepé de seda pesado con forro mate</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-4 font-label text-on-surface">
+<span class="text-[11px]">Haute Couture</span>
+</td>
+<td class="py-4 px-4">
+<span class="px-2 py-0.5 border border-outline-variant/60 bg-surface-container text-[10px] font-label uppercase text-on-surface tracking-wider">
+                    Bajo Pedido VIP
+                  </span>
+</td>
+<td class="py-4 px-4">
+<div class="font-headline font-semibold text-on-surface text-sm">5 <span class="text-[11px] font-normal text-on-surface-variant">muestras</span></div>
+<div class="w-20 bg-surface-container h-1 mt-1.5 overflow-hidden">
+<div class="bg-neutral-400 h-full" style="width: 20%;"></div>
+</div>
+<span class="text-[10px] text-on-surface-variant mt-1 block font-mono">Atelier París</span>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col gap-1">
+<span class="inline-flex items-center text-[10px] font-mono text-neutral-700 bg-neutral-100 px-1.5 py-0.5 border border-neutral-300 w-fit">
+<span class="w-1 h-1 rounded-full bg-neutral-500 mr-1.5 animate-spin"></span>
+                      Calibrando Malla
+                    </span>
+<span class="text-[10px] font-mono text-neutral-400">LiDAR 94% completado</span>
+</div>
+</td>
+<td class="py-4 px-4 text-right whitespace-nowrap">
+<div class="flex items-center justify-end gap-1.5">
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Ajustar Stock">
+<span class="material-symbols-outlined text-base">tune</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Inspección 3D">
+<span class="material-symbols-outlined text-base">view_in_ar</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Opciones">
+<span class="material-symbols-outlined text-base">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Item 7 -->
+<tr class="hover:bg-surface-bright transition-colors group">
+<td class="py-4 px-4">
+<input class="w-3.5 h-3.5 border-outline-variant text-primary rounded focus:ring-0" type="checkbox"/>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-3.5">
+<div class="w-12 h-16 bg-surface-container shrink-0 overflow-hidden relative border border-outline-variant/40">
+<img class="w-full h-full object-cover object-center" data-alt="Editorial close-up product photograph of a modern black leather sculptural ankle boot with a sharp geometric carved architectural heel. White museum podium presentation, pure diffuse light, reflections highlighting supple calfskin grain." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAizSWuwIvRYjZ6-ZKtvp-A4lgZLt_GJuoiQAlmgemTcrrt7aJlUIlJtv4uoJOMS0UsXXhyt8MuneGGMOPQultgdMioPcE0RIJcS5LlUzINzJG_PMHAttcrLL-YVXebJVlYq8cgskqtzJ2OZIrkXUvtNh9TYIv2YSb-nY0EvhQqWNpJKfiMujz6I3Aqe9CPwSPPutuWng1YOdX6vHX125AKyd2pOU7LZf6mwI__2WqGs5wi_sUWT1sjFXU1UTzkhVCBZ4LM8wrpWF8"/>
+<span class="absolute bottom-0 right-0 bg-primary text-[8px] font-mono text-white px-1">AR</span>
+</div>
+<div>
+<span class="font-headline font-semibold text-on-surface text-sm block leading-tight">Botín Escultura Tacón Geométrico</span>
+<span class="font-mono text-[11px] text-on-surface-variant tracking-tight block mt-0.5">#FS-SH-0391</span>
+<span class="text-[10px] text-neutral-400 font-label">Piel becerro plena flor • Tacón 85mm</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-4 font-label text-on-surface">
+<span class="text-[11px]">Calzado Escultórico</span>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-1.5 font-mono text-[10px]">
+<span class="px-1.5 py-0.5 border border-outline-variant/60 bg-surface-bright">37 (5)</span>
+<span class="px-1.5 py-0.5 border border-outline-variant/60 bg-surface-bright">38 (8)</span>
+<span class="px-1.5 py-0.5 border border-outline-variant/60 bg-surface-bright">39 (6)</span>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="font-headline font-semibold text-on-surface text-sm">19 <span class="text-[11px] font-normal text-on-surface-variant">pares</span></div>
+<div class="w-20 bg-surface-container h-1 mt-1.5 overflow-hidden">
+<div class="bg-primary h-full" style="width: 60%;"></div>
+</div>
+<span class="text-[10px] text-on-surface-variant mt-1 block font-mono">Milán &amp; París</span>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col gap-1">
+<span class="inline-flex items-center text-[10px] font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.5 border border-emerald-200 w-fit">
+<span class="w-1 h-1 rounded-full bg-emerald-600 mr-1.5"></span>
+                      Activo 60 FPS
+                    </span>
+<span class="text-[10px] font-mono text-neutral-400">High Poly Foot Scan</span>
+</div>
+</td>
+<td class="py-4 px-4 text-right whitespace-nowrap">
+<div class="flex items-center justify-end gap-1.5">
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Ajustar Stock">
+<span class="material-symbols-outlined text-base">tune</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Inspección 3D">
+<span class="material-symbols-outlined text-base">view_in_ar</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Opciones">
+<span class="material-symbols-outlined text-base">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- TABLE BOTTOM CONTROLS & PAGINATION -->
+<div class="p-4 border-t border-outline-variant/30 flex flex-col sm:flex-row justify-between items-center gap-4 bg-surface-bright">
+<div class="text-xs text-on-surface-variant font-label">
+            Mostrando <span class="font-semibold text-on-surface">1 - 7</span> de <span class="font-semibold text-on-surface">24</span> referencias exclusivas
+          </div>
+<div class="flex items-center space-x-1 font-mono text-xs">
+<button class="px-2.5 py-1 border border-outline-variant/40 text-on-surface-variant hover:bg-surface-container transition-colors disabled:opacity-30" disabled="">
+              Anterior
+            </button>
+<button class="px-3 py-1 bg-primary text-white font-medium">1</button>
+<button class="px-3 py-1 border border-outline-variant/40 text-on-surface hover:bg-surface-container transition-colors">2</button>
+<button class="px-3 py-1 border border-outline-variant/40 text-on-surface hover:bg-surface-container transition-colors">3</button>
+<button class="px-2.5 py-1 border border-outline-variant/40 text-on-surface hover:bg-surface-container transition-colors">
+              Siguiente
+            </button>
+</div>
+</div>
+</div>
+<!-- DETAIL DRAWER / VOLUMETRIC INSPECTOR PANEL (xl:col-span-4) -->
+<div class="xl:col-span-4 border border-outline-variant/40 bg-surface-container-lowest p-6 flex flex-col gap-6 sticky top-28">
+<!-- Header of Inspector -->
+<div class="flex items-start justify-between border-b border-outline-variant/30 pb-4">
+<div>
+<span class="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant block">INSPECTOR EN TIEMPO REAL</span>
+<h2 class="text-lg font-headline font-semibold text-on-surface">Abrigo Sculptural No. 04</h2>
+<span class="font-mono text-xs text-neutral-400">SKU: #FS-COAT-0492</span>
+</div>
+<span class="px-2 py-0.5 bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-mono uppercase font-semibold">
+            Activo AR
+          </span>
+</div>
+<!-- 3D / Wireframe High-End Preview Card -->
+<div class="relative w-full h-72 bg-surface-bright border border-outline-variant/40 flex items-center justify-center overflow-hidden group">
+<img class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" data-alt="Minimalist high fashion editorial model wearing an avant garde white wool coat posed gracefully in front of a white architectural space. Soft gentle ambient lighting with realistic fine fabric drape and couture tailoring details." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTUINJxSSOPAvj-7_K6i5OZ9naq4Y2-fzbqyOLVi8Uiru4ormg4FDNeSTY80014LLNNCpyPk-RwtsUBy_hhsL26K6eyg1JyH-deWfpSATJ3zkYINHGqOD15wuwQoWMHN7rQjvAGdlH710iRBUA8-_5H3Fzg4dDwcsPhYlAZam6D_tAoo6Qupx0Pgs1u1rdx5HTJnjlSjNkbR9T1ZxgQYOrKuCEvOsXLXpiKawE5sYcjtu4O2FSlXKchyYoNa2Ws7ZH1gxzLY1vQwI"/>
+<!-- AR Spatial Grid Simulation Overlay -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 pointer-events-none"></div>
+<!-- AR Status Badges on Image -->
+<div class="absolute top-3 left-3 flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2.5 py-1 text-[10px] font-mono text-white border border-white/10">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            Malla 3D V.3.4 (París LiDAR)
+          </div>
+<div class="absolute bottom-3 left-3 right-3 text-white">
+<div class="flex justify-between items-end">
+<div>
+<p class="text-[10px] font-mono text-neutral-300 uppercase">Textura Dinámica PBR</p>
+<p class="text-xs font-headline font-medium">Lana Cashmere 580g • 4096 x 4096 px</p>
+</div>
+<button class="px-2.5 py-1 bg-white text-black text-[10px] font-label uppercase tracking-widest hover:bg-neutral-200 transition-colors flex items-center gap-1 font-semibold">
+<span class="material-symbols-outlined text-xs">visibility</span> Ver 3D
+              </button>
+</div>
+</div>
+</div>
+<!-- Technical Textile Specifications Bento -->
+<div class="space-y-3">
+<span class="text-[11px] font-label font-semibold uppercase tracking-wider text-on-surface-variant block">
+            Ficha Técnica Textil &amp; Física AR
+          </span>
+<div class="grid grid-cols-2 gap-2 text-xs font-mono">
+<div class="p-3 bg-surface-bright border border-outline-variant/30">
+<span class="text-[10px] text-on-surface-variant block uppercase">Gramaje Real</span>
+<span class="font-semibold text-on-surface">580 g/m²</span>
+</div>
+<div class="p-3 bg-surface-bright border border-outline-variant/30">
+<span class="text-[10px] text-on-surface-variant block uppercase">Coeficiente Caída</span>
+<span class="font-semibold text-on-surface">0.84 (Rígido/Estructural)</span>
+</div>
+<div class="p-3 bg-surface-bright border border-outline-variant/30">
+<span class="text-[10px] text-on-surface-variant block uppercase">Vértices LiDAR</span>
+<span class="font-semibold text-on-surface">142.800 pts</span>
+</div>
+<div class="p-3 bg-surface-bright border border-outline-variant/30">
+<span class="text-[10px] text-on-surface-variant block uppercase">Precisión Física</span>
+<span class="font-semibold text-on-surface">0.2 mm / vértice</span>
+</div>
+</div>
+</div>
+<!-- Stock Distribution by Location -->
+<div class="space-y-3 border-t border-outline-variant/30 pt-4">
+<div class="flex justify-between items-center">
+<span class="text-[11px] font-label font-semibold uppercase tracking-wider text-on-surface-variant">
+              Distribución por Sucursal
+            </span>
+<span class="text-xs font-mono font-semibold text-on-surface">26 unidades</span>
+</div>
+<div class="space-y-2 font-body text-xs">
+<div class="flex items-center justify-between p-2 bg-surface-bright border border-outline-variant/20">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-on-surface-variant">store</span>
+<span class="font-medium text-on-surface">París Atelier Vendôme</span>
+</div>
+<span class="font-mono font-semibold text-on-surface">14 uds</span>
+</div>
+<div class="flex items-center justify-between p-2 bg-surface-bright border border-outline-variant/20">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-on-surface-variant">store</span>
+<span class="font-medium text-on-surface">Milán Via Montenapoleone</span>
+</div>
+<span class="font-mono font-semibold text-on-surface">8 uds</span>
+</div>
+<div class="flex items-center justify-between p-2 bg-surface-bright border border-outline-variant/20">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-on-surface-variant">store</span>
+<span class="font-medium text-on-surface">Madrid Serrano Flagship</span>
+</div>
+<span class="font-mono font-semibold text-on-surface">4 uds</span>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-col gap-2 pt-2 border-t border-outline-variant/30">
+<button class="w-full py-2.5 bg-primary text-white text-xs font-label uppercase tracking-widest hover:bg-neutral-800 transition-colors font-medium flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">sync_alt</span>
+            Transferir Entre Sucursales
+          </button>
+<button class="w-full py-2.5 border border-outline-variant text-on-surface text-xs font-label uppercase tracking-widest hover:bg-surface-container-low transition-colors font-medium flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">upgrade</span>
+            Actualizar Modelo Volumétrico (glTF)
+          </button>
+</div>
+</div>
+</div>
+</main>
+<!-- FOOTER (Shared Component: Footer) -->
+<footer class="w-full mt-auto bg-surface-container-low dark:bg-inverse-surface border-t border-outline-variant/30 dark:border-outline-variant/10">
+<div class="flex flex-col md:flex-row justify-between items-center gap-6 px-8 md:px-16 py-12 max-w-7xl mx-auto w-full">
+<!-- Logo & Copyright -->
+<div class="flex flex-col md:flex-row items-center gap-4 text-center md:text-left">
+<span class="font-headline text-sm font-bold tracking-widest uppercase text-primary dark:text-inverse-on-surface">
+          FashionStore
+        </span>
+<span class="hidden md:inline text-outline-variant">•</span>
+<p class="font-body text-xs text-on-surface-variant dark:text-inverse-on-surface">
+          © 2024 FashionStore. Experiencia de lujo aumentada.
+        </p>
+</div>
+<!-- Footer Navigation Links exactly from JSON -->
+<nav class="flex flex-wrap justify-center items-center gap-6 font-body text-xs text-on-surface-variant dark:text-inverse-on-surface/70">
+<a class="hover:text-primary dark:hover:text-inverse-on-surface transition-colors" href="#">Privacidad</a>
+<a class="hover:text-primary dark:hover:text-inverse-on-surface transition-colors" href="#">Términos y Condiciones</a>
+<a class="hover:text-primary dark:hover:text-inverse-on-surface transition-colors" href="#">Atención al Cliente</a>
+<a class="text-primary dark:text-inverse-on-surface underline hover:opacity-80 transition-colors" href="#">Vestidores AR</a>
+<a class="hover:text-primary dark:hover:text-inverse-on-surface transition-colors" href="#">Sostenibilidad</a>
+</nav>
+</div>
+</footer>
+</body></html>
