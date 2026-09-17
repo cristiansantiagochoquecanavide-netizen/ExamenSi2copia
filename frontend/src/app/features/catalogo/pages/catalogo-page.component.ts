@@ -21,6 +21,8 @@ import {
   EstadisticasCalificaciones
 } from '../models/catalogo.models';
 import { Sucursal } from '../../inventario/models/inventario.models';
+import { IaAsistenteService } from '../../ia-asistente/services/ia-asistente.service';
+import { OutfitSugerido } from '../../ia-asistente/models/ia-asistente.models';
 
 
 @Component({
@@ -40,6 +42,11 @@ import { Sucursal } from '../../inventario/models/inventario.models';
           <p class="hero-description">
             Sastrería contemporánea, siluetas desestructuradas y tecnología de Realidad Aumentada (AR) con modelos 3D (.glb / .usdz) para probadores virtuales y control de inventario por sucursal.
           </p>
+          <div class="hero-ia-banner" (click)="irAEstilistaIA()">
+            <span class="hero-ia-chip">✦ ATELIER IA</span>
+            <span class="hero-ia-text">¿Buscás asesoramiento exclusivo? Descubrí recomendaciones hiperpersonalizadas y looks completos coordinados.</span>
+            <span class="hero-ia-link">Probar Atelier Stylist &rarr;</span>
+          </div>
         </div>
       </section>
 
@@ -307,6 +314,13 @@ import { Sucursal } from '../../inventario/models/inventario.models';
                 [class.active]="activeModalTab() === 'resenas'" 
                 (click)="activeModalTab.set('resenas')">
                 <span class="tab-icon">★</span> RESEÑAS &bull; OPINIONES ({{ califEstadisticas()?.total_resenas || prenda.total_resenas || 0 }})
+              </button>
+              <button 
+                type="button" 
+                class="modal-tab-btn" 
+                [class.active]="activeModalTab() === 'look'" 
+                (click)="abrirTabLook(prenda.id)">
+                <span class="tab-icon">✦</span> COMPLETA TU LOOK (IA)
               </button>
             </div>
 
@@ -708,6 +722,61 @@ import { Sucursal } from '../../inventario/models/inventario.models';
                     </div>
                   }
                 </div>
+              </div>
+            }
+
+            <!-- TAB 3: COMPLETA TU LOOK (IA) (CU19) -->
+            @if (activeModalTab() === 'look') {
+              <div class="modal-look-view">
+                @if (isLoadingOutfit()) {
+                  <div class="loading-state-modal">
+                    <span class="spinner-sm"></span>
+                    <p>Coordinando prendas complementarias con Atelier IA...</p>
+                  </div>
+                } @else {
+                  @if (outfitPrendaData(); as outfit) {
+                    <div class="look-coordination-panel">
+                      <div class="look-coordination-header">
+                        <div class="look-header-titles">
+                          <span class="look-badge-gold">✦ SUGERENCIA DE ESTILISMO &bull; {{ outfit.match_score }}% MATCH</span>
+                          <h3 class="look-panel-title">{{ outfit.nombre_look }}</h3>
+                          <p class="look-panel-desc">{{ outfit.descripcion_estilo }}</p>
+                        </div>
+                        <div class="look-panel-pricing">
+                          <span class="look-pricing-label">Precio Look Completo</span>
+                          <strong class="look-pricing-val">\${{ outfit.precio_total | number:'1.2-2' }}</strong>
+                          @if (outfit.ahorro_estimado > 0) {
+                            <span class="look-saving-chip">Ahorro: -\${{ outfit.ahorro_estimado | number:'1.2-2' }}</span>
+                          }
+                        </div>
+                      </div>
+
+                      <div class="look-items-grid">
+                        @for (item of outfit.prendas; track item.id) {
+                          <div class="look-garment-card" [class.is-current]="item.id === prenda.id">
+                            <div class="look-garment-img-wrap">
+                              <img [src]="item.imagen_url || getPortadaUrl(prenda)" [alt]="item.nombre" />
+                              <span class="look-item-tag">{{ item.etiqueta_ia }}</span>
+                            </div>
+                            <div class="look-garment-info">
+                              <strong class="look-item-name">{{ item.nombre }}</strong>
+                              <span class="look-item-cat">{{ item.categoria_nombre }} &bull; {{ item.sector }}</span>
+                              <p class="look-item-why">“{{ item.motivo_recomendacion }}”</p>
+                              <span class="look-item-price">\${{ item.precio_base | number:'1.2-2' }} USD</span>
+                            </div>
+                            @if (item.id !== prenda.id) {
+                              <button type="button" class="btn-switch-item" (click)="seleccionarPrendaPorId(item.id)">
+                                Ver prenda
+                              </button>
+                            } @else {
+                              <span class="current-item-badge">Prenda en vista</span>
+                            }
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+                }
               </div>
             }
 
@@ -2764,11 +2833,230 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       color: #6b7280;
       font-size: 0.85rem;
     }
+
+    /* CU19: Atelier IA Banner & Look Styles */
+    .hero-ia-banner {
+      margin-top: 1.5rem;
+      background: linear-gradient(135deg, rgba(17, 17, 17, 0.95) 0%, rgba(35, 29, 21, 0.95) 100%);
+      border: 1px solid #c5a880;
+      border-radius: 6px;
+      padding: 0.85rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+    }
+    .hero-ia-banner:hover {
+      border-color: #dfcaa7;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(197, 168, 128, 0.3);
+    }
+    .hero-ia-chip {
+      background: #c5a880;
+      color: #111111;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 0.25rem 0.65rem;
+      border-radius: 50px;
+      white-space: nowrap;
+    }
+    .hero-ia-text {
+      color: #dfcaa7;
+      font-size: 0.88rem;
+      flex-grow: 1;
+    }
+    .hero-ia-link {
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      text-decoration: underline;
+    }
+
+    .modal-look-view {
+      padding: 2rem;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    .look-coordination-panel {
+      background: #fdfbf7;
+      border: 1px solid #c5a880;
+      border-radius: 8px;
+      padding: 1.75rem;
+    }
+    .look-coordination-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(197, 168, 128, 0.3);
+      padding-bottom: 1.25rem;
+    }
+    .look-badge-gold {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #92400e;
+      background: #fef3c7;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 0.4rem;
+    }
+    .look-panel-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #111827;
+      margin: 0 0 0.35rem;
+    }
+    .look-panel-desc {
+      font-size: 0.88rem;
+      color: #4b5563;
+      margin: 0;
+      line-height: 1.45;
+    }
+    .look-panel-pricing {
+      text-align: right;
+      min-width: 140px;
+    }
+    .look-pricing-label {
+      font-size: 0.72rem;
+      color: #6b7280;
+      display: block;
+      text-transform: uppercase;
+    }
+    .look-pricing-val {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #111827;
+      display: block;
+    }
+    .look-saving-chip {
+      font-size: 0.72rem;
+      color: #065f46;
+      background: #d1fae5;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      display: inline-block;
+      margin-top: 0.25rem;
+      font-weight: 600;
+    }
+    .look-items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+    .look-garment-card {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 6px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      position: relative;
+    }
+    .look-garment-card.is-current {
+      border: 2px solid #c5a880;
+      background: #fffdfa;
+    }
+    .look-garment-img-wrap {
+      position: relative;
+      height: 180px;
+      overflow: hidden;
+      border-radius: 4px;
+    }
+    .look-garment-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .look-item-tag {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: rgba(0, 0, 0, 0.75);
+      color: #ffffff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 3px;
+    }
+    .look-item-name {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #111827;
+      display: block;
+    }
+    .look-item-cat {
+      font-size: 0.72rem;
+      color: #6b7280;
+      display: block;
+      text-transform: uppercase;
+      margin-bottom: 0.3rem;
+    }
+    .look-item-why {
+      font-size: 0.78rem;
+      color: #4b5563;
+      font-style: italic;
+      margin: 0 0 0.5rem;
+      line-height: 1.4;
+    }
+    .look-item-price {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #111827;
+      display: block;
+    }
+    .btn-switch-item {
+      background: #111827;
+      color: #ffffff;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.5rem;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      margin-top: auto;
+      transition: background 0.2s ease;
+    }
+    .btn-switch-item:hover {
+      background: #c5a880;
+      color: #000000;
+    }
+    .current-item-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #92400e;
+      background: #fef3c7;
+      padding: 0.4rem;
+      text-align: center;
+      border-radius: 4px;
+      margin-top: auto;
+    }
+    .loading-state-modal {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #6b7280;
+    }
+    .spinner-sm {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      border: 3px solid rgba(197, 168, 128, 0.3);
+      border-top-color: #c5a880;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 0.75rem;
+    }
   `]
 })
 export class CatalogoPageComponent implements OnInit {
   private readonly catalogoService = inject(CatalogoService);
   private readonly inventarioService = inject(InventarioService);
+  private readonly iaService = inject(IaAsistenteService);
   readonly authService = inject(AuthService);
   readonly router = inject(Router);
 
@@ -2780,7 +3068,7 @@ export class CatalogoPageComponent implements OnInit {
   sucursales = signal<Sucursal[]>([]);
 
   // CU18: Calificaciones y Reseñas
-  activeModalTab = signal<'info' | 'resenas'>('info');
+  activeModalTab = signal<'info' | 'resenas' | 'look'>('info');
   califListado = signal<Calificacion[]>([]);
   califEstadisticas = signal<EstadisticasCalificaciones | null>(null);
   miCalificacion = signal<Calificacion | null>(null);
@@ -2789,6 +3077,10 @@ export class CatalogoPageComponent implements OnInit {
   isSubmittingCalif = signal<boolean>(false);
   showReviewForm = signal<boolean>(false);
   hoverEstrellas = signal<number>(0);
+
+  // CU19: Completa tu Look
+  outfitPrendaData = signal<OutfitSugerido | null>(null);
+  isLoadingOutfit = signal<boolean>(false);
 
   nuevaCalificacion: CalificacionCreate = {
     puntuacion: 5,
@@ -3166,7 +3458,7 @@ export class CatalogoPageComponent implements OnInit {
     return ['ADMINISTRADOR', 'ADMIN', 'GERENTE'].includes(rolNombre);
   }
 
-  openDetail(prenda: Prenda, initialTab: 'info' | 'resenas' = 'info'): void {
+  openDetail(prenda: Prenda, initialTab: 'info' | 'resenas' | 'look' = 'info'): void {
     this.selectedPrenda.set(prenda);
     this.activeModalTab.set(initialTab);
     this.showReviewForm.set(false);
@@ -3298,5 +3590,34 @@ export class CatalogoPageComponent implements OnInit {
         this.feedbackMsg.set(null);
       }
     }, 4500);
+  }
+
+  // CU19: Completa tu Look e IA
+  abrirTabLook(prendaId: number): void {
+    this.activeModalTab.set('look');
+    this.isLoadingOutfit.set(true);
+    this.iaService.getOutfitSugerido(prendaId).subscribe({
+      next: (data) => {
+        this.outfitPrendaData.set(data);
+        this.isLoadingOutfit.set(false);
+      },
+      error: (err) => {
+        console.error('Error al cargar outfit:', err);
+        this.isLoadingOutfit.set(false);
+      }
+    });
+  }
+
+  seleccionarPrendaPorId(prendaId: number): void {
+    this.catalogoService.getPrendaById(prendaId).subscribe({
+      next: (p) => {
+        this.openDetail(p, 'look');
+        this.abrirTabLook(p.id);
+      }
+    });
+  }
+
+  irAEstilistaIA(): void {
+    this.router.navigate(['/ia-asistente']);
   }
 }
