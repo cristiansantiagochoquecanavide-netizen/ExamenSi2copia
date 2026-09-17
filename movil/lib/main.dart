@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'core/theme/app_theme.dart';
 import 'core/routes/app_router.dart';
+import 'core/utils/app_notification.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +16,7 @@ class FashionStoreApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'FashionStore Mobile',
       debugShowCheckedModeBanner: false,
+      scaffoldMessengerKey: rootScaffoldMessengerKey,
       theme: AppTheme.lightTheme,
       routerConfig: appRouter,
     );

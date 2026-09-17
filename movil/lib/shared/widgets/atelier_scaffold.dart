@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
+import '../services/cart_service.dart';
 import 'diamond_logo.dart';
 
 class AtelierScaffold extends StatelessWidget {
@@ -52,34 +53,48 @@ class AtelierScaffold extends StatelessWidget {
         ),
       ),
       body: child,
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: AppTheme.surfaceColor,
-          border: Border(top: BorderSide(color: Color(0xFFE5E7EB), width: 1.0)),
-        ),
-        child: BottomNavigationBar(
-          backgroundColor: AppTheme.surfaceColor,
-          currentIndex: _calculateSelectedIndex(currentRoute),
-          selectedItemColor: AppTheme.primaryColor,
-          unselectedItemColor: AppTheme.mutedColor,
-          type: BottomNavigationBarType.fixed,
-          elevation: 0,
-          onTap: (index) => _onItemTapped(index, context),
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.checkroom), label: 'Catálogo'),
-            BottomNavigationBarItem(icon: Icon(Icons.view_in_ar), label: 'Vestidor AR'),
-            BottomNavigationBarItem(icon: Icon(Icons.event_seat), label: 'Reservas'),
-            BottomNavigationBarItem(icon: Icon(Icons.shopping_bag_outlined), label: 'Bolsa'),
-            BottomNavigationBarItem(icon: Icon(Icons.auto_awesome), label: 'IA Stylist'),
-            BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Cuenta'),
-          ],
-        ),
+      bottomNavigationBar: AnimatedBuilder(
+        animation: CartService.instance,
+        builder: (context, _) {
+          final cartCount = CartService.instance.totalItemsCount;
+          return Container(
+            decoration: const BoxDecoration(
+              color: AppTheme.surfaceColor,
+              border: Border(top: BorderSide(color: Color(0xFFE5E7EB), width: 1.0)),
+            ),
+            child: BottomNavigationBar(
+              backgroundColor: AppTheme.surfaceColor,
+              currentIndex: _calculateSelectedIndex(currentRoute),
+              selectedItemColor: AppTheme.primaryColor,
+              unselectedItemColor: AppTheme.mutedColor,
+              type: BottomNavigationBarType.fixed,
+              elevation: 0,
+              onTap: (index) => _onItemTapped(index, context),
+              items: [
+                const BottomNavigationBarItem(icon: Icon(Icons.checkroom), label: 'Catálogo'),
+                const BottomNavigationBarItem(icon: Icon(Icons.view_in_ar), label: 'Vestidor AR'),
+                const BottomNavigationBarItem(icon: Icon(Icons.event_seat), label: 'Reservas'),
+                BottomNavigationBarItem(
+                  icon: Badge(
+                    isLabelVisible: cartCount > 0,
+                    label: Text('$cartCount', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                    backgroundColor: Colors.black,
+                    child: const Icon(Icons.shopping_bag_outlined),
+                  ),
+                  label: 'Bolsa',
+                ),
+                const BottomNavigationBarItem(icon: Icon(Icons.auto_awesome), label: 'IA Stylist'),
+                const BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Cuenta'),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 
   int _calculateSelectedIndex(String route) {
-    if (route.startsWith('/vestidor_ar')) return 1;
+    if (route.contains('vestidor_ar')) return 1;
     if (route.startsWith('/reservas')) return 2;
     if (route.startsWith('/ventas')) return 3;
     if (route.startsWith('/ia_asistente')) return 4;
