@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import List, Optional
 from fastapi import HTTPException, status
 from sqlalchemy import select, and_, or_, desc
@@ -6,16 +7,21 @@ from sqlalchemy.orm import selectinload
 
 from app.domains.catalogo.models import (
     Categoria, Talla, Color, Temporada, Prenda, PrendaMultimedia, PrendaVariante,
-    InventarioStock, MovimientoInventario
+    InventarioStock, MovimientoInventario, CalificacionPrenda
 )
 from app.domains.catalogo.schemas import (
     CategoriaCreate, CategoriaUpdate, TallaCreate, TallaUpdate,
     ColorCreate, ColorUpdate, TemporadaCreate, TemporadaUpdate,
-    PrendaCreate, PrendaUpdate, PrendaMultimediaCreate, AjusteInventarioRequest
+    PrendaCreate, PrendaUpdate, PrendaMultimediaCreate, AjusteInventarioRequest,
+    CalificacionCreate, CalificacionUpdate, CalificacionResponse,
+    EstadisticasCalificacionesResponse, ListadoCalificacionesResponse,
+    DesgloseEstrellas, DesgloseAjuste, CalificacionUsuarioInfo
 )
 from app.domains.inventario.models import Sucursal
+from app.domains.ventas.models import Venta, DetalleVenta
 from app.domains.usuarios.models import Usuario
 from app.domains.usuarios.services import AuditoriaService
+
 
 
 # =========================================================================
@@ -258,7 +264,8 @@ class PrendaService:
             selectinload(Prenda.temporada),
             selectinload(Prenda.multimedia),
             selectinload(Prenda.variantes).selectinload(PrendaVariante.talla),
-            selectinload(Prenda.variantes).selectinload(PrendaVariante.color)
+            selectinload(Prenda.variantes).selectinload(PrendaVariante.color),
+            selectinload(Prenda.calificaciones)
         )
         filters = []
         if activo_solo:
@@ -295,7 +302,8 @@ class PrendaService:
             selectinload(Prenda.multimedia),
             selectinload(Prenda.variantes).selectinload(PrendaVariante.talla),
             selectinload(Prenda.variantes).selectinload(PrendaVariante.color),
-            selectinload(Prenda.variantes).selectinload(PrendaVariante.stock_items)
+            selectinload(Prenda.variantes).selectinload(PrendaVariante.stock_items),
+            selectinload(Prenda.calificaciones)
         ).where(Prenda.id == prenda_id)
         result = await db.execute(query)
         prenda = result.scalar_one_or_none()
@@ -482,3 +490,215 @@ class StockService:
         ).where(InventarioStock.sucursal_id == sucursal_id)
         result = await db.execute(query)
         return list(result.scalars().all())
+
+
+# =========================================================================
+# CU18: CALIFICACIONES Y RESEÑAS DE PRENDAS (VERIFIED BUYER / METRICAS)
+# =========================================================================
+class CalificacionService:
+    @staticmethod
+    async def verificar_compra(db: AsyncSession, usuario_id: int, prenda_id: int) -> bool:
+        """Verifica si el usuario tiene una compra PAGADA que incluya alguna variante de la prenda."""
+        query = (
+            select(DetalleVenta.id)
+            .join(Venta, DetalleVenta.venta_id == Venta.id)
+            .join(PrendaVariante, DetalleVenta.variante_id == PrendaVariante.id)
+            .where(
+                Venta.cliente_id == usuario_id,
+                Venta.estado == "PAGADA",
+                PrendaVariante.prenda_id == prenda_id
+            )
+            .limit(1)
+        )
+        res = await db.execute(query)
+        return res.scalar() is not None
+
+    @staticmethod
+    async def listar_calificaciones(
+        db: AsyncSession, prenda_id: int, usuario_actual_id: Optional[int] = None
+    ) -> ListadoCalificacionesResponse:
+        """Obtiene las métricas estadísticas y la lista de opiniones para la prenda."""
+        prenda = await db.get(Prenda, prenda_id)
+        if not prenda:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Prenda no encontrada")
+
+        query = (
+            select(CalificacionPrenda)
+            .options(selectinload(CalificacionPrenda.usuario))
+            .where(CalificacionPrenda.prenda_id == prenda_id, CalificacionPrenda.activo == True)
+            .order_by(desc(CalificacionPrenda.created_at))
+        )
+        result = await db.execute(query)
+        calificaciones = list(result.scalars().all())
+
+        total = len(calificaciones)
+        if total > 0:
+            promedio = round(sum(c.puntuacion for c in calificaciones) / total, 1)
+            promedio_calidad = round(sum(c.calidad for c in calificaciones) / total, 1)
+            estrellas = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+            ajustes = {"PEQUENO": 0, "FIEL": 0, "GRANDE": 0}
+            for c in calificaciones:
+                estrellas[c.puntuacion] = estrellas.get(c.puntuacion, 0) + 1
+                ajuste_key = c.ajuste_talla.upper() if c.ajuste_talla else "FIEL"
+                ajustes[ajuste_key] = ajustes.get(ajuste_key, 0) + 1
+
+            desglose_est = DesgloseEstrellas(
+                estrellas_5=estrellas[5],
+                estrellas_4=estrellas[4],
+                estrellas_3=estrellas[3],
+                estrellas_2=estrellas[2],
+                estrellas_1=estrellas[1],
+            )
+            desglose_aj = DesgloseAjuste(
+                pequeno=ajustes.get("PEQUENO", 0),
+                fiel=ajustes.get("FIEL", 0),
+                grande=ajustes.get("GRANDE", 0),
+            )
+            porcentaje_fiel = round((ajustes.get("FIEL", 0) / total) * 100)
+        else:
+            promedio = 0.0
+            promedio_calidad = 0.0
+            desglose_est = DesgloseEstrellas()
+            desglose_aj = DesgloseAjuste()
+            porcentaje_fiel = 100
+
+        estadisticas = EstadisticasCalificacionesResponse(
+            promedio=promedio,
+            total_resenas=total,
+            promedio_calidad=promedio_calidad,
+            desglose_estrellas=desglose_est,
+            desglose_ajuste=desglose_aj,
+            porcentaje_fiel_talla=porcentaje_fiel
+        )
+
+        calificaciones_dto = []
+        mi_calif_dto = None
+        for c in calificaciones:
+            user_info = None
+            if c.usuario:
+                user_info = CalificacionUsuarioInfo(
+                    id=c.usuario.id,
+                    nombre=c.usuario.nombre,
+                    apellido=c.usuario.apellido,
+                    email=c.usuario.email
+                )
+            dto = CalificacionResponse(
+                id=c.id,
+                prenda_id=c.prenda_id,
+                usuario_id=c.usuario_id,
+                puntuacion=c.puntuacion,
+                ajuste_talla=c.ajuste_talla,
+                calidad=c.calidad,
+                titulo=c.titulo,
+                comentario=c.comentario,
+                compra_verificada=c.compra_verificada,
+                activo=c.activo,
+                created_at=c.created_at,
+                updated_at=c.updated_at,
+                usuario=user_info
+            )
+            calificaciones_dto.append(dto)
+            if usuario_actual_id and c.usuario_id == usuario_actual_id:
+                mi_calif_dto = dto
+
+        es_verificado = False
+        if usuario_actual_id:
+            es_verificado = await CalificacionService.verificar_compra(db, usuario_actual_id, prenda_id)
+
+        return ListadoCalificacionesResponse(
+            estadisticas=estadisticas,
+            calificaciones=calificaciones_dto,
+            mi_calificacion=mi_calif_dto,
+            es_comprador_verificado=es_verificado
+        )
+
+    @staticmethod
+    async def crear_o_actualizar(
+        db: AsyncSession, prenda_id: int, data: CalificacionCreate, usuario: Usuario, ip: Optional[str] = None
+    ) -> CalificacionPrenda:
+        """Crea o actualiza la calificación de un usuario para una prenda con verificación de compra."""
+        prenda = await db.get(Prenda, prenda_id)
+        if not prenda or not prenda.activo:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Prenda no encontrada o inactiva")
+
+        compra_verificada = await CalificacionService.verificar_compra(db, usuario.id, prenda_id)
+
+        query = select(CalificacionPrenda).where(
+            CalificacionPrenda.prenda_id == prenda_id,
+            CalificacionPrenda.usuario_id == usuario.id
+        )
+        res = await db.execute(query)
+        calif = res.scalar_one_or_none()
+
+        if calif:
+            calif.puntuacion = data.puntuacion
+            calif.ajuste_talla = data.ajuste_talla
+            calif.calidad = data.calidad
+            calif.titulo = data.titulo
+            calif.comentario = data.comentario
+            calif.compra_verificada = compra_verificada
+            calif.activo = True
+            calif.updated_at = datetime.now(timezone.utc)
+            accion = "ACTUALIZAR_CALIFICACION"
+        else:
+            calif = CalificacionPrenda(
+                prenda_id=prenda_id,
+                usuario_id=usuario.id,
+                puntuacion=data.puntuacion,
+                ajuste_talla=data.ajuste_talla,
+                calidad=data.calidad,
+                titulo=data.titulo,
+                comentario=data.comentario,
+                compra_verificada=compra_verificada,
+                activo=True
+            )
+            db.add(calif)
+            accion = "CREAR_CALIFICACION"
+
+        await db.commit()
+        await db.refresh(calif)
+
+        await AuditoriaService.registrar_evento(
+            db,
+            accion=accion,
+            modulo="catalogo",
+            detalle=f"{accion} de prenda '{prenda.nombre}' (ID {prenda_id}): {data.puntuacion} estrellas - '{data.titulo}' (Verificada: {compra_verificada})",
+            usuario_id=usuario.id,
+            ip_address=ip
+        )
+        return calif
+
+    @staticmethod
+    async def eliminar(
+        db: AsyncSession, calificacion_id: int, usuario: Usuario, ip: Optional[str] = None
+    ) -> bool:
+        """Elimina la calificación si pertenece al usuario o si tiene rol de administración."""
+        res = await db.execute(
+            select(CalificacionPrenda).options(selectinload(CalificacionPrenda.prenda)).where(CalificacionPrenda.id == calificacion_id)
+        )
+        calif = res.scalar_one_or_none()
+        if not calif:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Calificación no encontrada")
+
+        es_autor = (calif.usuario_id == usuario.id)
+        es_admin = False
+        if usuario.rol and usuario.rol.nombre in ["ADMINISTRADOR", "GERENTE", "ADMIN"]:
+            es_admin = True
+
+        if not es_autor and not es_admin:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No tienes permisos para eliminar esta reseña")
+
+        prenda_nombre = calif.prenda.nombre if calif.prenda else f"ID {calif.prenda_id}"
+        await db.delete(calif)
+        await db.commit()
+
+        await AuditoriaService.registrar_evento(
+            db,
+            accion="ELIMINAR_CALIFICACION",
+            modulo="catalogo",
+            detalle=f"Eliminacion de calificacion ID {calificacion_id} para prenda '{prenda_nombre}'",
+            usuario_id=usuario.id,
+            ip_address=ip
+        )
+        return True
+

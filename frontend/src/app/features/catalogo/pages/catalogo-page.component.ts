@@ -1,8 +1,10 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { CatalogoService } from '../services/catalogo.service';
 import { InventarioService } from '../../inventario/services/inventario.service';
+import { AuthService } from '../../../core/services/auth.service';
 import {
   Prenda,
   PrendaCreate,
@@ -12,9 +14,14 @@ import {
   Temporada,
   Talla,
   Color,
-  AjusteInventarioRequest
+  AjusteInventarioRequest,
+  Calificacion,
+  CalificacionCreate,
+  ListadoCalificacionesResponse,
+  EstadisticasCalificaciones
 } from '../models/catalogo.models';
 import { Sucursal } from '../../inventario/models/inventario.models';
+
 
 @Component({
   selector: 'app-catalogo-page',
@@ -222,8 +229,20 @@ import { Sucursal } from '../../inventario/models/inventario.models';
                     <span class="season-tag">{{ prenda.temporada?.nombre || 'Primavera-Verano 2026' }}</span>
                   </div>
 
+                  <!-- Rating Stars & Reseñas (CU18) -->
+                  <div class="rating-strip" (click)="openDetail(prenda, 'resenas'); $event.stopPropagation()" title="Ver opiniones de clientes">
+                    <span class="stars-gold">
+                      @for (star of getStarIcons(prenda.rating_promedio || 0); track $index) {
+                        <span [class.star-filled]="star === '★'" [class.star-empty]="star === '☆'">{{ star }}</span>
+                      }
+                    </span>
+                    <span class="rating-num">{{ (prenda.rating_promedio || 0) | number:'1.1-1' }}</span>
+                    <span class="reviews-count">({{ prenda.total_resenas || 0 }})</span>
+                  </div>
+
                   <!-- Nombre Comercial en Negritas -->
                   <h2 class="product-title font-bold" (click)="openDetail(prenda)">{{ prenda.nombre }}</h2>
+
                   
                   <!-- Descripción de la Prenda (Altura y líneas uniformes) -->
                   <p class="product-desc">{{ prenda.descripcion }}</p>
@@ -273,83 +292,425 @@ import { Sucursal } from '../../inventario/models/inventario.models';
               <button type="button" class="modal-close" (click)="closeDetail()">&times;</button>
             </div>
 
-            <div class="modal-body">
-              <div class="modal-media-column">
-                <img [src]="getPortadaUrl(prenda)" [alt]="prenda.nombre" class="modal-main-img" />
-                
-                <div class="multimedia-add-box">
-                  <span class="add-box-title">+ Vincular Nuevo Archivo AR</span>
-                  <div class="add-box-row">
-                    <select [(ngModel)]="nuevoMultimedia.tipo">
-                      <option value="MODELO_3D_GLB">Modelo .GLB (Android/Web)</option>
-                      <option value="MODELO_3D_USDZ">Modelo .USDZ (iOS AR)</option>
-                      <option value="IMAGEN">Imagen de Galería</option>
-                    </select>
-                    <input 
-                      type="text" 
-                      [(ngModel)]="nuevoMultimedia.url" 
-                      placeholder="https://...modelo.glb"
-                    />
-                    <button type="button" class="btn-attach" (click)="attachMultimedia(prenda.id)">
-                      Adjuntar
+            <!-- TABS DE NAVEGACIÓN EN MODAL (CU18) -->
+            <div class="modal-tabs-bar">
+              <button 
+                type="button" 
+                class="modal-tab-btn" 
+                [class.active]="activeModalTab() === 'info'" 
+                (click)="activeModalTab.set('info')">
+                <span class="tab-icon">&diams;</span> INFORMACIÓN &bull; AR 3D
+              </button>
+              <button 
+                type="button" 
+                class="modal-tab-btn" 
+                [class.active]="activeModalTab() === 'resenas'" 
+                (click)="activeModalTab.set('resenas')">
+                <span class="tab-icon">★</span> RESEÑAS &bull; OPINIONES ({{ califEstadisticas()?.total_resenas || prenda.total_resenas || 0 }})
+              </button>
+            </div>
+
+            <!-- TAB 1: INFORMACIÓN Y 3D AR -->
+            @if (activeModalTab() === 'info') {
+              <div class="modal-body">
+                <div class="modal-media-column">
+                  <img [src]="getPortadaUrl(prenda)" [alt]="prenda.nombre" class="modal-main-img" />
+                  
+                  <div class="multimedia-add-box">
+                    <span class="add-box-title">+ Vincular Nuevo Archivo AR</span>
+                    <div class="add-box-row">
+                      <select [(ngModel)]="nuevoMultimedia.tipo">
+                        <option value="MODELO_3D_GLB">Modelo .GLB (Android/Web)</option>
+                        <option value="MODELO_3D_USDZ">Modelo .USDZ (iOS AR)</option>
+                        <option value="IMAGEN">Imagen de Galería</option>
+                      </select>
+                      <input 
+                        type="text" 
+                        [(ngModel)]="nuevoMultimedia.url" 
+                        placeholder="https://...modelo.glb"
+                      />
+                      <button type="button" class="btn-attach" (click)="attachMultimedia(prenda.id)">
+                        Adjuntar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="modal-info-column">
+                  <p class="modal-desc">{{ prenda.descripcion }}</p>
+
+                  <div class="modal-price-box">
+                    <span class="modal-price-label">PRECIO BASE:</span>
+                    <span class="modal-price-value"><span class="currency">$</span>{{ prenda.precio_base | number:'1.2-2' }}</span>
+                  </div>
+
+                  <!-- Modelos 3D y AR vinculados -->
+                  <div class="ar-section">
+                    <h4 class="ar-section-title">&diams; ACTIVOS DE REALIDAD AUMENTADA (AR)</h4>
+                    <p class="ar-note">Formatos optimizados para Probador Virtual Móvil y Visualización Web:</p>
+                    
+                    <div class="ar-models-list">
+                      @for (media of get3DModels(prenda); track media.id) {
+                        <div class="ar-model-item">
+                          <div class="ar-model-meta">
+                            <span class="ar-badge-pill">{{ media.formato.toUpperCase() }}</span>
+                            <span class="ar-model-type">{{ media.tipo === 'MODELO_3D_GLB' ? 'Web / Android (SceneViewer)' : 'iOS (Quick Look)' }}</span>
+                          </div>
+                          <a [href]="media.url" target="_blank" rel="noopener noreferrer" class="ar-link">
+                            Inspeccionar Modelo 3D &rarr;
+                          </a>
+                        </div>
+                      } @empty {
+                        <div class="no-models-notice">No se han adjuntado modelos 3D todavía para esta pieza.</div>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Variantes de Talla y Color -->
+                  <div class="variants-section">
+                    <h4 class="section-subtitle">VARIANTES DISPONIBLES EN STOCK:</h4>
+                    <div class="variants-table-mini">
+                      @for (v of prenda.variantes; track v.id) {
+                        <div class="variant-pill">
+                          <span class="v-talla">Talla: {{ v.talla?.codigo || 'N/A' }}</span>
+                          <span class="v-color" [style.color]="v.color?.codigo_hex || '#fff'">
+                            &bull; {{ v.color?.nombre || 'Color' }}
+                          </span>
+                          <span class="v-sku">SKU: {{ v.sku_variante }}</span>
+                        </div>
+                      }
+                    </div>
+                  </div>
+
+                  <div class="modal-actions">
+                    <button type="button" class="btn-reserve-lead" (click)="closeDetail()">
+                      CERRAR FICHA TÉCNICA
                     </button>
                   </div>
                 </div>
               </div>
+            }
 
-              <div class="modal-info-column">
-                <p class="modal-desc">{{ prenda.descripcion }}</p>
+            <!-- TAB 2: RESEÑAS Y OPINIONES (CU18) -->
+            @if (activeModalTab() === 'resenas') {
+              <div class="modal-reviews-view">
+                <!-- PANEL DE ESTADÍSTICAS Y MÉTRICAS -->
+                <div class="reviews-stats-card">
+                  <!-- Puntuación Promedio General -->
+                  <div class="stats-col-score">
+                    <span class="big-score">{{ (califEstadisticas()?.promedio || 0) | number:'1.1-1' }}</span>
+                    <div class="score-stars">
+                      @for (star of getStarIcons(califEstadisticas()?.promedio || 0); track $index) {
+                        <span class="star-gold">{{ star }}</span>
+                      }
+                    </div>
+                    <span class="score-subtext">{{ califEstadisticas()?.total_resenas || 0 }} opiniones de clientes</span>
+                  </div>
 
-                <div class="modal-price-box">
-                  <span class="modal-price-label">PRECIO BASE:</span>
-                  <span class="modal-price-value"><span class="currency">$</span>{{ prenda.precio_base | number:'1.2-2' }}</span>
+                  <!-- Desglose por Estrellas (Barras de distribución) -->
+                  <div class="stats-col-bars">
+                    <div class="breakdown-row">
+                      <span class="bar-label">5 ★</span>
+                      <div class="bar-track">
+                        <div class="bar-fill" [style.width.%]="getPercentage(califEstadisticas()?.desglose_estrellas?.estrellas_5 || 0, califEstadisticas()?.total_resenas || 0)"></div>
+                      </div>
+                      <span class="bar-count">{{ califEstadisticas()?.desglose_estrellas?.estrellas_5 || 0 }}</span>
+                    </div>
+                    <div class="breakdown-row">
+                      <span class="bar-label">4 ★</span>
+                      <div class="bar-track">
+                        <div class="bar-fill" [style.width.%]="getPercentage(califEstadisticas()?.desglose_estrellas?.estrellas_4 || 0, califEstadisticas()?.total_resenas || 0)"></div>
+                      </div>
+                      <span class="bar-count">{{ califEstadisticas()?.desglose_estrellas?.estrellas_4 || 0 }}</span>
+                    </div>
+                    <div class="breakdown-row">
+                      <span class="bar-label">3 ★</span>
+                      <div class="bar-track">
+                        <div class="bar-fill" [style.width.%]="getPercentage(califEstadisticas()?.desglose_estrellas?.estrellas_3 || 0, califEstadisticas()?.total_resenas || 0)"></div>
+                      </div>
+                      <span class="bar-count">{{ califEstadisticas()?.desglose_estrellas?.estrellas_3 || 0 }}</span>
+                    </div>
+                    <div class="breakdown-row">
+                      <span class="bar-label">2 ★</span>
+                      <div class="bar-track">
+                        <div class="bar-fill" [style.width.%]="getPercentage(califEstadisticas()?.desglose_estrellas?.estrellas_2 || 0, califEstadisticas()?.total_resenas || 0)"></div>
+                      </div>
+                      <span class="bar-count">{{ califEstadisticas()?.desglose_estrellas?.estrellas_2 || 0 }}</span>
+                    </div>
+                    <div class="breakdown-row">
+                      <span class="bar-label">1 ★</span>
+                      <div class="bar-track">
+                        <div class="bar-fill" [style.width.%]="getPercentage(califEstadisticas()?.desglose_estrellas?.estrellas_1 || 0, califEstadisticas()?.total_resenas || 0)"></div>
+                      </div>
+                      <span class="bar-count">{{ califEstadisticas()?.desglose_estrellas?.estrellas_1 || 0 }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Métricas de Ajuste de Talla y Calidad -->
+                  <div class="stats-col-fit">
+                    <div class="fit-indicator">
+                      <span class="fit-title">AJUSTE DE TALLA</span>
+                      <span class="fit-percentage">{{ califEstadisticas()?.porcentaje_fiel_talla || 100 }}%</span>
+                      <span class="fit-caption">indica que es fiel a su talla habitual</span>
+                    </div>
+                    <div class="fit-pills">
+                      <span class="fit-chip" [class.highlight]="(califEstadisticas()?.desglose_ajuste?.pequeno || 0) > 0">
+                        Queda Pequeña ({{ califEstadisticas()?.desglose_ajuste?.pequeno || 0 }})
+                      </span>
+                      <span class="fit-chip active">
+                        Fiel a la Talla ({{ califEstadisticas()?.desglose_ajuste?.fiel || 0 }})
+                      </span>
+                      <span class="fit-chip" [class.highlight]="(califEstadisticas()?.desglose_ajuste?.grande || 0) > 0">
+                        Queda Grande ({{ califEstadisticas()?.desglose_ajuste?.grande || 0 }})
+                      </span>
+                    </div>
+                    <div class="quality-mini">
+                      <span class="quality-label">Calidad del Tejido:</span>
+                      <span class="quality-val">{{ (califEstadisticas()?.promedio_calidad || 5.0) | number:'1.1-1' }} / 5.0</span>
+                    </div>
+                  </div>
                 </div>
 
-                <!-- Modelos 3D y AR vinculados -->
-                <div class="ar-section">
-                  <h4 class="ar-section-title">&diams; ACTIVOS DE REALIDAD AUMENTADA (AR)</h4>
-                  <p class="ar-note">Formatos optimizados para Probador Virtual Móvil y Visualización Web:</p>
-                  
-                  <div class="ar-models-list">
-                    @for (media of get3DModels(prenda); track media.id) {
-                      <div class="ar-model-item">
-                        <div class="ar-model-meta">
-                          <span class="ar-badge-pill">{{ media.formato.toUpperCase() }}</span>
-                          <span class="ar-model-type">{{ media.tipo === 'MODELO_3D_GLB' ? 'Web / Android (SceneViewer)' : 'iOS (Quick Look)' }}</span>
+                <!-- ACCIÓN PARA CALIFICAR / MI RESEÑA -->
+                <div class="review-action-strip">
+                  @if (!authService.isAuthenticated()) {
+                    <div class="login-prompt-box">
+                      <span>¿Quieres compartir tu experiencia sobre esta prenda?</span>
+                      <button type="button" class="btn-login-to-review" (click)="router.navigate(['/login'])">
+                        INICIAR SESIÓN PARA CALIFICAR
+                      </button>
+                    </div>
+                  } @else {
+                    <!-- Si ya tiene reseña y no está en modo edición -->
+                    @if (miCalificacion(); as miCal) {
+                      @if (!showReviewForm()) {
+                        <div class="my-review-card">
+                          <div class="my-review-header">
+                            <div class="my-review-title-group">
+                              <span class="my-review-badge">TU OPINIÓN PUBLICADA</span>
+                              <div class="stars-gold">
+                                @for (star of getStarIcons(miCal.puntuacion); track $index) {
+                                  <span>{{ star }}</span>
+                                }
+                              </div>
+                              @if (miCal.compra_verificada) {
+                                <span class="badge-verified-buyer">
+                                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                  Compra Verificada
+                                </span>
+                              }
+                            </div>
+                            <div class="my-review-actions">
+                              <button type="button" class="btn-edit-my-review" (click)="iniciarEdicionResena(miCal)">
+                                Modificar
+                              </button>
+                              <button type="button" class="btn-delete-my-review" (click)="eliminarMiResena(miCal.id, prenda.id)">
+                                Eliminar
+                              </button>
+                            </div>
+                          </div>
+                          <h4 class="my-review-heading">{{ miCal.titulo }}</h4>
+                          <p class="my-review-text">{{ miCal.comentario }}</p>
+                          <div class="my-review-meta">
+                            <span>Ajuste: {{ getAjusteLabel(miCal.ajuste_talla) }}</span> &bull;
+                            <span>Calidad: {{ miCal.calidad }}/5</span> &bull;
+                            <span>{{ miCal.created_at | date:'dd/MM/yyyy' }}</span>
+                          </div>
                         </div>
-                        <a [href]="media.url" target="_blank" rel="noopener noreferrer" class="ar-link">
-                          Inspeccionar Modelo 3D &rarr;
-                        </a>
-                      </div>
-                    } @empty {
-                      <div class="no-models-notice">No se han adjuntado modelos 3D todavía para esta pieza.</div>
+                      }
+                    } @else {
+                      @if (!showReviewForm()) {
+                        <div class="btn-open-form-container">
+                          <button type="button" class="btn-write-review" (click)="showReviewForm.set(true)">
+                            &#9998; ESCRIBIR UNA RESEÑA
+                          </button>
+                          @if (esCompradorVerificado()) {
+                            <span class="verified-status-hint">
+                              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                              ¡Compra verificada detectada para esta prenda!
+                            </span>
+                          }
+                        </div>
+                      }
                     }
-                  </div>
+
+                    <!-- FORMULARIO DE CREACIÓN / EDICIÓN -->
+                    @if (showReviewForm()) {
+                      <div class="review-form-card">
+                        <div class="review-form-header">
+                          <h4 class="review-form-title">{{ miCalificacion() ? 'Actualizar mi Opinión' : 'Calificar & Opinar sobre esta Prenda' }}</h4>
+                          <button type="button" class="btn-cancel-form" (click)="showReviewForm.set(false)">&times;</button>
+                        </div>
+
+                        @if (esCompradorVerificado()) {
+                          <div class="buyer-notice verified">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <span>Has adquirido esta prenda en nuestra boutique. Tu reseña se publicará con la insignia oficial de <strong>Compra Verificada</strong>.</span>
+                          </div>
+                        }
+
+                        <form (ngSubmit)="guardarCalificacion(prenda.id)" class="review-form-content">
+                          <!-- Puntuación General Interactiva -->
+                          <div class="form-group-review">
+                            <label class="review-field-label">PUNTUACIÓN GENERAL *</label>
+                            <div class="interactive-stars">
+                              @for (num of [1, 2, 3, 4, 5]; track num) {
+                                <button 
+                                  type="button" 
+                                  class="star-btn" 
+                                  [class.active]="(hoverEstrellas() || nuevaCalificacion.puntuacion) >= num"
+                                  (mouseenter)="hoverEstrellas.set(num)"
+                                  (mouseleave)="hoverEstrellas.set(0)"
+                                  (click)="nuevaCalificacion.puntuacion = num">
+                                  ★
+                                </button>
+                              }
+                              <span class="star-rating-text">{{ getRatingLabel(nuevaCalificacion.puntuacion) }}</span>
+                            </div>
+                          </div>
+
+                          <!-- Ajuste de Talla y Calidad del Tejido -->
+                          <div class="form-grid-2">
+                            <div class="form-group-review">
+                              <label class="review-field-label">¿CÓMO QUEDA LA TALLA? *</label>
+                              <div class="fit-selector-buttons">
+                                <button 
+                                  type="button" 
+                                  class="fit-select-btn" 
+                                  [class.selected]="nuevaCalificacion.ajuste_talla === 'PEQUENO'"
+                                  (click)="nuevaCalificacion.ajuste_talla = 'PEQUENO'">
+                                  Queda Pequeña
+                                </button>
+                                <button 
+                                  type="button" 
+                                  class="fit-select-btn" 
+                                  [class.selected]="nuevaCalificacion.ajuste_talla === 'FIEL'"
+                                  (click)="nuevaCalificacion.ajuste_talla = 'FIEL'">
+                                  Fiel a la Talla
+                                </button>
+                                <button 
+                                  type="button" 
+                                  class="fit-select-btn" 
+                                  [class.selected]="nuevaCalificacion.ajuste_talla === 'GRANDE'"
+                                  (click)="nuevaCalificacion.ajuste_talla = 'GRANDE'">
+                                  Queda Grande
+                                </button>
+                              </div>
+                            </div>
+
+                            <div class="form-group-review">
+                              <label class="review-field-label">CALIDAD DEL TEJIDO (1 A 5) *</label>
+                              <div class="quality-score-selector">
+                                @for (num of [1, 2, 3, 4, 5]; track num) {
+                                  <button 
+                                    type="button" 
+                                    class="quality-num-btn" 
+                                    [class.selected]="nuevaCalificacion.calidad === num"
+                                    (click)="nuevaCalificacion.calidad = num">
+                                    {{ num }}
+                                  </button>
+                                }
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- Título -->
+                          <div class="form-group-review">
+                            <label class="review-field-label">TÍTULO DE TU RESEÑA *</label>
+                            <input 
+                              type="text" 
+                              [(ngModel)]="nuevaCalificacion.titulo" 
+                              name="titulo" 
+                              placeholder="Ej. Caída impecable, excelente para cenas de gala" 
+                              required 
+                              class="review-input"
+                              maxlength="150"
+                            />
+                          </div>
+
+                          <!-- Comentario -->
+                          <div class="form-group-review">
+                            <label class="review-field-label">TU OPINIÓN DETALLADA *</label>
+                            <textarea 
+                              [(ngModel)]="nuevaCalificacion.comentario" 
+                              name="comentario" 
+                              rows="3" 
+                              placeholder="Cuéntanos sobre el corte, textura de la tela, comodidad y ocasiones de uso..." 
+                              required 
+                              class="review-textarea"
+                            ></textarea>
+                          </div>
+
+                          <div class="form-review-actions">
+                            <button type="button" class="btn-cancel-flat" (click)="showReviewForm.set(false)">Cancelar</button>
+                            <button type="submit" class="btn-submit-review" [disabled]="isSubmittingCalif()">
+                              {{ isSubmittingCalif() ? 'PUBLICANDO...' : (miCalificacion() ? 'ACTUALIZAR RESEÑA' : 'PUBLICAR RESEÑA') }}
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    }
+                  }
                 </div>
 
-                <!-- Variantes de Talla y Color -->
-                <div class="variants-section">
-                  <h4 class="section-subtitle">VARIANTES DISPONIBLES EN STOCK:</h4>
-                  <div class="variants-table-mini">
-                    @for (v of prenda.variantes; track v.id) {
-                      <div class="variant-pill">
-                        <span class="v-talla">Talla: {{ v.talla?.codigo || 'N/A' }}</span>
-                        <span class="v-color" [style.color]="v.color?.codigo_hex || '#fff'">
-                          &bull; {{ v.color?.nombre || 'Color' }}
-                        </span>
-                        <span class="v-sku">SKU: {{ v.sku_variante }}</span>
-                      </div>
-                    }
-                  </div>
-                </div>
+                <!-- LISTA DE RESEÑAS DE CLIENTES -->
+                <div class="reviews-list-container">
+                  <h4 class="reviews-list-title">OPINIONES DE NUESTROS CLIENTES ({{ califListado().length }})</h4>
 
-                <div class="modal-actions">
-                  <button type="button" class="btn-reserve-lead" (click)="closeDetail()">
-                    CERRAR FICHA TÉCNICA
-                  </button>
+                  @if (isLoadingCalif()) {
+                    <div class="reviews-loading">Cargando opiniones...</div>
+                  } @else if (califListado().length === 0) {
+                    <div class="no-reviews-box">
+                      <span>Esta prenda aún no tiene opiniones. ¡Sé el primero en calificarla!</span>
+                    </div>
+                  } @else {
+                    <div class="reviews-stack">
+                      @for (review of califListado(); track review.id) {
+                        <article class="review-item">
+                          <div class="review-item-header">
+                            <div class="author-info">
+                              <div class="author-avatar">{{ (review.usuario?.nombre || 'C')[0] }}</div>
+                              <div class="author-details">
+                                <span class="author-name">{{ review.usuario?.nombre }} {{ review.usuario?.apellido }}</span>
+                                <div class="review-rating-sub">
+                                  <span class="stars-gold-mini">
+                                    @for (s of getStarIcons(review.puntuacion); track $index) {
+                                      <span>{{ s }}</span>
+                                    }
+                                  </span>
+                                  @if (review.compra_verificada) {
+                                    <span class="badge-verified-buyer">
+                                      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                      Compra Verificada
+                                    </span>
+                                  }
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="review-meta-right">
+                              <span class="review-date">{{ review.created_at | date:'dd MMM yyyy' }}</span>
+                              @if (canDeleteReview(review)) {
+                                <button type="button" class="btn-del-review" (click)="eliminarResenaAdmin(review.id, prenda.id)" title="Eliminar reseña">&times;</button>
+                              }
+                            </div>
+                          </div>
+
+                          <h5 class="review-title">{{ review.titulo }}</h5>
+                          <p class="review-comment">{{ review.comentario }}</p>
+
+                          <div class="review-tags-footer">
+                            <span class="review-tag">Ajuste: {{ getAjusteLabel(review.ajuste_talla) }}</span>
+                            <span class="review-tag">Calidad: {{ review.calidad }}/5</span>
+                          </div>
+                        </article>
+                      }
+                    </div>
+                  }
                 </div>
               </div>
-            </div>
+            }
+
           </div>
         </div>
       }
@@ -1065,7 +1426,48 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       font-weight: 500;
     }
 
+    .rating-strip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-bottom: 0.45rem;
+      cursor: pointer;
+      width: fit-content;
+      transition: opacity 0.2s;
+    }
+
+    .rating-strip:hover {
+      opacity: 0.75;
+    }
+
+    .stars-gold {
+      color: #d97706;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      line-height: 1;
+    }
+
+    .star-filled {
+      color: #d97706;
+    }
+
+    .star-empty {
+      color: #d1d5db;
+    }
+
+    .rating-num {
+      font-weight: 700;
+      font-size: 0.78rem;
+      color: #111827;
+    }
+
+    .reviews-count {
+      font-size: 0.72rem;
+      color: #6b7280;
+    }
+
     .product-title {
+
       font-family: 'Inter', sans-serif;
       font-size: 1.22rem;
       font-weight: 800 !important;
@@ -1293,6 +1695,732 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       grid-template-columns: 1fr 1fr;
       gap: 2rem;
     }
+
+    .modal-tabs-bar {
+      display: flex;
+      gap: 1rem;
+      padding: 0 2rem;
+      background: #f9fafb;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-tab-btn {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: #6b7280;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 0.85rem 0.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+
+    .modal-tab-btn:hover {
+      color: #000000;
+    }
+
+    .modal-tab-btn.active {
+      color: #000000;
+      border-bottom-color: #000000;
+    }
+
+    .modal-tab-btn .tab-icon {
+      font-size: 0.85rem;
+      color: #d97706;
+    }
+
+    .modal-reviews-view {
+      padding: 2rem;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .reviews-stats-card {
+      display: grid;
+      grid-template-columns: 180px 1fr 240px;
+      gap: 2rem;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stats-col-score {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-right: 1px solid rgba(0, 0, 0, 0.08);
+      padding-right: 1.5rem;
+    }
+
+    .big-score {
+      font-size: 3rem;
+      font-weight: 800;
+      color: #111827;
+      line-height: 1;
+    }
+
+    .score-stars {
+      color: #d97706;
+      font-size: 1.25rem;
+      margin: 0.4rem 0;
+      letter-spacing: 0.1em;
+    }
+
+    .score-subtext {
+      font-size: 0.75rem;
+      color: #6b7280;
+      text-align: center;
+    }
+
+    .stats-col-bars {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .breakdown-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.75rem;
+      color: #4b5563;
+    }
+
+    .bar-label {
+      width: 2rem;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: #d97706;
+      border-radius: 9999px;
+      transition: width 0.4s ease;
+    }
+
+    .bar-count {
+      width: 1.5rem;
+      text-align: right;
+      color: #6b7280;
+      font-family: monospace;
+    }
+
+    .stats-col-fit {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.75rem;
+      border-left: 1px solid rgba(0, 0, 0, 0.08);
+      padding-left: 1.5rem;
+    }
+
+    .fit-title {
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: #6b7280;
+      font-weight: 700;
+      text-transform: uppercase;
+      display: block;
+    }
+
+    .fit-percentage {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #111827;
+      display: block;
+      line-height: 1.1;
+    }
+
+    .fit-caption {
+      font-size: 0.75rem;
+      color: #6b7280;
+      display: block;
+    }
+
+    .fit-pills {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-top: 0.25rem;
+    }
+
+    .fit-chip {
+      font-size: 0.7rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 9999px;
+      background: #ffffff;
+      color: #6b7280;
+      border: 1px solid #e5e7eb;
+      width: fit-content;
+    }
+
+    .fit-chip.active {
+      background: #fef3c7;
+      color: #92400e;
+      border-color: #fde68a;
+      font-weight: 600;
+    }
+
+    .quality-mini {
+      font-size: 0.75rem;
+      color: #4b5563;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      padding-top: 0.5rem;
+      margin-top: 0.25rem;
+    }
+
+    .quality-val {
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .review-action-strip {
+      margin-bottom: 2rem;
+    }
+
+    .login-prompt-box {
+      background: #f9fafb;
+      border: 1px dashed #d1d5db;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: #4b5563;
+      border-radius: 6px;
+    }
+
+    .btn-login-to-review {
+      background: #000000;
+      color: #ffffff;
+      border: none;
+      padding: 0.6rem 1.25rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-login-to-review:hover {
+      background: #27272a;
+    }
+
+    .btn-open-form-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .btn-write-review {
+      background: #000000;
+      color: #ffffff;
+      border: none;
+      padding: 0.75rem 1.75rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-write-review:hover {
+      background: #27272a;
+      transform: translateY(-1px);
+    }
+
+    .verified-status-hint {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #059669;
+      background: #ecfdf5;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      border: 1px solid #a7f3d0;
+    }
+
+    .my-review-card {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .my-review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .my-review-title-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .my-review-badge {
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      background: #000000;
+      color: #ffffff;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+    }
+
+    .badge-verified-buyer {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #059669;
+      background: #ecfdf5;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      border: 1px solid #a7f3d0;
+    }
+
+    .my-review-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-edit-my-review {
+      background: transparent;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #111111;
+      padding: 0.35rem 0.85rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-edit-my-review:hover {
+      background: #000000;
+      color: #ffffff;
+    }
+
+    .btn-delete-my-review {
+      background: transparent;
+      border: 1px solid #fca5a5;
+      color: #dc2626;
+      padding: 0.35rem 0.85rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-delete-my-review:hover {
+      background: #dc2626;
+      color: #ffffff;
+    }
+
+    .my-review-heading {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #111827;
+      margin: 0 0 0.4rem 0;
+    }
+
+    .my-review-text {
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: #374151;
+      margin: 0 0 0.75rem 0;
+    }
+
+    .my-review-meta {
+      font-size: 0.72rem;
+      color: #6b7280;
+    }
+
+    .review-form-card {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .review-form-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      padding-bottom: 0.75rem;
+    }
+
+    .review-form-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #111827;
+      margin: 0;
+    }
+
+    .btn-cancel-form {
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      color: #6b7280;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .btn-cancel-form:hover {
+      color: #000000;
+    }
+
+    .buyer-notice {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.8rem;
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      margin-bottom: 1.25rem;
+    }
+    .buyer-notice.verified {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+
+    .review-form-content {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .form-group-review {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .review-field-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #374151;
+      text-transform: uppercase;
+    }
+
+    .interactive-stars {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .star-btn {
+      background: transparent;
+      border: none;
+      font-size: 1.75rem;
+      color: #d1d5db;
+      cursor: pointer;
+      padding: 0 0.15rem;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .star-btn.active {
+      color: #d97706;
+    }
+
+    .star-rating-text {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #4b5563;
+      margin-left: 0.75rem;
+    }
+
+    .fit-selector-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .fit-select-btn {
+      flex: 1;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      color: #4b5563;
+      border-radius: 9999px;
+      padding: 0.55rem 0.85rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .fit-select-btn.selected {
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
+    }
+
+    .quality-score-selector {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .quality-num-btn {
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 9999px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      color: #374151;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .quality-num-btn.selected {
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
+    }
+
+    .review-input {
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.85rem;
+      color: #111827;
+      outline: none;
+    }
+    .review-input:focus {
+      border-color: #000000;
+    }
+
+    .review-textarea {
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.85rem;
+      color: #111827;
+      outline: none;
+      resize: vertical;
+      font-family: inherit;
+    }
+    .review-textarea:focus {
+      border-color: #000000;
+    }
+
+    .form-review-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .btn-cancel-flat {
+      background: transparent;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #374151;
+      padding: 0.6rem 1.25rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 9999px;
+      cursor: pointer;
+    }
+
+    .btn-submit-review {
+      background: #000000;
+      color: #ffffff;
+      border: none;
+      padding: 0.6rem 1.5rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-submit-review:hover {
+      background: #27272a;
+    }
+
+    .reviews-list-container {
+      margin-top: 2rem;
+    }
+
+    .reviews-list-title {
+      font-size: 0.82rem;
+      letter-spacing: 0.12em;
+      font-weight: 700;
+      color: #000000;
+      margin: 0 0 1.25rem 0;
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      padding-bottom: 0.5rem;
+    }
+
+    .no-reviews-box {
+      background: #f9fafb;
+      border: 1px dashed #d1d5db;
+      padding: 2rem;
+      text-align: center;
+      color: #6b7280;
+      font-size: 0.85rem;
+      border-radius: 6px;
+    }
+
+    .reviews-loading {
+      padding: 2rem;
+      text-align: center;
+      color: #6b7280;
+      font-size: 0.85rem;
+    }
+
+    .reviews-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .review-item {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      transition: box-shadow 0.2s ease;
+    }
+    .review-item:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .review-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+
+    .author-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .author-avatar {
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 9999px;
+      background: #111827;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .author-details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .author-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .review-rating-sub {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .stars-gold-mini {
+      color: #d97706;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+    }
+
+    .review-meta-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .review-date {
+      font-size: 0.72rem;
+      color: #6b7280;
+    }
+
+    .btn-del-review {
+      background: transparent;
+      border: none;
+      color: #9ca3af;
+      font-size: 1.25rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0.2rem;
+    }
+    .btn-del-review:hover {
+      color: #dc2626;
+    }
+
+    .review-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #111827;
+      margin: 0 0 0.35rem 0;
+    }
+
+    .review-comment {
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #374151;
+      margin: 0 0 0.75rem 0;
+    }
+
+    .review-tags-footer {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .review-tag {
+      font-size: 0.68rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      background: #f3f4f6;
+      color: #4b5563;
+      border: 1px solid #e5e7eb;
+    }
+
 
     .modal-form-body {
       padding: 2rem;
@@ -1641,6 +2769,8 @@ import { Sucursal } from '../../inventario/models/inventario.models';
 export class CatalogoPageComponent implements OnInit {
   private readonly catalogoService = inject(CatalogoService);
   private readonly inventarioService = inject(InventarioService);
+  readonly authService = inject(AuthService);
+  readonly router = inject(Router);
 
   prendas = signal<Prenda[]>([]);
   categorias = signal<Categoria[]>([]);
@@ -1648,6 +2778,26 @@ export class CatalogoPageComponent implements OnInit {
   tallas = signal<Talla[]>([]);
   colores = signal<Color[]>([]);
   sucursales = signal<Sucursal[]>([]);
+
+  // CU18: Calificaciones y Reseñas
+  activeModalTab = signal<'info' | 'resenas'>('info');
+  califListado = signal<Calificacion[]>([]);
+  califEstadisticas = signal<EstadisticasCalificaciones | null>(null);
+  miCalificacion = signal<Calificacion | null>(null);
+  esCompradorVerificado = signal<boolean>(false);
+  isLoadingCalif = signal<boolean>(false);
+  isSubmittingCalif = signal<boolean>(false);
+  showReviewForm = signal<boolean>(false);
+  hoverEstrellas = signal<number>(0);
+
+  nuevaCalificacion: CalificacionCreate = {
+    puntuacion: 5,
+    ajuste_talla: 'FIEL',
+    calidad: 5,
+    titulo: '',
+    comentario: ''
+  };
+
 
   isLoading = signal<boolean>(false);
   errorMessage = signal<string | null>(null);
@@ -1975,13 +3125,170 @@ export class CatalogoPageComponent implements OnInit {
     imgElement.src = 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&q=80';
   }
 
-  openDetail(prenda: Prenda): void {
+  getStarIcons(rating: number): string[] {
+    const rounded = Math.round(rating);
+    const stars: string[] = [];
+    for (let i = 1; i <= 5; i++) {
+      stars.push(i <= rounded ? '★' : '☆');
+    }
+    return stars;
+  }
+
+  getPercentage(count: number, total: number): number {
+    return total > 0 ? Math.round((count / total) * 100) : 0;
+  }
+
+  getAjusteLabel(ajuste?: string): string {
+    switch (ajuste?.toUpperCase()) {
+      case 'PEQUENO': return 'Queda Pequeña';
+      case 'GRANDE': return 'Queda Grande';
+      case 'FIEL':
+      default: return 'Fiel a la Talla';
+    }
+  }
+
+  getRatingLabel(puntuacion: number): string {
+    switch (puntuacion) {
+      case 5: return 'Excelente (5/5)';
+      case 4: return 'Muy Bueno (4/5)';
+      case 3: return 'Bueno (3/5)';
+      case 2: return 'Regular (2/5)';
+      case 1: return 'Deficiente (1/5)';
+      default: return `${puntuacion}/5`;
+    }
+  }
+
+  canDeleteReview(review: Calificacion): boolean {
+    const user = this.authService.currentUser();
+    if (!user) return false;
+    if (user.id === review.usuario_id) return true;
+    const rolNombre = user.rol?.nombre || '';
+    return ['ADMINISTRADOR', 'ADMIN', 'GERENTE'].includes(rolNombre);
+  }
+
+  openDetail(prenda: Prenda, initialTab: 'info' | 'resenas' = 'info'): void {
     this.selectedPrenda.set(prenda);
+    this.activeModalTab.set(initialTab);
+    this.showReviewForm.set(false);
+    this.loadCalificaciones(prenda.id);
   }
 
   closeDetail(): void {
     this.selectedPrenda.set(null);
   }
+
+  loadCalificaciones(prendaId: number): void {
+    this.isLoadingCalif.set(true);
+    this.catalogoService.getCalificacionesPrenda(prendaId).subscribe({
+      next: (res) => {
+        this.califListado.set(res.calificaciones);
+        this.califEstadisticas.set(res.estadisticas);
+        this.miCalificacion.set(res.mi_calificacion || null);
+        this.esCompradorVerificado.set(res.es_comprador_verificado);
+        this.isLoadingCalif.set(false);
+
+        const curr = this.selectedPrenda();
+        if (curr && curr.id === prendaId) {
+          curr.rating_promedio = res.estadisticas.promedio;
+          curr.total_resenas = res.estadisticas.total_resenas;
+        }
+        this.prendas.update(items =>
+          items.map(p => p.id === prendaId ? {
+            ...p,
+            rating_promedio: res.estadisticas.promedio,
+            total_resenas: res.estadisticas.total_resenas
+          } : p)
+        );
+
+        if (res.mi_calificacion) {
+          this.nuevaCalificacion = {
+            puntuacion: res.mi_calificacion.puntuacion,
+            ajuste_talla: res.mi_calificacion.ajuste_talla,
+            calidad: res.mi_calificacion.calidad,
+            titulo: res.mi_calificacion.titulo,
+            comentario: res.mi_calificacion.comentario
+          };
+        } else {
+          this.nuevaCalificacion = {
+            puntuacion: 5,
+            ajuste_talla: 'FIEL',
+            calidad: 5,
+            titulo: '',
+            comentario: ''
+          };
+        }
+      },
+      error: () => {
+        this.isLoadingCalif.set(false);
+      }
+    });
+  }
+
+  iniciarEdicionResena(calif: Calificacion): void {
+    this.nuevaCalificacion = {
+      puntuacion: calif.puntuacion,
+      ajuste_talla: calif.ajuste_talla,
+      calidad: calif.calidad,
+      titulo: calif.titulo,
+      comentario: calif.comentario
+    };
+    this.showReviewForm.set(true);
+  }
+
+  guardarCalificacion(prendaId: number): void {
+    if (!this.nuevaCalificacion.titulo.trim()) {
+      this.showFeedback('Por favor ingresa un título para tu reseña.', true);
+      return;
+    }
+    if (this.nuevaCalificacion.comentario.trim().length < 5) {
+      this.showFeedback('Por favor escribe un comentario de al menos 5 caracteres.', true);
+      return;
+    }
+
+    this.isSubmittingCalif.set(true);
+    this.catalogoService.calificarPrenda(prendaId, this.nuevaCalificacion).subscribe({
+      next: () => {
+        this.isSubmittingCalif.set(false);
+        this.showReviewForm.set(false);
+        this.showFeedback('¡Tu reseña ha sido publicada exitosamente!');
+        this.loadCalificaciones(prendaId);
+      },
+      error: (err) => {
+        this.isSubmittingCalif.set(false);
+        const detail = err.error?.detail || 'Error al publicar la reseña.';
+        this.showFeedback(detail, true);
+      }
+    });
+  }
+
+  eliminarMiResena(calificacionId: number, prendaId: number): void {
+    if (!confirm('¿Estás seguro de eliminar tu reseña para esta prenda?')) return;
+    this.catalogoService.eliminarCalificacion(calificacionId).subscribe({
+      next: () => {
+        this.showFeedback('Reseña eliminada correctamente.');
+        this.loadCalificaciones(prendaId);
+      },
+      error: (err) => {
+        const detail = err.error?.detail || 'Error al eliminar la reseña.';
+        this.showFeedback(detail, true);
+      }
+    });
+  }
+
+  eliminarResenaAdmin(calificacionId: number, prendaId: number): void {
+    if (!confirm('¿Estás seguro de eliminar esta reseña como moderador?')) return;
+    this.catalogoService.eliminarCalificacion(calificacionId).subscribe({
+      next: () => {
+        this.showFeedback('Reseña eliminada por moderación.');
+        this.loadCalificaciones(prendaId);
+      },
+      error: (err) => {
+        const detail = err.error?.detail || 'Error al eliminar la reseña.';
+        this.showFeedback(detail, true);
+      }
+    });
+  }
+
 
   showFeedback(msg: string, isError = false): void {
     this.feedbackMsg.set(msg);

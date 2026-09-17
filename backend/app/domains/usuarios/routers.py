@@ -61,6 +61,27 @@ async def get_current_user(
     return usuario
 
 
+async def get_optional_current_user(
+    token: Optional[str] = Depends(oauth2_scheme),
+    db: AsyncSession = Depends(get_db)
+) -> Optional[Usuario]:
+    if not token:
+        return None
+    if await AuthService.is_token_revoked(db, token):
+        return None
+    payload = decode_access_token(token)
+    if not payload:
+        return None
+    try:
+        user_id = int(payload.get("sub", 0))
+        usuario = await UsuarioService.obtener_por_id(db, user_id)
+        if usuario.estado != "ACTIVO":
+            return None
+        return usuario
+    except Exception:
+        return None
+
+
 def require_permissions(*required_permissions: str):
     async def permission_checker(current_user: Usuario = Depends(get_current_user)):
         if current_user.rol and current_user.rol.nombre == "ADMINISTRADOR":

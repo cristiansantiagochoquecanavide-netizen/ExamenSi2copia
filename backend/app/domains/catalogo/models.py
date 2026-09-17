@@ -73,6 +73,18 @@ class Prenda(Base):
     temporada: Mapped["Temporada"] = relationship("Temporada", back_populates="prendas", lazy="selectin")
     multimedia: Mapped[List["PrendaMultimedia"]] = relationship("PrendaMultimedia", back_populates="prenda", cascade="all, delete-orphan", lazy="selectin")
     variantes: Mapped[List["PrendaVariante"]] = relationship("PrendaVariante", back_populates="prenda", cascade="all, delete-orphan", lazy="selectin")
+    calificaciones: Mapped[List["CalificacionPrenda"]] = relationship("CalificacionPrenda", back_populates="prenda", cascade="all, delete-orphan", lazy="selectin")
+
+    @property
+    def rating_promedio(self) -> float:
+        califs = [c for c in (self.calificaciones or []) if getattr(c, "activo", True)]
+        if not califs:
+            return 0.0
+        return round(sum(c.puntuacion for c in califs) / len(califs), 1)
+
+    @property
+    def total_resenas(self) -> int:
+        return sum(1 for c in (self.calificaciones or []) if getattr(c, "activo", True))
 
 
 class PrendaMultimedia(Base):
@@ -141,3 +153,28 @@ class MovimientoInventario(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     stock: Mapped["InventarioStock"] = relationship("InventarioStock", back_populates="movimientos")
+
+
+# ----------------- CU18: CALIFICACIONES Y RESEÑAS DE PRENDAS -----------------
+class CalificacionPrenda(Base):
+    __tablename__ = "calificaciones_prenda"
+    __table_args__ = (
+        UniqueConstraint("prenda_id", "usuario_id", name="uq_prenda_usuario_calificacion"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    prenda_id: Mapped[int] = mapped_column(Integer, ForeignKey("prendas.id", ondelete="CASCADE"), nullable=False, index=True)
+    usuario_id: Mapped[int] = mapped_column(Integer, ForeignKey("usuarios.id", ondelete="CASCADE"), nullable=False, index=True)
+    puntuacion: Mapped[int] = mapped_column(Integer, nullable=False)
+    ajuste_talla: Mapped[str] = mapped_column(String(20), default="FIEL", nullable=False)  # PEQUENO, FIEL, GRANDE
+    calidad: Mapped[int] = mapped_column(Integer, default=5, nullable=False)
+    titulo: Mapped[str] = mapped_column(String(150), nullable=False)
+    comentario: Mapped[str] = mapped_column(Text, nullable=False)
+    compra_verificada: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    activo: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+    prenda: Mapped["Prenda"] = relationship("Prenda", back_populates="calificaciones")
+    usuario: Mapped["app.domains.usuarios.models.Usuario"] = relationship("app.domains.usuarios.models.Usuario", lazy="selectin")
+

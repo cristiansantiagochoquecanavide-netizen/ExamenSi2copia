@@ -16,8 +16,12 @@ import {
   Color,
   ColorCreate,
   AjusteInventarioRequest,
-  InventarioStock
+  InventarioStock,
+  Calificacion,
+  CalificacionCreate,
+  ListadoCalificacionesResponse
 } from '../models/catalogo.models';
+
 
 @Injectable({
   providedIn: 'root'
@@ -152,5 +156,21 @@ export class CatalogoService {
   getStockPorSucursal(sucursalId: number): Observable<InventarioStock[]> {
     return this.http.get<InventarioStock[]>(`${this.baseUrl}/inventario/sucursal/${sucursalId}`);
   }
+
+  // ==========================================
+  // CU18: CALIFICACIONES Y RESEÑAS DE PRENDAS
+  // ==========================================
+  getCalificacionesPrenda(prendaId: number): Observable<ListadoCalificacionesResponse> {
+    return this.http.get<ListadoCalificacionesResponse>(`${this.baseUrl}/prendas/${prendaId}/calificaciones`);
+  }
+
+  calificarPrenda(prendaId: number, data: CalificacionCreate): Observable<Calificacion> {
+    return this.http.post<Calificacion>(`${this.baseUrl}/prendas/${prendaId}/calificaciones`, data);
+  }
+
+  eliminarCalificacion(calificacionId: number): Observable<{ mensaje: string; exito: boolean }> {
+    return this.http.delete<{ mensaje: string; exito: boolean }>(`${this.baseUrl}/calificaciones/${calificacionId}`);
+  }
 }
+
 

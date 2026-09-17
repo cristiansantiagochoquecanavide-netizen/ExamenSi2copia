@@ -156,6 +156,8 @@ class PrendaResponse(BaseSchema):
     temporada: Optional[TemporadaResponse] = None
     multimedia: List[PrendaMultimediaResponse] = []
     variantes: List[PrendaVarianteResponse] = []
+    rating_promedio: Optional[float] = 0.0
+    total_resenas: Optional[int] = 0
 
 class AjusteInventarioRequest(BaseModel):
     variante_id: int
@@ -177,3 +179,67 @@ class InventarioStockResponse(BaseSchema):
 class MensajeCatalogoResponse(BaseModel):
     mensaje: str
     exito: bool = True
+
+
+# ----------------- CU18: CALIFICACIONES Y RESEÑAS DE PRENDAS -----------------
+class CalificacionCreate(BaseModel):
+    puntuacion: int = Field(..., ge=1, le=5)
+    ajuste_talla: str = Field("FIEL", pattern="^(PEQUENO|FIEL|GRANDE)$")
+    calidad: int = Field(5, ge=1, le=5)
+    titulo: str = Field(..., min_length=2, max_length=150)
+    comentario: str = Field(..., min_length=5)
+
+class CalificacionUpdate(BaseModel):
+    puntuacion: Optional[int] = Field(None, ge=1, le=5)
+    ajuste_talla: Optional[str] = Field(None, pattern="^(PEQUENO|FIEL|GRANDE)$")
+    calidad: Optional[int] = Field(None, ge=1, le=5)
+    titulo: Optional[str] = Field(None, min_length=2, max_length=150)
+    comentario: Optional[str] = Field(None, min_length=5)
+
+class CalificacionUsuarioInfo(BaseModel):
+    id: int
+    nombre: str
+    apellido: str
+    email: str
+
+class CalificacionResponse(BaseSchema):
+    id: int
+    prenda_id: int
+    usuario_id: int
+    puntuacion: int
+    ajuste_talla: str
+    calidad: int
+    titulo: str
+    comentario: str
+    compra_verificada: bool
+    activo: bool
+    created_at: datetime
+    updated_at: datetime
+    usuario: Optional[CalificacionUsuarioInfo] = None
+
+class DesgloseEstrellas(BaseModel):
+    estrellas_5: int = 0
+    estrellas_4: int = 0
+    estrellas_3: int = 0
+    estrellas_2: int = 0
+    estrellas_1: int = 0
+
+class DesgloseAjuste(BaseModel):
+    pequeno: int = 0
+    fiel: int = 0
+    grande: int = 0
+
+class EstadisticasCalificacionesResponse(BaseModel):
+    promedio: float = 0.0
+    total_resenas: int = 0
+    promedio_calidad: float = 0.0
+    desglose_estrellas: DesgloseEstrellas = DesgloseEstrellas()
+    desglose_ajuste: DesgloseAjuste = DesgloseAjuste()
+    porcentaje_fiel_talla: int = 100
+
+class ListadoCalificacionesResponse(BaseModel):
+    estadisticas: EstadisticasCalificacionesResponse
+    calificaciones: List[CalificacionResponse] = []
+    mi_calificacion: Optional[CalificacionResponse] = None
+    es_comprador_verificado: bool = False
+

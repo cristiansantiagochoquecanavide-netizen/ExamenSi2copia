@@ -123,6 +123,70 @@ export interface Prenda {
   temporada?: Temporada;
   multimedia: PrendaMultimedia[];
   variantes: PrendaVariante[];
+  rating_promedio?: number;
+  total_resenas?: number;
+}
+
+// ----------------- CU18: CALIFICACIONES Y RESEÑAS -----------------
+export interface CalificacionUsuarioInfo {
+  id: number;
+  nombre: string;
+  apellido: string;
+  email: string;
+}
+
+export interface Calificacion {
+  id: number;
+  prenda_id: number;
+  usuario_id: number;
+  puntuacion: number;
+  ajuste_talla: 'PEQUENO' | 'FIEL' | 'GRANDE';
+  calidad: number;
+  titulo: string;
+  comentario: string;
+  compra_verificada: boolean;
+  activo: boolean;
+  created_at: string;
+  updated_at: string;
+  usuario?: CalificacionUsuarioInfo;
+}
+
+export interface CalificacionCreate {
+  puntuacion: number;
+  ajuste_talla: 'PEQUENO' | 'FIEL' | 'GRANDE';
+  calidad: number;
+  titulo: string;
+  comentario: string;
+}
+
+export interface DesgloseEstrellas {
+  estrellas_5: number;
+  estrellas_4: number;
+  estrellas_3: number;
+  estrellas_2: number;
+  estrellas_1: number;
+}
+
+export interface DesgloseAjuste {
+  pequeno: number;
+  fiel: number;
+  grande: number;
+}
+
+export interface EstadisticasCalificaciones {
+  promedio: number;
+  total_resenas: number;
+  promedio_calidad: number;
+  desglose_estrellas: DesgloseEstrellas;
+  desglose_ajuste: DesgloseAjuste;
+  porcentaje_fiel_talla: number;
+}
+
+export interface ListadoCalificacionesResponse {
+  estadisticas: EstadisticasCalificaciones;
+  calificaciones: Calificacion[];
+  mi_calificacion?: Calificacion | null;
+  es_comprador_verificado: boolean;
 }
 
 export interface AjusteInventarioRequest {

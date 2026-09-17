@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.domains.usuarios.models import Usuario
-from app.domains.usuarios.routers import get_current_user, require_permissions
+from app.domains.usuarios.routers import get_current_user, get_optional_current_user, require_permissions
 from app.domains.catalogo.schemas import (
     CategoriaCreate, CategoriaUpdate, CategoriaResponse,
     TallaCreate, TallaUpdate, TallaResponse,
@@ -12,9 +12,11 @@ from app.domains.catalogo.schemas import (
     TemporadaCreate, TemporadaUpdate, TemporadaResponse,
     PrendaCreate, PrendaUpdate, PrendaResponse,
     PrendaMultimediaCreate, PrendaMultimediaResponse,
-    AjusteInventarioRequest, InventarioStockResponse, MensajeCatalogoResponse
+    AjusteInventarioRequest, InventarioStockResponse, MensajeCatalogoResponse,
+    CalificacionCreate, CalificacionUpdate, CalificacionResponse, ListadoCalificacionesResponse
 )
-from app.domains.catalogo.services import ParametrosModaService, PrendaService, StockService
+from app.domains.catalogo.services import ParametrosModaService, PrendaService, StockService, CalificacionService
+
 
 router = APIRouter(prefix="/catalogo", tags=["Cat?logo & Moda"])
 
@@ -219,3 +221,39 @@ async def ajustar_inventario(
 @router.get("/inventario/sucursal/{sucursal_id}", response_model=List[InventarioStockResponse], summary="Consultar Stock de Sucursal (CU6)")
 async def consultar_stock_sucursal(sucursal_id: int, db: AsyncSession = Depends(get_db)):
     return await StockService.consultar_stock_sucursal(db, sucursal_id)
+
+
+# ----------------- CU18: CALIFICACIONES Y RESEÑAS -----------------
+@router.get("/prendas/{prenda_id}/calificaciones", response_model=ListadoCalificacionesResponse, summary="Listar Calificaciones y Métricas (CU18)")
+async def listar_calificaciones_prenda(
+    prenda_id: int,
+    current_user: Optional[Usuario] = Depends(get_optional_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    user_id = current_user.id if current_user else None
+    return await CalificacionService.listar_calificaciones(db, prenda_id, user_id)
+
+
+@router.post("/prendas/{prenda_id}/calificaciones", response_model=CalificacionResponse, status_code=status.HTTP_201_CREATED, summary="Calificar Prenda (CU18)")
+async def calificar_prenda(
+    prenda_id: int,
+    data: CalificacionCreate,
+    request: Request,
+    current_user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    ip = request.client.host if request.client else None
+    return await CalificacionService.crear_o_actualizar(db, prenda_id, data, current_user, ip)
+
+
+@router.delete("/calificaciones/{calificacion_id}", response_model=MensajeCatalogoResponse, summary="Eliminar Calificación (CU18)")
+async def eliminar_calificacion(
+    calificacion_id: int,
+    request: Request,
+    current_user: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    ip = request.client.host if request.client else None
+    await CalificacionService.eliminar(db, calificacion_id, current_user, ip)
+    return MensajeCatalogoResponse(mensaje="Calificación eliminada exitosamente")
+
