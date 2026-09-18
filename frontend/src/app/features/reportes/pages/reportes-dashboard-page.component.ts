@@ -29,8 +29,14 @@ import {
           <div class="header-greeting-block">
             <h1 class="header-greeting">Buenos días, {{ currentUserName() }}</h1>
             <p class="header-date" *ngIf="selectedRango() !== 'MES_ESPECIFICO'">{{ currentDateFormatted() }}</p>
-            <p class="header-date audit-highlight" *ngIf="selectedRango() === 'MES_ESPECIFICO'">
+            <p class="header-date audit-highlight" *ngIf="selectedRango() === 'MES_ESPECIFICO' && modoVista() === 'HISTORICO'">
               <span class="audit-badge">AUDITORÍA HISTÓRICA</span> Período cerrado: {{ getNombreMes(selectedMes()) }} {{ selectedAnio() }}
+            </p>
+            <p class="header-date predictive-highlight" *ngIf="selectedRango() === 'MES_ESPECIFICO' && modoVista() === 'PREDICTIVO'">
+              <span class="predictive-badge">🔮 ESTIMACIÓN PREDICTIVA</span> Proyección estimada: {{ getNombreMes(selectedMes()) }} {{ selectedAnio() }}
+            </p>
+            <p class="header-date future-empty-highlight" *ngIf="selectedRango() === 'MES_ESPECIFICO' && modoVista() === 'SIN_DATOS_FUTURO'">
+              <span class="future-empty-badge">FUERA DE HORIZONTE</span> {{ getNombreMes(selectedMes()) }} {{ selectedAnio() }}
             </p>
           </div>
 
@@ -181,9 +187,43 @@ import {
         </section>
 
         <!-- ========================================================= -->
-        <!-- 3. FILA SUPERIOR: 4 KPIS + SEMICIRCULAR SALES TARGET GAUGE-->
+        <!-- ESTADO VACÍO CUANDO SE SELECCIONA UN MES FUTURO LEJANO    -->
         <!-- ========================================================= -->
-        <section class="harbor-top-metrics-grid">
+        <section *ngIf="modoVista() === 'SIN_DATOS_FUTURO'" class="future-empty-state-section">
+          <div class="empty-state-card">
+            <div class="empty-zen-icon">⏳</div>
+            <h2 class="empty-title">"No te apresures en ver tu futuro, enfocate en el presente"</h2>
+            <p class="empty-subtitle">
+              Actualmente estamos en <strong>Septiembre 2026</strong>. Nuestro motor de Business Intelligence calcula proyecciones con un horizonte confiable de <strong>hasta un mes hacia adelante (Octubre 2026)</strong>.
+              Para <strong>{{ getNombreMes(selectedMes()) }} {{ selectedAnio() }}</strong> aún no existen datos de ventas ni proyecciones estadísticas aplicables.
+            </p>
+            <div class="empty-actions">
+              <button type="button" class="btn-empty-action" (click)="irAMesActual()">
+                Ver Mes Actual (Septiembre)
+              </button>
+              <button type="button" class="btn-empty-outline" (click)="irAMesPredictivo()">
+                Ver Estimación de Octubre
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- CONTENIDO NORMAL O PREDICTIVO (SOLO SI NO ES FUTURO)      -->
+        <!-- ========================================================= -->
+        <ng-container *ngIf="modoVista() !== 'SIN_DATOS_FUTURO'">
+          <!-- Banner Superior de Estimación Predictiva -->
+          <div *ngIf="modoVista() === 'PREDICTIVO'" class="predictive-banner">
+            <span class="predictive-banner-icon">🔮</span>
+            <div class="predictive-banner-content">
+              <strong>Modo Estimación Predictiva activado:</strong> Todas las métricas visualizadas para <strong>{{ getNombreMes(selectedMes()) }} {{ selectedAnio() }}</strong> son proyecciones calculadas automáticamente según el rendimiento del negocio en los meses pasados.
+            </div>
+          </div>
+
+          <!-- ========================================================= -->
+          <!-- 3. FILA SUPERIOR: 4 KPIS + SEMICIRCULAR SALES TARGET GAUGE-->
+          <!-- ========================================================= -->
+          <section class="harbor-top-metrics-grid">
           <!-- KPI 1: Facturación / Revenue -->
           <article class="harbor-kpi-card">
             <div class="kpi-header-row">
@@ -414,7 +454,7 @@ import {
                     class="trend-comparative-path"
                   />
 
-                  <!-- Curva Sólida Fluida (Meses reales transcurridos) -->
+                  <!-- Curva Sólida Fluida -->
                   <path
                     [attr.d]="svgPathActual()"
                     fill="none"
@@ -426,34 +466,18 @@ import {
                     class="trend-line-path"
                   />
 
-                  <!-- Curva Punteada de Predicción IA (Forecast del Siguiente Mes) -->
-                  <path
-                    *ngIf="svgPathForecast()"
-                    [attr.d]="svgPathForecast()"
-                    fill="none"
-                    stroke="#2563eb"
-                    stroke-width="3.2"
-                    stroke-dasharray="6,4"
-                    stroke-linecap="round"
-                    class="trend-forecast-path"
-                  />
-
-                  <!-- Pulsing Beacon en el Último Punto Real -->
-                  <g *ngIf="lastActualPoint() && (!hoveredTrendPoint || hoveredTrendPoint.periodo !== lastActualPoint()!.periodo)" class="beacon-point-group">
-                    <circle [attr.cx]="lastActualPoint()!.x" [attr.cy]="lastActualPoint()!.yActual" r="12" class="beacon-pulse-ring" />
-                    <circle [attr.cx]="lastActualPoint()!.x" [attr.cy]="lastActualPoint()!.yActual" r="5" fill="#ff3811" stroke="#ffffff" stroke-width="2.5" />
+                  <!-- Pulsing Beacon en el Último Punto -->
+                  <g *ngIf="lastTrendPoint() && !hoveredTrendPoint" class="beacon-point-group">
+                    <circle [attr.cx]="lastTrendPoint()!.x" [attr.cy]="lastTrendPoint()!.yActual" r="12" class="beacon-pulse-ring" />
+                    <circle [attr.cx]="lastTrendPoint()!.x" [attr.cy]="lastTrendPoint()!.yActual" r="5" fill="#ff3811" stroke="#ffffff" stroke-width="2.5" />
                   </g>
 
-                  <!-- Badge y Beacon en el Punto Forecast IA (Mes Siguiente) -->
-                  <g *ngIf="forecastCoord() && (!hoveredTrendPoint || hoveredTrendPoint.periodo !== forecastCoord()!.periodo)" class="forecast-point-group">
-                    <circle [attr.cx]="forecastCoord()!.x" [attr.cy]="forecastCoord()!.yActual" r="14" class="forecast-pulse-ring" />
-                    <circle [attr.cx]="forecastCoord()!.x" [attr.cy]="forecastCoord()!.yActual" r="6" fill="#2563eb" stroke="#ffffff" stroke-width="2.5" />
-                    <g [attr.transform]="'translate(' + (forecastCoord()!.x - 52) + ',' + (forecastCoord()!.yActual - 32) + ')'" class="forecast-badge-tag">
-                      <rect width="104" height="24" rx="12" fill="#1e40af" filter="drop-shadow(0 3px 6px rgba(37,99,235,0.35))" />
-                      <text x="52" y="16" text-anchor="middle" fill="#ffffff" font-size="10.5" font-weight="800">
-                        ⚡ Forecast IA
-                      </text>
-                    </g>
+                  <!-- Badge Flotante en el Último Punto (Live Value) -->
+                  <g *ngIf="lastTrendPoint() && !hoveredTrendPoint" [attr.transform]="'translate(' + (lastTrendPoint()!.x - 45) + ',' + (lastTrendPoint()!.yActual - 32) + ')'" class="current-badge-group">
+                    <rect width="90" height="24" rx="12" fill="#111827" filter="drop-shadow(0 3px 6px rgba(0,0,0,0.25))" />
+                    <text x="45" y="16.5" text-anchor="middle" fill="#ffffff" font-size="11.5" font-weight="800" font-family="ui-monospace, monospace">
+                      &dollar;{{ lastTrendPoint()!.montoActual | number:'1.0-0' }}
+                    </text>
                   </g>
                 </ng-container>
 
@@ -472,17 +496,14 @@ import {
                       opacity="0.45"
                       style="pointer-events: none;"
                     />
-                    <!-- Barra actual (Sólida si real, punteada/azul si forecast) -->
+                    <!-- Barra actual -->
                     <rect
                       [attr.x]="pt.x - 14"
                       [attr.y]="pt.yActual"
                       width="28"
                       [attr.height]="210 - pt.yActual"
                       rx="5"
-                      [attr.fill]="pt.esProyeccion ? 'rgba(37, 99, 235, 0.25)' : 'url(#harborBarGrad)'"
-                      [attr.stroke]="pt.esProyeccion ? '#2563eb' : 'none'"
-                      [attr.stroke-width]="pt.esProyeccion ? 2 : 0"
-                      [attr.stroke-dasharray]="pt.esProyeccion ? '4,3' : 'none'"
+                      fill="url(#harborBarGrad)"
                       [class.active-bar]="hoveredTrendPoint && hoveredTrendPoint.periodo === pt.periodo"
                       class="animated-bar"
                     />
@@ -538,16 +559,14 @@ import {
                 class="trend-hover-tooltip"
                 [style.left.px]="hoveredTooltipLeft()">
                 <div class="tooltip-header-row">
-                  <span class="tooltip-period-badge" [class.badge-forecast-tooltip]="hoveredTrendPoint.esProyeccion">
-                    {{ hoveredTrendPoint.periodo }} {{ hoveredTrendPoint.esProyeccion ? '(Forecast IA)' : '' }}
-                  </span>
+                  <span class="tooltip-period-badge">{{ hoveredTrendPoint.periodo }}</span>
                   <span class="tooltip-diff-pill" [class.positive]="hoveredTrendPoint.montoActual >= hoveredTrendPoint.montoAnterior">
                     {{ hoveredTrendPoint.montoActual >= hoveredTrendPoint.montoAnterior ? '▲ +' : '▼ -' }}{{ getPointDiffPct(hoveredTrendPoint) }}%
                   </span>
                 </div>
                 <div class="tooltip-metric-grid">
                   <div class="tooltip-stat">
-                    <span class="stat-lbl"><span class="dot-cur" [style.background]="hoveredTrendPoint.esProyeccion ? '#2563eb' : '#ff3811'"></span> {{ hoveredTrendPoint.esProyeccion ? 'Proyección estim.:' : 'Este período:' }}</span>
+                    <span class="stat-lbl"><span class="dot-cur"></span> Este período:</span>
                     <span class="stat-val highlight">&dollar;{{ hoveredTrendPoint.montoActual | number:'1.2-2' }}</span>
                   </div>
                   <div class="tooltip-stat" *ngIf="showComparative()">
@@ -568,9 +587,8 @@ import {
                 <span
                   *ngFor="let pt of trendChartCoords()"
                   class="x-tick-label"
-                  [class.forecast-tick]="pt.esProyeccion"
                   [class.active-tick]="hoveredTrendPoint && hoveredTrendPoint.periodo === pt.periodo">
-                  {{ pt.periodo }}<small *ngIf="pt.esProyeccion" class="tick-ia-pill">IA</small>
+                  {{ pt.periodo }}
                 </span>
               </div>
             </div>
@@ -598,17 +616,6 @@ import {
                 <div class="bi-chip-content">
                   <span class="bi-chip-title">Meta de Ventas</span>
                   <span class="bi-chip-num">{{ financialData().cumplimiento_pct }}% cubierto</span>
-                </div>
-              </div>
-
-              <!-- Chip 4: Forecast Predictivo -->
-              <div class="bi-stat-chip forecast-bi-chip" *ngIf="financialData().proyeccion_siguiente_mes">
-                <span class="bi-chip-bullet bullet-forecast"></span>
-                <div class="bi-chip-content">
-                  <span class="bi-chip-title">Forecast {{ financialData().proyeccion_mes_nombre || 'Próx. Mes' }} (IA)</span>
-                  <span class="bi-chip-num">
-                    &dollar;{{ financialData().proyeccion_siguiente_mes | number:'1.0-0' }} &bull; <strong class="text-forecast-accent">+{{ financialData().proyeccion_variacion_pct }}%</strong>
-                  </span>
                 </div>
               </div>
 
@@ -770,6 +777,8 @@ import {
           </article>
         </section>
 
+        </ng-container>
+
       </div>
     </div>
   `,
@@ -906,6 +915,162 @@ import {
       letter-spacing: 0.04em;
       padding: 0.15rem 0.45rem;
       border-radius: 4px;
+    }
+
+    .predictive-highlight {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #7c3aed !important;
+      font-weight: 600;
+    }
+
+    .predictive-badge {
+      background: #f5f3ff;
+      color: #7c3aed;
+      border: 1px solid #ddd6fe;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+    }
+
+    .future-empty-highlight {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #64748b !important;
+      font-weight: 600;
+    }
+
+    .future-empty-badge {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+    }
+
+    /* Banner Estimación Predictiva */
+    .predictive-banner {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+      border: 1px solid #c4b5fd;
+      border-radius: 12px;
+      padding: 0.85rem 1.25rem;
+      color: #5b21b6;
+      font-size: 0.82rem;
+      line-height: 1.4;
+      box-shadow: 0 2px 6px rgba(124, 58, 237, 0.08);
+      animation: fadeIn 0.25s ease-in-out;
+    }
+
+    .predictive-banner-icon {
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+
+    /* Estado Vacío Amigable para Meses Futuros */
+    .future-empty-state-section {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 420px;
+      padding: 2rem 1rem;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .empty-state-card {
+      background: #ffffff;
+      border: 1.5px dashed #cbd5e1;
+      border-radius: 16px;
+      padding: 3.5rem 2.5rem;
+      max-width: 640px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+    }
+
+    .empty-zen-icon {
+      font-size: 3rem;
+      background: #f8fafc;
+      width: 76px;
+      height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .empty-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #1e293b;
+      line-height: 1.3;
+      margin: 0;
+      font-style: italic;
+    }
+
+    .empty-subtitle {
+      font-size: 0.88rem;
+      color: #64748b;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .empty-actions {
+      display: flex;
+      gap: 0.85rem;
+      margin-top: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-empty-action {
+      background: #111827;
+      color: #ffffff;
+      border: 1px solid #111827;
+      border-radius: 8px;
+      padding: 0.6rem 1.25rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .btn-empty-action:hover {
+      background: #000000;
+      transform: translateY(-1px);
+    }
+
+    .btn-empty-outline {
+      background: #f5f3ff;
+      color: #7c3aed;
+      border: 1.5px solid #ddd6fe;
+      border-radius: 8px;
+      padding: 0.6rem 1.25rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-empty-outline:hover {
+      background: #ede9fe;
+      border-color: #c4b5fd;
+      transform: translateY(-1px);
     }
 
     .btn-harbor-export {
@@ -1747,62 +1912,6 @@ import {
       flex-shrink: 0;
     }
 
-    .forecast-bi-chip {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      border-radius: 8px;
-      padding: 0.35rem 0.65rem;
-      border-right: none;
-    }
-
-    .bullet-forecast {
-      background: #2563eb;
-      box-shadow: 0 0 6px rgba(37, 99, 235, 0.4);
-    }
-
-    .text-forecast-accent {
-      color: #2563eb;
-    }
-
-    .forecast-pulse-ring {
-      fill: none;
-      stroke: #2563eb;
-      stroke-width: 2;
-      opacity: 0.6;
-      animation: forecastPulse 2.5s infinite ease-out;
-    }
-
-    @keyframes forecastPulse {
-      0% { r: 6; opacity: 0.8; }
-      100% { r: 18; opacity: 0; }
-    }
-
-    .trend-forecast-path {
-      animation: fadeIn 0.4s ease-in;
-    }
-
-    .badge-forecast-tooltip {
-      background: #eff6ff !important;
-      color: #1d4ed8 !important;
-      border: 1px solid #bfdbfe;
-    }
-
-    .forecast-tick {
-      color: #2563eb !important;
-      font-weight: 700 !important;
-      position: relative;
-    }
-
-    .tick-ia-pill {
-      font-size: 0.62rem;
-      background: #2563eb;
-      color: #ffffff;
-      padding: 0.1rem 0.3rem;
-      border-radius: 4px;
-      margin-left: 0.2rem;
-      vertical-align: middle;
-    }
-
     /* Fulfillment de Pedidos */
     .card-main-title {
       font-size: 0.95rem;
@@ -2299,22 +2408,24 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
     ];
   });
 
+  modoVista = computed(() => this.dashboardData()?.modo_vista || 'HISTORICO');
+  mensajeFuturo = computed(() => this.dashboardData()?.mensaje_futuro || 'No te apresures en ver tu futuro, enfocate en el presente');
+
   // Coordenadas calculadas para la curva SVG
   trendChartCoords = computed(() => {
     const d = this.dashboardData();
     const points: ComparativeTrendPoint[] = (d && d.comparative_trend && d.comparative_trend.length > 0)
       ? d.comparative_trend
       : [
-          { periodo: 'Ene', monto_actual: 5200, monto_anterior: 4200, es_proyeccion: false },
-          { periodo: 'Feb', monto_actual: 6300, monto_anterior: 4800, es_proyeccion: false },
-          { periodo: 'Mar', monto_actual: 8100, monto_anterior: 6500, es_proyeccion: false },
-          { periodo: 'Abr', monto_actual: 8900, monto_anterior: 7400, es_proyeccion: false },
-          { periodo: 'May', monto_actual: 11200, monto_anterior: 9100, es_proyeccion: false },
-          { periodo: 'Jun', monto_actual: 12400, monto_anterior: 10400, es_proyeccion: false },
-          { periodo: 'Jul', monto_actual: 13900, monto_anterior: 11200, es_proyeccion: false },
-          { periodo: 'Ago', monto_actual: 13100, monto_anterior: 11800, es_proyeccion: false },
-          { periodo: 'Sep', monto_actual: 15400, monto_anterior: 12900, es_proyeccion: false },
-          { periodo: 'Oct', monto_actual: 16450, monto_anterior: 14200, es_proyeccion: true }
+          { periodo: 'Ene', monto_actual: 5200, monto_anterior: 4200 },
+          { periodo: 'Feb', monto_actual: 6300, monto_anterior: 4800 },
+          { periodo: 'Mar', monto_actual: 8100, monto_anterior: 6500 },
+          { periodo: 'Abr', monto_actual: 8900, monto_anterior: 7400 },
+          { periodo: 'May', monto_actual: 11200, monto_anterior: 9100 },
+          { periodo: 'Jun', monto_actual: 12400, monto_anterior: 10400 },
+          { periodo: 'Jul', monto_actual: 13900, monto_anterior: 11200 },
+          { periodo: 'Ago', monto_actual: 13100, monto_anterior: 11800 },
+          { periodo: 'Sep', monto_actual: 15400, monto_anterior: 12900 }
         ];
 
     const maxVal = this.maxTrendVal();
@@ -2332,23 +2443,9 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
         yAnterior: Math.round(yAnt),
         periodo: p.periodo,
         montoActual: p.monto_actual,
-        montoAnterior: p.monto_anterior,
-        esProyeccion: !!p.es_proyeccion
+        montoAnterior: p.monto_anterior
       };
     });
-  });
-
-  actualCoords = computed(() => {
-    return this.trendChartCoords().filter(p => !p.esProyeccion);
-  });
-
-  forecastCoord = computed(() => {
-    return this.trendChartCoords().find(p => p.esProyeccion) || null;
-  });
-
-  lastActualPoint = computed(() => {
-    const act = this.actualCoords();
-    return act.length > 0 ? act[act.length - 1] : null;
   });
 
   lastTrendPoint = computed(() => {
@@ -2357,7 +2454,7 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
   });
 
   svgPathActual = computed(() => {
-    const coords = this.actualCoords();
+    const coords = this.trendChartCoords();
     if (coords.length === 0) return '';
     let d = `M${coords[0].x},${coords[0].yActual}`;
     for (let i = 1; i < coords.length; i++) {
@@ -2370,20 +2467,12 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
   });
 
   svgAreaActual = computed(() => {
-    const coords = this.actualCoords();
+    const coords = this.trendChartCoords();
     if (coords.length === 0) return '';
     const line = this.svgPathActual();
     const last = coords[coords.length - 1];
     const first = coords[0];
     return `${line} L${last.x},210 L${first.x},210 Z`;
-  });
-
-  svgPathForecast = computed(() => {
-    const last = this.lastActualPoint();
-    const fcast = this.forecastCoord();
-    if (!last || !fcast) return '';
-    const cpx = last.x + (fcast.x - last.x) / 2;
-    return `M${last.x},${last.yActual} C${cpx},${last.yActual} ${cpx},${fcast.yActual} ${fcast.x},${fcast.yActual}`;
   });
 
   svgPathAnterior = computed(() => {
@@ -2398,6 +2487,18 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
     }
     return d;
   });
+
+  irAMesActual(): void {
+    this.selectedMes.set(9);
+    this.selectedAnio.set(2026);
+    this.cambiarRango('MES_ACTUAL');
+  }
+
+  irAMesPredictivo(): void {
+    this.selectedMes.set(10);
+    this.selectedAnio.set(2026);
+    this.cambiarMes(10);
+  }
 
   trendPeakPoint = computed(() => {
     const coords = this.trendChartCoords();

@@ -103,6 +103,8 @@ export interface GeographicHub {
 export interface DashboardReporteResponse {
   rango: string;
   granularidad?: string;
+  modo_vista?: 'HISTORICO' | 'PREDICTIVO' | 'SIN_DATOS_FUTURO';
+  mensaje_futuro?: string;
   kpis: KPISummary;
   financial?: FinancialIndicator;
   comparative_trend?: ComparativeTrendPoint[];

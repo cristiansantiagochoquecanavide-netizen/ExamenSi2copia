@@ -121,6 +121,8 @@ class GeographicHub(BaseModel):
 class DashboardReporteResponse(BaseModel):
     rango: str
     granularidad: Optional[str] = "MES"
+    modo_vista: str = "HISTORICO"  # "HISTORICO", "PREDICTIVO", "SIN_DATOS_FUTURO"
+    mensaje_futuro: Optional[str] = None
     kpis: KPISummaryResponse
     financial: FinancialIndicatorResponse
     comparative_trend: List[ComparativeTrendPoint]
