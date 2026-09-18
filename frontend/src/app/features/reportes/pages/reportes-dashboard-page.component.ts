@@ -1933,7 +1933,16 @@ import {
       flex-shrink: 0;
     }
 
-    /* Fulfillment de Pedidos */
+    /* Fulfillment de Pedidos (Escalado aumentado en 3 unidades) */
+    .fulfillment-card .card-main-title {
+      font-size: 1.15rem; /* +3px (era 0.95rem) */
+    }
+
+    .fulfillment-card .card-subtitle {
+      font-size: 0.94rem; /* +3px (era 0.75rem) */
+      margin-top: 0.25rem;
+    }
+
     .card-main-title {
       font-size: 0.95rem;
       font-weight: 800;
@@ -1950,20 +1959,20 @@ import {
     .fulfillment-bars-list {
       display: flex;
       flex-direction: column;
-      gap: 0.85rem;
-      margin-top: 0.5rem;
+      gap: 1.15rem;
+      margin-top: 0.85rem;
     }
 
     .fulfillment-bar-item {
       display: flex;
       flex-direction: column;
-      gap: 0.3rem;
+      gap: 0.45rem;
     }
 
     .fulfillment-bar-label-row {
       display: flex;
       justify-content: space-between;
-      font-size: 0.75rem;
+      font-size: 0.94rem; /* +3px (era 0.75rem) */
     }
 
     .status-name {
@@ -1973,19 +1982,19 @@ import {
 
     .status-count-pct {
       color: #6b7280;
-      font-size: 0.72rem;
+      font-size: 0.91rem; /* +3px (era 0.72rem) */
     }
 
     .fulfillment-track {
-      height: 7px;
+      height: 10px; /* +3px (era 7px) */
       background: #f1f5f9;
-      border-radius: 4px;
+      border-radius: 6px;
       overflow: hidden;
     }
 
     .fulfillment-fill {
       height: 100%;
-      border-radius: 4px;
+      border-radius: 6px;
       transition: width 0.4s ease;
     }
 
@@ -1997,26 +2006,26 @@ import {
     .fulfillment-summary-footer {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 0.75rem;
+      gap: 1rem;
       border-top: 1px solid #f3f4f6;
-      padding-top: 1rem;
+      padding-top: 1.25rem;
       margin-top: auto;
     }
 
     .logistics-stat-box {
       display: flex;
       flex-direction: column;
-      gap: 0.1rem;
+      gap: 0.2rem;
     }
 
     .logistics-stat-val {
-      font-size: 1.15rem;
+      font-size: 1.35rem; /* +3px (era 1.15rem) */
       font-weight: 800;
       color: #111827;
     }
 
     .logistics-stat-lbl {
-      font-size: 0.68rem;
+      font-size: 0.87rem; /* +3px (era 0.68rem) */
       color: #6b7280;
     }
 
