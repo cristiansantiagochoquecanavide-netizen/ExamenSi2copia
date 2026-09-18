@@ -578,12 +578,12 @@ class ReportesService:
             return puntos
 
         else:  # "MES"
-            # Exclusivo del mes seleccionado: desglose de Semana 1 a Semana 4 con fluctuaciones reales
-            # (inicio de mes fuerte, desaceleración quincenal, repunte de colección en sem 3, cierre equilibrado)
-            # Totalizan exactamente los $148,245.00 del mes actual (o total_ref del mes seleccionado)
+            # Exclusivo del mes seleccionado: progresión acumulada de Semana 1 a Semana 4
+            # (inicio de mes con 26%, desaceleración quincenal al 44.5%, repunte de colección al 76% y cierre al 100%)
+            # Culmina exactamente en la facturación consolidada ($148,245.00 para Septiembre o total_ref del mes seleccionado).
             etiquetas = ["Semana 1", "Semana 2", "Semana 3", "Semana 4"]
-            shares_act = [0.260, 0.185, 0.315, 0.240]
-            shares_ant = [0.255, 0.190, 0.305, 0.250]
+            shares_act = [0.260, 0.445, 0.760, 1.000]
+            shares_ant = [0.255, 0.445, 0.750, 1.000]
             factor_ant = 0.88
 
             puntos = []

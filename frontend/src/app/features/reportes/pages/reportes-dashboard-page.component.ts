@@ -2324,8 +2324,8 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
       // Escala semanal hasta $80,000 (o superior en múltiplos de $20k si el pico lo supera)
       return peak > 80000 ? Math.ceil(peak / 20000) * 20000 : 80000;
     } else {
-      // Escala mensual (semanas del mes) hasta $60,000 (o superior en múltiplos de $15k si el pico lo supera)
-      return peak > 60000 ? Math.ceil(peak / 15000) * 15000 : 60000;
+      // Escala mensual (semanas del mes) hasta $200,000 (o superior en múltiplos de $50k si el pico lo supera)
+      return peak > 200000 ? Math.ceil(peak / 50000) * 50000 : 200000;
     }
   });
 
@@ -2377,9 +2377,9 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
       } else {
         points = [
           { periodo: 'Semana 1', monto_actual: 38544, monto_anterior: 33266 },
-          { periodo: 'Semana 2', monto_actual: 27425, monto_anterior: 24787 },
-          { periodo: 'Semana 3', monto_actual: 46697, monto_anterior: 39789 },
-          { periodo: 'Semana 4', monto_actual: 35579, monto_anterior: 32614 }
+          { periodo: 'Semana 2', monto_actual: 65969, monto_anterior: 58053 },
+          { periodo: 'Semana 3', monto_actual: 112666, monto_anterior: 97842 },
+          { periodo: 'Semana 4', monto_actual: 148245, monto_anterior: 130456 }
         ];
       }
     }
