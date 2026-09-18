@@ -477,7 +477,7 @@ class _UsuariosScreenState extends State<UsuariosScreen> {
           onPressed: () => context.go('/reportes'),
           icon: const Icon(Icons.bar_chart, color: Color(0xFFE9C349)),
           label: const Text(
-            '📊 REPORTES & DASHBOARD (IA)',
+            'REPORTES & DASHBOARD (IA)',
             style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1.2),
           ),
           style: ElevatedButton.styleFrom(
