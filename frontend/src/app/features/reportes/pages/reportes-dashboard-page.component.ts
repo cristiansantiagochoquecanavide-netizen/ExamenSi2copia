@@ -241,11 +241,11 @@ import {
                   stroke-width="12"
                   stroke-linecap="round"
                 />
-                <!-- Arco de progreso (Dorado Haute Couture) -->
+                <!-- Arco de progreso (Coral Harbor) -->
                 <path
                   d="M 24 82 A 56 56 0 0 1 136 82"
                   fill="none"
-                  stroke="#d4af37"
+                  stroke="#ff5733"
                   stroke-width="12"
                   stroke-linecap="round"
                   stroke-dasharray="175.93"
@@ -280,123 +280,286 @@ import {
                 </div>
               </div>
 
-              <!-- Selector de Granularidad: Día, Semana, Mes -->
-              <div class="granularity-switcher-tabs">
+              <div class="chart-controls-cluster">
+                <!-- Alternador Vista: Curva / Columnas -->
+                <div class="chart-type-tabs">
+                  <button
+                    type="button"
+                    class="type-tab-btn"
+                    [class.active]="chartViewType() === 'line'"
+                    (click)="chartViewType.set('line')"
+                    title="Curva fluida">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <path d="M3 17l6-6 4 4 8-8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>Línea</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="type-tab-btn"
+                    [class.active]="chartViewType() === 'bar'"
+                    (click)="chartViewType.set('bar')"
+                    title="Columnas redondeadas">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <rect x="3" y="11" width="4" height="10" rx="1"/>
+                      <rect x="10" y="6" width="4" height="15" rx="1"/>
+                      <rect x="17" y="2" width="4" height="19" rx="1"/>
+                    </svg>
+                    <span>Barras</span>
+                  </button>
+                </div>
+
+                <!-- Toggle Comparativa con Período Previo -->
                 <button
                   type="button"
-                  class="switcher-tab"
-                  [class.active]="selectedGranularidad() === 'DIA'"
-                  (click)="cambiarGranularidad('DIA')">
-                  Día
+                  class="comparative-pill-btn"
+                  [class.active]="showComparative()"
+                  (click)="showComparative.set(!showComparative())"
+                  title="Mostrar/Ocultar comparativa previa">
+                  <span class="comp-legend-dash"></span>
+                  <span>Anterior</span>
                 </button>
-                <button
-                  type="button"
-                  class="switcher-tab"
-                  [class.active]="selectedGranularidad() === 'SEMANA'"
-                  (click)="cambiarGranularidad('SEMANA')">
-                  Semana
-                </button>
-                <button
-                  type="button"
-                  class="switcher-tab"
-                  [class.active]="selectedGranularidad() === 'MES'"
-                  (click)="cambiarGranularidad('MES')">
-                  Mes
-                </button>
+
+                <!-- Selector de Granularidad: Día, Semana, Mes -->
+                <div class="granularity-switcher-tabs">
+                  <button
+                    type="button"
+                    class="switcher-tab"
+                    [class.active]="selectedGranularidad() === 'DIA'"
+                    (click)="cambiarGranularidad('DIA')">
+                    Día
+                  </button>
+                  <button
+                    type="button"
+                    class="switcher-tab"
+                    [class.active]="selectedGranularidad() === 'SEMANA'"
+                    (click)="cambiarGranularidad('SEMANA')">
+                    Semana
+                  </button>
+                  <button
+                    type="button"
+                    class="switcher-tab"
+                    [class.active]="selectedGranularidad() === 'MES'"
+                    (click)="cambiarGranularidad('MES')">
+                    Mes
+                  </button>
+                </div>
               </div>
             </div>
 
-            <!-- Gráfico SVG Curva Fluida con Escala Y Cuantitativa -->
-            <div class="chart-stage-container">
+            <!-- Gráfico SVG Interactivo con Tracking Magnético -->
+            <div class="chart-stage-container" (mousemove)="onChartMouseMove($event)" (mouseleave)="onChartMouseLeave()">
               <svg class="flowing-trend-svg" viewBox="0 0 660 210" preserveAspectRatio="none">
-                <!-- Escala Eje Y & Líneas de Guía Horizontales -->
+                <defs>
+                  <!-- Gradiente Suave del Área -->
+                  <linearGradient id="harborTrendAreaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#ff5733" stop-opacity="0.25" />
+                    <stop offset="60%" stop-color="#ff5733" stop-opacity="0.06" />
+                    <stop offset="100%" stop-color="#ff5733" stop-opacity="0.00" />
+                  </linearGradient>
+
+                  <!-- Gradiente de la Curva -->
+                  <linearGradient id="harborCurveStrokeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#ff7a59" />
+                    <stop offset="100%" stop-color="#ff3811" />
+                  </linearGradient>
+
+                  <!-- Gradiente de las Barras -->
+                  <linearGradient id="harborBarGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#ff6b4a" />
+                    <stop offset="100%" stop-color="#ff3811" />
+                  </linearGradient>
+
+                  <!-- Filtro de Resplandor Cálido -->
+                  <filter id="harborCurveGlow" x="-10%" y="-20%" width="120%" height="150%">
+                    <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#ff5733" flood-opacity="0.28" />
+                  </filter>
+                </defs>
+
+                <!-- Escala Eje Y & Líneas de Guía Horizontales Sutiles -->
                 <g *ngFor="let tick of trendYAxisTicks()">
                   <text x="50" [attr.y]="tick.y + 4" text-anchor="end" class="chart-y-label">{{ tick.label }}</text>
                   <line x1="56" [attr.y1]="tick.y" x2="655" [attr.y2]="tick.y" stroke="#f1f5f9" stroke-width="1" [attr.stroke-dasharray]="tick.y === 175 ? 'none' : '3,3'" />
                 </g>
 
-                <!-- Gradiente de Fondo Suave Haute Couture -->
-                <defs>
-                  <linearGradient id="harborCurveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#d4af37" stop-opacity="0.18" />
-                    <stop offset="100%" stop-color="#d4af37" stop-opacity="0.00" />
-                  </linearGradient>
-                </defs>
+                <!-- MODO A: LÍNEA CONTINUA FLUIDA -->
+                <ng-container *ngIf="chartViewType() === 'line'">
+                  <!-- Área rellena suave -->
+                  <path [attr.d]="svgAreaActual()" fill="url(#harborTrendAreaGrad)" class="trend-area-path" />
 
-                <!-- Área Rellena del Período Actual -->
-                <path [attr.d]="svgAreaActual()" fill="url(#harborCurveGradient)" />
+                  <!-- Curva Dotted: Período Anterior -->
+                  <path
+                    *ngIf="showComparative()"
+                    [attr.d]="svgPathAnterior()"
+                    fill="none"
+                    stroke="#cbd5e1"
+                    stroke-width="1.8"
+                    stroke-dasharray="4,4"
+                  />
 
-                <!-- Línea Guía Vertical Magnética al interactuar -->
-                <line
-                  *ngIf="hoveredTrendPoint"
-                  [attr.x1]="hoveredTrendPoint.x"
-                  y1="30"
-                  [attr.x2]="hoveredTrendPoint.x"
-                  y2="175"
-                  stroke="#111111"
-                  stroke-dasharray="3,3"
-                  stroke-width="1.2"
-                  opacity="0.35"
-                />
+                  <!-- Curva Sólida Fluida (Sin 12 círculos rígidos) -->
+                  <path
+                    [attr.d]="svgPathActual()"
+                    fill="none"
+                    stroke="url(#harborCurveStrokeGrad)"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    filter="url(#harborCurveGlow)"
+                    class="trend-line-path"
+                  />
 
-                <!-- Curva Dotted: Período Anterior -->
-                <path [attr.d]="svgPathAnterior()" fill="none" stroke="#9ca3af" stroke-width="2" stroke-dasharray="4,4" />
+                  <!-- Pulsing Beacon en el Último Punto -->
+                  <g *ngIf="lastTrendPoint() && !hoveredTrendPoint" class="beacon-point-group">
+                    <circle [attr.cx]="lastTrendPoint()!.x" [attr.cy]="lastTrendPoint()!.yActual" r="10" class="beacon-pulse-ring" />
+                    <circle [attr.cx]="lastTrendPoint()!.x" [attr.cy]="lastTrendPoint()!.yActual" r="4.5" fill="#ff3811" stroke="#ffffff" stroke-width="2.5" />
+                  </g>
 
-                <!-- Curva Sólida: Este Período -->
-                <path [attr.d]="svgPathActual()" fill="none" stroke="#111111" stroke-width="2.6" />
+                  <!-- Badge Flotante en el Último Punto (Live Value) -->
+                  <g *ngIf="lastTrendPoint() && !hoveredTrendPoint" [attr.transform]="'translate(' + (lastTrendPoint()!.x - 42) + ',' + (lastTrendPoint()!.yActual - 28) + ')'" class="current-badge-group">
+                    <rect width="84" height="22" rx="11" fill="#111827" filter="drop-shadow(0 3px 6px rgba(0,0,0,0.25))" />
+                    <text x="42" y="15" text-anchor="middle" fill="#ffffff" font-size="10.5" font-weight="800" font-family="ui-monospace, monospace">
+                      &dollar;{{ lastTrendPoint()!.montoActual | number:'1.0-0' }}
+                    </text>
+                  </g>
+                </ng-container>
 
-                <!-- Nodos Interactivos -->
-                <g *ngFor="let pt of trendChartCoords()">
+                <!-- MODO B: BARRAS MODERNAS -->
+                <ng-container *ngIf="chartViewType() === 'bar'">
+                  <g *ngFor="let pt of trendChartCoords()">
+                    <!-- Barra de fondo previa (si comparativa activa) -->
+                    <rect
+                      *ngIf="showComparative()"
+                      [attr.x]="pt.x - 13"
+                      [attr.y]="pt.yAnterior"
+                      width="26"
+                      [attr.height]="175 - pt.yAnterior"
+                      rx="5"
+                      fill="#e2e8f0"
+                      opacity="0.45"
+                      style="pointer-events: none;"
+                    />
+                    <!-- Barra actual -->
+                    <rect
+                      [attr.x]="pt.x - 13"
+                      [attr.y]="pt.yActual"
+                      width="26"
+                      [attr.height]="175 - pt.yActual"
+                      rx="5"
+                      fill="url(#harborBarGrad)"
+                      [class.active-bar]="hoveredTrendPoint && hoveredTrendPoint.periodo === pt.periodo"
+                      class="animated-bar"
+                    />
+                  </g>
+                </ng-container>
+
+                <!-- GUÍA Y MARCADOR DE HOVER MAGNÉTICO -->
+                <g *ngIf="hoveredTrendPoint">
+                  <line
+                    [attr.x1]="hoveredTrendPoint.x"
+                    y1="25"
+                    [attr.x2]="hoveredTrendPoint.x"
+                    y2="175"
+                    stroke="#ff3811"
+                    stroke-dasharray="3,3"
+                    stroke-width="1.5"
+                    opacity="0.65"
+                  />
                   <circle
-                    [attr.cx]="pt.x"
-                    [attr.cy]="pt.yActual"
+                    [attr.cx]="hoveredTrendPoint.x"
+                    [attr.cy]="hoveredTrendPoint.yActual"
+                    r="6.5"
+                    fill="#ff3811"
+                    stroke="#ffffff"
+                    stroke-width="3"
+                    filter="drop-shadow(0 2px 5px rgba(255,56,17,0.45))"
+                  />
+                  <circle
+                    *ngIf="showComparative()"
+                    [attr.cx]="hoveredTrendPoint.x"
+                    [attr.cy]="hoveredTrendPoint.yAnterior"
                     r="4.5"
-                    fill="#ffffff"
-                    stroke="#111111"
-                    stroke-width="2.5"
-                    (mouseenter)="hoveredTrendPoint = pt"
-                    (mouseleave)="hoveredTrendPoint = null"
-                    class="interactive-node"
+                    fill="#94a3b8"
+                    stroke="#ffffff"
+                    stroke-width="2"
                   />
                 </g>
 
-                <!-- Badge Flotante Fijado en el Último Punto (Current Value) -->
-                <g *ngIf="lastTrendPoint()" [attr.transform]="'translate(' + (lastTrendPoint()!.x - 38) + ',' + (lastTrendPoint()!.yActual - 28) + ')'" class="current-badge-group">
-                  <rect width="76" height="21" rx="3" fill="#111111" />
-                  <polygon points="38,21 34,25 42,25" fill="#111111" />
-                  <text x="38" y="14.5" text-anchor="middle" fill="#ffffff" font-size="10.5" font-weight="700" font-family="ui-monospace, monospace">
-                    &dollar;{{ lastTrendPoint()!.montoActual | number:'1.0-0' }}
-                  </text>
-                </g>
-
-                <g *ngIf="lastTrendPoint()">
-                  <circle [attr.cx]="lastTrendPoint()!.x" [attr.cy]="lastTrendPoint()!.yActual" r="6" fill="#111111" stroke="#ffffff" stroke-width="2" />
-                </g>
+                <!-- Capa invisible para capturar mousemove sobre el lienzo entero -->
+                <rect
+                  x="56"
+                  y="0"
+                  width="604"
+                  height="185"
+                  fill="transparent"
+                  style="cursor: crosshair;"
+                />
               </svg>
 
-              <!-- Tooltip Flotante de Punto Activo -->
-              <div *ngIf="hoveredTrendPoint" class="trend-hover-tooltip" [style.left.px]="hoveredTrendPoint.x - 60">
-                <div class="tooltip-title">{{ hoveredTrendPoint.periodo }}</div>
-                <div class="tooltip-row">
-                  <span class="dot-cur"></span>
-                  <span>Actual: <strong>&dollar;{{ hoveredTrendPoint.montoActual | number:'1.2-2' }}</strong></span>
+              <!-- Tooltip Flotante Ejecutivo (Glassmorphism) -->
+              <div
+                *ngIf="hoveredTrendPoint"
+                class="trend-hover-tooltip"
+                [style.left.px]="hoveredTooltipLeft()">
+                <div class="tooltip-header-row">
+                  <span class="tooltip-period-badge">{{ hoveredTrendPoint.periodo }}</span>
+                  <span class="tooltip-diff-pill" [class.positive]="hoveredTrendPoint.montoActual >= hoveredTrendPoint.montoAnterior">
+                    {{ hoveredTrendPoint.montoActual >= hoveredTrendPoint.montoAnterior ? '▲ +' : '▼ -' }}{{ getPointDiffPct(hoveredTrendPoint) }}%
+                  </span>
                 </div>
-                <div class="tooltip-row">
-                  <span class="dot-prev"></span>
-                  <span>Anterior: &dollar;{{ hoveredTrendPoint.montoAnterior | number:'1.2-2' }}</span>
+                <div class="tooltip-metric-grid">
+                  <div class="tooltip-stat">
+                    <span class="stat-lbl">Ingresos actuales</span>
+                    <span class="stat-val highlight">&dollar;{{ hoveredTrendPoint.montoActual | number:'1.2-2' }}</span>
+                  </div>
+                  <div class="tooltip-stat" *ngIf="showComparative()">
+                    <span class="stat-lbl">Período anterior</span>
+                    <span class="stat-val text-muted">&dollar;{{ hoveredTrendPoint.montoAnterior | number:'1.2-2' }}</span>
+                  </div>
                 </div>
               </div>
 
               <!-- Eje X con Etiquetas Temporales -->
               <div class="chart-x-axis-row" style="padding-left: 56px; padding-right: 12px;">
-                <span *ngFor="let pt of trendChartCoords()">{{ pt.periodo }}</span>
+                <span
+                  *ngFor="let pt of trendChartCoords()"
+                  class="x-tick-label"
+                  [class.active-tick]="hoveredTrendPoint && hoveredTrendPoint.periodo === pt.periodo">
+                  {{ pt.periodo }}
+                </span>
               </div>
             </div>
 
-            <!-- Insight inferior -->
-            <div class="chart-achievement-bar">
-              <span class="achievement-icon">🚀</span>
-              <span><strong>¡Excelente ritmo operativo!</strong> {{ financialData().mensaje_insight }}</span>
+            <!-- Barra Inferior BI Ejecutiva (Reemplazo del banner amarillo) -->
+            <div class="executive-bi-strip">
+              <div class="bi-stat-chip">
+                <span class="bi-chip-bullet bullet-peak"></span>
+                <div class="bi-chip-content">
+                  <span class="bi-chip-title">Pico Máximo</span>
+                  <span class="bi-chip-num">{{ trendPeakPoint()?.periodo }} &bull; &dollar;{{ trendPeakPoint()?.montoActual | number:'1.0-0' }}</span>
+                </div>
+              </div>
+
+              <div class="bi-stat-chip">
+                <span class="bi-chip-bullet bullet-avg"></span>
+                <div class="bi-chip-content">
+                  <span class="bi-chip-title">Promedio</span>
+                  <span class="bi-chip-num">&dollar;{{ trendAverageVal() | number:'1.0-0' }}</span>
+                </div>
+              </div>
+
+              <div class="bi-stat-chip">
+                <span class="bi-chip-bullet bullet-pace"></span>
+                <div class="bi-chip-content">
+                  <span class="bi-chip-title">Meta de Ventas</span>
+                  <span class="bi-chip-num">{{ financialData().cumplimiento_pct }}% cubierto</span>
+                </div>
+              </div>
+
+              <div class="bi-ai-insight-box">
+                <span class="ai-sparkle-symbol">✨</span>
+                <span class="ai-insight-text">{{ financialData().mensaje_insight }}</span>
+              </div>
             </div>
           </article>
 
@@ -1120,6 +1283,75 @@ import {
       border-radius: 6px;
     }
 
+    /* Cluster de controles de la tarjeta */
+    .chart-controls-cluster {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+
+    .chart-type-tabs {
+      display: flex;
+      background: #f3f4f6;
+      padding: 3px;
+      border-radius: 8px;
+      gap: 2px;
+    }
+
+    .type-tab-btn {
+      background: transparent;
+      border: none;
+      padding: 0.35rem 0.65rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #6b7280;
+      cursor: pointer;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .type-tab-btn.active {
+      background: #ffffff;
+      color: #111827;
+      font-weight: 700;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    }
+
+    .comparative-pill-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      padding: 0.35rem 0.65rem;
+      border-radius: 8px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .comp-legend-dash {
+      width: 10px;
+      height: 2px;
+      border-bottom: 2px dashed #94a3b8;
+    }
+
+    .comparative-pill-btn.active {
+      border-color: #cbd5e1;
+      color: #111827;
+      background: #f8fafc;
+    }
+
+    .comparative-pill-btn.active .comp-legend-dash {
+      border-bottom-color: #111827;
+    }
+
     .granularity-switcher-tabs {
       display: flex;
       background: #f3f4f6;
@@ -1147,6 +1379,7 @@ import {
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
     }
 
+    /* Escenario SVG y Animaciones */
     .chart-stage-container {
       position: relative;
       width: 100%;
@@ -1166,15 +1399,37 @@ import {
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
 
-    .interactive-node {
-      cursor: pointer;
-      transition: r 0.15s ease, stroke-width 0.15s ease;
+    .trend-line-path {
+      stroke-dasharray: 2000;
+      stroke-dashoffset: 0;
+      animation: drawTrendCurve 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
-    .interactive-node:hover {
-      r: 6.5;
-      stroke-width: 3;
-      stroke: #d4af37;
+    @keyframes drawTrendCurve {
+      from { stroke-dashoffset: 2000; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    .trend-area-path {
+      animation: fadeInArea 0.8s ease forwards;
+    }
+
+    @keyframes fadeInArea {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .beacon-pulse-ring {
+      fill: #ff3811;
+      animation: harborBeaconPulse 2s infinite ease-out;
+      transform-origin: center;
+      pointer-events: none;
+    }
+
+    @keyframes harborBeaconPulse {
+      0% { r: 4px; opacity: 0.85; }
+      70% { r: 16px; opacity: 0; }
+      100% { r: 16px; opacity: 0; }
     }
 
     .current-badge-group {
@@ -1182,37 +1437,91 @@ import {
       pointer-events: none;
     }
 
+    .animated-bar {
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .animated-bar:hover, .animated-bar.active-bar {
+      opacity: 0.9;
+      filter: drop-shadow(0 2px 6px rgba(255, 56, 17, 0.45));
+    }
+
+    /* Tooltip Flotante Mejorado */
     .trend-hover-tooltip {
       position: absolute;
-      top: 15px;
-      background: #111827;
+      top: 10px;
+      background: rgba(17, 24, 39, 0.94);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       color: #ffffff;
-      padding: 0.4rem 0.65rem;
-      border-radius: 6px;
-      font-size: 0.7rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
+      padding: 0.55rem 0.85rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.35);
       pointer-events: none;
-      z-index: 10;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      z-index: 20;
+      min-width: 175px;
+      transition: left 0.08s ease-out;
     }
 
-    .tooltip-title {
-      font-weight: 700;
-      color: #d4af37;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-      padding-bottom: 2px;
-    }
-
-    .tooltip-row {
+    .tooltip-header-row {
       display: flex;
       align-items: center;
-      gap: 0.35rem;
+      justify-content: space-between;
+      gap: 0.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 0.3rem;
+      margin-bottom: 0.4rem;
     }
 
-    .dot-cur { width: 6px; height: 6px; background: #ffffff; border-radius: 50%; }
-    .dot-prev { width: 6px; height: 6px; background: #9ca3af; border-radius: 50%; }
+    .tooltip-period-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      text-transform: capitalize;
+    }
+
+    .tooltip-diff-pill {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      background: #fef2f2;
+      color: #ef4444;
+    }
+
+    .tooltip-diff-pill.positive {
+      background: #ecfdf5;
+      color: #059669;
+    }
+
+    .tooltip-metric-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .tooltip-stat {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.72rem;
+    }
+
+    .tooltip-stat .stat-lbl {
+      color: #94a3b8;
+    }
+
+    .tooltip-stat .stat-val {
+      font-weight: 700;
+      font-family: ui-monospace, monospace;
+    }
+
+    .tooltip-stat .stat-val.highlight {
+      color: #ff7a59;
+      font-size: 0.8rem;
+    }
 
     .chart-x-axis-row {
       display: flex;
@@ -1223,17 +1532,81 @@ import {
       padding-top: 0.25rem;
     }
 
-    .chart-achievement-bar {
-      background: #fdf8e6;
-      border: 1px solid #fef08a;
-      border-left: 3px solid #d4af37;
-      padding: 0.65rem 0.9rem;
-      border-radius: 8px;
+    .x-tick-label {
+      transition: color 0.15s ease;
+    }
+
+    .x-tick-label.active-tick {
+      color: #ff3811;
+      font-weight: 800;
+    }
+
+    /* Barra Inferior BI Ejecutiva */
+    .executive-bi-strip {
+      display: grid;
+      grid-template-columns: repeat(3, auto) 1fr;
+      align-items: center;
+      gap: 0.85rem;
+      background: #fafafa;
+      border: 1px solid #f1f5f9;
+      border-radius: 10px;
+      padding: 0.65rem 1rem;
+    }
+
+    .bi-stat-chip {
       display: flex;
       align-items: center;
-      gap: 0.6rem;
+      gap: 0.5rem;
+      border-right: 1px solid #e2e8f0;
+      padding-right: 0.85rem;
+    }
+
+    .bi-chip-bullet {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .bullet-peak { background: #ff5733; }
+    .bullet-avg { background: #3b82f6; }
+    .bullet-pace { background: #10b981; }
+
+    .bi-chip-content {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .bi-chip-title {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .bi-chip-num {
       font-size: 0.78rem;
-      color: #854d0e;
+      font-weight: 800;
+      color: #0f172a;
+      font-family: ui-monospace, monospace;
+    }
+
+    .bi-ai-insight-box {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding-left: 0.35rem;
+      font-size: 0.74rem;
+      color: #475569;
+      line-height: 1.35;
+    }
+
+    .ai-sparkle-symbol {
+      font-size: 0.9rem;
+      color: #ff5733;
+      flex-shrink: 0;
     }
 
     /* Fulfillment de Pedidos */
@@ -1582,6 +1955,19 @@ import {
         align-items: flex-start;
         gap: 0.75rem;
       }
+      .chart-controls-cluster {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .executive-bi-strip {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+      }
+      .bi-stat-chip {
+        border-right: none;
+        border-bottom: 1px solid #f1f5f9;
+        padding-bottom: 0.35rem;
+      }
       .granularity-switcher-tabs {
         width: 100%;
         display: grid;
@@ -1623,6 +2009,8 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
 
   // Interacción en gráfico
   hoveredTrendPoint: any = null;
+  chartViewType = signal<'line' | 'bar'>('line');
+  showComparative = signal<boolean>(true);
 
   quickPills = [
     { label: '🏆 ¿Cuál es el producto más vendido?', query: 'Cual es el producto mas vendido?' },
@@ -1777,6 +2165,54 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
     }
     return d;
   });
+
+  trendPeakPoint = computed(() => {
+    const coords = this.trendChartCoords();
+    if (coords.length === 0) return null;
+    return coords.reduce((max, cur) => cur.montoActual > max.montoActual ? cur : max, coords[0]);
+  });
+
+  trendAverageVal = computed(() => {
+    const coords = this.trendChartCoords();
+    if (coords.length === 0) return 0;
+    const sum = coords.reduce((acc, cur) => acc + cur.montoActual, 0);
+    return Math.round(sum / coords.length);
+  });
+
+  hoveredTooltipLeft(): number {
+    if (!this.hoveredTrendPoint) return 0;
+    return Math.min(Math.max(this.hoveredTrendPoint.x - 90, 10), 480);
+  }
+
+  getPointDiffPct(pt: any): string {
+    if (!pt || !pt.montoAnterior || pt.montoAnterior === 0) return '0.0';
+    const diff = ((pt.montoActual - pt.montoAnterior) / pt.montoAnterior) * 100;
+    return Math.abs(diff).toFixed(1);
+  }
+
+  onChartMouseMove(event: MouseEvent): void {
+    const coords = this.trendChartCoords();
+    if (coords.length === 0) return;
+    const target = event.currentTarget as HTMLElement;
+    const rect = target.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const svgX = (mouseX / rect.width) * 660;
+
+    let closest = coords[0];
+    let minDiff = Math.abs(coords[0].x - svgX);
+    for (let i = 1; i < coords.length; i++) {
+      const diff = Math.abs(coords[i].x - svgX);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closest = coords[i];
+      }
+    }
+    this.hoveredTrendPoint = closest;
+  }
+
+  onChartMouseLeave(): void {
+    this.hoveredTrendPoint = null;
+  }
 
   // Lista de Productos Más Vendidos
   topProductsList = computed<TopProductItem[]>(() => {
