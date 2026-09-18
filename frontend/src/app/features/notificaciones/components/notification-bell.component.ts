@@ -18,7 +18,7 @@ import { Notificacion } from '../models/notificaciones.models';
         title="Centro de Notificaciones y Alertas"
         aria-label="Abrir centro de notificaciones"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="bell-svg">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="bell-svg">
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
           <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
         </svg>
@@ -196,35 +196,39 @@ import { Notificacion } from '../models/notificaciones.models';
 
     /* Botón Campana Navbar */
     .nav-bell-btn {
-      background: transparent;
-      border: 1px solid rgba(0, 0, 0, 0.15);
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.18);
       width: 38px;
       height: 38px;
-      border-radius: 50%;
+      border-radius: 50% !important;
       cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
       position: relative;
-      color: #111111;
+      color: #000000;
+      padding: 0 !important;
+      box-sizing: border-box;
       transition: all 0.2s ease;
     }
 
     .nav-bell-btn:hover {
-      background: #000000;
-      color: #ffffff;
+      background: #f9fafb;
       border-color: #000000;
+      transform: translateY(-1px);
     }
 
     .bell-svg {
-      width: 19px;
-      height: 19px;
+      width: 20px;
+      height: 20px;
+      display: block;
+      stroke: #000000;
     }
 
     .bell-badge-count {
       position: absolute;
-      top: -3px;
-      right: -3px;
+      top: -4px;
+      right: -4px;
       background: #dc2626;
       color: #ffffff;
       font-size: 10px;
