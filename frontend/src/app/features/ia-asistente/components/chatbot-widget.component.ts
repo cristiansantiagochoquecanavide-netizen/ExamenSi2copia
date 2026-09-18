@@ -207,11 +207,16 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
               title="Dictar mensaje por voz"
               aria-label="Hablar al asistente"
             >
-              <svg viewBox="0 0 24 24" class="mic-icon-svg" fill="none" stroke="#000000" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                <line x1="12" y1="19" x2="12" y2="23" />
-                <line x1="8" y1="23" x2="16" y2="23" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                class="mic-icon-svg"
+                aria-hidden="true"
+              >
+                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
               </svg>
             </button>
 
@@ -234,10 +239,15 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
               title="Enviar mensaje"
               aria-label="Enviar"
             >
-              <!-- Icono Avión de Papel -->
-              <svg viewBox="0 0 24 24" class="send-plane-svg" fill="none" stroke="#ffffff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="22" y1="2" x2="11" y2="13"></line>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                class="send-plane-svg"
+                aria-hidden="true"
+              >
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
               </svg>
             </button>
           </footer>
@@ -739,39 +749,41 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
 
     /* 4. Icono del micrófono en color negro sobre borde nítido */
     .btn-voice-input {
-      background: #ffffff;
-      border: 1.8px solid #000000;
-      color: #000000;
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
+      background: #ffffff !important;
+      border: 2px solid #000000 !important;
+      color: #000000 !important;
+      width: 40px !important;
+      height: 40px !important;
+      min-width: 40px !important;
+      min-height: 40px !important;
+      border-radius: 50% !important;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-      flex-shrink: 0;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      transition: all 0.2s ease;
+      flex-shrink: 0 !important;
+      padding: 0 !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
     }
 
     .btn-voice-input:hover {
-      background: #000000;
-      color: #ffffff;
+      background: #000000 !important;
+      border-color: #000000 !important;
     }
 
     .btn-voice-input:hover .mic-icon-svg {
-      stroke: #ffffff;
+      fill: #ffffff !important;
     }
 
     .btn-voice-input.listening {
       background: #dc2626 !important;
       border-color: #dc2626 !important;
-      color: #ffffff !important;
       animation: pulseMic 1.4s infinite;
     }
 
     .btn-voice-input.listening .mic-icon-svg {
-      stroke: #ffffff !important;
+      fill: #ffffff !important;
     }
 
     @keyframes pulseMic {
@@ -787,47 +799,59 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
     }
 
     .mic-icon-svg {
-      width: 19px;
-      height: 19px;
-      stroke: #000000;
-      transition: stroke 0.2s;
+      width: 20px !important;
+      height: 20px !important;
+      min-width: 20px !important;
+      min-height: 20px !important;
+      display: block !important;
+      fill: #000000 !important;
+      flex-shrink: 0 !important;
+      pointer-events: none;
     }
 
     /* 3. Botón de enviar con Avión de Papel en color Azul */
     .btn-send-message {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: #0066ff;
-      border: none;
-      color: #ffffff;
+      width: 40px !important;
+      height: 40px !important;
+      min-width: 40px !important;
+      min-height: 40px !important;
+      border-radius: 50% !important;
+      background: #0066ff !important;
+      border: none !important;
+      color: #ffffff !important;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-      flex-shrink: 0;
-      box-shadow: 0 3px 10px rgba(0, 102, 255, 0.35);
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      transition: all 0.2s ease;
+      flex-shrink: 0 !important;
+      padding: 0 !important;
+      box-shadow: 0 3px 10px rgba(0, 102, 255, 0.4);
     }
 
     .btn-send-message:hover:not(:disabled) {
-      background: #0052cc;
+      background: #0052cc !important;
       transform: scale(1.06);
-      box-shadow: 0 4px 14px rgba(0, 102, 255, 0.45);
+      box-shadow: 0 4px 14px rgba(0, 102, 255, 0.5);
     }
 
     .btn-send-message:disabled {
-      background: #7bb4ff;
-      opacity: 0.85;
+      background: #2563eb !important;
+      opacity: 0.75 !important;
       cursor: not-allowed;
       box-shadow: none;
     }
 
     .send-plane-svg {
-      width: 18px;
-      height: 18px;
+      width: 20px !important;
+      height: 20px !important;
+      min-width: 20px !important;
+      min-height: 20px !important;
+      display: block !important;
+      fill: #ffffff !important;
       margin-left: 2px;
-      stroke: #ffffff;
+      flex-shrink: 0 !important;
+      pointer-events: none;
     }
 
     /* Mobile Adaptability */
