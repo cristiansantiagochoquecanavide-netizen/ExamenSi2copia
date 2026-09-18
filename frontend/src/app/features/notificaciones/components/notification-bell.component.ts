@@ -84,6 +84,7 @@ import { Notificacion } from '../models/notificaciones.models';
                 <div
                   class="notif-item-row"
                   [class.unread]="!notif.leida"
+                  [class.read]="notif.leida"
                   (click)="onNotificationClick(notif)"
                 >
                   <div class="notif-icon-col">
@@ -94,7 +95,12 @@ import { Notificacion } from '../models/notificaciones.models';
 
                   <div class="notif-content-col">
                     <div class="notif-title-row">
-                      <span class="type-tag">{{ getTypeLabel(notif.tipo) }}</span>
+                      <div class="tag-group">
+                        <span class="type-tag">{{ getTypeLabel(notif.tipo) }}</span>
+                        @if (!notif.leida) {
+                          <span class="pill-unread-tag">&bull; NUEVA</span>
+                        }
+                      </div>
                       <span class="notif-time">{{ notif.created_at | date:'shortTime' }}</span>
                     </div>
                     <h5 class="notif-item-title">{{ notif.titulo }}</h5>
@@ -373,20 +379,86 @@ import { Notificacion } from '../models/notificaciones.models';
       display: flex;
       align-items: flex-start;
       gap: 12px;
-      padding: 12px 14px;
-      border-bottom: 1px solid #f0f0f0;
+      padding: 13px 16px;
+      border-bottom: 1px solid #eeeeee;
       cursor: pointer;
-      transition: background 0.15s ease;
+      transition: all 0.2s ease;
       position: relative;
     }
 
-    .notif-item-row:hover {
-      background: #f9f9f9;
+    /* No Leídas: Fondo blanco puro, borde izquierdo dorado y textos oscuros */
+    .notif-item-row.unread {
+      background: #ffffff;
+      border-left: 4px solid #c5a880;
     }
 
-    .notif-item-row.unread {
-      background: #fcfaf6;
-      border-left: 3px solid #c5a880;
+    .notif-item-row.unread:hover {
+      background: #fffdf9;
+    }
+
+    .notif-item-row.unread .notif-item-title {
+      color: #000000 !important;
+      font-weight: 800 !important;
+    }
+
+    .notif-item-row.unread .notif-item-msg {
+      color: #222222;
+      font-weight: 500;
+    }
+
+    .notif-item-row.unread .type-tag {
+      color: #8c7657;
+      font-weight: 800;
+    }
+
+    /* Leídas: Fondo grisáceo suave, letras notablemente más claras y atenuadas */
+    .notif-item-row.read {
+      background: #f7f8fa;
+      border-left: 4px solid transparent;
+      opacity: 0.82;
+    }
+
+    .notif-item-row.read:hover {
+      background: #eef1f4;
+      opacity: 1;
+    }
+
+    .notif-item-row.read .notif-item-title {
+      color: #71717a !important;
+      font-weight: 600 !important;
+    }
+
+    .notif-item-row.read .notif-item-msg {
+      color: #a1a1aa;
+      font-weight: 400;
+    }
+
+    .notif-item-row.read .type-tag {
+      color: #a1a1aa;
+      font-weight: 600;
+    }
+
+    .notif-item-row.read .type-icon-badge {
+      opacity: 0.5;
+      filter: grayscale(35%);
+    }
+
+    .tag-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .pill-unread-tag {
+      background: #c5a880;
+      color: #000000;
+      font-size: 9.5px;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+      display: inline-block;
+      line-height: 1.3;
     }
 
     .notif-icon-col {
@@ -402,6 +474,7 @@ import { Notificacion } from '../models/notificaciones.models';
       justify-content: center;
       font-size: 16px;
       background: #f2f2f2;
+      transition: all 0.2s ease;
     }
 
     .badge-ia { background: #fef7ec; border: 1px solid #f2e2c2; }
@@ -419,15 +492,13 @@ import { Notificacion } from '../models/notificaciones.models';
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 3px;
+      margin-bottom: 4px;
     }
 
     .type-tag {
       font-size: 10.5px;
-      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: #888888;
     }
 
     .notif-time {
@@ -437,15 +508,12 @@ import { Notificacion } from '../models/notificaciones.models';
 
     .notif-item-title {
       font-size: 13.5px !important;
-      font-weight: 700 !important;
-      color: #111111 !important;
-      margin: 0 0 3px 0 !important;
+      margin: 0 0 4px 0 !important;
       line-height: 1.3;
     }
 
     .notif-item-msg {
       font-size: 12.5px;
-      color: #555555;
       line-height: 1.4;
       margin: 0;
     }
