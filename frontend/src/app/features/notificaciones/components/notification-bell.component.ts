@@ -70,14 +70,6 @@ import { Notificacion } from '../models/notificaciones.models';
             </button>
             <button
               type="button"
-              class="filter-pill filter-ia"
-              [class.active]="activeFilter() === 'RECOMENDACION_IA'"
-              (click)="setFilter('RECOMENDACION_IA')"
-            >
-              ✨ IA Stylist (CU19)
-            </button>
-            <button
-              type="button"
               class="filter-pill"
               [class.active]="activeFilter() === 'RESERVA_PROBADOR'"
               (click)="setFilter('RESERVA_PROBADOR')"
@@ -125,7 +117,7 @@ import { Notificacion } from '../models/notificaciones.models';
                     <p class="notif-item-msg">{{ notif.mensaje }}</p>
 
                     @if (notif.tipo === 'RECOMENDACION_IA') {
-                      <div class="cu19-action-hint">
+                      <div class="ia-action-hint">
                         <span>Ver recomendación en Atelier Stylist &rarr;</span>
                       </div>
                     }
@@ -156,7 +148,7 @@ import { Notificacion } from '../models/notificaciones.models';
                 (click)="simularAlerta('RECOMENDACION_IA')"
                 title="Generar alerta de look IA"
               >
-                ✨ IA (CU19)
+                ✨ IA Stylist
               </button>
               <button
                 type="button"
@@ -255,7 +247,7 @@ import { Notificacion } from '../models/notificaciones.models';
       position: absolute;
       top: calc(100% + 12px);
       right: 0;
-      width: 390px;
+      width: 420px;
       max-width: calc(100vw - 24px);
       background: #ffffff;
       border: 1px solid #e5e5e5;
@@ -275,46 +267,57 @@ import { Notificacion } from '../models/notificaciones.models';
 
     /* Header */
     .notif-dropdown-header {
-      padding: 14px 16px;
+      padding: 14px 18px;
       background: #000000;
       color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: space-between;
       border-bottom: 2px solid #c5a880;
+      gap: 12px;
     }
 
     .header-left {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      flex-shrink: 0;
     }
 
     .notif-dropdown-title {
-      font-size: 13px !important;
+      font-size: 14px !important;
       font-weight: 800 !important;
       letter-spacing: 1px;
       margin: 0 !important;
       color: #ffffff !important;
+      white-space: nowrap;
     }
 
     .unread-pill {
       background: #c5a880;
       color: #000000;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 10px;
+      padding: 3px 10px;
+      border-radius: 12px;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.2;
     }
 
     .btn-mark-all-read {
       background: transparent;
       border: none;
       color: #c5a880;
-      font-size: 11.5px;
+      font-size: 12.5px;
       font-weight: 600;
       cursor: pointer;
       text-decoration: underline;
+      white-space: nowrap;
+      margin-left: auto;
+      text-align: right;
       transition: color 0.2s;
     }
 
@@ -325,19 +328,25 @@ import { Notificacion } from '../models/notificaciones.models';
     /* Filters Bar */
     .notif-filters-bar {
       display: flex;
-      gap: 6px;
-      padding: 10px 14px;
+      gap: 8px;
+      padding: 10px 16px;
       background: #f9f9f9;
       border-bottom: 1px solid #eeeeee;
       overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .notif-filters-bar::-webkit-scrollbar {
+      display: none;
     }
 
     .filter-pill {
       background: #ffffff;
       border: 1px solid #dddddd;
       color: #444444;
-      font-size: 11px;
-      padding: 4px 10px;
+      font-size: 12px;
+      padding: 5px 12px;
       border-radius: 14px;
       cursor: pointer;
       white-space: nowrap;
@@ -356,12 +365,6 @@ import { Notificacion } from '../models/notificaciones.models';
       font-weight: 600;
     }
 
-    .filter-pill.filter-ia.active {
-      background: #000000;
-      color: #c5a880;
-      border-color: #c5a880;
-    }
-
     /* List Scroll */
     .notif-list-scroll {
       max-height: 340px;
@@ -373,7 +376,7 @@ import { Notificacion } from '../models/notificaciones.models';
       padding: 30px 20px;
       text-align: center;
       color: #777777;
-      font-size: 13px;
+      font-size: 14px;
     }
 
     .empty-icon {
@@ -413,7 +416,7 @@ import { Notificacion } from '../models/notificaciones.models';
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 15px;
+      font-size: 16px;
       background: #f2f2f2;
     }
 
@@ -436,7 +439,7 @@ import { Notificacion } from '../models/notificaciones.models';
     }
 
     .type-tag {
-      font-size: 9.5px;
+      font-size: 10.5px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -444,12 +447,12 @@ import { Notificacion } from '../models/notificaciones.models';
     }
 
     .notif-time {
-      font-size: 10px;
+      font-size: 11px;
       color: #999999;
     }
 
     .notif-item-title {
-      font-size: 12.5px !important;
+      font-size: 13.5px !important;
       font-weight: 700 !important;
       color: #111111 !important;
       margin: 0 0 3px 0 !important;
@@ -457,15 +460,15 @@ import { Notificacion } from '../models/notificaciones.models';
     }
 
     .notif-item-msg {
-      font-size: 11.5px;
+      font-size: 12.5px;
       color: #555555;
       line-height: 1.4;
       margin: 0;
     }
 
-    .cu19-action-hint {
+    .ia-action-hint {
       margin-top: 6px;
-      font-size: 10.5px;
+      font-size: 11.5px;
       font-weight: 600;
       color: #8c7657;
       text-decoration: underline;
@@ -491,18 +494,18 @@ import { Notificacion } from '../models/notificaciones.models';
 
     /* Footer de Pruebas */
     .notif-dropdown-footer {
-      padding: 10px 14px;
+      padding: 12px 16px;
       background: #fafafa;
       border-top: 1px solid #eeeeee;
     }
 
     .test-label {
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       color: #888888;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
 
     .test-buttons-row {
@@ -512,8 +515,8 @@ import { Notificacion } from '../models/notificaciones.models';
 
     .test-buttons-row button {
       flex: 1;
-      padding: 5px 4px;
-      font-size: 10.5px;
+      padding: 6px 5px;
+      font-size: 11.5px;
       font-weight: 600;
       border-radius: 6px;
       cursor: pointer;
@@ -608,7 +611,7 @@ export class NotificationBellComponent {
 
   getTypeLabel(tipo: string): string {
     switch (tipo) {
-      case 'RECOMENDACION_IA': return 'Atelier Stylist (CU19)';
+      case 'RECOMENDACION_IA': return 'Atelier Stylist';
       case 'RESERVA_PROBADOR': return 'Reserva Probador';
       case 'ESTADO_PEDIDO': return 'Estado de Pedido';
       case 'PROMOCION': return 'Promoción Especial';
