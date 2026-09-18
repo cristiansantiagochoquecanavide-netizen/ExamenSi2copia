@@ -20,9 +20,13 @@ export class NotificacionesService {
   readonly notifications = signal<Notificacion[]>([]);
   readonly isLoading = signal<boolean>(false);
   readonly isOpen = signal<boolean>(false);
+  readonly activePromoToast = signal<Notificacion | null>(null);
+
+  private promoTimer: any = null;
 
   constructor() {
     this.cargarResumen();
+    this.verificarPromoActiva();
   }
 
   toggleOpen(): void {
@@ -106,8 +110,48 @@ export class NotificacionesService {
       tap((nueva) => {
         this.notifications.update(list => [nueva, ...list]);
         this.unreadCount.update(c => c + 1);
+        if (nueva.tipo === 'PROMOCION') {
+          this.mostrarPromoToast(nueva);
+        }
       })
     );
+  }
+
+  mostrarPromoToast(notif: Notificacion): void {
+    this.activePromoToast.set(notif);
+    if (this.promoTimer) {
+      clearTimeout(this.promoTimer);
+    }
+    // Auto-cierre suave tras 8 segundos
+    this.promoTimer = setTimeout(() => {
+      this.cerrarPromoToast();
+    }, 8000);
+  }
+
+  cerrarPromoToast(): void {
+    if (this.promoTimer) {
+      clearTimeout(this.promoTimer);
+    }
+    this.activePromoToast.set(null);
+  }
+
+  verificarPromoActiva(): void {
+    const yaMostrada = sessionStorage.getItem('atelier_promo_toast_seen');
+    if (yaMostrada) return;
+
+    this.http.get<Notificacion[]>(`${this.baseUrl}`, {
+      params: new HttpParams().set('tipo', 'PROMOCION').set('solo_no_leidas', 'true').set('limit', '1')
+    }).subscribe({
+      next: (items) => {
+        if (items && items.length > 0) {
+          setTimeout(() => {
+            this.mostrarPromoToast(items[0]);
+            sessionStorage.setItem('atelier_promo_toast_seen', 'true');
+          }, 1800);
+        }
+      },
+      error: () => {}
+    });
   }
 
   private actualizarConteoNoLeidas(): void {

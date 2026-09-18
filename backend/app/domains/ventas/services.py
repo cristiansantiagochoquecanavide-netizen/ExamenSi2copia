@@ -1363,6 +1363,34 @@ class VentasService:
             ip_address=ip,
             valores_nuevos={"codigo": promocion.codigo, "tipo": promocion.tipo_descuento, "valor": str(promocion.valor_descuento)}
         )
+
+        # Emitir Alerta Push / Notificación Automática (CU21 Alertas y Promociones)
+        try:
+            from app.domains.notificaciones.models import Notificacion
+            simbolo = "%" if promocion.tipo_descuento == "PORCENTAJE" else "$"
+            notif = Notificacion(
+                usuario_id=None,
+                titulo=f"🏷️ ¡Nueva Oferta!: {promocion.nombre}",
+                mensaje=f"Aprovechá un {promocion.valor_descuento}{simbolo} de descuento con el cupón {promocion.codigo}. Válido por tiempo limitado.",
+                tipo="PROMOCION",
+                canal="IN_APP",
+                prioridad="ALTA",
+                leida=False,
+                data_extra={
+                    "codigo_cupon": promocion.codigo,
+                    "cupon": promocion.codigo,
+                    "valor_descuento": str(promocion.valor_descuento),
+                    "tipo_descuento": promocion.tipo_descuento,
+                    "promocion_id": promocion.id,
+                    "link": "/catalogo"
+                },
+                created_at=datetime.now(timezone.utc)
+            )
+            db.add(notif)
+            await db.commit()
+        except Exception:
+            pass
+
         return promocion
 
     @staticmethod

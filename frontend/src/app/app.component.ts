@@ -5,11 +5,12 @@ import { AuthService } from './core/services/auth.service';
 import { CartService } from './features/ventas/services/cart.service';
 import { ChatbotWidgetComponent } from './features/ia-asistente/components/chatbot-widget.component';
 import { NotificationBellComponent } from './features/notificaciones/components/notification-bell.component';
+import { PromoToastComponent } from './features/notificaciones/components/promo-toast.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, ChatbotWidgetComponent, NotificationBellComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, ChatbotWidgetComponent, NotificationBellComponent, PromoToastComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
