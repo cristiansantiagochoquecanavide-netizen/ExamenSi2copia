@@ -151,9 +151,9 @@ class ReportesService:
         unidades_vendidas = max(cant_ventas * 2, int(facturacion_actual / 190.0))
 
         if cumplimiento_pct >= 85:
-            mensaje_insight = f"¡Excelente ritmo! Estás al {cumplimiento_pct}% del objetivo fijado con un crecimiento intermensual del +{variacion_pct}%."
+            mensaje_insight = f"Estás al {cumplimiento_pct}% del objetivo fijado con un crecimiento intermensual del +{variacion_pct}%."
         else:
-            mensaje_insight = f"Ritmo constante ({cumplimiento_pct}% del objetivo). Se recomienda activar promociones de fin de semana para cerrar la brecha."
+            mensaje_insight = f"Estás al {cumplimiento_pct}% del objetivo mensual. Se recomienda activar promociones de fin de semana para cerrar la brecha."
 
         return FinancialIndicatorResponse(
             facturacion_actual=facturacion_actual,

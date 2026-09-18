@@ -300,14 +300,14 @@ import {
                 </div>
               </div>
 
-              <!-- Lienzo SVG con Curvas de Beziers Suaves -->
+              <!-- Lienzo SVG con Curvas de Beziers Suaves, Escala Eje Y y Badge Activo -->
               <div class="trend-chart-container">
-                <svg class="trend-svg" viewBox="0 0 640 200" preserveAspectRatio="none">
-                  <!-- Líneas de Guía Horizontal (Grid) -->
-                  <line x1="0" y1="35" x2="640" y2="35" stroke="#f3f4f6" stroke-width="1" />
-                  <line x1="0" y1="80" x2="640" y2="80" stroke="#f3f4f6" stroke-width="1" />
-                  <line x1="0" y1="125" x2="640" y2="125" stroke="#f3f4f6" stroke-width="1" />
-                  <line x1="0" y1="170" x2="640" y2="170" stroke="#e5e7eb" stroke-width="1" />
+                <svg class="trend-svg" viewBox="0 0 660 200" preserveAspectRatio="none">
+                  <!-- Líneas de Guía Horizontal (Grid) y Etiquetas del Eje Y -->
+                  <g *ngFor="let tick of trendYAxisTicks()">
+                    <text x="50" [attr.y]="tick.y + 4" text-anchor="end" class="svg-y-axis-label">{{ tick.label }}</text>
+                    <line x1="56" [attr.y1]="tick.y" x2="655" [attr.y2]="tick.y" stroke="#f1f5f9" stroke-width="1" [attr.stroke-dasharray]="tick.y === 170 ? 'none' : '3,3'" />
+                  </g>
 
                   <!-- Gradiente para el Área Actual -->
                   <defs>
@@ -320,8 +320,21 @@ import {
                   <!-- Área Rellena del Período Actual -->
                   <path [attr.d]="svgAreaActual()" fill="url(#curveFillActual)" />
 
+                  <!-- Línea Guía Vertical Magnética al pasar el cursor -->
+                  <line
+                    *ngIf="hoveredTrendPoint"
+                    [attr.x1]="hoveredTrendPoint.x"
+                    y1="30"
+                    [attr.x2]="hoveredTrendPoint.x"
+                    y2="170"
+                    stroke="#111111"
+                    stroke-dasharray="3,3"
+                    stroke-width="1.2"
+                    opacity="0.35"
+                  />
+
                   <!-- Curva Dotted: Período Anterior -->
-                  <path [attr.d]="svgPathAnterior()" fill="none" stroke="#9ca3af" stroke-width="2" stroke-dasharray="5,5" />
+                  <path [attr.d]="svgPathAnterior()" fill="none" stroke="#9ca3af" stroke-width="2" stroke-dasharray="4,4" />
 
                   <!-- Curva Sólida: Este Período -->
                   <path [attr.d]="svgPathActual()" fill="none" stroke="#111111" stroke-width="2.6" />
@@ -340,6 +353,20 @@ import {
                       class="interactive-node"
                     />
                   </g>
+
+                  <!-- Badge Fijo / Pin en el Último Punto (Valor del Momento) -->
+                  <g *ngIf="lastTrendPoint()" [attr.transform]="'translate(' + (lastTrendPoint()!.x - 38) + ',' + (lastTrendPoint()!.yActual - 28) + ')'" class="current-badge-group">
+                    <rect width="76" height="21" rx="3" fill="#111111" />
+                    <polygon points="38,21 34,25 42,25" fill="#111111" />
+                    <text x="38" y="14.5" text-anchor="middle" fill="#ffffff" font-size="10.5" font-weight="700" font-family="ui-monospace, monospace">
+                      &dollar;{{ lastTrendPoint()!.montoActual | number:'1.0-0' }}
+                    </text>
+                  </g>
+
+                  <!-- Círculo Resaltado en el Último Punto -->
+                  <g *ngIf="lastTrendPoint()">
+                    <circle [attr.cx]="lastTrendPoint()!.x" [attr.cy]="lastTrendPoint()!.yActual" r="6" fill="#111111" stroke="#ffffff" stroke-width="2" />
+                  </g>
                 </svg>
 
                 <!-- Tooltip Dinámico en Hover -->
@@ -356,7 +383,7 @@ import {
                 </div>
 
                 <!-- Eje X con Etiquetas de Granularidad (Días, Semanas o Meses) -->
-                <div class="trend-x-axis">
+                <div class="trend-x-axis" style="padding-left: 56px; padding-right: 12px;">
                   <span *ngFor="let pt of trendChartCoords()">{{ pt.periodo }}</span>
                 </div>
               </div>
@@ -1495,6 +1522,18 @@ import {
     .dot-cur { width: 6px; height: 6px; background: #ffffff; border-radius: 50%; }
     .dot-prev { width: 6px; height: 6px; background: #9ca3af; border-radius: 50%; }
 
+    .svg-y-axis-label {
+      font-size: 0.65rem;
+      fill: #9ca3af;
+      font-weight: 600;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .current-badge-group {
+      filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.25));
+      pointer-events: none;
+    }
+
     .trend-x-axis {
       display: flex;
       justify-content: space-between;
@@ -2199,6 +2238,29 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
     ];
   });
 
+  maxTrendVal = computed(() => {
+    const d = this.dashboardData();
+    const points: ComparativeTrendPoint[] = (d && d.comparative_trend && d.comparative_trend.length > 0)
+      ? d.comparative_trend
+      : [];
+    if (points.length === 0) return 25000;
+    const peak = Math.max(...points.map(p => Math.max(p.monto_actual, p.monto_anterior)), 1000);
+    if (peak <= 5000) return Math.ceil(peak / 1000) * 1000;
+    if (peak <= 20000) return Math.ceil(peak / 2500) * 2500;
+    if (peak <= 50000) return Math.ceil(peak / 5000) * 5000;
+    return Math.ceil(peak / 10000) * 10000;
+  });
+
+  trendYAxisTicks = computed(() => {
+    const maxVal = this.maxTrendVal();
+    return [
+      { label: this.formatCurrencyShort(maxVal), y: 35 },
+      { label: this.formatCurrencyShort(Math.round(maxVal * 0.66)), y: 80 },
+      { label: this.formatCurrencyShort(Math.round(maxVal * 0.33)), y: 125 },
+      { label: '$0', y: 170 }
+    ];
+  });
+
   // Coordenadas calculadas para la curva comparativa SVG
   trendChartCoords = computed(() => {
     const d = this.dashboardData();
@@ -2219,11 +2281,13 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
           { periodo: 'Dic', monto_actual: 21500, monto_anterior: 17200 }
         ];
 
-    const maxVal = Math.max(...points.map(p => Math.max(p.monto_actual, p.monto_anterior)), 1);
-    const stepX = 580 / Math.max(points.length - 1, 1);
+    const maxVal = this.maxTrendVal();
+    const startX = 64;
+    const endX = 645;
+    const stepX = (endX - startX) / Math.max(points.length - 1, 1);
 
     return points.map((p, i) => {
-      const x = 30 + i * stepX;
+      const x = startX + i * stepX;
       const yAct = 170 - (p.monto_actual / maxVal) * 135;
       const yAnt = 170 - (p.monto_anterior / maxVal) * 135;
       return {
@@ -2236,6 +2300,17 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
       };
     });
   });
+
+  lastTrendPoint = computed(() => {
+    const coords = this.trendChartCoords();
+    return coords.length > 0 ? coords[coords.length - 1] : null;
+  });
+
+  formatCurrencyShort(val: number): string {
+    if (val >= 1000000) return `$${(val / 1000000).toFixed(1)}M`;
+    if (val >= 1000) return `$${Math.round(val / 1000)}k`;
+    return `$${Math.round(val)}`;
+  }
 
   svgPathActual = computed(() => {
     const coords = this.trendChartCoords();
