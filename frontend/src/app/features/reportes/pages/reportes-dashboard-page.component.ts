@@ -279,38 +279,44 @@ import {
             </div>
           </article>
 
-          <!-- Card 5: Meta de Ventas (Semicircle Radial Gauge) -->
+          <!-- Card 5: Meta de Ventas (Semicircle Radial Gauge + Info lateral) -->
           <article class="harbor-kpi-card target-gauge-card">
-            <div class="target-gauge-wrapper">
-              <svg class="semicircle-svg" viewBox="0 0 160 95">
-                <!-- Pista base semicircular (gris muy suave) -->
-                <path
-                  d="M 24 82 A 56 56 0 0 1 136 82"
-                  fill="none"
-                  stroke="#f1f5f9"
-                  stroke-width="12"
-                  stroke-linecap="round"
-                />
-                <!-- Arco de progreso (Coral Harbor) -->
-                <path
-                  d="M 24 82 A 56 56 0 0 1 136 82"
-                  fill="none"
-                  stroke="#ff5733"
-                  stroke-width="12"
-                  stroke-linecap="round"
-                  stroke-dasharray="175.93"
-                  [attr.stroke-dashoffset]="semicircleDashoffset()"
-                />
-              </svg>
-
-              <div class="gauge-center-caption">
-                <span class="gauge-bold-pct">{{ financialData().cumplimiento_pct }}%</span>
-                <span class="gauge-label">Meta de Ventas</span>
-              </div>
+            <div class="kpi-header-row">
+              <span class="kpi-tag-name">Meta de Ventas</span>
             </div>
 
-            <div class="target-footnote">
-              &dollar;{{ (financialData().facturacion_actual / 1000) | number:'1.1-1' }}k de &dollar;{{ (financialData().objetivo_mes / 1000) | number:'1.0-0' }}k mensual
+            <div class="target-gauge-body">
+              <div class="target-gauge-wrapper">
+                <svg class="semicircle-svg" viewBox="0 0 160 92">
+                  <!-- Pista base semicircular (gris muy suave) -->
+                  <path
+                    d="M 24 80 A 56 56 0 0 1 136 80"
+                    fill="none"
+                    stroke="#f1f5f9"
+                    stroke-width="12"
+                    stroke-linecap="round"
+                  />
+                  <!-- Arco de progreso (Coral Harbor) -->
+                  <path
+                    d="M 24 80 A 56 56 0 0 1 136 80"
+                    fill="none"
+                    stroke="#ff5733"
+                    stroke-width="12"
+                    stroke-linecap="round"
+                    stroke-dasharray="175.93"
+                    [attr.stroke-dashoffset]="semicircleDashoffset()"
+                  />
+                </svg>
+
+                <div class="gauge-center-caption">
+                  <span class="gauge-bold-pct">{{ financialData().cumplimiento_pct }}%</span>
+                </div>
+              </div>
+
+              <div class="target-side-info">
+                <div class="target-main-amount">&dollar;{{ (financialData().facturacion_actual / 1000) | number:'1.1-1' }}k</div>
+                <div class="target-goal-text">Meta: &dollar;{{ (financialData().objetivo_mes / 1000) | number:'1.0-0' }}k</div>
+              </div>
             </div>
           </article>
         </section>
@@ -1438,18 +1444,27 @@ import {
       color: #9ca3af;
     }
 
-    /* Card 5: Meta de Ventas con Gauge Semicircular */
+    /* Card 5: Meta de Ventas con Gauge Semicircular e Info lateral */
     .target-gauge-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .target-gauge-body {
+      display: flex;
       align-items: center;
-      text-align: center;
-      padding: 1rem 1rem 0.85rem 1rem;
-      gap: 0.2rem;
+      justify-content: flex-start;
+      gap: 0.85rem;
+      width: 100%;
     }
 
     .target-gauge-wrapper {
       position: relative;
-      width: 150px;
-      height: 85px;
+      width: 92px;
+      height: 54px;
+      flex-shrink: 0;
     }
 
     .semicircle-svg {
@@ -1459,35 +1474,46 @@ import {
 
     .gauge-center-caption {
       position: absolute;
-      bottom: 2px;
+      bottom: 1px;
       left: 0;
       right: 0;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
       pointer-events: none;
     }
 
     .gauge-bold-pct {
-      font-size: 1.45rem;
+      font-size: 1.15rem;
       font-weight: 800;
       color: #111827;
       line-height: 1;
+      letter-spacing: -0.02em;
     }
 
-    .gauge-label {
-      font-size: 0.65rem;
-      font-weight: 700;
-      color: #6b7280;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-top: 2px;
+    .target-side-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.15rem;
+      min-width: 0;
+      text-align: left;
     }
 
-    .target-footnote {
-      font-size: 0.7rem;
+    .target-main-amount {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #111827;
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+
+    .target-goal-text {
+      font-size: 0.72rem;
+      font-weight: 600;
       color: #6b7280;
-      font-weight: 500;
+      white-space: nowrap;
     }
 
     /* =========================================================
