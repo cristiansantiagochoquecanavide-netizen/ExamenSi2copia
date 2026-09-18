@@ -75,8 +75,11 @@ import {
               class="voice-mic-trigger"
               (click)="toggleVoiceRecording()"
               [title]="isListening() ? 'Detener dictado' : 'Hablar al Asistente IA'">
-              <svg *ngIf="!isListening()" class="icon-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+              <svg *ngIf="!isListening()" class="icon-mic" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="2" width="6" height="12" rx="3" fill="#ffffff" stroke="#ffffff" />
+                <path d="M5 10v1a7 7 0 0 0 14 0v-1" stroke="#ffffff" stroke-width="2.2" />
+                <line x1="12" y1="18" x2="12" y2="22" stroke="#ffffff" stroke-width="2.2" />
+                <line x1="8" y1="22" x2="16" y2="22" stroke="#ffffff" stroke-width="2.2" />
               </svg>
               <div *ngIf="isListening()" class="audio-wave-bars">
                 <span class="bar bar-1"></span>
@@ -898,11 +901,11 @@ import {
     }
 
     .voice-mic-trigger {
-      background: #111111;
+      background: #d4af37;
       color: #ffffff;
       border: none;
-      width: 36px;
-      height: 36px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -910,17 +913,21 @@ import {
       cursor: pointer;
       flex-shrink: 0;
       transition: transform 0.15s ease, background-color 0.2s ease;
+      box-shadow: 0 2px 5px rgba(212, 175, 55, 0.35);
     }
 
     .voice-mic-trigger:hover {
-      background: #d4af37;
-      color: #000000;
-      transform: scale(1.05);
+      background: #b89324;
+      color: #ffffff;
+      transform: scale(1.06);
     }
 
     .icon-mic {
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
+      stroke: #ffffff;
+      color: #ffffff;
+      display: block;
     }
 
     .audio-wave-bars {
