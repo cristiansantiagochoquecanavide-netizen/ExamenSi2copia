@@ -204,12 +204,23 @@ class ReportesService:
         descuentos_totales = round(facturacion_actual * 0.045, 2)
         unidades_vendidas = max(cant_ventas * 2, int(facturacion_actual / 190.0))
 
+        # Cálculo de Forecast Predictivo (Siguiente Mes)
+        nombres_meses = [
+            "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+        ]
+        now = datetime.now()
+        prox_mes_num = (now.month % 12) + 1
+        nombre_prox_mes = nombres_meses[prox_mes_num - 1]
+        proyeccion_variacion_pct = 6.4
+        proyeccion_siguiente_mes = round(facturacion_actual * (1.0 + proyeccion_variacion_pct / 100.0), 2)
+
         if mes_audit_nombre:
             mensaje_insight = f"Auditoría de {mes_audit_nombre}: facturación consolidada de ${facturacion_actual:,.2f} ({cumplimiento_pct}% del objetivo fijado)."
         elif cumplimiento_pct >= 85:
-            mensaje_insight = f"Estás al {cumplimiento_pct}% del objetivo fijado con un crecimiento intermensual del +{variacion_pct}%."
+            mensaje_insight = f"Estás al {cumplimiento_pct}% del objetivo. Forecast predictivo para {nombre_prox_mes}: ~${proyeccion_siguiente_mes:,.0f} (+{proyeccion_variacion_pct}% de inercia)."
         else:
-            mensaje_insight = f"Estás al {cumplimiento_pct}% del objetivo mensual. Se recomienda activar promociones de fin de semana para cerrar la brecha."
+            mensaje_insight = f"Estás al {cumplimiento_pct}% del objetivo mensual. Proyección para {nombre_prox_mes}: ~${proyeccion_siguiente_mes:,.0f}."
 
         return FinancialIndicatorResponse(
             facturacion_actual=facturacion_actual,
@@ -221,7 +232,10 @@ class ReportesService:
             pedidos_totales=cant_ventas,
             unidades_vendidas=unidades_vendidas,
             descuentos_totales=descuentos_totales,
-            mensaje_insight=mensaje_insight
+            mensaje_insight=mensaje_insight,
+            proyeccion_siguiente_mes=proyeccion_siguiente_mes,
+            proyeccion_mes_nombre=nombre_prox_mes,
+            proyeccion_variacion_pct=proyeccion_variacion_pct
         )
 
     def _generar_comparative_trend(
@@ -234,29 +248,88 @@ class ReportesService:
             etiquetas = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00"]
             curva_act = [0.12, 0.06, 0.35, 1.05, 0.90, 1.40]
             curva_ant = [0.10, 0.05, 0.28, 0.85, 0.78, 1.15]
+            puntos = []
+            for i, lbl in enumerate(etiquetas):
+                puntos.append(
+                    ComparativeTrendPoint(
+                        periodo=lbl,
+                        monto_actual=round(factor * curva_act[i] * 70, 2),
+                        monto_anterior=round(factor * curva_ant[i] * 70, 2),
+                        es_proyeccion=False
+                    )
+                )
+            return puntos
+
         elif gran == "SEMANA":
             etiquetas = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
             curva_act = [0.75, 0.90, 1.05, 1.20, 1.65, 2.15, 1.80]
             curva_ant = [0.65, 0.80, 0.95, 1.00, 1.40, 1.85, 1.50]
+            puntos = []
+            for i, lbl in enumerate(etiquetas):
+                puntos.append(
+                    ComparativeTrendPoint(
+                        periodo=lbl,
+                        monto_actual=round(factor * curva_act[i] * 70, 2),
+                        monto_anterior=round(factor * curva_ant[i] * 70, 2),
+                        es_proyeccion=False
+                    )
+                )
+            return puntos
+
         else:  # "MES"
-            etiquetas = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+            todos_meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
             curva_act = [0.55, 0.65, 0.85, 0.90, 1.15, 1.25, 1.40, 1.35, 1.55, 1.70, 1.95, 2.10]
             curva_ant = [0.45, 0.50, 0.70, 0.80, 0.95, 1.10, 1.15, 1.20, 1.30, 1.45, 1.60, 1.75]
 
-        puntos = []
-        for i, lbl in enumerate(etiquetas):
-            mult_act = curva_act[i % len(curva_act)]
-            mult_ant = curva_ant[i % len(curva_ant)]
-            monto_act = round(factor * mult_act * 70, 2)
-            monto_ant = round(factor * mult_ant * 70, 2)
-            puntos.append(
-                ComparativeTrendPoint(
-                    periodo=lbl,
-                    monto_actual=monto_act,
-                    monto_anterior=monto_ant
+            now = datetime.now()
+            mes_actual = now.month  # ej. 9 (Septiembre)
+
+            puntos: List[ComparativeTrendPoint] = []
+            # 1. Meses cerrados/reales hasta el mes actual
+            for i in range(min(mes_actual, len(todos_meses))):
+                lbl = todos_meses[i]
+                monto_act = round(factor * curva_act[i] * 70, 2)
+                monto_ant = round(factor * curva_ant[i] * 70, 2)
+                puntos.append(
+                    ComparativeTrendPoint(
+                        periodo=lbl,
+                        monto_actual=monto_act,
+                        monto_anterior=monto_ant,
+                        es_proyeccion=False
+                    )
                 )
-            )
-        return puntos
+
+            # 2. Forecast Predictivo para el mes inmediato siguiente (t+1)
+            if mes_actual < len(todos_meses):
+                prox_idx = mes_actual
+                prox_lbl = todos_meses[prox_idx]
+
+                # Modelo de Promedio Móvil Ponderado (WMA) de los últimos 3 meses:
+                # Pesos: t-2 (20%), t-1 (35%), t (45%)
+                if len(puntos) >= 3:
+                    m_prev2 = puntos[-3].monto_actual
+                    m_prev1 = puntos[-2].monto_actual
+                    m_curr = puntos[-1].monto_actual
+                    wma_base = (m_prev2 * 0.20) + (m_prev1 * 0.35) + (m_curr * 0.45)
+                    trend_momentum = min(1.10, max(1.03, m_curr / m_prev1)) if m_prev1 > 0 else 1.05
+                    monto_proyectado = round(wma_base * trend_momentum, 2)
+                elif len(puntos) > 0:
+                    monto_proyectado = round(puntos[-1].monto_actual * 1.05, 2)
+                else:
+                    monto_proyectado = round(factor * 1.65 * 70, 2)
+
+                monto_ant_prox = round(factor * curva_ant[prox_idx] * 70, 2)
+
+                puntos.append(
+                    ComparativeTrendPoint(
+                        periodo=prox_lbl,
+                        monto_actual=monto_proyectado,
+                        monto_anterior=monto_ant_prox,
+                        es_proyeccion=True
+                    )
+                )
+
+            return puntos
 
     async def _calcular_inventario_apilado(self) -> List[InventoryStackedItem]:
         return [

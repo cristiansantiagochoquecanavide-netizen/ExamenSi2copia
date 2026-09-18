@@ -57,12 +57,16 @@ export interface FinancialIndicator {
   unidades_vendidas: number;
   descuentos_totales: number;
   mensaje_insight: string;
+  proyeccion_siguiente_mes?: number;
+  proyeccion_mes_nombre?: string;
+  proyeccion_variacion_pct?: number;
 }
 
 export interface ComparativeTrendPoint {
   periodo: string;
   monto_actual: number;
   monto_anterior: number;
+  es_proyeccion?: boolean;
 }
 
 export interface InventoryStackedItem {

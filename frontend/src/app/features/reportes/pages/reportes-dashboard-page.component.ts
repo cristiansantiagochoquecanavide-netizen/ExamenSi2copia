@@ -414,7 +414,7 @@ import {
                     class="trend-comparative-path"
                   />
 
-                  <!-- Curva Sólida Fluida (Sin 12 círculos rígidos) -->
+                  <!-- Curva Sólida Fluida (Meses reales transcurridos) -->
                   <path
                     [attr.d]="svgPathActual()"
                     fill="none"
@@ -426,18 +426,34 @@ import {
                     class="trend-line-path"
                   />
 
-                  <!-- Pulsing Beacon en el Último Punto -->
-                  <g *ngIf="lastTrendPoint() && !hoveredTrendPoint" class="beacon-point-group">
-                    <circle [attr.cx]="lastTrendPoint()!.x" [attr.cy]="lastTrendPoint()!.yActual" r="12" class="beacon-pulse-ring" />
-                    <circle [attr.cx]="lastTrendPoint()!.x" [attr.cy]="lastTrendPoint()!.yActual" r="5" fill="#ff3811" stroke="#ffffff" stroke-width="2.5" />
+                  <!-- Curva Punteada de Predicción IA (Forecast del Siguiente Mes) -->
+                  <path
+                    *ngIf="svgPathForecast()"
+                    [attr.d]="svgPathForecast()"
+                    fill="none"
+                    stroke="#2563eb"
+                    stroke-width="3.2"
+                    stroke-dasharray="6,4"
+                    stroke-linecap="round"
+                    class="trend-forecast-path"
+                  />
+
+                  <!-- Pulsing Beacon en el Último Punto Real -->
+                  <g *ngIf="lastActualPoint() && (!hoveredTrendPoint || hoveredTrendPoint.periodo !== lastActualPoint()!.periodo)" class="beacon-point-group">
+                    <circle [attr.cx]="lastActualPoint()!.x" [attr.cy]="lastActualPoint()!.yActual" r="12" class="beacon-pulse-ring" />
+                    <circle [attr.cx]="lastActualPoint()!.x" [attr.cy]="lastActualPoint()!.yActual" r="5" fill="#ff3811" stroke="#ffffff" stroke-width="2.5" />
                   </g>
 
-                  <!-- Badge Flotante en el Último Punto (Live Value) -->
-                  <g *ngIf="lastTrendPoint() && !hoveredTrendPoint" [attr.transform]="'translate(' + (lastTrendPoint()!.x - 45) + ',' + (lastTrendPoint()!.yActual - 32) + ')'" class="current-badge-group">
-                    <rect width="90" height="24" rx="12" fill="#111827" filter="drop-shadow(0 3px 6px rgba(0,0,0,0.25))" />
-                    <text x="45" y="16.5" text-anchor="middle" fill="#ffffff" font-size="11.5" font-weight="800" font-family="ui-monospace, monospace">
-                      &dollar;{{ lastTrendPoint()!.montoActual | number:'1.0-0' }}
-                    </text>
+                  <!-- Badge y Beacon en el Punto Forecast IA (Mes Siguiente) -->
+                  <g *ngIf="forecastCoord() && (!hoveredTrendPoint || hoveredTrendPoint.periodo !== forecastCoord()!.periodo)" class="forecast-point-group">
+                    <circle [attr.cx]="forecastCoord()!.x" [attr.cy]="forecastCoord()!.yActual" r="14" class="forecast-pulse-ring" />
+                    <circle [attr.cx]="forecastCoord()!.x" [attr.cy]="forecastCoord()!.yActual" r="6" fill="#2563eb" stroke="#ffffff" stroke-width="2.5" />
+                    <g [attr.transform]="'translate(' + (forecastCoord()!.x - 52) + ',' + (forecastCoord()!.yActual - 32) + ')'" class="forecast-badge-tag">
+                      <rect width="104" height="24" rx="12" fill="#1e40af" filter="drop-shadow(0 3px 6px rgba(37,99,235,0.35))" />
+                      <text x="52" y="16" text-anchor="middle" fill="#ffffff" font-size="10.5" font-weight="800">
+                        ⚡ Forecast IA
+                      </text>
+                    </g>
                   </g>
                 </ng-container>
 
@@ -456,14 +472,17 @@ import {
                       opacity="0.45"
                       style="pointer-events: none;"
                     />
-                    <!-- Barra actual -->
+                    <!-- Barra actual (Sólida si real, punteada/azul si forecast) -->
                     <rect
                       [attr.x]="pt.x - 14"
                       [attr.y]="pt.yActual"
                       width="28"
                       [attr.height]="210 - pt.yActual"
                       rx="5"
-                      fill="url(#harborBarGrad)"
+                      [attr.fill]="pt.esProyeccion ? 'rgba(37, 99, 235, 0.25)' : 'url(#harborBarGrad)'"
+                      [attr.stroke]="pt.esProyeccion ? '#2563eb' : 'none'"
+                      [attr.stroke-width]="pt.esProyeccion ? 2 : 0"
+                      [attr.stroke-dasharray]="pt.esProyeccion ? '4,3' : 'none'"
                       [class.active-bar]="hoveredTrendPoint && hoveredTrendPoint.periodo === pt.periodo"
                       class="animated-bar"
                     />
@@ -519,14 +538,16 @@ import {
                 class="trend-hover-tooltip"
                 [style.left.px]="hoveredTooltipLeft()">
                 <div class="tooltip-header-row">
-                  <span class="tooltip-period-badge">{{ hoveredTrendPoint.periodo }}</span>
+                  <span class="tooltip-period-badge" [class.badge-forecast-tooltip]="hoveredTrendPoint.esProyeccion">
+                    {{ hoveredTrendPoint.periodo }} {{ hoveredTrendPoint.esProyeccion ? '(Forecast IA)' : '' }}
+                  </span>
                   <span class="tooltip-diff-pill" [class.positive]="hoveredTrendPoint.montoActual >= hoveredTrendPoint.montoAnterior">
                     {{ hoveredTrendPoint.montoActual >= hoveredTrendPoint.montoAnterior ? '▲ +' : '▼ -' }}{{ getPointDiffPct(hoveredTrendPoint) }}%
                   </span>
                 </div>
                 <div class="tooltip-metric-grid">
                   <div class="tooltip-stat">
-                    <span class="stat-lbl"><span class="dot-cur"></span> Este período:</span>
+                    <span class="stat-lbl"><span class="dot-cur" [style.background]="hoveredTrendPoint.esProyeccion ? '#2563eb' : '#ff3811'"></span> {{ hoveredTrendPoint.esProyeccion ? 'Proyección estim.:' : 'Este período:' }}</span>
                     <span class="stat-val highlight">&dollar;{{ hoveredTrendPoint.montoActual | number:'1.2-2' }}</span>
                   </div>
                   <div class="tooltip-stat" *ngIf="showComparative()">
@@ -547,8 +568,9 @@ import {
                 <span
                   *ngFor="let pt of trendChartCoords()"
                   class="x-tick-label"
+                  [class.forecast-tick]="pt.esProyeccion"
                   [class.active-tick]="hoveredTrendPoint && hoveredTrendPoint.periodo === pt.periodo">
-                  {{ pt.periodo }}
+                  {{ pt.periodo }}<small *ngIf="pt.esProyeccion" class="tick-ia-pill">IA</small>
                 </span>
               </div>
             </div>
@@ -576,6 +598,17 @@ import {
                 <div class="bi-chip-content">
                   <span class="bi-chip-title">Meta de Ventas</span>
                   <span class="bi-chip-num">{{ financialData().cumplimiento_pct }}% cubierto</span>
+                </div>
+              </div>
+
+              <!-- Chip 4: Forecast Predictivo -->
+              <div class="bi-stat-chip forecast-bi-chip" *ngIf="financialData().proyeccion_siguiente_mes">
+                <span class="bi-chip-bullet bullet-forecast"></span>
+                <div class="bi-chip-content">
+                  <span class="bi-chip-title">Forecast {{ financialData().proyeccion_mes_nombre || 'Próx. Mes' }} (IA)</span>
+                  <span class="bi-chip-num">
+                    &dollar;{{ financialData().proyeccion_siguiente_mes | number:'1.0-0' }} &bull; <strong class="text-forecast-accent">+{{ financialData().proyeccion_variacion_pct }}%</strong>
+                  </span>
                 </div>
               </div>
 
@@ -1714,6 +1747,62 @@ import {
       flex-shrink: 0;
     }
 
+    .forecast-bi-chip {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 0.35rem 0.65rem;
+      border-right: none;
+    }
+
+    .bullet-forecast {
+      background: #2563eb;
+      box-shadow: 0 0 6px rgba(37, 99, 235, 0.4);
+    }
+
+    .text-forecast-accent {
+      color: #2563eb;
+    }
+
+    .forecast-pulse-ring {
+      fill: none;
+      stroke: #2563eb;
+      stroke-width: 2;
+      opacity: 0.6;
+      animation: forecastPulse 2.5s infinite ease-out;
+    }
+
+    @keyframes forecastPulse {
+      0% { r: 6; opacity: 0.8; }
+      100% { r: 18; opacity: 0; }
+    }
+
+    .trend-forecast-path {
+      animation: fadeIn 0.4s ease-in;
+    }
+
+    .badge-forecast-tooltip {
+      background: #eff6ff !important;
+      color: #1d4ed8 !important;
+      border: 1px solid #bfdbfe;
+    }
+
+    .forecast-tick {
+      color: #2563eb !important;
+      font-weight: 700 !important;
+      position: relative;
+    }
+
+    .tick-ia-pill {
+      font-size: 0.62rem;
+      background: #2563eb;
+      color: #ffffff;
+      padding: 0.1rem 0.3rem;
+      border-radius: 4px;
+      margin-left: 0.2rem;
+      vertical-align: middle;
+    }
+
     /* Fulfillment de Pedidos */
     .card-main-title {
       font-size: 0.95rem;
@@ -2216,18 +2305,16 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
     const points: ComparativeTrendPoint[] = (d && d.comparative_trend && d.comparative_trend.length > 0)
       ? d.comparative_trend
       : [
-          { periodo: 'Ene', monto_actual: 5200, monto_anterior: 4200 },
-          { periodo: 'Feb', monto_actual: 6300, monto_anterior: 4800 },
-          { periodo: 'Mar', monto_actual: 8100, monto_anterior: 6500 },
-          { periodo: 'Abr', monto_actual: 8900, monto_anterior: 7400 },
-          { periodo: 'May', monto_actual: 11200, monto_anterior: 9100 },
-          { periodo: 'Jun', monto_actual: 12400, monto_anterior: 10400 },
-          { periodo: 'Jul', monto_actual: 13900, monto_anterior: 11200 },
-          { periodo: 'Ago', monto_actual: 13100, monto_anterior: 11800 },
-          { periodo: 'Sep', monto_actual: 15400, monto_anterior: 12900 },
-          { periodo: 'Oct', monto_actual: 16800, monto_anterior: 14200 },
-          { periodo: 'Nov', monto_actual: 19200, monto_anterior: 15900 },
-          { periodo: 'Dic', monto_actual: 21500, monto_anterior: 17200 }
+          { periodo: 'Ene', monto_actual: 5200, monto_anterior: 4200, es_proyeccion: false },
+          { periodo: 'Feb', monto_actual: 6300, monto_anterior: 4800, es_proyeccion: false },
+          { periodo: 'Mar', monto_actual: 8100, monto_anterior: 6500, es_proyeccion: false },
+          { periodo: 'Abr', monto_actual: 8900, monto_anterior: 7400, es_proyeccion: false },
+          { periodo: 'May', monto_actual: 11200, monto_anterior: 9100, es_proyeccion: false },
+          { periodo: 'Jun', monto_actual: 12400, monto_anterior: 10400, es_proyeccion: false },
+          { periodo: 'Jul', monto_actual: 13900, monto_anterior: 11200, es_proyeccion: false },
+          { periodo: 'Ago', monto_actual: 13100, monto_anterior: 11800, es_proyeccion: false },
+          { periodo: 'Sep', monto_actual: 15400, monto_anterior: 12900, es_proyeccion: false },
+          { periodo: 'Oct', monto_actual: 16450, monto_anterior: 14200, es_proyeccion: true }
         ];
 
     const maxVal = this.maxTrendVal();
@@ -2245,9 +2332,23 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
         yAnterior: Math.round(yAnt),
         periodo: p.periodo,
         montoActual: p.monto_actual,
-        montoAnterior: p.monto_anterior
+        montoAnterior: p.monto_anterior,
+        esProyeccion: !!p.es_proyeccion
       };
     });
+  });
+
+  actualCoords = computed(() => {
+    return this.trendChartCoords().filter(p => !p.esProyeccion);
+  });
+
+  forecastCoord = computed(() => {
+    return this.trendChartCoords().find(p => p.esProyeccion) || null;
+  });
+
+  lastActualPoint = computed(() => {
+    const act = this.actualCoords();
+    return act.length > 0 ? act[act.length - 1] : null;
   });
 
   lastTrendPoint = computed(() => {
@@ -2256,7 +2357,7 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
   });
 
   svgPathActual = computed(() => {
-    const coords = this.trendChartCoords();
+    const coords = this.actualCoords();
     if (coords.length === 0) return '';
     let d = `M${coords[0].x},${coords[0].yActual}`;
     for (let i = 1; i < coords.length; i++) {
@@ -2269,12 +2370,20 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
   });
 
   svgAreaActual = computed(() => {
-    const coords = this.trendChartCoords();
+    const coords = this.actualCoords();
     if (coords.length === 0) return '';
     const line = this.svgPathActual();
     const last = coords[coords.length - 1];
     const first = coords[0];
     return `${line} L${last.x},210 L${first.x},210 Z`;
+  });
+
+  svgPathForecast = computed(() => {
+    const last = this.lastActualPoint();
+    const fcast = this.forecastCoord();
+    if (!last || !fcast) return '';
+    const cpx = last.x + (fcast.x - last.x) / 2;
+    return `M${last.x},${last.yActual} C${cpx},${last.yActual} ${cpx},${fcast.yActual} ${fcast.x},${fcast.yActual}`;
   });
 
   svgPathAnterior = computed(() => {

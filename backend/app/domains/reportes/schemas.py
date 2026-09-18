@@ -75,12 +75,16 @@ class FinancialIndicatorResponse(BaseModel):
     unidades_vendidas: int
     descuentos_totales: float
     mensaje_insight: str
+    proyeccion_siguiente_mes: Optional[float] = None
+    proyeccion_mes_nombre: Optional[str] = None
+    proyeccion_variacion_pct: Optional[float] = None
 
 
 class ComparativeTrendPoint(BaseModel):
     periodo: str
     monto_actual: float
     monto_anterior: float
+    es_proyeccion: bool = False
 
 
 class InventoryStackedItem(BaseModel):
