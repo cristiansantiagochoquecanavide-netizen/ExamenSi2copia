@@ -75,11 +75,17 @@ import {
               class="voice-mic-trigger"
               (click)="toggleVoiceRecording()"
               [title]="isListening() ? 'Detener dictado' : 'Hablar al Asistente IA'">
-              <svg *ngIf="!isListening()" class="icon-mic" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="9" y="2" width="6" height="12" rx="3" fill="#ffffff" stroke="#ffffff" />
-                <path d="M5 10v1a7 7 0 0 0 14 0v-1" stroke="#ffffff" stroke-width="2.2" />
-                <line x1="12" y1="18" x2="12" y2="22" stroke="#ffffff" stroke-width="2.2" />
-                <line x1="8" y1="22" x2="16" y2="22" stroke="#ffffff" stroke-width="2.2" />
+              <svg
+                *ngIf="!isListening()"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                class="icon-mic"
+                aria-hidden="true"
+              >
+                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" fill="#ffffff"/>
+                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" fill="#ffffff"/>
               </svg>
               <div *ngIf="isListening()" class="audio-wave-bars">
                 <span class="bar bar-1"></span>
@@ -901,33 +907,40 @@ import {
     }
 
     .voice-mic-trigger {
-      background: #d4af37;
-      color: #ffffff;
+      background: #d4af37 !important;
+      color: #ffffff !important;
       border: none;
-      width: 38px;
-      height: 38px;
+      width: 38px !important;
+      height: 38px !important;
+      min-width: 38px !important;
+      min-height: 38px !important;
       border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
       cursor: pointer;
-      flex-shrink: 0;
+      flex-shrink: 0 !important;
       transition: transform 0.15s ease, background-color 0.2s ease;
       box-shadow: 0 2px 5px rgba(212, 175, 55, 0.35);
+      padding: 0 !important;
     }
 
     .voice-mic-trigger:hover {
-      background: #b89324;
-      color: #ffffff;
+      background: #b89324 !important;
+      color: #ffffff !important;
       transform: scale(1.06);
     }
 
     .icon-mic {
-      width: 20px;
-      height: 20px;
-      stroke: #ffffff;
-      color: #ffffff;
-      display: block;
+      width: 20px !important;
+      height: 20px !important;
+      min-width: 20px !important;
+      min-height: 20px !important;
+      fill: #ffffff !important;
+      color: #ffffff !important;
+      display: block !important;
+      flex-shrink: 0 !important;
+      pointer-events: none;
     }
 
     .audio-wave-bars {
