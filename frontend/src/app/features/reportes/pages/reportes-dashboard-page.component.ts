@@ -306,11 +306,16 @@ import {
                     stroke-dasharray="175.93"
                     [attr.stroke-dashoffset]="semicircleDashoffset()"
                   />
+                  <!-- Porcentaje nítido y ópticamente centrado en el hueco del arco sin colisiones -->
+                  <text
+                    x="80"
+                    y="60"
+                    text-anchor="middle"
+                    dominant-baseline="central"
+                    class="gauge-svg-pct">
+                    {{ financialData().cumplimiento_pct }}%
+                  </text>
                 </svg>
-
-                <div class="gauge-center-caption">
-                  <span class="gauge-bold-pct">{{ financialData().cumplimiento_pct }}%</span>
-                </div>
               </div>
 
               <div class="target-side-info">
@@ -1384,33 +1389,23 @@ import {
 
     .target-gauge-wrapper {
       position: relative;
-      width: 92px;
-      height: 54px;
+      width: 96px;
+      height: 56px;
       flex-shrink: 0;
     }
 
     .semicircle-svg {
       width: 100%;
       height: 100%;
+      overflow: visible;
     }
 
-    .gauge-center-caption {
-      position: absolute;
-      bottom: 1px;
-      left: 0;
-      right: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      pointer-events: none;
-    }
-
-    .gauge-bold-pct {
-      font-size: 1.15rem;
+    .gauge-svg-pct {
+      font-size: 21px;
       font-weight: 800;
-      color: #111827;
-      line-height: 1;
-      letter-spacing: -0.02em;
+      fill: #111827;
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+      letter-spacing: -0.03em;
     }
 
     .target-side-info {
