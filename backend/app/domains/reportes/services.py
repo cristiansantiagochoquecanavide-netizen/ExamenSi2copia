@@ -309,10 +309,10 @@ class ReportesService:
         gran = (granularidad or "MES").upper()
 
         if gran == "DIA":
-            # Formato 24 horas cada 3 horas cubriendo todo el ciclo diario (00:00 a 24:00)
+            # Formato 24 horas cada 3 horas con pico vespertino/nocturno real de tienda de moda (15:00 a 21:00)
             etiquetas = ["00:00", "03:00", "06:00", "09:00", "12:00", "15:00", "18:00", "21:00", "24:00"]
-            puntos_act = [180.0, 320.0, 560.0, 1450.0, 3750.0, 5450.0, 7150.0, 8100.0, 8420.0]
-            puntos_ant = [150.0, 240.0, 420.0, 1150.0, 3100.0, 4650.0, 6200.0, 7050.0, 7350.0]
+            puntos_act = [280.0, 110.0, 220.0, 1450.0, 3800.0, 6450.0, 8920.0, 7340.0, 1150.0]
+            puntos_ant = [190.0, 140.0, 180.0, 1150.0, 3100.0, 5200.0, 7450.0, 6100.0, 880.0]
             puntos = []
             for i, lbl in enumerate(etiquetas):
                 puntos.append(
@@ -325,10 +325,11 @@ class ReportesService:
             return puntos
 
         elif gran == "SEMANA":
-            # Días de la semana de Lunes a Domingo
+            # Días de la semana de Lunes a Domingo con dinámica real de boutique:
+            # Martes con promoción/ventas mayores que Jueves y Viernes; Sábado día fuerte de compras superior al Domingo.
             etiquetas = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
-            puntos_act = [5400.0, 11900.0, 19600.0, 28400.0, 40200.0, 53800.0, 58400.0]
-            puntos_ant = [4800.0, 10400.0, 17100.0, 24800.0, 35200.0, 47100.0, 51200.0]
+            puntos_act = [18400.0, 48200.0, 24600.0, 31800.0, 42500.0, 69400.0, 36800.0]
+            puntos_ant = [16200.0, 41500.0, 21800.0, 28400.0, 37900.0, 61200.0, 31500.0]
             puntos = []
             for i, lbl in enumerate(etiquetas):
                 puntos.append(
@@ -341,10 +342,13 @@ class ReportesService:
             return puntos
 
         else:  # "MES"
-            # Exclusivo del mes seleccionado: desglose de Semana 1 a Semana 4 que totaliza la facturación mensual
+            # Exclusivo del mes seleccionado: desglose de Semana 1 a Semana 4 con fluctuaciones reales
+            # (inicio de mes fuerte, desaceleración quincenal, repunte de colección en sem 3, cierre equilibrado)
+            # Totalizan exactamente los $148,245.00 del mes actual (o total_ref en proyecciones)
             etiquetas = ["Semana 1", "Semana 2", "Semana 3", "Semana 4"]
-            shares_act = [0.225, 0.470, 0.730, 1.000]
-            shares_ant = [0.198, 0.415, 0.645, 0.880]
+            shares_act = [0.260, 0.185, 0.315, 0.240]
+            shares_ant = [0.255, 0.190, 0.305, 0.250]
+            factor_ant = 0.88
 
             puntos = []
             for i, lbl in enumerate(etiquetas):
@@ -352,7 +356,7 @@ class ReportesService:
                     ComparativeTrendPoint(
                         periodo=lbl,
                         monto_actual=round(total_ref * shares_act[i], 2),
-                        monto_anterior=round(total_ref * shares_ant[i], 2),
+                        monto_anterior=round(total_ref * factor_ant * shares_ant[i], 2),
                         es_proyeccion=(modo_vista == "PREDICTIVO" and i == 3)
                     )
                 )

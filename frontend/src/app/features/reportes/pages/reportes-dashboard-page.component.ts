@@ -2319,8 +2319,8 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
       // Escala semanal hasta $80,000 (o superior en múltiplos de $20k si el pico lo supera)
       return peak > 80000 ? Math.ceil(peak / 20000) * 20000 : 80000;
     } else {
-      // Escala mensual hasta $200,000 (o superior en múltiplos de $50k si el pico lo supera)
-      return peak > 200000 ? Math.ceil(peak / 50000) * 50000 : 200000;
+      // Escala mensual (semanas del mes) hasta $60,000 (o superior en múltiplos de $15k si el pico lo supera)
+      return peak > 60000 ? Math.ceil(peak / 15000) * 15000 : 60000;
     }
   });
 
@@ -2349,32 +2349,32 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
     if (points.length === 0) {
       if (gran === 'DIA') {
         points = [
-          { periodo: '00:00', monto_actual: 180, monto_anterior: 150 },
-          { periodo: '03:00', monto_actual: 320, monto_anterior: 240 },
-          { periodo: '06:00', monto_actual: 560, monto_anterior: 420 },
+          { periodo: '00:00', monto_actual: 280, monto_anterior: 190 },
+          { periodo: '03:00', monto_actual: 110, monto_anterior: 140 },
+          { periodo: '06:00', monto_actual: 220, monto_anterior: 180 },
           { periodo: '09:00', monto_actual: 1450, monto_anterior: 1150 },
-          { periodo: '12:00', monto_actual: 3750, monto_anterior: 3100 },
-          { periodo: '15:00', monto_actual: 5450, monto_anterior: 4650 },
-          { periodo: '18:00', monto_actual: 7150, monto_anterior: 6200 },
-          { periodo: '21:00', monto_actual: 8100, monto_anterior: 7050 },
-          { periodo: '24:00', monto_actual: 8420, monto_anterior: 7350 }
+          { periodo: '12:00', monto_actual: 3800, monto_anterior: 3100 },
+          { periodo: '15:00', monto_actual: 6450, monto_anterior: 5200 },
+          { periodo: '18:00', monto_actual: 8920, monto_anterior: 7450 },
+          { periodo: '21:00', monto_actual: 7340, monto_anterior: 6100 },
+          { periodo: '24:00', monto_actual: 1150, monto_anterior: 880 }
         ];
       } else if (gran === 'SEMANA') {
         points = [
-          { periodo: 'Lun', monto_actual: 5400, monto_anterior: 4800 },
-          { periodo: 'Mar', monto_actual: 11900, monto_anterior: 10400 },
-          { periodo: 'Mié', monto_actual: 19600, monto_anterior: 17100 },
-          { periodo: 'Jue', monto_actual: 28400, monto_anterior: 24800 },
-          { periodo: 'Vie', monto_actual: 40200, monto_anterior: 35200 },
-          { periodo: 'Sáb', monto_actual: 53800, monto_anterior: 47100 },
-          { periodo: 'Dom', monto_actual: 58400, monto_anterior: 51200 }
+          { periodo: 'Lun', monto_actual: 18400, monto_anterior: 16200 },
+          { periodo: 'Mar', monto_actual: 48200, monto_anterior: 41500 },
+          { periodo: 'Mié', monto_actual: 24600, monto_anterior: 21800 },
+          { periodo: 'Jue', monto_actual: 31800, monto_anterior: 28400 },
+          { periodo: 'Vie', monto_actual: 42500, monto_anterior: 37900 },
+          { periodo: 'Sáb', monto_actual: 69400, monto_anterior: 61200 },
+          { periodo: 'Dom', monto_actual: 36800, monto_anterior: 31500 }
         ];
       } else {
         points = [
-          { periodo: 'Semana 1', monto_actual: 33355, monto_anterior: 29350 },
-          { periodo: 'Semana 2', monto_actual: 69675, monto_anterior: 61520 },
-          { periodo: 'Semana 3', monto_actual: 108218, monto_anterior: 95618 },
-          { periodo: 'Semana 4', monto_actual: 148245, monto_anterior: 130455 }
+          { periodo: 'Semana 1', monto_actual: 38544, monto_anterior: 33266 },
+          { periodo: 'Semana 2', monto_actual: 27425, monto_anterior: 24787 },
+          { periodo: 'Semana 3', monto_actual: 46697, monto_anterior: 39789 },
+          { periodo: 'Semana 4', monto_actual: 35579, monto_anterior: 32614 }
         ];
       }
     }
