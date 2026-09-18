@@ -327,79 +327,35 @@ import {
         <section class="harbor-middle-grid">
           <!-- Columna Izquierda (65%): Tendencia de Ingresos -->
           <article class="harbor-card revenue-chart-card">
-            <div class="card-header-flex">
-              <div class="revenue-header-stats">
-                <span class="card-eyebrow">TENDENCIA DE INGRESOS</span>
-                <div class="revenue-hero-row">
-                  <span class="revenue-hero-number">&dollar;{{ financialData().facturacion_actual | number:'1.2-2' }}</span>
-                  <span class="hero-growth-badge">▲ +{{ financialData().variacion_pct }}%</span>
-                </div>
+            <div class="card-header-flex revenue-single-header">
+              <div class="revenue-header-info">
+                <h3 class="revenue-title">Tendencia de Ingresos</h3>
+                <span class="revenue-hero-number">&dollar;{{ financialData().facturacion_actual | number:'1.2-2' }}</span>
               </div>
 
-              <div class="chart-controls-cluster">
-                <!-- Alternador Vista: Curva / Columnas -->
-                <div class="chart-type-tabs">
-                  <button
-                    type="button"
-                    class="type-tab-btn"
-                    [class.active]="chartViewType() === 'line'"
-                    (click)="chartViewType.set('line')"
-                    title="Curva fluida">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                      <path d="M3 17l6-6 4 4 8-8" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <span>Línea</span>
-                  </button>
-                  <button
-                    type="button"
-                    class="type-tab-btn"
-                    [class.active]="chartViewType() === 'bar'"
-                    (click)="chartViewType.set('bar')"
-                    title="Columnas redondeadas">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                      <rect x="3" y="11" width="4" height="10" rx="1"/>
-                      <rect x="10" y="6" width="4" height="15" rx="1"/>
-                      <rect x="17" y="2" width="4" height="19" rx="1"/>
-                    </svg>
-                    <span>Barras</span>
-                  </button>
-                </div>
-
-                <!-- Toggle Comparativa con Período Previo -->
+              <!-- Selector de Granularidad: Día, Semana, Mes arriba a la derecha -->
+              <div class="granularity-switcher-tabs">
                 <button
                   type="button"
-                  class="comparative-pill-btn"
-                  [class.active]="showComparative()"
-                  (click)="showComparative.set(!showComparative())"
-                  title="Mostrar/Ocultar comparativa con el período anterior">
-                  <span class="comp-legend-dash"></span>
-                  <span>{{ showComparative() ? 'Comparando: Activo' : '+ Comparar anterior' }}</span>
+                  class="switcher-tab"
+                  [class.active]="selectedGranularidad() === 'DIA'"
+                  (click)="cambiarGranularidad('DIA')">
+                  Día
                 </button>
-
-                <!-- Selector de Granularidad: Día, Semana, Mes -->
-                <div class="granularity-switcher-tabs">
-                  <button
-                    type="button"
-                    class="switcher-tab"
-                    [class.active]="selectedGranularidad() === 'DIA'"
-                    (click)="cambiarGranularidad('DIA')">
-                    Día
-                  </button>
-                  <button
-                    type="button"
-                    class="switcher-tab"
-                    [class.active]="selectedGranularidad() === 'SEMANA'"
-                    (click)="cambiarGranularidad('SEMANA')">
-                    Semana
-                  </button>
-                  <button
-                    type="button"
-                    class="switcher-tab"
-                    [class.active]="selectedGranularidad() === 'MES'"
-                    (click)="cambiarGranularidad('MES')">
-                    Mes
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  class="switcher-tab"
+                  [class.active]="selectedGranularidad() === 'SEMANA'"
+                  (click)="cambiarGranularidad('SEMANA')">
+                  Semana
+                </button>
+                <button
+                  type="button"
+                  class="switcher-tab"
+                  [class.active]="selectedGranularidad() === 'MES'"
+                  (click)="cambiarGranularidad('MES')">
+                  Mes
+                </button>
               </div>
             </div>
 
@@ -1543,104 +1499,38 @@ import {
       align-items: flex-start;
     }
 
-    .card-eyebrow {
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: #9ca3af;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+    .revenue-single-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      flex-wrap: nowrap;
+      margin-bottom: 0.25rem;
     }
 
-    .revenue-hero-row {
+    .revenue-header-info {
       display: flex;
       align-items: baseline;
-      gap: 0.65rem;
-      margin-top: 0.2rem;
+      gap: 1.25rem;
+      flex-wrap: nowrap;
+    }
+
+    .revenue-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #111827;
+      margin: 0;
+      white-space: nowrap;
+      letter-spacing: -0.01em;
     }
 
     .revenue-hero-number {
-      font-size: 1.95rem;
+      font-size: 1.65rem;
       font-weight: 800;
       letter-spacing: -0.02em;
       color: #111827;
-    }
-
-    .hero-growth-badge {
-      background: #ecfdf5;
-      color: #059669;
-      font-size: 0.72rem;
-      font-weight: 700;
-      padding: 0.2rem 0.5rem;
-      border-radius: 6px;
-    }
-
-    /* Cluster de controles de la tarjeta */
-    .chart-controls-cluster {
-      display: flex;
-      align-items: center;
-      gap: 0.65rem;
-      flex-wrap: wrap;
-    }
-
-    .chart-type-tabs {
-      display: flex;
-      background: #f3f4f6;
-      padding: 3px;
-      border-radius: 8px;
-      gap: 2px;
-    }
-
-    .type-tab-btn {
-      background: transparent;
-      border: none;
-      padding: 0.35rem 0.65rem;
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: #6b7280;
-      cursor: pointer;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.15s ease;
-    }
-
-    .type-tab-btn.active {
-      background: #ffffff;
-      color: #111827;
-      font-weight: 700;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-    }
-
-    .comparative-pill-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: #ffffff;
-      border: 1.5px solid #e2e8f0;
-      padding: 0.35rem 0.75rem;
-      border-radius: 8px;
-      font-size: 0.74rem;
-      font-weight: 700;
-      color: #64748b;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .comp-legend-dash {
-      width: 14px;
-      height: 3px;
-      border-bottom: 2.5px dashed #64748b;
-    }
-
-    .comparative-pill-btn.active {
-      border-color: #ff5733;
-      color: #111827;
-      background: #fff7f5;
-    }
-
-    .comparative-pill-btn.active .comp-legend-dash {
-      border-bottom-color: #ff5733;
+      line-height: 1;
+      white-space: nowrap;
     }
 
     .granularity-switcher-tabs {
