@@ -17,214 +17,138 @@ import {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
-    <div class="min-h-screen bg-[#131313] text-[#e2e2e2] font-sans selection:bg-[#e9c349]/30">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div class="dashboard-page-wrapper">
+      <div class="dashboard-container">
 
         <!-- ========================================== -->
-        <!-- TOP BANNER / HEADLINE AREA (STITCH THEME) -->
+        <!-- 1. CABECERA EJECUTIVA LIMPIA (SIN 'SI2')   -->
         <!-- ========================================== -->
-        <header class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-[#353535]/60">
-          <div>
-            <div class="flex items-center gap-2 mb-2 text-xs tracking-widest uppercase text-[#8e9192]">
-              <span>Atelier Control Center</span>
-              <span>/</span>
-              <span class="text-[#e9c349] font-medium">Global Operations &amp; Voice BI</span>
+        <header class="dashboard-header">
+          <div class="header-titles">
+            <div class="header-eyebrow">
+              <span class="gold-dot">&bull;</span>
+              <span>INTELIGENCIA DE NEGOCIOS &bull; ATELIER NOIR</span>
             </div>
-            <h1 class="text-3xl sm:text-4xl font-serif tracking-tight text-white">
-              Overview Dashboard &amp; Análisis por Voz
-            </h1>
-            <p class="text-sm text-[#8e9192] mt-1">
-              Inteligencia comercial en tiempo real sincronizada con omnicanalidad y probadores VIP.
+            <h1 class="header-main-title">Dashboard de Rendimiento Ejecutivo</h1>
+            <p class="header-subtitle">
+              Métricas consolidadas de facturación, probadores VIP, inventario crítico y canales de venta.
             </p>
           </div>
 
-          <div class="flex flex-wrap items-center gap-3">
-            <!-- Rango selector -->
-            <div class="inline-flex rounded-sm bg-[#1b1b1b] p-1 border border-[#353535]">
-              <button
-                *ngFor="let r of rangosDisponibles"
-                type="button"
-                (click)="cambiarRango(r.id)"
-                [ngClass]="selectedRango() === r.id ? 'bg-[#353535] text-[#e9c349]' : 'text-[#8e9192]'"
-                class="px-3 py-1 text-xs font-semibold uppercase tracking-wider transition-colors rounded-sm hover:text-white">
-                {{ r.label }}
-              </button>
+          <div class="header-controls">
+            <!-- Selector de Rango Temporal -->
+            <div class="period-selector-wrapper">
+              <label class="period-label">PERÍODO:</label>
+              <select class="period-select" [ngModel]="selectedRango()" (ngModelChange)="cambiarRango($event)">
+                <option value="24H">Últimas 24 Horas</option>
+                <option value="7D">Últimos 7 Días</option>
+                <option value="30D">Últimos 30 Días</option>
+                <option value="MES">Mes Actual en Curso</option>
+              </select>
             </div>
 
-            <!-- Exportar CSV -->
+            <!-- Botón Exportar CSV -->
             <button
               type="button"
+              class="btn-export-csv"
               (click)="exportarReporte()"
-              [disabled]="exporting()"
-              class="inline-flex items-center gap-2 bg-white text-[#131313] px-4 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-[#e9c349] hover:text-[#131313] transition-all border border-transparent shadow-sm disabled:opacity-50">
-              <svg *ngIf="!exporting()" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <span *ngIf="exporting()" class="animate-spin inline-block w-4 h-4 border-2 border-black border-t-transparent rounded-full"></span>
-              <span>{{ exporting() ? 'Exportando...' : 'Exportar Reporte' }}</span>
+              [disabled]="exporting()">
+              <span *ngIf="!exporting()">↓ Exportar Reporte</span>
+              <span *ngIf="exporting()">Generando CSV...</span>
             </button>
           </div>
         </header>
 
         <!-- ============================================================== -->
-        <!-- MOTOR DE ANÁLISIS POR VOZ CON IA (HAUTE COUTURE EXECUTIVE BI) -->
+        <!-- 2. BARRA UNIFICADA DE ASISTENTE DE VOZ IA (ZERO BUTTON CLUTTER) -->
         <!-- ============================================================== -->
-        <section class="relative overflow-hidden rounded-md bg-[#1b1b1b] border border-[#e9c349]/40 p-6 shadow-xl transition-all">
-          <div class="absolute top-0 right-0 -mr-8 -mt-8 w-40 h-40 bg-[#e9c349]/5 rounded-full blur-3xl pointer-events-none"></div>
-
-          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <!-- Voice engine header -->
-            <div class="space-y-1">
-              <div class="inline-flex items-center gap-2 text-xs uppercase tracking-wider text-[#e9c349] font-medium">
-                <span class="w-2 h-2 rounded-full bg-[#e9c349] animate-pulse"></span>
-                <span>Asistente Ejecutivo de Voz IA &bull; Natural Language BI</span>
-              </div>
-              <h2 class="text-xl font-serif text-white">
-                Consulta Verbal del Atelier
-              </h2>
-              <p class="text-xs text-[#8e9192]">
-                Haz preguntas sobre ventas, stock crítico, citas en probadores o proyecciones. El motor formula diagnósticos ejecutivos hablados.
-              </p>
-            </div>
-
-            <!-- Voice Controls Zone -->
-            <div class="flex flex-wrap items-center gap-3">
-              <!-- Micro button -->
-              <button
-                type="button"
-                (click)="toggleVoiceRecording()"
-                [ngClass]="isListening() ? 'bg-red-600 text-white border-red-500 animate-pulse' : 'bg-[#2a2a2a] text-[#e9c349] border-[#e9c349]/50'"
-                class="inline-flex items-center gap-3 px-5 py-3 rounded-full border text-sm font-semibold tracking-wide transition-all hover:scale-105 shadow-md">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                </svg>
-                <span>{{ isListening() ? 'Escuchando... (Toca para detener)' : 'Hablar con Asistente' }}</span>
-
-                <!-- Animated Audio Wave -->
-                <div *ngIf="isListening()" class="flex items-center gap-1 ml-1">
-                  <span class="w-1 h-3 bg-white rounded animate-bounce"></span>
-                  <span class="w-1 h-5 bg-white rounded animate-bounce delay-100"></span>
-                  <span class="w-1 h-2 bg-white rounded animate-bounce delay-200"></span>
-                  <span class="w-1 h-4 bg-white rounded animate-bounce delay-150"></span>
-                </div>
-              </button>
-
-              <!-- Text fallback input -->
-              <form (ngSubmit)="ejecutarConsultaTexto()" class="flex items-center gap-2">
-                <input
-                  type="text"
-                  [(ngModel)]="textQueryInput"
-                  name="textQueryInput"
-                  placeholder="O escribe tu consulta aquí..."
-                  class="bg-[#131313] border border-[#353535] text-xs text-white px-3 py-2.5 rounded-sm focus:outline-none focus:border-[#e9c349] w-56 sm:w-64"
-                />
-                <button
-                  type="submit"
-                  [disabled]="!textQueryInput.trim() || isProcessingVoice()"
-                  class="bg-[#353535] hover:bg-[#e9c349] hover:text-black text-white px-3 py-2.5 text-xs font-semibold uppercase tracking-wider rounded-sm transition-colors disabled:opacity-40">
-                  Consultar
-                </button>
-              </form>
-            </div>
-          </div>
-
-          <!-- Interim transcription display -->
-          <div *ngIf="isListening() || currentTranscript()" class="mt-4 p-3 bg-[#131313]/90 border border-[#e9c349]/30 rounded text-sm text-[#e2e2e2] flex items-center gap-3">
-            <span class="text-[#e9c349] font-bold text-xs uppercase tracking-wider">Transcribiendo:</span>
-            <span class="italic font-light text-white">"{{ currentTranscript() || 'Escuchando tu voz...' }}"</span>
-          </div>
-
-          <!-- Quick suggestions pills -->
-          <div class="mt-5 pt-4 border-t border-[#353535]/50 flex flex-wrap items-center gap-2 text-xs">
-            <span class="text-[#8e9192] uppercase tracking-wider font-semibold mr-1">Preguntas rápidas:</span>
+        <section class="voice-ai-unified-section">
+          <div class="voice-search-bar" [class.listening-active]="isListening()">
+            <!-- Botón de Micrófono Integrado -->
             <button
-              *ngFor="let pill of quickPills"
               type="button"
-              (click)="consultarPorPill(pill.query)"
-              class="bg-[#2a2a2a] hover:bg-[#353535] hover:text-[#e9c349] border border-[#353535] text-[#c4c7c8] px-3 py-1.5 rounded-full transition-all text-xs">
-              {{ pill.label }}
+              class="voice-mic-trigger"
+              (click)="toggleVoiceRecording()"
+              [title]="isListening() ? 'Detener escucha' : 'Hablar al Asistente IA'">
+              <svg *ngIf="!isListening()" class="icon-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+              </svg>
+
+              <!-- Ondas de Audio Animadas al Escuchar -->
+              <div *ngIf="isListening()" class="audio-wave-bars">
+                <span class="bar bar-1"></span>
+                <span class="bar bar-2"></span>
+                <span class="bar bar-3"></span>
+                <span class="bar bar-4"></span>
+              </div>
+            </button>
+
+            <!-- Campo de Texto / Transcripción -->
+            <input
+              type="text"
+              class="voice-search-input"
+              [(ngModel)]="textQueryInput"
+              (keyup.enter)="ejecutarConsultaTexto()"
+              [placeholder]="isListening() ? (currentTranscript() || 'Escuchando tu voz...') : 'Preguntá a la IA sobre ventas, stock o probadores (escribe o pulsa el micrófono)...'"
+            />
+
+            <!-- Botón de Envío -->
+            <button
+              type="button"
+              class="voice-submit-btn"
+              (click)="ejecutarConsultaTexto()"
+              [disabled]="!textQueryInput.trim() || isProcessingVoice()">
+              {{ isProcessingVoice() ? 'Analizando...' : 'Consultar' }}
             </button>
           </div>
 
-          <!-- Loading state for Voice Analysis -->
-          <div *ngIf="isProcessingVoice()" class="mt-6 p-4 bg-[#131313] border border-[#353535] rounded-md flex items-center gap-3 text-sm text-[#e9c349]">
-            <span class="animate-spin inline-block w-4 h-4 border-2 border-[#e9c349] border-t-transparent rounded-full"></span>
-            <span>El motor de IA está procesando las transacciones y formulando el informe gerencial...</span>
+          <!-- Sugerencias Rápidas Desplegables Sutiles -->
+          <div class="quick-prompts-subtle">
+            <span class="prompt-hint">Consultas frecuentes:</span>
+            <button
+              *ngFor="let p of quickPills"
+              type="button"
+              class="prompt-chip"
+              (click)="consultarPorPill(p.query)">
+              {{ p.label }}
+            </button>
           </div>
 
-          <!-- ============================================== -->
-          <!-- VOICE AI ANALYSIS RESULT PANEL (SPEAKABLE)     -->
-          <!-- ============================================== -->
-          <div *ngIf="voiceAnalysis() && !isProcessingVoice()" class="mt-6 p-5 bg-[#131313] border border-[#e9c349] rounded-md shadow-2xl animate-fadeIn space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#353535]">
-              <div class="flex items-center gap-3">
-                <span class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest bg-[#e9c349] text-[#131313] rounded-sm">
-                  {{ voiceAnalysis()?.intencion_detectada }}
-                </span>
-                <span class="text-xs text-[#8e9192]">Consulta:</span>
-                <span class="text-sm text-white font-serif italic">"{{ voiceAnalysis()?.pregunta }}"</span>
+          <!-- Tarjeta Desplegable de Diagnóstico Gerencial IA (Cuando hay respuesta) -->
+          <div *ngIf="voiceAnalysis() && !isProcessingVoice()" class="voice-result-card">
+            <div class="voice-result-header">
+              <div class="intent-zone">
+                <span class="intent-badge">{{ voiceAnalysis()?.intencion_detectada }}</span>
+                <span class="query-echo">"{{ voiceAnalysis()?.pregunta }}"</span>
               </div>
 
-              <!-- TTS Speaker Button -->
-              <div class="flex items-center gap-2">
+              <div class="voice-result-actions">
+                <!-- Botón Text-to-Speech -->
                 <button
                   type="button"
-                  (click)="toggleTTSPlayback()"
-                  [ngClass]="isSpeaking() ? 'bg-[#e9c349] text-black' : 'bg-[#2a2a2a] text-white'"
-                  class="inline-flex items-center gap-2 px-3 py-1.5 rounded text-xs font-semibold uppercase tracking-wider hover:bg-[#e9c349] hover:text-black transition-all border border-[#e9c349]/40">
-                  <svg *ngIf="!isSpeaking()" class="w-4 h-4 text-[#e9c349]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-                  </svg>
-                  <svg *ngIf="isSpeaking()" class="w-4 h-4 text-black animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span>{{ isSpeaking() ? 'Detener Voz' : 'Escuchar Voz IA' }}</span>
+                  class="btn-tts-speak"
+                  [class.speaking]="isSpeaking()"
+                  (click)="toggleTTSPlayback()">
+                  <span>{{ isSpeaking() ? '⏹ Detener Voz' : '🔊 Escuchar Voz IA' }}</span>
                 </button>
-
-                <button
-                  type="button"
-                  (click)="cerrarAnalisisVoz()"
-                  class="text-[#8e9192] hover:text-white p-1 text-lg leading-none"
-                  title="Cerrar tarjeta de diagnóstico">
-                  &times;
-                </button>
+                <button type="button" class="btn-close-analysis" (click)="cerrarAnalisisVoz()">&times;</button>
               </div>
             </div>
 
-            <!-- Analysis content breakdown -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-              <!-- 1. Cuantitativo -->
-              <div class="bg-[#1b1b1b] p-3.5 rounded border border-[#353535]/60 space-y-1.5">
-                <div class="text-[11px] font-semibold tracking-wider uppercase text-[#e9c349] flex items-center gap-1.5">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                  Diagnóstico Cuantitativo
-                </div>
-                <p class="text-[#c4c7c8] leading-relaxed">
-                  {{ voiceAnalysis()?.diagnostico_cuantitativo }}
-                </p>
+            <div class="voice-diagnosis-grid">
+              <div class="diagnosis-column">
+                <h4 class="diag-title">DIAGNÓSTICO CUANTITATIVO</h4>
+                <p class="diag-body">{{ voiceAnalysis()?.diagnostico_cuantitativo }}</p>
               </div>
-
-              <!-- 2. Interpretación Negocio -->
-              <div class="bg-[#1b1b1b] p-3.5 rounded border border-[#353535]/60 space-y-1.5">
-                <div class="text-[11px] font-semibold tracking-wider uppercase text-white flex items-center gap-1.5">
-                  <svg class="w-3.5 h-3.5 text-[#e9c349]\" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-                  Interpretación Estratégica
-                </div>
-                <p class="text-[#c4c7c8] leading-relaxed">
-                  {{ voiceAnalysis()?.interpretacion_negocio }}
-                </p>
+              <div class="diagnosis-column">
+                <h4 class="diag-title">INTERPRETACIÓN ESTRATÉGICA</h4>
+                <p class="diag-body">{{ voiceAnalysis()?.interpretacion_negocio }}</p>
               </div>
-
-              <!-- 3. Recomendaciones -->
-              <div class="bg-[#1b1b1b] p-3.5 rounded border border-[#353535]/60 space-y-1.5">
-                <div class="text-[11px] font-semibold tracking-wider uppercase text-[#e9c349] flex items-center gap-1.5">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                  Recomendaciones Accionables
-                </div>
-                <ul class="space-y-1 text-[#c4c7c8]">
-                  <li *ngFor="let rec of voiceAnalysis()?.recomendaciones_estrategicas" class="flex items-start gap-1.5">
-                    <span class="text-[#e9c349] font-bold">&bull;</span>
-                    <span>{{ rec }}</span>
+              <div class="diagnosis-column">
+                <h4 class="diag-title">RECOMENDACIONES DE GERENCIA</h4>
+                <ul class="diag-list">
+                  <li *ngFor="let rec of voiceAnalysis()?.recomendaciones_estrategicas">
+                    &bull; {{ rec }}
                   </li>
                 </ul>
               </div>
@@ -233,372 +157,1311 @@ import {
         </section>
 
         <!-- ========================================== -->
-        <!-- KEY METRIC CARDS (4 KPI GRID - STITCH)     -->
+        <!-- 3. FILA DE 5 TARJETAS KPI PRINCIPALES     -->
         <!-- ========================================== -->
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          <!-- Card 1: Revenue -->
-          <div class="bg-[#1b1b1b] p-6 flex flex-col justify-between relative overflow-hidden group hover:bg-[#1f1f1f] transition-all rounded-sm border-t-2 border-[#e9c349]">
-            <div class="flex justify-between items-start mb-4">
-              <span class="text-xs uppercase tracking-wider text-[#8e9192] font-semibold">Total Revenue</span>
-              <svg class="w-5 h-5 text-[#e9c349]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+        <section class="kpi-five-grid">
+          <!-- KPI 1: Ventas Totales con Sparkline -->
+          <article class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-title">VENTAS TOTALES</span>
+              <span class="kpi-badge positive">+14%</span>
+            </div>
+            <div class="kpi-value-row">
+              <span class="kpi-number">&dollar;{{ (dashboardData()?.kpis?.total_revenue || 148245) | number:'1.2-2' }}</span>
+            </div>
+            <div class="kpi-footer-row">
+              <!-- Mini SVG Sparkline -->
+              <svg class="mini-sparkline" viewBox="0 0 100 24" preserveAspectRatio="none">
+                <path d="M0,18 Q20,15 40,10 T70,14 T100,4" fill="none" stroke="#d4af37" stroke-width="2" />
               </svg>
+              <span class="kpi-reference">vs mes anterior</span>
             </div>
-            <div>
-              <div class="text-3xl font-serif text-white mb-1">
-                {{ (dashboardData()?.kpis?.total_revenue || 0) | currency:'USD':'symbol':'1.2-2' }}
-              </div>
-              <div class="flex items-center text-xs text-[#e9c349]">
-                <span class="font-medium">+{{ dashboardData()?.kpis?.revenue_change_pct || 12.4 }}%</span>
-                <span class="text-[#8e9192] ml-1 font-light">vs período anterior</span>
-              </div>
-            </div>
-          </div>
+          </article>
 
-          <!-- Card 2: Active Orders -->
-          <div class="bg-[#1b1b1b] p-6 flex flex-col justify-between relative overflow-hidden group hover:bg-[#1f1f1f] transition-all rounded-sm border-t-2 border-white">
-            <div class="flex justify-between items-start mb-4">
-              <span class="text-xs uppercase tracking-wider text-[#8e9192] font-semibold">Active Orders</span>
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
+          <!-- KPI 2: Pedidos Totales -->
+          <article class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-title">PEDIDOS TOTALES</span>
+              <span class="kpi-badge positive">+8%</span>
             </div>
-            <div>
-              <div class="text-3xl font-serif text-white mb-1">
-                {{ dashboardData()?.kpis?.active_orders || 24 }}
-              </div>
-              <div class="flex items-center text-xs text-[#8e9192]">
-                <span class="inline-block w-2 h-2 rounded-full bg-[#e9c349] mr-1.5"></span>
-                <span>{{ dashboardData()?.kpis?.in_progress_fulfillment || 6 }} en empaque final</span>
-              </div>
+            <div class="kpi-value-row">
+              <span class="kpi-number">{{ dashboardData()?.kpis?.active_orders || 412 }}</span>
             </div>
-          </div>
+            <div class="kpi-footer-row">
+              <span class="status-dot"></span>
+              <span class="kpi-reference">{{ dashboardData()?.kpis?.in_progress_fulfillment || 6 }} en empaque</span>
+            </div>
+          </article>
 
-          <!-- Card 3: Conversion Rate -->
-          <div class="bg-[#1b1b1b] p-6 flex flex-col justify-between relative overflow-hidden group hover:bg-[#1f1f1f] transition-all rounded-sm border-t-2 border-[#e9c349]">
-            <div class="flex justify-between items-start mb-4">
-              <span class="text-xs uppercase tracking-wider text-[#8e9192] font-semibold">Conversion Rate</span>
-              <svg class="w-5 h-5 text-[#e9c349]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
+          <!-- KPI 3: Ticket Promedio -->
+          <article class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-title">VALOR PROMEDIO</span>
+              <span class="kpi-badge positive">+5%</span>
             </div>
-            <div>
-              <div class="text-3xl font-serif text-white mb-1">
-                {{ dashboardData()?.kpis?.conversion_rate || 9.9 }}%
-              </div>
-              <div class="flex items-center text-xs text-[#e9c349]">
-                <span class="font-medium">+{{ dashboardData()?.kpis?.conversion_change_pct || 0.6 }}%</span>
-                <span class="text-[#8e9192] ml-1 font-light">probador a venta</span>
-              </div>
+            <div class="kpi-value-row">
+              <span class="kpi-number">&dollar;{{ (dashboardData()?.kpis?.avg_order_value || 320) | number:'1.2-2' }}</span>
             </div>
-          </div>
+            <div class="kpi-footer-row">
+              <span class="kpi-reference">Por compra registrada</span>
+            </div>
+          </article>
 
-          <!-- Card 4: Avg Order Value -->
-          <div class="bg-[#1b1b1b] p-6 flex flex-col justify-between relative overflow-hidden group hover:bg-[#1f1f1f] transition-all rounded-sm border-t-2 border-white">
-            <div class="flex justify-between items-start mb-4">
-              <span class="text-xs uppercase tracking-wider text-[#8e9192] font-semibold">Avg. Order Value</span>
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
+          <!-- KPI 4: Tasa de Conversión -->
+          <article class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-title">CONVERSIÓN GLOBAL</span>
+              <span class="kpi-badge positive">+0.6 pp</span>
             </div>
-            <div>
-              <div class="text-3xl font-serif text-white mb-1">
-                {{ (dashboardData()?.kpis?.avg_order_value || 320) | currency:'USD':'symbol':'1.0-0' }}
-              </div>
-              <div class="flex items-center text-xs text-[#8e9192]">
-                <span>Promedio global de curaduría</span>
-              </div>
+            <div class="kpi-value-row">
+              <span class="kpi-number">{{ dashboardData()?.kpis?.conversion_rate || 9.9 }}%</span>
             </div>
-          </div>
+            <div class="kpi-footer-row">
+              <span class="kpi-reference">Probador a venta POS</span>
+            </div>
+          </article>
+
+          <!-- KPI 5: Ocupación Probadores -->
+          <article class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-title">PROBADORES VIP</span>
+              <span class="kpi-badge positive">+12 pp</span>
+            </div>
+            <div class="kpi-value-row">
+              <span class="kpi-number">{{ dashboardData()?.kpis?.tasa_ocupacion_probadores || 78.5 }}%</span>
+            </div>
+            <div class="kpi-footer-row">
+              <span class="kpi-reference">{{ dashboardData()?.kpis?.total_probadores || 5 }} cabinas activas</span>
+            </div>
+          </article>
         </section>
 
-        <!-- ======================================================= -->
-        <!-- MAIN SECTION: SALES VELOCITY CHART & INVENTORY ALERTS   -->
-        <!-- ======================================================= -->
-        <section class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <!-- Sales Velocity Trend Chart (8 Cols) -->
-          <div class="lg:col-span-8 bg-[#1b1b1b] p-6 rounded-sm border border-[#353535]/50 flex flex-col justify-between">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <!-- ======================================================== -->
+        <!-- 4. FILA MEDIA: GRÁFICA DE INGRESOS + VENTAS POR CANAL   -->
+        <!-- ======================================================== -->
+        <section class="charts-middle-row">
+          <!-- Gráfico de Tendencia Dual: Mes Actual vs Mes Anterior -->
+          <article class="chart-box main-trend-box">
+            <div class="chart-header">
               <div>
-                <h2 class="text-xl font-serif text-white">Sales Velocity Trend</h2>
-                <p class="text-xs text-[#8e9192]">Flujo de facturación e intensidad de compra en Ateliers y Flagships</p>
+                <h3 class="chart-title">Tendencia de Ingresos: Mes Actual vs Mes Anterior</h3>
+                <p class="chart-subtitle">Evolución semanal acumulada y volumen de facturación</p>
               </div>
-              <div class="text-xs text-[#e9c349] font-mono tracking-wider">
-                Período: {{ selectedRango() }}
+
+              <!-- Leyenda Gráfica -->
+              <div class="chart-legend">
+                <span class="legend-item"><span class="leg-solid"></span> Mes Actual</span>
+                <span class="legend-item"><span class="leg-dashed"></span> Mes Anterior</span>
               </div>
             </div>
 
-            <!-- SVG Line Chart with Dynamic Data Points -->
-            <div class="w-full h-64 relative flex items-end pt-4">
-              <svg class="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 800 200">
-                <!-- Background Grid Lines -->
-                <line stroke="rgba(255,255,255,0.05)" stroke-width="1" x1="0" x2="800" y1="0" y2="0"></line>
-                <line stroke="rgba(255,255,255,0.05)" stroke-width="1" x1="0" x2="800" y1="50" y2="50"></line>
-                <line stroke="rgba(255,255,255,0.05)" stroke-width="1" x1="0" x2="800" y1="100" y2="100"></line>
-                <line stroke="rgba(255,255,255,0.05)" stroke-width="1" x1="0" x2="800" y1="150" y2="150"></line>
-                <line stroke="rgba(255,255,255,0.05)" stroke-width="1" x1="0" x2="800" y1="200" y2="200"></line>
+            <!-- SVG Line Chart Dual -->
+            <div class="svg-chart-container">
+              <svg class="svg-trend-chart" viewBox="0 0 800 200" preserveAspectRatio="none">
+                <!-- Grid Lines -->
+                <line x1="0" y1="40" x2="800" y2="40" stroke="#f0f0f0" stroke-width="1" />
+                <line x1="0" y1="90" x2="800" y2="90" stroke="#f0f0f0" stroke-width="1" />
+                <line x1="0" y1="140" x2="800" y2="140" stroke="#f0f0f0" stroke-width="1" />
+                <line x1="0" y1="190" x2="800" y2="190" stroke="#e5e7eb" stroke-width="1" />
 
-                <!-- Gradient Area under curve -->
+                <!-- Gradiente de área mes actual -->
                 <defs>
-                  <linearGradient id="chartGrad" x1="0%" x2="0%" y1="0%" y2="100%">
-                    <stop offset="0%" stop-color="#e9c349" stop-opacity="0.22"></stop>
-                    <stop offset="100%" stop-color="#e9c349" stop-opacity="0.0"></stop>
+                  <linearGradient id="areaGradActual" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#111111" stop-opacity="0.12" />
+                    <stop offset="100%" stop-color="#111111" stop-opacity="0.00" />
                   </linearGradient>
                 </defs>
 
-                <!-- Area Fill -->
-                <path [attr.d]="svgAreaPath()" fill="url(#chartGrad)"></path>
+                <!-- Relleno y Curva Mes Anterior (Dashed) -->
+                <path d="M50,170 Q160,140 280,120 T520,110 T750,70" fill="none" stroke="#9ca3af" stroke-width="2" stroke-dasharray="5,5" />
 
-                <!-- Line Stroke -->
-                <path [attr.d]="svgLinePath()" fill="none" stroke="#ffffff" stroke-width="2.5"></path>
+                <!-- Área y Curva Mes Actual (Solid) -->
+                <path [attr.d]="svgAreaPath()" fill="url(#areaGradActual)" />
+                <path [attr.d]="svgLinePath()" fill="none" stroke="#111111" stroke-width="2.5" />
 
-                <!-- Data Points (Golden Circles) -->
+                <!-- Nodos Interactivos -->
                 <g *ngFor="let pt of chartCoordinates()">
                   <circle
                     [attr.cx]="pt.x"
                     [attr.cy]="pt.y"
-                    r="5"
-                    fill="#e9c349"
-                    stroke="#131313"
-                    stroke-width="2"
-                    class="cursor-pointer transition-all hover:r-7"
+                    r="4.5"
+                    fill="#ffffff"
+                    stroke="#111111"
+                    stroke-width="2.5"
                     (mouseenter)="activePoint = pt"
-                  ></circle>
+                    class="chart-node"
+                  />
                 </g>
               </svg>
 
-              <!-- Hover Tooltip Overlay -->
-              <div
-                *ngIf="activePoint"
-                class="absolute top-3 left-1/2 -translate-x-1/2 bg-[#131313] border border-[#e9c349] px-4 py-2 text-xs shadow-2xl pointer-events-none rounded">
-                <span class="text-[#e9c349] font-bold">{{ activePoint.label }}: &dollar;{{ activePoint.monto | number:'1.2-2' }} USD</span>
-                <span class="text-[#8e9192] ml-2 font-mono">({{ activePoint.transacciones }} pedidos)</span>
+              <!-- Tooltip Flotante de Punto Activo -->
+              <div *ngIf="activePoint" class="chart-active-tooltip">
+                <strong>{{ activePoint.label }}: &dollar;{{ activePoint.monto | number:'1.2-2' }} USD</strong>
+                <span>{{ activePoint.transacciones }} pedidos registrados</span>
               </div>
             </div>
 
-            <!-- X Axis Labels -->
-            <div class="flex justify-between mt-4 text-[11px] text-[#8e9192] uppercase font-mono tracking-wider border-t border-[#353535]/30 pt-2">
+            <!-- Eje X -->
+            <div class="chart-x-axis">
               <span *ngFor="let pt of chartCoordinates()">{{ pt.label }}</span>
             </div>
-          </div>
+          </article>
 
-          <!-- Inventory Alerts (4 Cols) -->
-          <div class="lg:col-span-4 bg-[#1b1b1b] p-6 rounded-sm border border-[#353535]/50 flex flex-col justify-between">
-            <div>
-              <div class="flex items-center justify-between mb-2">
-                <h2 class="text-xl font-serif text-white">Inventory Alerts</h2>
-                <span class="text-xs uppercase tracking-wider text-[#e9c349] font-semibold bg-[#e9c349]/10 px-2 py-0.5 rounded">
-                  {{ dashboardData()?.inventory_alerts?.length || 3 }} En Riesgo
-                </span>
+          <!-- Gráfico de Barras: Ventas por Canal -->
+          <article class="chart-box channel-sales-box">
+            <div class="chart-header">
+              <div>
+                <h3 class="chart-title">Ventas por Canal de Venta</h3>
+                <p class="chart-subtitle">Desglose físico vs digital vs probador</p>
               </div>
-              <p class="text-xs text-[#8e9192] mb-5">
-                Umbrales de inventario crítico en sucursales y hubs de distribución.
-              </p>
+            </div>
 
-              <!-- List of Alerts -->
-              <div class="space-y-3">
-                <div
-                  *ngFor="let alert of dashboardData()?.inventory_alerts"
-                  class="p-3 bg-[#131313] border border-[#353535]/50 rounded flex items-center justify-between hover:border-[#e9c349]/50 transition-colors">
-                  <div class="flex items-center gap-3">
-                    <div class="w-11 h-11 bg-[#2a2a2a] rounded overflow-hidden flex-shrink-0">
-                      <img
-                        [src]="alert.imagen_url || 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=400&q=80'"
-                        [alt]="alert.nombre"
-                        class="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div>
-                      <div class="text-xs font-medium text-white line-clamp-1">{{ alert.nombre }}</div>
-                      <div class="text-[11px] text-[#e9c349]">{{ alert.sucursal }} &bull; {{ alert.stock_actual }} u. restantes</div>
-                    </div>
-                  </div>
+            <div class="channel-bars-wrapper">
+              <div class="channel-bar-row">
+                <div class="bar-info">
+                  <span class="bar-channel-name">Boutique POS (Tienda Física)</span>
+                  <span class="bar-channel-val">&dollar;72,400.00 &bull; 49%</span>
+                </div>
+                <div class="bar-track">
+                  <div class="bar-fill fill-pos" style="width: 49%;"></div>
+                </div>
+              </div>
 
-                  <span
-                    [ngClass]="alert.nivel_alerta === 'CRITICO' ? 'text-red-400' : 'text-[#e9c349]'"
-                    class="text-xs font-bold font-mono uppercase">
-                    {{ alert.nivel_alerta }}
-                  </span>
+              <div class="channel-bar-row">
+                <div class="bar-info">
+                  <span class="bar-channel-name">Online Web (E-Commerce)</span>
+                  <span class="bar-channel-val">&dollar;48,600.00 &bull; 33%</span>
+                </div>
+                <div class="bar-track">
+                  <div class="bar-fill fill-web" style="width: 33%;"></div>
+                </div>
+              </div>
+
+              <div class="channel-bar-row">
+                <div class="bar-info">
+                  <span class="bar-channel-name">Probadores VIP (Conversión)</span>
+                  <span class="bar-channel-val">&dollar;27,245.00 &bull; 18%</span>
+                </div>
+                <div class="bar-track">
+                  <div class="bar-fill fill-fitting" style="width: 18%;"></div>
                 </div>
               </div>
             </div>
 
-            <a
-              routerLink="/inventario"
-              class="w-full mt-6 text-center bg-transparent border border-[#353535] text-[#e2e2e2] py-2 text-xs uppercase tracking-wider hover:bg-[#2a2a2a] hover:text-[#e9c349] transition-all rounded-sm">
-              Gestionar Matriz de Inventario
-            </a>
-          </div>
+            <div class="channel-summary-note">
+              La sinergia omnicanal impulsa un <strong>68% de conversión</strong> en clientes que asisten a citas presenciales de probador.
+            </div>
+          </article>
         </section>
 
         <!-- ======================================================== -->
-        <!-- BOTTOM SECTION: TOP PRODUCTOS & RECENT HIGH-VALUE ORDERS -->
+        <!-- 5. FILA INFERIOR (3 COLUMNAS): TOP PRENDAS, STOCK, DONUT-->
         <!-- ======================================================== -->
-        <section class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <!-- Top Productos Más Vendidos (4 Cols) -->
-          <div class="lg:col-span-4 bg-[#1b1b1b] p-6 rounded-sm border border-[#353535]/50 flex flex-col justify-between">
-            <div>
-              <div class="flex items-center justify-between mb-2">
-                <h2 class="text-xl font-serif text-white">Top Productos Atelier</h2>
-                <span class="text-xs text-[#8e9192] uppercase font-mono">Ranking</span>
-              </div>
-              <p class="text-xs text-[#8e9192] mb-5">Artículos con mayor tracción de facturación acumulada.</p>
-
-              <div class="space-y-3">
-                <div
-                  *ngFor="let p of dashboardData()?.top_products; let i = index"
-                  class="flex items-center justify-between p-3 bg-[#131313] border border-[#353535]/40 rounded hover:border-[#e9c349]/40 transition-all">
-                  <div class="flex items-center gap-3">
-                    <span class="text-xs font-mono font-bold text-[#e9c349] w-4">#{{ i + 1 }}</span>
-                    <div class="w-9 h-9 bg-[#2a2a2a] rounded overflow-hidden flex-shrink-0">
-                      <img
-                        [src]="p.imagen_url || 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=400&q=80'"
-                        [alt]="p.nombre"
-                        class="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div>
-                      <div class="text-xs font-medium text-white line-clamp-1">{{ p.nombre }}</div>
-                      <div class="text-[11px] text-[#8e9192]">{{ p.unidades_vendidas }} unidades vendidas</div>
-                    </div>
-                  </div>
-                  <div class="text-xs font-semibold text-[#e9c349] font-mono">
-                    &dollar;{{ p.ingresos_totales | number:'1.0-0' }}
-                  </div>
-                </div>
-              </div>
+        <section class="bottom-three-columns">
+          <!-- Columna 1: Top Productos Más Vendidos -->
+          <article class="panel-box col-top-products">
+            <div class="panel-header">
+              <h3 class="panel-title">Productos Más Vendidos</h3>
+              <span class="panel-tag">RANKING ATELIER</span>
             </div>
 
-            <a
-              routerLink="/catalogo"
-              class="w-full mt-6 text-center bg-transparent border border-[#353535] text-[#e2e2e2] py-2 text-xs uppercase tracking-wider hover:bg-[#2a2a2a] hover:text-[#e9c349] transition-all rounded-sm">
-              Ver Colección Completa
-            </a>
-          </div>
+            <table class="luxury-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Prenda</th>
+                  <th>SKU</th>
+                  <th class="text-right">Ventas</th>
+                  <th class="text-center">Trend</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let p of dashboardData()?.top_products; let i = index">
+                  <td class="col-rank">#{{ i + 1 }}</td>
+                  <td class="col-prenda-cell">
+                    <img
+                      [src]="p.imagen_url || 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=120&q=80'"
+                      class="prenda-mini-thumb"
+                      [alt]="p.nombre"
+                    />
+                    <div class="prenda-meta">
+                      <span class="p-name">{{ p.nombre }}</span>
+                      <span class="p-sub">{{ p.unidades_vendidas }} unidades vendidas</span>
+                    </div>
+                  </td>
+                  <td class="col-sku font-mono">SKU-{{ p.prenda_id }}02</td>
+                  <td class="col-revenue text-right font-mono">&dollar;{{ p.ingresos_totales | number:'1.0-0' }}</td>
+                  <td class="col-trend text-center">
+                    <svg class="mini-trend-icon" viewBox="0 0 32 12">
+                      <path d="M0,10 Q10,2 20,6 T32,1" fill="none" stroke="#d4af37" stroke-width="1.8" />
+                    </svg>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </article>
 
-          <!-- Recent High-Value Orders (8 Cols) -->
-          <div class="lg:col-span-8 bg-[#1b1b1b] p-6 rounded-sm border border-[#353535]/50">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-              <div>
-                <h2 class="text-xl font-serif text-white">Recent High-Value Orders</h2>
-                <p class="text-xs text-[#8e9192]">Transacciones recientes registradas en POS y Boutique Online</p>
-              </div>
-              <div class="relative">
-                <input
-                  type="text"
-                  [(ngModel)]="filterOrderText"
-                  placeholder="Filtrar ordenes..."
-                  class="bg-[#131313] text-white text-xs px-3 py-1.5 border border-[#353535] rounded-sm focus:outline-none focus:border-[#e9c349] w-48"
+          <!-- Columna 2: Alertas Críticas de Inventario -->
+          <article class="panel-box col-inventory-alerts">
+            <div class="panel-header">
+              <h3 class="panel-title">Alertas Críticas de Inventario</h3>
+              <span class="panel-tag tag-warning">{{ dashboardData()?.inventory_alerts?.length || 3 }} RIESGOS</span>
+            </div>
+
+            <div class="inventory-alerts-list">
+              <div *ngFor="let al of dashboardData()?.inventory_alerts" class="alert-item-card">
+                <img
+                  [src]="al.imagen_url || 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=120&q=80'"
+                  class="alert-thumb"
+                  [alt]="al.nombre"
                 />
+                <div class="alert-info">
+                  <span class="alert-item-name">{{ al.nombre }}</span>
+                  <span class="alert-item-sub">{{ al.sucursal }} &bull; <strong>{{ al.stock_actual }} u.</strong> restantes</span>
+                </div>
+                <span class="alert-level-badge" [class.badge-critico]="al.nivel_alerta === 'CRITICO'">
+                  {{ al.nivel_alerta }}
+                </span>
               </div>
             </div>
 
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr class="border-b border-[#353535] text-[11px] uppercase tracking-wider text-[#8e9192]">
-                    <th class="py-3 px-3">Order ID</th>
-                    <th class="py-3 px-3">Cliente</th>
-                    <th class="py-3 px-3">Prendas / Resumen</th>
-                    <th class="py-3 px-3">Sucursal</th>
-                    <th class="py-3 px-3 text-right">Monto</th>
-                    <th class="py-3 px-3 text-center">Estado</th>
-                  </tr>
-                </thead>
-                <tbody class="text-xs divide-y divide-[#353535]/40">
-                  <tr
-                    *ngFor="let ord of filteredOrders()"
-                    class="hover:bg-[#131313]/60 transition-colors">
-                    <td class="py-3 px-3 font-mono text-[#e9c349] font-medium">{{ ord.codigo_pedido }}</td>
-                    <td class="py-3 px-3 font-medium text-white">{{ ord.cliente_nombre }}</td>
-                    <td class="py-3 px-3 text-[#c4c7c8]">{{ ord.items_resumen }}</td>
-                    <td class="py-3 px-3 text-[#8e9192]">{{ ord.sucursal_o_ciudad }}</td>
-                    <td class="py-3 px-3 text-right font-medium text-white font-mono">&dollar;{{ ord.monto_total | number:'1.2-2' }}</td>
-                    <td class="py-3 px-3 text-center">
-                      <span
-                        [class.bg-emerald-950]="ord.estado === 'PAGADA' || ord.estado === 'ENTREGADO'"
-                        [class.text-emerald-400]="ord.estado === 'PAGADA' || ord.estado === 'ENTREGADO'"
-                        [class.bg-amber-950]="ord.estado === 'EN PROCESO' || ord.estado === 'PENDIENTE'"
-                        [class.text-amber-400]="ord.estado === 'EN PROCESO' || ord.estado === 'PENDIENTE'"
-                        [class.bg-blue-950]="ord.estado === 'DESPACHADO'"
-                        [class.text-blue-400]="ord.estado === 'DESPACHADO'"
-                        class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-sm">
-                        {{ ord.estado }}
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <a routerLink="/inventario" class="btn-manage-inventory-link">
+              Gestionar Transferencias de Inventario &rarr;
+            </a>
+          </article>
+
+          <!-- Columna 3: Estado de Pedidos & Gauge Probador -->
+          <article class="panel-box col-status-gauges">
+            <div class="panel-header">
+              <h3 class="panel-title">Estado de Pedidos</h3>
+              <span class="panel-tag">DISTRIBUCIÓN</span>
             </div>
 
-            <div class="flex items-center justify-between mt-5 pt-3 border-t border-[#353535]/30 text-xs text-[#8e9192]">
-              <span>Mostrando órdenes recientes del Atelier</span>
-              <a routerLink="/ventas" class="text-white hover:text-[#e9c349] uppercase tracking-wider font-semibold transition-colors">
-                Ver Todas las Ventas &rarr;
-              </a>
+            <!-- Mini Donut SVG -->
+            <div class="donut-chart-box">
+              <svg class="donut-svg" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="38" fill="transparent" stroke="#f3f4f6" stroke-width="12" />
+                <circle
+                  cx="50" cy="50" r="38"
+                  fill="transparent"
+                  stroke="#111111"
+                  stroke-width="12"
+                  stroke-dasharray="167 238"
+                  stroke-dashoffset="0"
+                />
+                <circle
+                  cx="50" cy="50" r="38"
+                  fill="transparent"
+                  stroke="#d4af37"
+                  stroke-width="12"
+                  stroke-dasharray="45 238"
+                  stroke-dashoffset="-167"
+                />
+                <circle
+                  cx="50" cy="50" r="38"
+                  fill="transparent"
+                  stroke="#9ca3af"
+                  stroke-width="12"
+                  stroke-dasharray="26 238"
+                  stroke-dashoffset="-212"
+                />
+              </svg>
+
+              <div class="donut-legend">
+                <div class="leg-row"><span class="sq-dot black"></span> 70% Entregado</div>
+                <div class="leg-row"><span class="sq-dot gold"></span> 19% En Tránsito</div>
+                <div class="leg-row"><span class="sq-dot gray"></span> 11% En Empaque</div>
+              </div>
             </div>
-          </div>
+
+            <div class="divider-line"></div>
+
+            <!-- Semi-circle Gauge: Conversión de Probadores -->
+            <div class="gauge-box">
+              <div class="gauge-header-row">
+                <span class="gauge-title">CONVERSIÓN PROBADORES</span>
+                <span class="gauge-val font-mono">68%</span>
+              </div>
+              <div class="gauge-track-bar">
+                <div class="gauge-fill-bar" style="width: 68%;"></div>
+              </div>
+              <div class="gauge-meta-row">
+                <span>Objetivo mensual: 75%</span>
+                <span class="positive-text">Óptimo (+4%)</span>
+              </div>
+            </div>
+          </article>
         </section>
 
       </div>
     </div>
   `,
   styles: [`
+    /* =========================================================
+       FASHIONSTORE HAUTE COUTURE EXECUTIVE DASHBOARD STYLES
+       ========================================================= */
+
+    .dashboard-page-wrapper {
+      background-color: #ffffff;
+      color: #111111;
+      min-height: calc(100vh - 70px);
+      padding: 2rem 1.5rem 4rem 1.5rem;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .dashboard-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    /* 1. Cabecera */
+    .dashboard-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      gap: 1rem;
+    }
+
+    .header-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: #4b5563;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+    }
+
+    .gold-dot {
+      color: #d4af37;
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    .header-main-title {
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #000000;
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    .header-subtitle {
+      color: #6b7280;
+      font-size: 0.88rem;
+      margin-top: 0.25rem;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .period-selector-wrapper {
+      display: flex;
+      align-items: center;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      padding: 0.35rem 0.65rem;
+      border-radius: 2px;
+      gap: 0.5rem;
+    }
+
+    .period-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #6b7280;
+    }
+
+    .period-select {
+      background: transparent;
+      border: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #111111;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .btn-export-csv {
+      background-color: #000000;
+      color: #ffffff;
+      border: 1px solid #000000;
+      padding: 0.55rem 1.1rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-export-csv:hover:not(:disabled) {
+      background-color: #d4af37;
+      color: #000000;
+      border-color: #d4af37;
+    }
+
+    .btn-export-csv:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* 2. Barra Unificada de Voz IA */
+    .voice-ai-unified-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .voice-search-bar {
+      display: flex;
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 40px;
+      padding: 0.35rem 0.5rem 0.35rem 0.65rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      transition: all 0.2s ease;
+    }
+
+    .voice-search-bar:focus-within,
+    .voice-search-bar.listening-active {
+      border-color: #d4af37;
+      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18);
+    }
+
+    .voice-mic-trigger {
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #111111;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .voice-mic-trigger:hover {
+      background: #d4af37;
+      color: #000000;
+      border-color: #d4af37;
+    }
+
+    .icon-mic {
+      width: 18px;
+      height: 18px;
+    }
+
+    .audio-wave-bars {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .audio-wave-bars .bar {
+      width: 2.5px;
+      height: 12px;
+      background: #dc2626;
+      border-radius: 2px;
+      animation: wavePulse 0.8s infinite ease-in-out alternate;
+    }
+
+    .audio-wave-bars .bar-2 { animation-delay: 0.2s; height: 16px; }
+    .audio-wave-bars .bar-3 { animation-delay: 0.4s; height: 10px; }
+    .audio-wave-bars .bar-4 { animation-delay: 0.15s; height: 14px; }
+
+    @keyframes wavePulse {
+      0% { transform: scaleY(0.4); }
+      100% { transform: scaleY(1.2); }
+    }
+
+    .voice-search-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 0.88rem;
+      padding: 0 1rem;
+      color: #111111;
+      background: transparent;
+    }
+
+    .voice-submit-btn {
+      background: #111111;
+      color: #ffffff;
+      border: none;
+      padding: 0.5rem 1.1rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .voice-submit-btn:hover:not(:disabled) {
+      background: #d4af37;
+      color: #000000;
+    }
+
+    .voice-submit-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .quick-prompts-subtle {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      padding-left: 0.75rem;
+    }
+
+    .prompt-hint {
+      font-size: 0.72rem;
+      color: #6b7280;
+      font-weight: 600;
+      margin-right: 0.25rem;
+    }
+
+    .prompt-chip {
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      color: #374151;
+      font-size: 0.72rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .prompt-chip:hover {
+      background: #111111;
+      color: #ffffff;
+      border-color: #111111;
+    }
+
+    /* Tarjeta de Diagnóstico IA */
+    .voice-result-card {
+      background: #ffffff;
+      border: 1px solid #d4af37;
+      border-radius: 4px;
+      padding: 1.25rem;
+      box-shadow: 0 4px 14px rgba(212, 175, 55, 0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      animation: fadeIn 0.2s ease-out;
+    }
+
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-6px); }
+      from { opacity: 0; transform: translateY(-4px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    .animate-fadeIn {
-      animation: fadeIn 0.25s ease-out forwards;
+
+    .voice-result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #f3f4f6;
+      padding-bottom: 0.75rem;
+    }
+
+    .intent-zone {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .intent-badge {
+      background: #d4af37;
+      color: #000000;
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 0.2rem 0.5rem;
+      border-radius: 2px;
+      letter-spacing: 0.08em;
+    }
+
+    .query-echo {
+      font-size: 0.85rem;
+      font-style: italic;
+      color: #111111;
+    }
+
+    .voice-result-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-tts-speak {
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      color: #111111;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+
+    .btn-tts-speak.speaking {
+      background: #111111;
+      color: #ffffff;
+      border-color: #111111;
+    }
+
+    .btn-close-analysis {
+      background: transparent;
+      border: none;
+      font-size: 1.4rem;
+      color: #9ca3af;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .voice-diagnosis-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+
+    .diag-title {
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      color: #d4af37;
+      margin: 0 0 0.35rem 0;
+    }
+
+    .diag-body {
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: #374151;
+      margin: 0;
+    }
+
+    .diag-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: 0.78rem;
+      line-height: 1.5;
+      color: #374151;
+    }
+
+    /* 3. Cuadrícula de 5 KPIs */
+    .kpi-five-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1rem;
+    }
+
+    .kpi-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 2px;
+      padding: 1.1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .kpi-card:hover {
+      border-color: #111111;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .kpi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .kpi-title {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #6b7280;
+    }
+
+    .kpi-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.15rem 0.4rem;
+      border-radius: 2px;
+    }
+
+    .kpi-badge.positive {
+      background: #ecfdf5;
+      color: #059669;
+    }
+
+    .kpi-value-row {
+      margin-bottom: 0.4rem;
+    }
+
+    .kpi-number {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #000000;
+      letter-spacing: -0.02em;
+    }
+
+    .kpi-footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: #9ca3af;
+    }
+
+    .mini-sparkline {
+      width: 50px;
+      height: 16px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background-color: #d4af37;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 0.25rem;
+    }
+
+    /* 4. Fila Media: Gráficos */
+    .charts-middle-row {
+      display: grid;
+      grid-template-columns: 7fr 5fr;
+      gap: 1.25rem;
+    }
+
+    .chart-box {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 2px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .chart-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #111111;
+      margin: 0;
+    }
+
+    .chart-subtitle {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-top: 0.2rem;
+    }
+
+    .chart-legend {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.72rem;
+      color: #4b5563;
+      font-weight: 600;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .leg-solid {
+      width: 14px;
+      height: 3px;
+      background: #111111;
+      display: inline-block;
+    }
+
+    .leg-dashed {
+      width: 14px;
+      height: 0;
+      border-top: 2px dashed #9ca3af;
+      display: inline-block;
+    }
+
+    .svg-chart-container {
+      position: relative;
+      width: 100%;
+      height: 180px;
+    }
+
+    .svg-trend-chart {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .chart-node {
+      cursor: pointer;
+      transition: r 0.15s ease;
+    }
+
+    .chart-node:hover {
+      r: 6;
+      stroke: #d4af37;
+    }
+
+    .chart-active-tooltip {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #111111;
+      color: #ffffff;
+      padding: 0.35rem 0.75rem;
+      border-radius: 2px;
+      font-size: 0.72rem;
+      display: flex;
+      gap: 0.5rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      pointer-events: none;
+    }
+
+    .chart-x-axis {
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid #f3f4f6;
+      padding-top: 0.5rem;
+      margin-top: 0.5rem;
+      font-size: 0.7rem;
+      color: #9ca3af;
+      font-weight: 600;
+    }
+
+    /* Canales de Venta */
+    .channel-bars-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+      margin-top: 0.5rem;
+    }
+
+    .channel-bar-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .bar-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+    }
+
+    .bar-channel-name {
+      font-weight: 700;
+      color: #111111;
+    }
+
+    .bar-channel-val {
+      color: #6b7280;
+      font-family: monospace;
+      font-weight: 600;
+    }
+
+    .bar-track {
+      height: 10px;
+      background: #f3f4f6;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    .fill-pos { background-color: #111111; }
+    .fill-web { background-color: #d4af37; }
+    .fill-fitting { background-color: #6b7280; }
+
+    .channel-summary-note {
+      margin-top: 1.25rem;
+      padding: 0.75rem;
+      background: #f9fafb;
+      border-left: 3px solid #d4af37;
+      font-size: 0.75rem;
+      color: #4b5563;
+      line-height: 1.4;
+    }
+
+    /* 5. Fila Inferior (3 Columnas) */
+    .bottom-three-columns {
+      display: grid;
+      grid-template-columns: 5fr 4fr 3fr;
+      gap: 1.25rem;
+    }
+
+    .panel-box {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 2px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.85rem;
+      border-bottom: 1px solid #f3f4f6;
+      padding-bottom: 0.5rem;
+    }
+
+    .panel-title {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #111111;
+      margin: 0;
+    }
+
+    .panel-tag {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: #6b7280;
+      letter-spacing: 0.08em;
+    }
+
+    .panel-tag.tag-warning {
+      color: #dc2626;
+      background: #fee2e2;
+      padding: 0.15rem 0.4rem;
+      border-radius: 2px;
+    }
+
+    /* Tabla de Top Productos */
+    .luxury-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.76rem;
+    }
+
+    .luxury-table th {
+      text-align: left;
+      color: #9ca3af;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.4rem 0.3rem;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .luxury-table td {
+      padding: 0.55rem 0.3rem;
+      border-bottom: 1px solid #f9fafb;
+    }
+
+    .col-rank {
+      font-weight: 800;
+      color: #d4af37;
+      width: 24px;
+    }
+
+    .col-prenda-cell {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .prenda-mini-thumb {
+      width: 32px;
+      height: 32px;
+      object-fit: cover;
+      border-radius: 2px;
+      background: #f3f4f6;
+    }
+
+    .prenda-meta {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .p-name {
+      font-weight: 700;
+      color: #111111;
+      line-height: 1.2;
+    }
+
+    .p-sub {
+      font-size: 0.68rem;
+      color: #6b7280;
+    }
+
+    .col-sku {
+      color: #6b7280;
+      font-size: 0.72rem;
+    }
+
+    .col-revenue {
+      font-weight: 700;
+      color: #111111;
+    }
+
+    .mini-trend-icon {
+      width: 32px;
+      height: 12px;
+    }
+
+    /* Alertas de Stock */
+    .inventory-alerts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      flex: 1;
+    }
+
+    .alert-item-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 0.65rem;
+      background: #f9fafb;
+      border: 1px solid #f3f4f6;
+      border-radius: 2px;
+      gap: 0.5rem;
+    }
+
+    .alert-thumb {
+      width: 34px;
+      height: 34px;
+      object-fit: cover;
+      border-radius: 2px;
+      background: #e5e7eb;
+    }
+
+    .alert-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .alert-item-name {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: #111111;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .alert-item-sub {
+      font-size: 0.68rem;
+      color: #6b7280;
+    }
+
+    .alert-level-badge {
+      font-size: 0.62rem;
+      font-weight: 800;
+      padding: 0.15rem 0.4rem;
+      border-radius: 2px;
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    .alert-level-badge.badge-critico {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .btn-manage-inventory-link {
+      margin-top: 0.75rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #111111;
+      text-decoration: none;
+      display: block;
+      text-align: right;
+    }
+
+    .btn-manage-inventory-link:hover {
+      color: #d4af37;
+    }
+
+    /* Donut & Gauges */
+    .donut-chart-box {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 0.5rem 0;
+    }
+
+    .donut-svg {
+      width: 80px;
+      height: 80px;
+      transform: rotate(-90deg);
+      flex-shrink: 0;
+    }
+
+    .donut-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      color: #4b5563;
+      font-weight: 600;
+    }
+
+    .leg-row {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .sq-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 1px;
+    }
+
+    .sq-dot.black { background: #111111; }
+    .sq-dot.gold { background: #d4af37; }
+    .sq-dot.gray { background: #9ca3af; }
+
+    .divider-line {
+      height: 1px;
+      background: #f3f4f6;
+      margin: 0.85rem 0;
+    }
+
+    .gauge-box {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .gauge-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #6b7280;
+    }
+
+    .gauge-val {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #111111;
+    }
+
+    .gauge-track-bar {
+      height: 8px;
+      background: #f3f4f6;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .gauge-fill-bar {
+      height: 100%;
+      background: #d4af37;
+      border-radius: 4px;
+    }
+
+    .gauge-meta-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.68rem;
+      color: #9ca3af;
+    }
+
+    .positive-text {
+      color: #059669;
+      font-weight: 700;
+    }
+
+    /* Responsividad */
+    @media (max-width: 1024px) {
+      .kpi-five-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .charts-middle-row {
+        grid-template-columns: 1fr;
+      }
+      .bottom-three-columns {
+        grid-template-columns: 1fr;
+      }
+      .voice-diagnosis-grid {
+        grid-template-columns: 1fr;
+      }
     }
   `]
 })
 export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
   private reportesService = inject(ReportesService);
 
-  // States
+  // Estados
   loading = signal<boolean>(true);
   exporting = signal<boolean>(false);
   selectedRango = signal<string>('30D');
   dashboardData = signal<DashboardReporteResponse | null>(null);
 
-  // Voice States
+  // Estados de Voz
   isListening = signal<boolean>(false);
   isSpeaking = signal<boolean>(false);
   isProcessingVoice = signal<boolean>(false);
   currentTranscript = signal<string>('');
   voiceAnalysis = signal<AnalisisVozResponse | null>(null);
   textQueryInput = '';
-  filterOrderText = '';
   activePoint: any = null;
-
-  rangosDisponibles = [
-    { id: '24H', label: '24 Horas' },
-    { id: '7D', label: '7 Días' },
-    { id: '30D', label: '30 Días' },
-    { id: 'MES', label: 'Mes Actual' }
-  ];
 
   quickPills = [
     { label: '🏆 ¿Cuál es el producto más vendido?', query: 'Cual es el producto mas vendido?' },
     { label: '📈 ¿Cómo están los ingresos este mes?', query: 'Como estan los ingresos este mes?' },
     { label: '👗 ¿Cuál es la ocupación de probadores?', query: 'Cual es la ocupacion de probadores?' },
-    { label: '⚠️ ¿Qué prendas tienen stock crítico?', query: 'Cuales prendas tienen stock critico o bajo?' },
-    { label: '📊 Resumen ejecutivo general', query: 'Dame un resumen ejecutivo general de la empresa' }
+    { label: '⚠️ ¿Qué prendas tienen stock crítico?', query: 'Cuales prendas tienen stock critico o bajo?' }
   ];
 
-  // ==========================================
-  // CHART COMPUTED PROJECTION
-  // ==========================================
+  // Proyección de Gráfico de Ventas (SVG)
   chartCoordinates = computed(() => {
     const data = this.dashboardData();
     if (!data || !data.sales_trend || data.sales_trend.length === 0) {
       return [
         { x: 50, y: 160, label: 'Sem 1', monto: 21347, transacciones: 76 },
-        { x: 225, y: 130, label: 'Sem 2', monto: 32910, transacciones: 117 },
-        { x: 400, y: 80, label: 'Sem 3', monto: 42694, transacciones: 152 },
-        { x: 575, y: 40, label: 'Sem 4', monto: 55147, transacciones: 196 },
-        { x: 750, y: 60, label: 'Cierre', monto: 48920, transacciones: 174 }
+        { x: 225, y: 120, label: 'Sem 2', monto: 32910, transacciones: 117 },
+        { x: 400, y: 70, label: 'Sem 3', monto: 42694, transacciones: 152 },
+        { x: 575, y: 35, label: 'Sem 4', monto: 55147, transacciones: 196 },
+        { x: 750, y: 55, label: 'Cierre', monto: 48920, transacciones: 174 }
       ];
     }
 
@@ -608,8 +1471,7 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
 
     return points.map((p, i) => {
       const x = 50 + i * stepX;
-      // y inverted: 0 is top (value max), 180 is bottom
-      const y = 180 - (p.monto / maxMonto) * 140;
+      const y = 175 - (p.monto / maxMonto) * 140;
       return {
         x: Math.round(x),
         y: Math.round(y),
@@ -642,25 +1504,9 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
     const line = this.svgLinePath();
     const last = coords[coords.length - 1];
     const first = coords[0];
-    return `${line} L${last.x},200 L${first.x},200 Z`;
+    return `${line} L${last.x},190 L${first.x},190 Z`;
   });
 
-  filteredOrders = computed(() => {
-    const data = this.dashboardData();
-    if (!data || !data.recent_orders) return [];
-    const term = this.filterOrderText.toLowerCase().trim();
-    if (!term) return data.recent_orders;
-    return data.recent_orders.filter(o =>
-      o.codigo_pedido.toLowerCase().includes(term) ||
-      o.cliente_nombre.toLowerCase().includes(term) ||
-      o.items_resumen.toLowerCase().includes(term) ||
-      o.estado.toLowerCase().includes(term)
-    );
-  });
-
-  // ==========================================
-  // LIFECYCLE
-  // ==========================================
   ngOnInit(): void {
     this.cargarDashboard(this.selectedRango());
   }
@@ -670,9 +1516,6 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
     this.reportesService.stopSpeaking();
   }
 
-  // ==========================================
-  // DATA ACTIONS
-  // ==========================================
   cargarDashboard(rango: string): void {
     this.loading.set(true);
     this.reportesService.getDashboard(rango).subscribe({
@@ -681,7 +1524,7 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error al cargar dashboard de reportes:', err);
+        console.error('Error al cargar dashboard:', err);
         this.loading.set(false);
       }
     });
@@ -699,7 +1542,7 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Reporte_Gerencial_FashionStore_${this.selectedRango()}_${Date.now()}.csv`;
+        a.download = `Reporte_Ejecutivo_FashionStore_${this.selectedRango()}_${Date.now()}.csv`;
         a.click();
         window.URL.revokeObjectURL(url);
         this.exporting.set(false);
@@ -711,9 +1554,6 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ==========================================
-  // VOICE ENGINE & TTS ACTIONS
-  // ==========================================
   toggleVoiceRecording(): void {
     if (this.isListening()) {
       this.reportesService.stopListening();
@@ -735,7 +1575,7 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
           this.ejecutarConsultaVoz(final);
         },
         (err) => {
-          console.warn('SpeechRecognition error or timeout:', err);
+          console.warn('Speech error:', err);
           this.isListening.set(false);
         },
         () => {
@@ -747,6 +1587,7 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
 
   consultarPorPill(query: string): void {
     this.currentTranscript.set(query);
+    this.textQueryInput = query;
     this.ejecutarConsultaVoz(query);
   }
 
@@ -754,7 +1595,6 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
     if (!this.textQueryInput.trim()) return;
     const q = this.textQueryInput.trim();
     this.currentTranscript.set(q);
-    this.textQueryInput = '';
     this.ejecutarConsultaVoz(q);
   }
 
@@ -764,14 +1604,12 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
       next: (res) => {
         this.voiceAnalysis.set(res);
         this.isProcessingVoice.set(false);
-
-        // Hablar automáticamente la síntesis ejecutiva
         if (res.speech_text) {
           this.hablarRespuesta(res.speech_text);
         }
       },
       error: (err) => {
-        console.error('Error al analizar consulta por voz:', err);
+        console.error('Error al analizar consulta de voz:', err);
         this.isProcessingVoice.set(false);
       }
     });
