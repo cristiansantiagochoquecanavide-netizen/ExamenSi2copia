@@ -2301,26 +2301,36 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
     return arcLength * (1 - pct / 100);
   });
 
-  // Escala cuantitativa dinámica para el eje Y
+  // Escala cuantitativa dinámica y lógica para el eje Y según la granularidad
   maxTrendVal = computed(() => {
+    const gran = this.selectedGranularidad();
     const d = this.dashboardData();
     const points: ComparativeTrendPoint[] = (d && d.comparative_trend && d.comparative_trend.length > 0)
       ? d.comparative_trend
       : [];
-    if (points.length === 0) return 25000;
-    const peak = Math.max(...points.map(p => Math.max(p.monto_actual, p.monto_anterior)), 1000);
-    if (peak <= 5000) return Math.ceil(peak / 1000) * 1000;
-    if (peak <= 20000) return Math.ceil(peak / 2500) * 2500;
-    if (peak <= 50000) return Math.ceil(peak / 5000) * 5000;
-    return Math.ceil(peak / 10000) * 10000;
+    const peak = points.length > 0
+      ? Math.max(...points.map(p => Math.max(p.monto_actual, p.monto_anterior)), 1000)
+      : 1000;
+
+    if (gran === 'DIA') {
+      // Escala diaria hasta $10,000 (o superior en múltiplos de $2.5k si el pico lo supera)
+      return peak > 10000 ? Math.ceil(peak / 2500) * 2500 : 10000;
+    } else if (gran === 'SEMANA') {
+      // Escala semanal hasta $80,000 (o superior en múltiplos de $20k si el pico lo supera)
+      return peak > 80000 ? Math.ceil(peak / 20000) * 20000 : 80000;
+    } else {
+      // Escala mensual hasta $200,000 (o superior en múltiplos de $50k si el pico lo supera)
+      return peak > 200000 ? Math.ceil(peak / 50000) * 50000 : 200000;
+    }
   });
 
   trendYAxisTicks = computed(() => {
     const maxVal = this.maxTrendVal();
     return [
       { label: this.formatCurrencyShort(maxVal), y: 30 },
-      { label: this.formatCurrencyShort(Math.round(maxVal * 0.66)), y: 90 },
-      { label: this.formatCurrencyShort(Math.round(maxVal * 0.33)), y: 150 },
+      { label: this.formatCurrencyShort(Math.round(maxVal * 0.75)), y: 75 },
+      { label: this.formatCurrencyShort(Math.round(maxVal * 0.50)), y: 120 },
+      { label: this.formatCurrencyShort(Math.round(maxVal * 0.25)), y: 165 },
       { label: '$0', y: 210 }
     ];
   });
@@ -2589,8 +2599,12 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
   }
 
   formatCurrencyShort(val: number): string {
+    if (val === 0) return '$0';
     if (val >= 1000000) return `$${(val / 1000000).toFixed(1)}M`;
-    if (val >= 1000) return `$${Math.round(val / 1000)}k`;
+    if (val >= 1000) {
+      const kVal = val / 1000;
+      return kVal % 1 === 0 ? `$${kVal}k` : `$${kVal.toFixed(1)}k`;
+    }
     return `$${Math.round(val)}`;
   }
 
