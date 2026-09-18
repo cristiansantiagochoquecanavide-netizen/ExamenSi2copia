@@ -473,6 +473,22 @@ class _UsuariosScreenState extends State<UsuariosScreen> {
         const SizedBox(height: 24),
 
         // Navigation & Actions
+        ElevatedButton.icon(
+          onPressed: () => context.go('/reportes'),
+          icon: const Icon(Icons.bar_chart, color: Color(0xFFE9C349)),
+          label: const Text(
+            '📊 REPORTES & DASHBOARD (IA)',
+            style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1.2),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF131313),
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            side: const BorderSide(color: Color(0xFFE9C349)),
+          ),
+        ),
+        const SizedBox(height: 12),
         ElevatedButton(
           onPressed: () => context.go('/catalogo'),
           style: ElevatedButton.styleFrom(
