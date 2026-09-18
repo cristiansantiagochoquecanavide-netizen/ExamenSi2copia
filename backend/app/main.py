@@ -9,6 +9,7 @@ from app.domains.inventario.routers import router as inventario_router
 from app.domains.reservas.routers import router as reservas_router
 from app.domains.ventas.routers import router as ventas_router
 from app.domains.ia_asistente.routers import router as ia_asistente_router
+from app.domains.notificaciones.routers import router as notificaciones_router
 
 
 @asynccontextmanager
@@ -44,6 +45,7 @@ app.include_router(inventario_router, prefix=settings.API_V1_STR)
 app.include_router(reservas_router, prefix=settings.API_V1_STR)
 app.include_router(ventas_router, prefix=settings.API_V1_STR)
 app.include_router(ia_asistente_router, prefix=settings.API_V1_STR)
+app.include_router(notificaciones_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/", tags=["Root"])

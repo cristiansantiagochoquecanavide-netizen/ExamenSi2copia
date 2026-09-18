@@ -131,6 +131,9 @@
     </nav>
 
     <div class="user-auth-zone">
+      <!-- CU21: Centro de Notificaciones & Alertas -->
+      <app-notification-bell />
+
       <a routerLink="/ventas/checkout" class="nav-cart-btn" title="Bolsa de Compras E-Commerce">
         <span class="cart-icon">🛍️</span>
         <span class="cart-badge">{{ (cartService.count$ | async) || 0 }}</span>

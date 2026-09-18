@@ -44,6 +44,14 @@ class AtelierScaffold extends StatelessWidget {
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined, color: Colors.black),
+            tooltip: 'Alertas & Notificaciones',
+            onPressed: () => context.go('/notificaciones'),
+          ),
+          const SizedBox(width: 6),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
           child: Container(

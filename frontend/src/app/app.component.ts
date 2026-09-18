@@ -4,11 +4,12 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from './core/services/auth.service';
 import { CartService } from './features/ventas/services/cart.service';
 import { ChatbotWidgetComponent } from './features/ia-asistente/components/chatbot-widget.component';
+import { NotificationBellComponent } from './features/notificaciones/components/notification-bell.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, ChatbotWidgetComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, ChatbotWidgetComponent, NotificationBellComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })

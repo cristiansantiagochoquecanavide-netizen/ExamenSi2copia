@@ -6,6 +6,7 @@ import '../../features/inventario/presentation/screens/inventario_screen.dart';
 import '../../features/reservas/presentation/screens/reservas_screen.dart';
 import '../../features/ventas/presentation/screens/ventas_screen.dart';
 import '../../features/ia_asistente/presentation/screens/ia_asistente_screen.dart';
+import '../../features/notificaciones/presentation/screens/notificaciones_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/catalogo',
@@ -39,6 +40,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/ia_asistente',
       builder: (context, state) => const IaAsistenteScreen(),
+    ),
+    GoRoute(
+      path: '/notificaciones',
+      builder: (context, state) => const NotificacionesScreen(),
     ),
   ],
 );
