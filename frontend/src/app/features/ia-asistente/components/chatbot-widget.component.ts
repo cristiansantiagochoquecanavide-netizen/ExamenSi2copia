@@ -27,14 +27,17 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
           title="Consultar con Atelier Concierge (IA)"
           aria-label="Abrir asistente virtual Atelier Concierge"
         >
-          <!-- Isotipo Haute Couture Concierge -->
-          <svg class="launcher-icon-svg" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Diamante biselado con corona de estilismo -->
-            <polygon points="24,6 40,18 24,42 8,18" stroke="#c5a880" stroke-width="2.2" stroke-linejoin="round" fill="none"/>
-            <polygon points="24,11 35,19 24,37 13,19" stroke="#ffffff" stroke-width="1.6" stroke-linejoin="round" fill="none"/>
-            <circle cx="24" cy="22" r="3" fill="#c5a880"/>
-            <!-- Destello de IA -->
-            <path d="M38 8L40 3L42 8L47 10L42 12L40 17L38 12L33 10L38 8Z" fill="#c5a880"/>
+          <!-- Isotipo Logo de la Web: Diamante Tallado con Bisel Oro -->
+          <svg class="launcher-logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="24,13 76,13 95,40 50,88 5,40" stroke="#c5a880" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#ffffff"/>
+            <polygon points="26,16 74,16 92,40 50,84 8,40" stroke="#000000" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+            <line x1="8" y1="40" x2="92" y2="40" stroke="#000000" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="26" y1="16" x2="34" y2="40" stroke="#000000" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="74" y1="16" x2="66" y2="40" stroke="#000000" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="50" y1="16" x2="34" y2="40" stroke="#000000" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="50" y1="16" x2="66" y2="40" stroke="#000000" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="50" y1="84" x2="34" y2="40" stroke="#000000" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="50" y1="84" x2="66" y2="40" stroke="#000000" stroke-width="2.5" stroke-linecap="round"/>
           </svg>
           <span class="launcher-ai-badge">IA</span>
         </button>
@@ -46,14 +49,18 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
           <!-- Header -->
           <header class="chat-header">
             <div class="chat-header-info">
+              <!-- Avatar de la IA: Logo Oficial de la Web -->
               <div class="concierge-avatar-ring">
-                <svg viewBox="0 0 32 32" class="avatar-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="16" cy="16" r="14" stroke="#c5a880" stroke-width="1.8"/>
-                  <path d="M12 12C12 12 14 10 16 10C18 10 20 12 20 12" stroke="#c5a880" stroke-width="1.6" stroke-linecap="round"/>
-                  <circle cx="13" cy="14" r="1.2" fill="#ffffff"/>
-                  <circle cx="19" cy="14" r="1.2" fill="#ffffff"/>
-                  <path d="M16 16V20L18 20" stroke="#c5a880" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M13 22C14.5 23.5 17.5 23.5 19 22" stroke="#c5a880" stroke-width="1.4" stroke-linecap="round"/>
+                <svg class="avatar-logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <polygon points="24,13 76,13 95,40 50,88 5,40" stroke="#c5a880" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round" fill="#ffffff"/>
+                  <polygon points="26,16 74,16 92,40 50,84 8,40" stroke="#000000" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+                  <line x1="8" y1="40" x2="92" y2="40" stroke="#000000" stroke-width="3" stroke-linecap="round"/>
+                  <line x1="26" y1="16" x2="34" y2="40" stroke="#000000" stroke-width="3" stroke-linecap="round"/>
+                  <line x1="74" y1="16" x2="66" y2="40" stroke="#000000" stroke-width="3" stroke-linecap="round"/>
+                  <line x1="50" y1="16" x2="34" y2="40" stroke="#000000" stroke-width="3" stroke-linecap="round"/>
+                  <line x1="50" y1="16" x2="66" y2="40" stroke="#000000" stroke-width="3" stroke-linecap="round"/>
+                  <line x1="50" y1="84" x2="34" y2="40" stroke="#000000" stroke-width="3" stroke-linecap="round"/>
+                  <line x1="50" y1="84" x2="66" y2="40" stroke="#000000" stroke-width="3" stroke-linecap="round"/>
                 </svg>
               </div>
               <div class="concierge-titles">
@@ -96,7 +103,19 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
                 [class.row-bot]="msg.remitente === 'ASISTENTE'"
               >
                 @if (msg.remitente === 'ASISTENTE') {
-                  <div class="bot-micro-avatar">A</div>
+                  <div class="bot-micro-avatar">
+                    <svg class="micro-logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <polygon points="24,13 76,13 95,40 50,88 5,40" stroke="#c5a880" stroke-width="5" stroke-linejoin="round" fill="#ffffff"/>
+                      <polygon points="26,16 74,16 92,40 50,84 8,40" stroke="#000000" stroke-width="4" stroke-linejoin="round"/>
+                      <line x1="8" y1="40" x2="92" y2="40" stroke="#000000" stroke-width="3.5" stroke-linecap="round"/>
+                      <line x1="26" y1="16" x2="34" y2="40" stroke="#000000" stroke-width="3.5" stroke-linecap="round"/>
+                      <line x1="74" y1="16" x2="66" y2="40" stroke="#000000" stroke-width="3.5" stroke-linecap="round"/>
+                      <line x1="50" y1="16" x2="34" y2="40" stroke="#000000" stroke-width="3.5" stroke-linecap="round"/>
+                      <line x1="50" y1="16" x2="66" y2="40" stroke="#000000" stroke-width="3.5" stroke-linecap="round"/>
+                      <line x1="50" y1="84" x2="34" y2="40" stroke="#000000" stroke-width="3.5" stroke-linecap="round"/>
+                      <line x1="50" y1="84" x2="66" y2="40" stroke="#000000" stroke-width="3.5" stroke-linecap="round"/>
+                    </svg>
+                  </div>
                 }
 
                 <div class="chat-bubble" [class.bubble-user]="msg.remitente === 'USUARIO'" [class.bubble-bot]="msg.remitente === 'ASISTENTE'">
@@ -162,7 +181,12 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
             <!-- Loading / Thinking Indicator -->
             @if (chatbotService.isLoading()) {
               <div class="chat-bubble-row row-bot">
-                <div class="bot-micro-avatar">A</div>
+                <div class="bot-micro-avatar">
+                  <svg class="micro-logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <polygon points="24,13 76,13 95,40 50,88 5,40" stroke="#c5a880" stroke-width="5" stroke-linejoin="round" fill="#ffffff"/>
+                    <polygon points="26,16 74,16 92,40 50,84 8,40" stroke="#000000" stroke-width="4" stroke-linejoin="round"/>
+                  </svg>
+                </div>
                 <div class="chat-bubble bubble-bot typing-bubble">
                   <span class="typing-dot"></span>
                   <span class="typing-dot"></span>
@@ -174,7 +198,7 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
 
           <!-- Input Footer -->
           <footer class="chat-input-bar">
-            <!-- Voice Dictation Button (Web Speech API) -->
+            <!-- Voice Dictation Button (Microfono Negro de Alta Visibilidad) -->
             <button
               type="button"
               class="btn-voice-input"
@@ -183,7 +207,7 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
               title="Dictar mensaje por voz"
               aria-label="Hablar al asistente"
             >
-              <svg viewBox="0 0 24 24" class="mic-icon-svg" fill="none" stroke="currentColor" stroke-width="2">
+              <svg viewBox="0 0 24 24" class="mic-icon-svg" fill="none" stroke="#000000" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
                 <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
                 <line x1="12" y1="19" x2="12" y2="23" />
@@ -201,6 +225,7 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
               aria-label="Mensaje para Atelier Concierge"
             ></textarea>
 
+            <!-- Send Button: Avión de Papel en Azul Vibrante -->
             <button
               type="button"
               class="btn-send-message"
@@ -209,8 +234,10 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
               title="Enviar mensaje"
               aria-label="Enviar"
             >
-              <svg viewBox="0 0 24 24" class="send-icon-svg" fill="currentColor">
-                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+              <!-- Icono Avión de Papel -->
+              <svg viewBox="0 0 24 24" class="send-plane-svg" fill="none" stroke="#ffffff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
               </svg>
             </button>
           </footer>
@@ -237,8 +264,8 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
       height: 62px;
       border-radius: 50%;
       background: #000000;
-      border: 2px solid #c5a880;
-      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.38), 0 0 16px rgba(197, 168, 128, 0.25);
+      border: 2.2px solid #c5a880;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.42), 0 0 18px rgba(197, 168, 128, 0.35);
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -250,14 +277,14 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
 
     .chatbot-launcher-btn:hover {
       transform: scale(1.08) translateY(-2px);
-      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45), 0 0 24px rgba(197, 168, 128, 0.45);
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5), 0 0 26px rgba(197, 168, 128, 0.5);
       border-color: #dfcaa7;
     }
 
-    .launcher-icon-svg {
-      width: 34px;
-      height: 34px;
-      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+    .launcher-logo-svg {
+      width: 32px;
+      height: 32px;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
     }
 
     .launcher-ai-badge {
@@ -266,7 +293,7 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
       right: -2px;
       background: linear-gradient(135deg, #c5a880 0%, #a48256 100%);
       color: #000000;
-      font-size: 9px;
+      font-size: 9.5px;
       font-weight: 800;
       letter-spacing: 0.5px;
       padding: 2px 6px;
@@ -280,14 +307,14 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
       position: fixed;
       bottom: 96px;
       right: 24px;
-      width: 395px;
+      width: 400px;
       max-width: calc(100vw - 32px);
-      height: 570px;
+      height: 580px;
       max-height: calc(100vh - 120px);
       background: #ffffff;
       border-radius: 18px;
       border: 1px solid rgba(197, 168, 128, 0.45);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25), 0 4px 16px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28), 0 4px 16px rgba(0, 0, 0, 0.1);
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -307,8 +334,8 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
 
     /* Header */
     .chat-header {
-      background: #000000;
-      color: #ffffff;
+      background: #000000 !important;
+      color: #ffffff !important;
       padding: 14px 18px;
       border-bottom: 2px solid #c5a880;
       display: flex;
@@ -323,20 +350,22 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
     }
 
     .concierge-avatar-ring {
-      width: 38px;
-      height: 38px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
-      background: #111111;
-      border: 1.5px solid #c5a880;
+      background: #ffffff;
+      border: 2px solid #c5a880;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      padding: 3px;
     }
 
-    .avatar-svg {
-      width: 26px;
-      height: 26px;
+    .avatar-logo-svg {
+      width: 28px;
+      height: 28px;
     }
 
     .concierge-titles {
@@ -344,30 +373,33 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
       flex-direction: column;
     }
 
+    /* 1. Titulo en blanco puro visible */
     .concierge-title {
-      font-size: 13px;
-      font-weight: 700;
+      font-size: 14.5px !important;
+      font-weight: 800 !important;
       letter-spacing: 1.2px;
-      margin: 0;
-      color: #ffffff;
+      margin: 0 !important;
+      color: #ffffff !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
     }
 
     .concierge-status {
-      font-size: 10.5px;
-      color: #c5a880;
+      font-size: 12px !important;
+      color: #ffffff !important;
       display: flex;
       align-items: center;
-      gap: 5px;
-      margin-top: 2px;
+      gap: 6px;
+      margin-top: 3px;
+      opacity: 0.95;
     }
 
     .status-pulse-dot {
-      width: 6px;
-      height: 6px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: #22c55e;
       display: inline-block;
-      box-shadow: 0 0 6px #22c55e;
+      box-shadow: 0 0 8px #22c55e;
     }
 
     .chat-header-actions {
@@ -379,11 +411,11 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
     .header-btn {
       background: transparent;
       border: none;
-      color: #a0a0a0;
-      font-size: 18px;
+      color: #e0e0e0 !important;
+      font-size: 19px;
       cursor: pointer;
-      width: 30px;
-      height: 30px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -392,12 +424,12 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
     }
 
     .header-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
-      color: #ffffff;
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff !important;
     }
 
     .btn-close {
-      font-size: 22px;
+      font-size: 24px;
       line-height: 1;
     }
 
@@ -415,7 +447,7 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
 
     .chat-bubble-row {
       display: flex;
-      gap: 8px;
+      gap: 9px;
       max-width: 100%;
     }
 
@@ -429,26 +461,31 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
     }
 
     .bot-micro-avatar {
-      width: 26px;
-      height: 26px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
-      background: #000000;
-      color: #c5a880;
-      border: 1px solid #c5a880;
-      font-size: 11px;
-      font-weight: 700;
+      background: #ffffff;
+      border: 1.5px solid #c5a880;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      margin-top: 2px;
+      margin-top: 3px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+      padding: 2px;
     }
 
+    .micro-logo-svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* 5. Aumento de tamaño de letra en burbujas (+1 / legibilidad mejorada) */
     .chat-bubble {
       max-width: 82%;
-      padding: 11px 14px;
-      font-size: 13px;
-      line-height: 1.45;
+      padding: 12px 15px;
+      font-size: 14px;
+      line-height: 1.5;
       position: relative;
       word-wrap: break-word;
     }
@@ -464,7 +501,7 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
     .bubble-bot {
       background: #ffffff;
       color: #1a1a1a;
-      border: 1px solid #e8e8e8;
+      border: 1px solid #e5e5e5;
       border-radius: 16px 16px 16px 3px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     }
@@ -481,7 +518,7 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
     }
 
     .rag-header-tag {
-      font-size: 10.5px;
+      font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.6px;
@@ -511,8 +548,8 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
     }
 
     .card-thumb-wrap {
-      width: 60px;
-      height: 75px;
+      width: 62px;
+      height: 78px;
       border-radius: 6px;
       overflow: hidden;
       position: relative;
@@ -532,7 +569,7 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
       left: 2px;
       background: rgba(0, 0, 0, 0.75);
       color: #ffd700;
-      font-size: 9px;
+      font-size: 9.5px;
       padding: 1px 4px;
       border-radius: 4px;
       font-weight: 600;
@@ -547,14 +584,14 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
     }
 
     .card-sector-tag {
-      font-size: 9.5px;
+      font-size: 10.5px;
       color: #777777;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     .card-title {
-      font-size: 11.5px;
+      font-size: 12.5px;
       font-weight: 600;
       color: #000000;
       margin: 2px 0 4px;
@@ -571,7 +608,7 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
     }
 
     .card-price {
-      font-size: 12.5px;
+      font-size: 13.5px;
       font-weight: 700;
       color: #111111;
     }
@@ -580,9 +617,9 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
       background: #000000;
       color: #ffffff;
       border: 1px solid #c5a880;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 600;
-      padding: 4px 8px;
+      padding: 4px 9px;
       border-radius: 4px;
       cursor: pointer;
       transition: background 0.2s, color 0.2s;
@@ -600,29 +637,31 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
     }
 
     .suggestions-label {
-      font-size: 10px;
+      font-size: 11.5px;
       color: #888888;
       margin-bottom: 6px;
       text-transform: uppercase;
-      letter-spacing: 0.4px;
+      letter-spacing: 0.5px;
+      font-weight: 600;
     }
 
     .chips-container {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 7px;
     }
 
     .suggestion-chip {
       background: #f4f0eb;
-      color: #333333;
+      color: #222222;
       border: 1px solid #dfd8cf;
-      padding: 5px 10px;
-      border-radius: 14px;
-      font-size: 11px;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 12px;
       cursor: pointer;
       text-align: left;
       transition: all 0.2s ease;
+      font-weight: 500;
     }
 
     .suggestion-chip:hover {
@@ -675,34 +714,36 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
       border-top: 1px solid #eeeeee;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 9px;
     }
 
     .chat-text-input {
       flex: 1;
-      border: 1px solid #e0e0e0;
+      border: 1.5px solid #dcdcdc;
       border-radius: 20px;
-      padding: 8px 14px;
-      font-size: 13px;
+      padding: 9px 14px;
+      font-size: 14px;
       outline: none;
       resize: none;
       line-height: 1.4;
       max-height: 70px;
       font-family: inherit;
+      color: #111111;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
 
     .chat-text-input:focus {
-      border-color: #c5a880;
-      box-shadow: 0 0 0 2px rgba(197, 168, 128, 0.2);
+      border-color: #0066ff;
+      box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.15);
     }
 
+    /* 4. Icono del micrófono en color negro sobre borde nítido */
     .btn-voice-input {
-      background: transparent;
-      border: 1px solid #e0e0e0;
-      color: #666666;
-      width: 36px;
-      height: 36px;
+      background: #ffffff;
+      border: 1.8px solid #000000;
+      color: #000000;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
       cursor: pointer;
       display: flex;
@@ -710,19 +751,27 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
       justify-content: center;
       transition: all 0.2s;
       flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     }
 
     .btn-voice-input:hover {
-      border-color: #c5a880;
-      color: #000000;
-      background: #fbfbfb;
+      background: #000000;
+      color: #ffffff;
+    }
+
+    .btn-voice-input:hover .mic-icon-svg {
+      stroke: #ffffff;
     }
 
     .btn-voice-input.listening {
-      background: #dc2626;
-      border-color: #dc2626;
-      color: #ffffff;
+      background: #dc2626 !important;
+      border-color: #dc2626 !important;
+      color: #ffffff !important;
       animation: pulseMic 1.4s infinite;
+    }
+
+    .btn-voice-input.listening .mic-icon-svg {
+      stroke: #ffffff !important;
     }
 
     @keyframes pulseMic {
@@ -738,42 +787,47 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
     }
 
     .mic-icon-svg {
-      width: 17px;
-      height: 17px;
+      width: 19px;
+      height: 19px;
+      stroke: #000000;
+      transition: stroke 0.2s;
     }
 
+    /* 3. Botón de enviar con Avión de Papel en color Azul */
     .btn-send-message {
-      width: 36px;
-      height: 36px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
-      background: #000000;
-      color: #c5a880;
-      border: 1px solid #c5a880;
+      background: #0066ff;
+      border: none;
+      color: #ffffff;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: all 0.2s;
       flex-shrink: 0;
+      box-shadow: 0 3px 10px rgba(0, 102, 255, 0.35);
     }
 
     .btn-send-message:hover:not(:disabled) {
-      background: #c5a880;
-      color: #000000;
-      transform: scale(1.05);
+      background: #0052cc;
+      transform: scale(1.06);
+      box-shadow: 0 4px 14px rgba(0, 102, 255, 0.45);
     }
 
     .btn-send-message:disabled {
-      background: #e5e5e5;
-      color: #999999;
-      border-color: #cccccc;
+      background: #7bb4ff;
+      opacity: 0.85;
       cursor: not-allowed;
+      box-shadow: none;
     }
 
-    .send-icon-svg {
-      width: 15px;
-      height: 15px;
+    .send-plane-svg {
+      width: 18px;
+      height: 18px;
       margin-left: 2px;
+      stroke: #ffffff;
     }
 
     /* Mobile Adaptability */
