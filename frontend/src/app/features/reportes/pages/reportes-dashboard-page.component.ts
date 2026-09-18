@@ -227,7 +227,6 @@ import {
           <article class="harbor-kpi-card">
             <div class="kpi-header-row">
               <span class="kpi-tag-name">Facturación</span>
-              <span class="kpi-icon-pill icon-revenue">&dollar;</span>
             </div>
             <div class="kpi-main-number">&dollar;{{ financialData().facturacion_actual | number:'1.2-2' }}</div>
             <div class="kpi-comparison-row">
@@ -242,7 +241,6 @@ import {
           <article class="harbor-kpi-card">
             <div class="kpi-header-row">
               <span class="kpi-tag-name">Pedidos Totales</span>
-              <span class="kpi-icon-pill icon-orders">📦</span>
             </div>
             <div class="kpi-main-number">{{ financialData().pedidos_totales }}</div>
             <div class="kpi-comparison-row">
@@ -257,7 +255,6 @@ import {
           <article class="harbor-kpi-card">
             <div class="kpi-header-row">
               <span class="kpi-tag-name">Ticket Promedio</span>
-              <span class="kpi-icon-pill icon-ticket">💳</span>
             </div>
             <div class="kpi-main-number">&dollar;{{ financialData().ticket_medio | number:'1.2-2' }}</div>
             <div class="kpi-comparison-row">
@@ -272,7 +269,6 @@ import {
           <article class="harbor-kpi-card">
             <div class="kpi-header-row">
               <span class="kpi-tag-name">Conversión Global</span>
-              <span class="kpi-icon-pill icon-conversion">⚡</span>
             </div>
             <div class="kpi-main-number">{{ dashboardData()?.kpis?.conversion_rate || 9.9 }}%</div>
             <div class="kpi-comparison-row">
