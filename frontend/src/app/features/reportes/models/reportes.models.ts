@@ -46,9 +46,67 @@ export interface TopProductItem {
   imagen_url?: string | null;
 }
 
+export interface FinancialIndicator {
+  facturacion_actual: number;
+  facturacion_anterior: number;
+  variacion_pct: number;
+  objetivo_mes: number;
+  cumplimiento_pct: number;
+  ticket_medio: number;
+  pedidos_totales: number;
+  unidades_vendidas: number;
+  descuentos_totales: number;
+  mensaje_insight: string;
+}
+
+export interface ComparativeTrendPoint {
+  periodo: string;
+  monto_actual: number;
+  monto_anterior: number;
+}
+
+export interface InventoryStackedItem {
+  categoria: string;
+  disponible: number;
+  reservado_probadores: number;
+  alerta_critica: number;
+}
+
+export interface FunnelStepItem {
+  etapa: string;
+  cantidad: number;
+  porcentaje: number;
+  conversion_siguiente: number;
+}
+
+export interface DistributionSlice {
+  nombre: string;
+  porcentaje: number;
+  cantidad: number;
+  color: string;
+}
+
+export interface GeographicHub {
+  sucursal: string;
+  ciudad: string;
+  pedidos: number;
+  monto: number;
+  tiempo_entrega_promedio: string;
+  lat_relativa: number;
+  lng_relativa: number;
+}
+
 export interface DashboardReporteResponse {
   rango: string;
+  granularidad?: string;
   kpis: KPISummary;
+  financial?: FinancialIndicator;
+  comparative_trend?: ComparativeTrendPoint[];
+  inventory_stacked?: InventoryStackedItem[];
+  funnel_steps?: FunnelStepItem[];
+  channel_distribution?: DistributionSlice[];
+  order_status_donut?: DistributionSlice[];
+  geographic_hubs?: GeographicHub[];
   sales_trend: SalesVelocityPoint[];
   inventory_alerts: InventoryAlertItem[];
   recent_orders: RecentOrderRow[];

@@ -21,8 +21,8 @@ export class ReportesService {
   // 1. ENDPOINTS HTTP
   // =========================================================================
 
-  getDashboard(rango: string = '30D', sucursalId?: number): Observable<DashboardReporteResponse> {
-    let url = `${this.apiUrl}/dashboard?rango=${rango}`;
+  getDashboard(rango: string = '30D', granularidad: string = 'MES', sucursalId?: number): Observable<DashboardReporteResponse> {
+    let url = `${this.apiUrl}/dashboard?rango=${rango}&granularidad=${granularidad}`;
     if (sucursalId) {
       url += `&sucursal_id=${sucursalId}`;
     }

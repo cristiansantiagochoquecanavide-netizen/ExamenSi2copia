@@ -60,9 +60,71 @@ class TopProductItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+# =========================================================================
+# NUEVAS ESTRUCTURAS PARA LOS 4 MÓDULOS GERENCIALES LIMPIOS
+# =========================================================================
+
+class FinancialIndicatorResponse(BaseModel):
+    facturacion_actual: float
+    facturacion_anterior: float
+    variacion_pct: float
+    objetivo_mes: float
+    cumplimiento_pct: float
+    ticket_medio: float
+    pedidos_totales: int
+    unidades_vendidas: int
+    descuentos_totales: float
+    mensaje_insight: str
+
+
+class ComparativeTrendPoint(BaseModel):
+    periodo: str
+    monto_actual: float
+    monto_anterior: float
+
+
+class InventoryStackedItem(BaseModel):
+    categoria: str
+    disponible: int
+    reservado_probadores: int
+    alerta_critica: int
+
+
+class FunnelStepItem(BaseModel):
+    etapa: str
+    cantidad: int
+    porcentaje: float
+    conversion_siguiente: float
+
+
+class DistributionSlice(BaseModel):
+    nombre: str
+    porcentaje: float
+    cantidad: int
+    color: str
+
+
+class GeographicHub(BaseModel):
+    sucursal: str
+    ciudad: str
+    pedidos: int
+    monto: float
+    tiempo_entrega_promedio: str
+    lat_relativa: float
+    lng_relativa: float
+
+
 class DashboardReporteResponse(BaseModel):
     rango: str
+    granularidad: Optional[str] = "MES"
     kpis: KPISummaryResponse
+    financial: FinancialIndicatorResponse
+    comparative_trend: List[ComparativeTrendPoint]
+    inventory_stacked: List[InventoryStackedItem]
+    funnel_steps: List[FunnelStepItem]
+    channel_distribution: List[DistributionSlice]
+    order_status_donut: List[DistributionSlice]
+    geographic_hubs: List[GeographicHub]
     sales_trend: List[SalesVelocityPoint]
     inventory_alerts: List[InventoryAlertItem]
     recent_orders: List[RecentOrderRow]
