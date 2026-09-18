@@ -349,7 +349,7 @@ import {
 
             <!-- Gráfico SVG Interactivo con Tracking Magnético -->
             <div class="chart-stage-container" (mousemove)="onChartMouseMove($event)" (mouseleave)="onChartMouseLeave()">
-              <svg class="flowing-trend-svg" viewBox="0 0 660 210" preserveAspectRatio="none">
+              <svg class="flowing-trend-svg" viewBox="0 0 680 250" preserveAspectRatio="none">
                 <defs>
                   <!-- Gradiente Suave del Área -->
                   <linearGradient id="harborTrendAreaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -378,8 +378,8 @@ import {
 
                 <!-- Escala Eje Y & Líneas de Guía Horizontales Sutiles -->
                 <g *ngFor="let tick of trendYAxisTicks()">
-                  <text x="50" [attr.y]="tick.y + 4" text-anchor="end" class="chart-y-label">{{ tick.label }}</text>
-                  <line x1="56" [attr.y1]="tick.y" x2="655" [attr.y2]="tick.y" stroke="#f1f5f9" stroke-width="1" [attr.stroke-dasharray]="tick.y === 175 ? 'none' : '3,3'" />
+                  <text x="56" [attr.y]="tick.y + 4" text-anchor="end" class="chart-y-label">{{ tick.label }}</text>
+                  <line x1="64" [attr.y1]="tick.y" x2="675" [attr.y2]="tick.y" stroke="#f1f5f9" stroke-width="1.2" [attr.stroke-dasharray]="tick.y === 210 ? 'none' : '3,3'" />
                 </g>
 
                 <!-- MODO A: LÍNEA CONTINUA FLUIDA -->
@@ -402,7 +402,7 @@ import {
                     [attr.d]="svgPathActual()"
                     fill="none"
                     stroke="url(#harborCurveStrokeGrad)"
-                    stroke-width="3"
+                    stroke-width="3.2"
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     filter="url(#harborCurveGlow)"
@@ -411,14 +411,14 @@ import {
 
                   <!-- Pulsing Beacon en el Último Punto -->
                   <g *ngIf="lastTrendPoint() && !hoveredTrendPoint" class="beacon-point-group">
-                    <circle [attr.cx]="lastTrendPoint()!.x" [attr.cy]="lastTrendPoint()!.yActual" r="10" class="beacon-pulse-ring" />
-                    <circle [attr.cx]="lastTrendPoint()!.x" [attr.cy]="lastTrendPoint()!.yActual" r="4.5" fill="#ff3811" stroke="#ffffff" stroke-width="2.5" />
+                    <circle [attr.cx]="lastTrendPoint()!.x" [attr.cy]="lastTrendPoint()!.yActual" r="12" class="beacon-pulse-ring" />
+                    <circle [attr.cx]="lastTrendPoint()!.x" [attr.cy]="lastTrendPoint()!.yActual" r="5" fill="#ff3811" stroke="#ffffff" stroke-width="2.5" />
                   </g>
 
                   <!-- Badge Flotante en el Último Punto (Live Value) -->
-                  <g *ngIf="lastTrendPoint() && !hoveredTrendPoint" [attr.transform]="'translate(' + (lastTrendPoint()!.x - 42) + ',' + (lastTrendPoint()!.yActual - 28) + ')'" class="current-badge-group">
-                    <rect width="84" height="22" rx="11" fill="#111827" filter="drop-shadow(0 3px 6px rgba(0,0,0,0.25))" />
-                    <text x="42" y="15" text-anchor="middle" fill="#ffffff" font-size="10.5" font-weight="800" font-family="ui-monospace, monospace">
+                  <g *ngIf="lastTrendPoint() && !hoveredTrendPoint" [attr.transform]="'translate(' + (lastTrendPoint()!.x - 45) + ',' + (lastTrendPoint()!.yActual - 32) + ')'" class="current-badge-group">
+                    <rect width="90" height="24" rx="12" fill="#111827" filter="drop-shadow(0 3px 6px rgba(0,0,0,0.25))" />
+                    <text x="45" y="16.5" text-anchor="middle" fill="#ffffff" font-size="11.5" font-weight="800" font-family="ui-monospace, monospace">
                       &dollar;{{ lastTrendPoint()!.montoActual | number:'1.0-0' }}
                     </text>
                   </g>
@@ -430,10 +430,10 @@ import {
                     <!-- Barra de fondo previa (si comparativa activa) -->
                     <rect
                       *ngIf="showComparative()"
-                      [attr.x]="pt.x - 13"
+                      [attr.x]="pt.x - 14"
                       [attr.y]="pt.yAnterior"
-                      width="26"
-                      [attr.height]="175 - pt.yAnterior"
+                      width="28"
+                      [attr.height]="210 - pt.yAnterior"
                       rx="5"
                       fill="#e2e8f0"
                       opacity="0.45"
@@ -441,10 +441,10 @@ import {
                     />
                     <!-- Barra actual -->
                     <rect
-                      [attr.x]="pt.x - 13"
+                      [attr.x]="pt.x - 14"
                       [attr.y]="pt.yActual"
-                      width="26"
-                      [attr.height]="175 - pt.yActual"
+                      width="28"
+                      [attr.height]="210 - pt.yActual"
                       rx="5"
                       fill="url(#harborBarGrad)"
                       [class.active-bar]="hoveredTrendPoint && hoveredTrendPoint.periodo === pt.periodo"
@@ -457,9 +457,9 @@ import {
                 <g *ngIf="hoveredTrendPoint">
                   <line
                     [attr.x1]="hoveredTrendPoint.x"
-                    y1="25"
+                    y1="20"
                     [attr.x2]="hoveredTrendPoint.x"
-                    y2="175"
+                    y2="210"
                     stroke="#ff3811"
                     stroke-dasharray="3,3"
                     stroke-width="1.5"
@@ -468,7 +468,7 @@ import {
                   <circle
                     [attr.cx]="hoveredTrendPoint.x"
                     [attr.cy]="hoveredTrendPoint.yActual"
-                    r="6.5"
+                    r="7"
                     fill="#ff3811"
                     stroke="#ffffff"
                     stroke-width="3"
@@ -487,10 +487,10 @@ import {
 
                 <!-- Capa invisible para capturar mousemove sobre el lienzo entero -->
                 <rect
-                  x="56"
+                  x="64"
                   y="0"
-                  width="604"
-                  height="185"
+                  width="616"
+                  height="225"
                   fill="transparent"
                   style="cursor: crosshair;"
                 />
@@ -520,7 +520,7 @@ import {
               </div>
 
               <!-- Eje X con Etiquetas Temporales -->
-              <div class="chart-x-axis-row" style="padding-left: 56px; padding-right: 12px;">
+              <div class="chart-x-axis-row" style="padding-left: 64px; padding-right: 14px;">
                 <span
                   *ngFor="let pt of trendChartCoords()"
                   class="x-tick-label"
@@ -1268,7 +1268,7 @@ import {
     }
 
     .revenue-hero-number {
-      font-size: 1.65rem;
+      font-size: 1.95rem;
       font-weight: 800;
       letter-spacing: -0.02em;
       color: #111827;
@@ -1383,20 +1383,21 @@ import {
     .chart-stage-container {
       position: relative;
       width: 100%;
-      height: 210px;
+      height: 290px;
     }
 
     .flowing-trend-svg {
       width: 100%;
-      height: 180px;
+      height: 250px;
       overflow: visible;
     }
 
     .chart-y-label {
-      font-size: 0.65rem;
-      fill: #9ca3af;
-      font-weight: 600;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.82rem;
+      fill: #475569;
+      font-weight: 700;
+      font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      letter-spacing: -0.01em;
     }
 
     .trend-line-path {
@@ -1526,19 +1527,21 @@ import {
     .chart-x-axis-row {
       display: flex;
       justify-content: space-between;
-      font-size: 0.68rem;
-      font-weight: 600;
-      color: #6b7280;
-      padding-top: 0.25rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #475569;
+      padding-top: 0.65rem;
     }
 
     .x-tick-label {
-      transition: color 0.15s ease;
+      transition: all 0.15s ease;
+      cursor: default;
     }
 
     .x-tick-label.active-tick {
       color: #ff3811;
       font-weight: 800;
+      transform: scale(1.1);
     }
 
     /* Barra Inferior BI Ejecutiva */
@@ -2079,10 +2082,10 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
   trendYAxisTicks = computed(() => {
     const maxVal = this.maxTrendVal();
     return [
-      { label: this.formatCurrencyShort(maxVal), y: 35 },
-      { label: this.formatCurrencyShort(Math.round(maxVal * 0.66)), y: 82 },
-      { label: this.formatCurrencyShort(Math.round(maxVal * 0.33)), y: 128 },
-      { label: '$0', y: 175 }
+      { label: this.formatCurrencyShort(maxVal), y: 30 },
+      { label: this.formatCurrencyShort(Math.round(maxVal * 0.66)), y: 90 },
+      { label: this.formatCurrencyShort(Math.round(maxVal * 0.33)), y: 150 },
+      { label: '$0', y: 210 }
     ];
   });
 
@@ -2107,14 +2110,14 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
         ];
 
     const maxVal = this.maxTrendVal();
-    const startX = 64;
-    const endX = 645;
+    const startX = 72;
+    const endX = 665;
     const stepX = (endX - startX) / Math.max(points.length - 1, 1);
 
     return points.map((p, i) => {
       const x = startX + i * stepX;
-      const yAct = 175 - (p.monto_actual / maxVal) * 140;
-      const yAnt = 175 - (p.monto_anterior / maxVal) * 140;
+      const yAct = 210 - (p.monto_actual / maxVal) * 180;
+      const yAnt = 210 - (p.monto_anterior / maxVal) * 180;
       return {
         x: Math.round(x),
         yActual: Math.round(yAct),
@@ -2150,7 +2153,7 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
     const line = this.svgPathActual();
     const last = coords[coords.length - 1];
     const first = coords[0];
-    return `${line} L${last.x},175 L${first.x},175 Z`;
+    return `${line} L${last.x},210 L${first.x},210 Z`;
   });
 
   svgPathAnterior = computed(() => {
@@ -2196,7 +2199,7 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
     const target = event.currentTarget as HTMLElement;
     const rect = target.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
-    const svgX = (mouseX / rect.width) * 660;
+    const svgX = (mouseX / rect.width) * 680;
 
     let closest = coords[0];
     let minDiff = Math.abs(coords[0].x - svgX);
