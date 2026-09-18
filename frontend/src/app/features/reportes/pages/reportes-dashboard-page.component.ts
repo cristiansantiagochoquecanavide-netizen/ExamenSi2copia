@@ -28,7 +28,10 @@ import {
         <header class="harbor-header">
           <div class="header-greeting-block">
             <h1 class="header-greeting">Buenos días, {{ currentUserName() }}</h1>
-            <p class="header-date">{{ currentDateFormatted() }}</p>
+            <p class="header-date" *ngIf="selectedRango() !== 'MES_ESPECIFICO'">{{ currentDateFormatted() }}</p>
+            <p class="header-date audit-highlight" *ngIf="selectedRango() === 'MES_ESPECIFICO'">
+              <span class="audit-badge">AUDITORÍA HISTÓRICA</span> Período cerrado: {{ getNombreMes(selectedMes()) }} {{ selectedAnio() }}
+            </p>
           </div>
 
           <div class="header-actions-block">
@@ -43,9 +46,20 @@ import {
               <select [ngModel]="selectedRango()" (ngModelChange)="cambiarRango($event)" class="timeframe-dropdown">
                 <option value="MES_ACTUAL">Mes actual (En curso)</option>
                 <option value="MES_ANTERIOR">Mes pasado (Cerrado)</option>
+                <option value="MES_ESPECIFICO">Mes específico (Histórico)...</option>
                 <option value="30D">Últimos 30 días</option>
                 <option value="7D">Últimos 7 días</option>
                 <option value="24H">Últimas 24 horas</option>
+              </select>
+            </div>
+
+            <!-- Selector de Mes y Año específico -->
+            <div *ngIf="selectedRango() === 'MES_ESPECIFICO'" class="month-picker-pill">
+              <select [ngModel]="selectedMes()" (ngModelChange)="cambiarMes($event)" class="month-dropdown" title="Seleccionar mes de auditoría">
+                <option *ngFor="let m of mesesDisponibles" [value]="m.id">{{ m.nombre }}</option>
+              </select>
+              <select [ngModel]="selectedAnio()" (ngModelChange)="cambiarAnio($event)" class="year-dropdown" title="Seleccionar año de auditoría">
+                <option *ngFor="let y of aniosDisponibles" [value]="y">{{ y }}</option>
               </select>
             </div>
 
@@ -810,6 +824,55 @@ import {
       color: #1f2937;
       cursor: pointer;
       outline: none;
+    }
+
+    .month-picker-pill {
+      display: flex;
+      align-items: center;
+      background: #ffffff;
+      border: 1.5px solid #2563eb;
+      border-radius: 8px;
+      padding: 0.35rem 0.65rem;
+      gap: 0.5rem;
+      box-shadow: 0 1px 4px rgba(37, 99, 235, 0.15);
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    .month-dropdown,
+    .year-dropdown {
+      background: transparent;
+      border: none;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #1d4ed8;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .month-dropdown option,
+    .year-dropdown option {
+      color: #111827;
+      background: #ffffff;
+      font-weight: 500;
+    }
+
+    .audit-highlight {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #1e40af !important;
+      font-weight: 600;
+    }
+
+    .audit-badge {
+      background: #eff6ff;
+      color: #2563eb;
+      border: 1px solid #bfdbfe;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
     }
 
     .btn-harbor-export {
@@ -2039,7 +2102,26 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
   exporting = signal<boolean>(false);
   selectedRango = signal<string>('30D');
   selectedGranularidad = signal<'DIA' | 'SEMANA' | 'MES'>('MES');
+  selectedMes = signal<number>(8); // Por defecto Agosto
+  selectedAnio = signal<number>(2026);
   dashboardData = signal<DashboardReporteResponse | null>(null);
+
+  mesesDisponibles = [
+    { id: 1, nombre: 'Enero' },
+    { id: 2, nombre: 'Febrero' },
+    { id: 3, nombre: 'Marzo' },
+    { id: 4, nombre: 'Abril' },
+    { id: 5, nombre: 'Mayo' },
+    { id: 6, nombre: 'Junio' },
+    { id: 7, nombre: 'Julio' },
+    { id: 8, nombre: 'Agosto' },
+    { id: 9, nombre: 'Septiembre' },
+    { id: 10, nombre: 'Octubre' },
+    { id: 11, nombre: 'Noviembre' },
+    { id: 12, nombre: 'Diciembre' }
+  ];
+
+  aniosDisponibles = [2026, 2025, 2024];
 
   // Asistente de Voz IA
   isListening = signal<boolean>(false);
@@ -2301,7 +2383,9 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
 
   cargarDashboard(rango: string, granularidad: 'DIA' | 'SEMANA' | 'MES'): void {
     this.loading.set(true);
-    this.reportesService.getDashboard(rango, granularidad).subscribe({
+    const mes = rango === 'MES_ESPECIFICO' ? this.selectedMes() : undefined;
+    const anio = rango === 'MES_ESPECIFICO' ? this.selectedAnio() : undefined;
+    this.reportesService.getDashboard(rango, granularidad, undefined, mes, anio).subscribe({
       next: (res) => {
         this.dashboardData.set(res);
         this.loading.set(false);
@@ -2316,6 +2400,23 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
   cambiarRango(rango: string): void {
     this.selectedRango.set(rango);
     this.cargarDashboard(rango, this.selectedGranularidad());
+  }
+
+  cambiarMes(mes: any): void {
+    const m = Number(mes);
+    this.selectedMes.set(m);
+    this.cargarDashboard('MES_ESPECIFICO', this.selectedGranularidad());
+  }
+
+  cambiarAnio(anio: any): void {
+    const a = Number(anio);
+    this.selectedAnio.set(a);
+    this.cargarDashboard('MES_ESPECIFICO', this.selectedGranularidad());
+  }
+
+  getNombreMes(mesId: number): string {
+    const mes = this.mesesDisponibles.find(m => m.id === Number(mesId));
+    return mes ? mes.nombre : '';
   }
 
   cambiarGranularidad(gran: 'DIA' | 'SEMANA' | 'MES'): void {

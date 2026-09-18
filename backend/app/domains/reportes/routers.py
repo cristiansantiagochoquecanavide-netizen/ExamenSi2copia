@@ -18,14 +18,18 @@ router = APIRouter(prefix="/reportes", tags=["Reportes & Dashboard (IA) - CU22"]
     summary="Obtener métricas, KPIs y gráficos consolidados para el Dashboard"
 )
 async def obtener_dashboard(
-    rango: str = Query("30D", description="Rango temporal: 24H, 7D, 30D, MES_ACTUAL"),
+    rango: str = Query("30D", description="Rango temporal: 24H, 7D, 30D, MES_ACTUAL, MES_ANTERIOR, MES_ESPECIFICO"),
     granularidad: str = Query("MES", description="Granularidad de línea temporal: DIA, SEMANA, MES"),
+    mes: Optional[int] = Query(None, ge=1, le=12, description="Mes específico (1 a 12)"),
+    anio: Optional[int] = Query(None, ge=2020, le=2030, description="Año específico"),
     sucursal_id: Optional[int] = Query(None, description="Filtrar por sucursal"),
     db: AsyncSession = Depends(get_db)
 ):
     """Retorna los KPIs ejecutivos, gráficos de tendencia, alertas y órdenes recientes."""
     service = ReportesService(db)
-    return await service.obtener_dashboard_kpis(rango=rango, granularidad=granularidad, sucursal_id=sucursal_id)
+    return await service.obtener_dashboard_kpis(
+        rango=rango, granularidad=granularidad, sucursal_id=sucursal_id, mes=mes, anio=anio
+    )
 
 
 @router.post(
