@@ -41,10 +41,11 @@ import {
                 <line x1="3" y1="10" x2="21" y2="10" stroke-width="2" />
               </svg>
               <select [ngModel]="selectedRango()" (ngModelChange)="cambiarRango($event)" class="timeframe-dropdown">
-                <option value="24H">Últimas 24 horas</option>
-                <option value="7D">Últimos 7 días</option>
+                <option value="MES_ACTUAL">Mes actual (En curso)</option>
+                <option value="MES_ANTERIOR">Mes pasado (Cerrado)</option>
                 <option value="30D">Últimos 30 días</option>
-                <option value="MES_ACTUAL">Mes actual</option>
+                <option value="7D">Últimos 7 días</option>
+                <option value="24H">Últimas 24 horas</option>
               </select>
             </div>
 
@@ -315,9 +316,9 @@ import {
                   class="comparative-pill-btn"
                   [class.active]="showComparative()"
                   (click)="showComparative.set(!showComparative())"
-                  title="Mostrar/Ocultar comparativa previa">
+                  title="Mostrar/Ocultar comparativa con el período anterior">
                   <span class="comp-legend-dash"></span>
-                  <span>Anterior</span>
+                  <span>{{ showComparative() ? 'Comparando: Activo' : '+ Comparar anterior' }}</span>
                 </button>
 
                 <!-- Selector de Granularidad: Día, Semana, Mes -->
@@ -387,14 +388,16 @@ import {
                   <!-- Área rellena suave -->
                   <path [attr.d]="svgAreaActual()" fill="url(#harborTrendAreaGrad)" class="trend-area-path" />
 
-                  <!-- Curva Dotted: Período Anterior -->
+                  <!-- Curva Dotted: Período Anterior (Visible, con contraste óptimo) -->
                   <path
                     *ngIf="showComparative()"
                     [attr.d]="svgPathAnterior()"
                     fill="none"
-                    stroke="#cbd5e1"
-                    stroke-width="1.8"
-                    stroke-dasharray="4,4"
+                    stroke="#64748b"
+                    stroke-width="2.4"
+                    stroke-dasharray="6,4"
+                    stroke-linecap="round"
+                    class="trend-comparative-path"
                   />
 
                   <!-- Curva Sólida Fluida (Sin 12 círculos rígidos) -->
@@ -509,12 +512,18 @@ import {
                 </div>
                 <div class="tooltip-metric-grid">
                   <div class="tooltip-stat">
-                    <span class="stat-lbl">Ingresos actuales</span>
+                    <span class="stat-lbl"><span class="dot-cur"></span> Este período:</span>
                     <span class="stat-val highlight">&dollar;{{ hoveredTrendPoint.montoActual | number:'1.2-2' }}</span>
                   </div>
                   <div class="tooltip-stat" *ngIf="showComparative()">
-                    <span class="stat-lbl">Período anterior</span>
+                    <span class="stat-lbl"><span class="dot-prev"></span> Período anterior:</span>
                     <span class="stat-val text-muted">&dollar;{{ hoveredTrendPoint.montoAnterior | number:'1.2-2' }}</span>
+                  </div>
+                  <div class="tooltip-stat tooltip-diff-row" *ngIf="showComparative()">
+                    <span class="stat-lbl">Diferencia neta:</span>
+                    <span class="stat-val" [class.highlight]="hoveredTrendPoint.montoActual >= hoveredTrendPoint.montoAnterior">
+                      {{ hoveredTrendPoint.montoActual >= hoveredTrendPoint.montoAnterior ? '+' : '-' }}&dollar;{{ getPointDiffMonto(hoveredTrendPoint) | number:'1.2-2' }}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1324,32 +1333,32 @@ import {
     .comparative-pill-btn {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
       background: #ffffff;
-      border: 1px solid #e5e7eb;
-      padding: 0.35rem 0.65rem;
+      border: 1.5px solid #e2e8f0;
+      padding: 0.35rem 0.75rem;
       border-radius: 8px;
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: #94a3b8;
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: #64748b;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: all 0.2s ease;
     }
 
     .comp-legend-dash {
-      width: 10px;
-      height: 2px;
-      border-bottom: 2px dashed #94a3b8;
+      width: 14px;
+      height: 3px;
+      border-bottom: 2.5px dashed #64748b;
     }
 
     .comparative-pill-btn.active {
-      border-color: #cbd5e1;
+      border-color: #ff5733;
       color: #111827;
-      background: #f8fafc;
+      background: #fff7f5;
     }
 
     .comparative-pill-btn.active .comp-legend-dash {
-      border-bottom-color: #111827;
+      border-bottom-color: #ff5733;
     }
 
     .granularity-switcher-tabs {
@@ -1512,6 +1521,36 @@ import {
 
     .tooltip-stat .stat-lbl {
       color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .dot-cur {
+      width: 7px;
+      height: 7px;
+      background: #ff5733;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .dot-prev {
+      width: 7px;
+      height: 7px;
+      background: #64748b;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .stat-prev-val {
+      color: #cbd5e1;
+      font-weight: 600;
+    }
+
+    .tooltip-diff-row {
+      border-top: 1px dashed rgba(255, 255, 255, 0.15);
+      padding-top: 0.25rem;
+      margin-top: 0.15rem;
     }
 
     .tooltip-stat .stat-val {
@@ -2191,6 +2230,11 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
     if (!pt || !pt.montoAnterior || pt.montoAnterior === 0) return '0.0';
     const diff = ((pt.montoActual - pt.montoAnterior) / pt.montoAnterior) * 100;
     return Math.abs(diff).toFixed(1);
+  }
+
+  getPointDiffMonto(pt: any): number {
+    if (!pt) return 0;
+    return Math.abs(pt.montoActual - pt.montoAnterior);
   }
 
   onChartMouseMove(event: MouseEvent): void {
