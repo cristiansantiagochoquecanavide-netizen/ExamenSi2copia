@@ -86,3 +86,46 @@ class InteraccionCreate(BaseModel):
     score_aplicado: Optional[float] = 0.0
     motivo: Optional[str] = "EXPLORACION"
 
+
+# --- CHATBOT / ASISTENTE VIRTUAL IA (CU20) ---
+class PrendaChatCardResponse(BaseModel):
+    id: int
+    nombre: str
+    sku: str
+    precio_base: float
+    categoria_nombre: str
+    sector: str
+    imagen_url: Optional[str] = None
+    rating_promedio: float = 5.0
+    total_resenas: int = 0
+
+
+class MensajeChatCreate(BaseModel):
+    texto: str = Field(min_length=1, max_length=1000, description="Texto de la consulta del usuario")
+    session_uuid: Optional[str] = Field(default=None, description="UUID de la sesión existente si la hubiere")
+
+
+class MensajeChatResponse(BaseIaasistenteSchema):
+    id: int
+    remitente: str
+    texto: str
+    intencion_detectada: Optional[str] = None
+    prendas_recomendadas: List[PrendaChatCardResponse] = Field(default_factory=list)
+    sugerencias_rapidas: List[str] = Field(default_factory=list)
+    created_at: datetime
+
+
+class SesionChatResponse(BaseIaasistenteSchema):
+    session_uuid: str
+    titulo: str
+    mensajes: List[MensajeChatResponse] = Field(default_factory=list)
+    created_at: datetime
+
+
+class SesionChatResumen(BaseModel):
+    session_uuid: str
+    titulo: str
+    total_mensajes: int
+    updated_at: datetime
+
+

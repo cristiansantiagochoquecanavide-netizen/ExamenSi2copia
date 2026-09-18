@@ -6,11 +6,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.domains.usuarios.models import Usuario
 from app.domains.usuarios.routers import get_current_user, get_optional_current_user
-from app.domains.ia_asistente.services import IaasistenteService
+from app.domains.ia_asistente.services import IaasistenteService, ChatbotConciergeService
 from app.domains.ia_asistente.schemas import (
     IaasistenteStatusResponse, PreferenciaEstiloCreate, PreferenciaEstiloResponse,
     RecomendacionPrendaItem, OutfitSugeridoResponse, DashboardRecomendacionesResponse,
-    InteraccionCreate
+    InteraccionCreate, MensajeChatCreate, MensajeChatResponse, SesionChatResponse,
+    SesionChatResumen
 )
 
 router = APIRouter(
@@ -134,4 +135,73 @@ async def registrar_interaccion(
         usuario_id=usuario_id
     )
     return {"status": "ok", "message": "Interaccion registrada exitosamente"}
+
+
+# =============================================================================
+# ENDPOINTS CHATBOT / ASISTENTE VIRTUAL IA (CU20)
+# =============================================================================
+@router.post(
+    "/chat",
+    response_model=MensajeChatResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Enviar mensaje a Atelier Concierge IA (CU20)"
+)
+async def enviar_mensaje_chat(
+    payload: MensajeChatCreate,
+    usuario: Optional[Usuario] = Depends(get_optional_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    service = ChatbotConciergeService(db)
+    usuario_id = usuario.id if usuario else None
+    return await service.procesar_mensaje(
+        texto=payload.texto,
+        session_uuid=payload.session_uuid,
+        usuario_id=usuario_id
+    )
+
+
+@router.get(
+    "/chat/sesiones",
+    response_model=List[SesionChatResumen],
+    summary="Listar sesiones previas de chat del usuario (CU20)"
+)
+async def listar_sesiones_chat(
+    usuario: Usuario = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    service = ChatbotConciergeService(db)
+    return await service.listar_sesiones_usuario(usuario.id)
+
+
+@router.get(
+    "/chat/{session_uuid}",
+    response_model=SesionChatResponse,
+    summary="Obtener historial completo de una sesión de chat (CU20)"
+)
+async def obtener_historial_chat(
+    session_uuid: str,
+    db: AsyncSession = Depends(get_db)
+):
+    service = ChatbotConciergeService(db)
+    historial = await service.obtener_historial_sesion(session_uuid)
+    if not historial:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sesión de chat no encontrada")
+    return historial
+
+
+@router.delete(
+    "/chat/{session_uuid}",
+    status_code=status.HTTP_200_OK,
+    summary="Eliminar o reiniciar sesión de chat (CU20)"
+)
+async def eliminar_sesion_chat(
+    session_uuid: str,
+    db: AsyncSession = Depends(get_db)
+):
+    service = ChatbotConciergeService(db)
+    ok = await service.eliminar_sesion(session_uuid)
+    if not ok:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sesión de chat no encontrada")
+    return {"status": "ok", "message": "Sesión eliminada"}
+
 

@@ -3,11 +3,12 @@ import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/rou
 import { CommonModule } from '@angular/common';
 import { AuthService } from './core/services/auth.service';
 import { CartService } from './features/ventas/services/cart.service';
+import { ChatbotWidgetComponent } from './features/ia-asistente/components/chatbot-widget.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, ChatbotWidgetComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })

@@ -58,3 +58,41 @@ export interface DashboardRecomendaciones {
   outfits_destacados: OutfitSugerido[];
 }
 
+// ----------------- CU20: ATELIER CONCIERGE CHATBOT (IA) -----------------
+export interface PrendaChatCard {
+  id: number;
+  nombre: string;
+  sku: string;
+  precio_base: number;
+  categoria_nombre: string;
+  sector: string;
+  imagen_url?: string | null;
+  rating_promedio: number;
+  total_resenas: number;
+}
+
+export interface MensajeChat {
+  id?: number;
+  remitente: 'USUARIO' | 'ASISTENTE';
+  texto: string;
+  prendas_recomendadas?: PrendaChatCard[];
+  sugerencias_rapidas?: string[];
+  created_at?: string;
+  session_uuid?: string;
+  isSending?: boolean;
+}
+
+export interface MensajeChatCreate {
+  texto: string;
+  session_uuid?: string | null;
+}
+
+export interface SesionChat {
+  id: number;
+  session_uuid: string;
+  titulo: string;
+  activa: boolean;
+  created_at: string;
+  mensajes: MensajeChat[];
+}
+
