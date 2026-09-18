@@ -327,9 +327,9 @@ import {
         <section class="harbor-middle-grid">
           <!-- Columna Izquierda (65%): Tendencia de Ingresos -->
           <article class="harbor-card revenue-chart-card">
-            <div class="card-header-flex revenue-single-header">
-              <div class="revenue-header-info">
-                <h3 class="revenue-title">Tendencia de Ingresos</h3>
+            <div class="card-header-flex revenue-chart-header">
+              <div class="revenue-header-left">
+                <span class="card-eyebrow">TENDENCIA DE INGRESOS</span>
                 <span class="revenue-hero-number">&dollar;{{ financialData().facturacion_actual | number:'1.2-2' }}</span>
               </div>
 
@@ -1499,37 +1499,34 @@ import {
       align-items: flex-start;
     }
 
-    .revenue-single-header {
+    .revenue-chart-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
       width: 100%;
-      flex-wrap: nowrap;
       margin-bottom: 0.25rem;
     }
 
-    .revenue-header-info {
+    .revenue-header-left {
       display: flex;
-      align-items: baseline;
-      gap: 1.25rem;
-      flex-wrap: nowrap;
+      flex-direction: column;
+      gap: 0.2rem;
     }
 
-    .revenue-title {
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: #111827;
-      margin: 0;
-      white-space: nowrap;
-      letter-spacing: -0.01em;
+    .card-eyebrow {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #9ca3af;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
     .revenue-hero-number {
-      font-size: 1.65rem;
+      font-size: 1.85rem;
       font-weight: 800;
       letter-spacing: -0.02em;
       color: #111827;
-      line-height: 1;
+      line-height: 1.1;
       white-space: nowrap;
     }
 
