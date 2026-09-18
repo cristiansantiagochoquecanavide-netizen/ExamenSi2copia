@@ -430,9 +430,9 @@ import {
                   </g>
 
                   <!-- Badge Flotante en el Último Punto (Live Value) -->
-                  <g *ngIf="lastTrendPoint() && !hoveredTrendPoint" [attr.transform]="'translate(' + (lastTrendPoint()!.x - 45) + ',' + (lastTrendPoint()!.yActual - 32) + ')'" class="current-badge-group">
-                    <rect width="90" height="24" rx="12" fill="#111827" filter="drop-shadow(0 3px 6px rgba(0,0,0,0.25))" />
-                    <text x="45" y="16.5" text-anchor="middle" fill="#ffffff" font-size="11.5" font-weight="800" font-family="ui-monospace, monospace">
+                  <g *ngIf="lastTrendPoint() && !hoveredTrendPoint" [attr.transform]="'translate(' + (lastTrendPoint()!.x - 50) + ',' + (lastTrendPoint()!.yActual - 32) + ')'" class="current-badge-group">
+                    <rect width="100" height="24" rx="12" fill="#111827" filter="drop-shadow(0 3px 6px rgba(0,0,0,0.25))" />
+                    <text x="50" y="16.5" text-anchor="middle" fill="#ffffff" font-size="11.5" font-weight="800" font-family="ui-monospace, monospace">
                       &dollar;{{ lastTrendPoint()!.montoActual | number:'1.0-0' }}
                     </text>
                   </g>
