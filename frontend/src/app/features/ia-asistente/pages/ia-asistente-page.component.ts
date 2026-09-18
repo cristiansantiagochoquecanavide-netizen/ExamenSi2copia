@@ -17,17 +17,16 @@ import { AuthService } from '../../../core/services/auth.service';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
-    <div class="atelier-container">
-      <!-- 1. HERO & BANNER EDITORIAL -->
-      <section class="atelier-hero">
-        <div class="hero-backdrop"></div>
+    <div class="catalogo-container">
+      <!-- 1. HERO & BANNER EDITORIAL (ESTILO FASHIONSTORE) -->
+      <section class="editorial-hero">
         <div class="hero-content">
-          <div class="hero-badge">
-            <span class="ai-sparkle">✦</span>
-            <span>ATELIER STYLIST • MOTOR DE RECOMENDACIONES IA</span>
+          <div class="editorial-eyebrow">
+            <span class="gold-dot">&bull;</span>
+            <span>ATELIER STYLIST &bull; MOTOR DE RECOMENDACIONES IA</span>
           </div>
 
-          <h1 class="hero-title">Tu Estilista Personal de Alta Costura</h1>
+          <h1 class="hero-title">Tu Estilista Personal</h1>
 
           <p class="hero-description">
             @if (dashboard()?.usuario_nombre) {
@@ -40,9 +39,8 @@ import { AuthService } from '../../../core/services/auth.service';
           </p>
 
           <div class="hero-actions">
-            <button type="button" class="btn-quiz-cta" (click)="abrirModalQuiz()">
-              <span class="btn-icon">⚡</span>
-              <span>{{ dashboard()?.perfil_completado ? 'Refinar mi Test de Estilo' : 'Realizar Test de Estilo Personal' }}</span>
+            <button type="button" class="btn-action-gold" (click)="abrirModalQuiz()">
+              ⚡ {{ dashboard()?.perfil_completado ? 'REFINAR MI TEST DE ESTILO' : 'REALIZAR TEST DE ESTILO PERSONAL' }}
             </button>
 
             @if (dashboard()?.perfil_completado && dashboard()?.preferencias) {
@@ -415,58 +413,51 @@ import { AuthService } from '../../../core/services/auth.service';
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
+    .catalogo-container,
     .atelier-container {
       max-width: 1400px;
       margin: 0 auto;
-      padding: 2.5rem 1.5rem 5rem;
+      padding: 2.5rem 3rem 4rem 3rem;
+      color: #111111;
+      background-color: #ffffff;
     }
 
-    /* 1. HERO BANNER */
-    .atelier-hero {
-      position: relative;
-      background: #fdfbf7;
-      border: 1px solid rgba(197, 168, 128, 0.4);
-      border-left: 4px solid #c5a880;
-      padding: 3rem 2.5rem;
-      border-radius: 4px;
+    /* 1. HERO BANNER EDITORIAL */
+    .editorial-hero {
+      padding: 0 0 2.5rem 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       margin-bottom: 2.5rem;
-      overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
     }
 
-    .hero-badge {
-      display: inline-flex;
+    .editorial-eyebrow {
+      display: flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.35rem 0.9rem;
-      background: #f4ede4;
-      border: 1px solid #c5a880;
-      color: #78350f;
       font-size: 0.72rem;
+      letter-spacing: 0.25em;
+      color: #374151;
       font-weight: 700;
-      letter-spacing: 0.12em;
-      border-radius: 50px;
-      margin-bottom: 1.25rem;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
     }
 
-    .ai-sparkle {
-      color: #b45309;
-      font-size: 0.9rem;
+    .gold-dot {
+      color: #000000;
     }
 
     .hero-title {
-      font-size: 2.4rem;
+      font-size: 2.5rem;
       font-weight: 800;
       letter-spacing: -0.02em;
-      margin: 0 0 1rem;
+      margin: 0 0 0.75rem 0;
       color: #000000 !important;
     }
 
     .hero-description {
-      font-size: 1.05rem;
+      font-size: 0.95rem;
       line-height: 1.6;
       color: #4b5563;
-      max-width: 850px;
+      max-width: 800px;
       margin-bottom: 2rem;
     }
 
@@ -482,27 +473,23 @@ import { AuthService } from '../../../core/services/auth.service';
       gap: 1.25rem;
     }
 
-    .btn-quiz-cta {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
+    .btn-action-gold {
       background: #000000;
+      border: 1px solid #000000;
       color: #ffffff;
+      padding: 0.65rem 1.4rem;
+      font-size: 0.75rem;
       font-weight: 700;
-      font-size: 0.88rem;
-      padding: 0.85rem 1.6rem;
-      border: none;
-      border-radius: 4px;
+      letter-spacing: 0.12em;
       cursor: pointer;
+      border-radius: 9999px;
       transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
     }
 
-    .btn-quiz-cta:hover {
-      background: #c5a880;
-      color: #000000;
-      transform: translateY(-1px);
+    .btn-action-gold:hover {
+      background: #262626;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
@@ -550,27 +537,32 @@ import { AuthService } from '../../../core/services/auth.service';
 
     .occasion-pill {
       background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.15);
-      color: #4b5563;
-      padding: 0.5rem 1.1rem;
-      border-radius: 50px;
+      border: 1px solid #d1d5db;
+      border-radius: 9999px;
+      color: #111111;
+      padding: 0.55rem 1.45rem;
       font-size: 0.82rem;
-      font-weight: 600;
+      font-weight: 700;
+      letter-spacing: 0.08em;
       cursor: pointer;
-      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
     }
 
     .occasion-pill:hover {
       border-color: #000000;
       color: #000000;
+      background: #f9fafb;
     }
 
     .occasion-pill.active {
-      background: #000000;
-      border-color: #000000;
-      color: #ffffff;
-      font-weight: 700;
+      background: #000000 !important;
+      border-color: #000000 !important;
+      color: #ffffff !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
     }
 
     /* 3. SECTION HEADERS */
@@ -895,15 +887,29 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .pill-category {
-      background: #fdfbf7;
-      border: 1px solid #c5a880;
-      color: #78350f;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      color: #000000;
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.32rem 0.85rem;
+      border-radius: 9999px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
     }
 
     .pill-sector {
-      background: #f3f4f6;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      color: #374151;
+      background: #000000;
+      border: 1px solid #000000;
+      color: #ffffff;
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.32rem 0.85rem;
+      border-radius: 9999px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
     }
 
     /* Regla 4: Nombre comercial en negrita */

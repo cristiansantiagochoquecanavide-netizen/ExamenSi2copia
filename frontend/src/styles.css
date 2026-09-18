@@ -570,3 +570,130 @@ label {
   color: #1e40af !important;
   font-weight: 500 !important;
 }
+
+/* =========================================================
+   IA ASISTENTE (ATELIER STYLIST) - UNIFIED LIGHT THEME
+   ========================================================= */
+app-ia-asistente-page {
+  display: block !important;
+  background-color: #ffffff !important;
+  color: #111111 !important;
+  min-height: 100vh !important;
+}
+
+app-ia-asistente-page .catalogo-container,
+app-ia-asistente-page .atelier-container {
+  background-color: #ffffff !important;
+  color: #111111 !important;
+}
+
+app-ia-asistente-page .editorial-hero,
+app-ia-asistente-page .atelier-hero {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: none !important;
+  padding: 0 0 2.5rem 0 !important;
+  margin-bottom: 2.5rem !important;
+}
+
+app-ia-asistente-page .hero-title {
+  color: #000000 !important;
+}
+
+app-ia-asistente-page .hero-description {
+  color: #4b5563 !important;
+}
+
+app-ia-asistente-page .outfit-card,
+app-ia-asistente-page .recom-card,
+app-ia-asistente-page .outfit-item-card {
+  background-color: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  color: #111111 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+app-ia-asistente-page .outfit-card:hover,
+app-ia-asistente-page .recom-card:hover {
+  border-color: rgba(0, 0, 0, 0.25) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+}
+
+app-ia-asistente-page .card-body {
+  background-color: #ffffff !important;
+  color: #111111 !important;
+}
+
+app-ia-asistente-page .product-title,
+app-ia-asistente-page .outfit-title,
+app-ia-asistente-page .section-title {
+  color: #000000 !important;
+}
+
+app-ia-asistente-page .ai-rationale-box {
+  background: #f9fafb !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-left: 3px solid #000000 !important;
+  color: #374151 !important;
+}
+
+app-ia-asistente-page .rationale-text {
+  color: #374151 !important;
+}
+
+app-ia-asistente-page .card-footer {
+  border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+app-ia-asistente-page .amount,
+app-ia-asistente-page .price-val {
+  color: #000000 !important;
+}
+
+app-ia-asistente-page .occasion-pill {
+  background: #ffffff !important;
+  border: 1px solid #d1d5db !important;
+  color: #111111 !important;
+}
+
+app-ia-asistente-page .occasion-pill:hover {
+  border-color: #000000 !important;
+  background: #f9fafb !important;
+}
+
+app-ia-asistente-page .occasion-pill.active {
+  background: #000000 !important;
+  border-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+app-ia-asistente-page .quiz-modal,
+app-ia-asistente-page .look-modal {
+  background-color: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  color: #111111 !important;
+}
+
+app-ia-asistente-page .modal-header,
+app-ia-asistente-page .modal-footer {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+app-ia-asistente-page .modal-title {
+  color: #000000 !important;
+}
+
+app-ia-asistente-page .quiz-pill {
+  background: #f3f4f6 !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  color: #374151 !important;
+}
+
+app-ia-asistente-page .quiz-pill.selected {
+  background: #000000 !important;
+  border-color: #000000 !important;
+  color: #ffffff !important;
+}
+
