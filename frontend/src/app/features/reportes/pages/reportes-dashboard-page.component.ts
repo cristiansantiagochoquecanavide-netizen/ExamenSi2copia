@@ -3,19 +3,15 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { ReportesService } from '../services/reportes.service';
+import { AuthService } from '../../../core/services/auth.service';
 import {
   DashboardReporteResponse,
   AnalisisVozResponse,
-  SalesVelocityPoint,
-  InventoryAlertItem,
-  RecentOrderRow,
   TopProductItem,
+  RecentOrderRow,
   FinancialIndicator,
   ComparativeTrendPoint,
-  InventoryStackedItem,
-  FunnelStepItem,
-  DistributionSlice,
-  GeographicHub
+  DistributionSlice
 } from '../models/reportes.models';
 
 @Component({
@@ -23,58 +19,63 @@ import {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
-    <div class="dashboard-page-wrapper">
-      <div class="dashboard-container">
+    <div class="harbor-page-wrapper">
+      <div class="harbor-container">
 
         <!-- ========================================================= -->
-        <!-- CABECERA PRINCIPAL EJECUTIVA (SIN "SI2")                  -->
+        <!-- 1. HEADER EJECUTIVO (ESTILO HARBOR)                       -->
         <!-- ========================================================= -->
-        <header class="dashboard-header">
-          <div class="header-titles">
-            <div class="header-eyebrow">
-              <span class="gold-dot">&bull;</span>
-              <span>INTELLIGENCE &bull; ATELIER NOIR</span>
-            </div>
-            <h1 class="header-main-title">Dashboard Ejecutivo & Business Intelligence</h1>
-            <p class="header-subtitle">
-              Panel analítico consolidado de visión financiera, inventario de alta costura, funnel de conversión y logística.
-            </p>
+        <header class="harbor-header">
+          <div class="header-greeting-block">
+            <h1 class="header-greeting">Buenos días, {{ currentUserName() }}</h1>
+            <p class="header-date">{{ currentDateFormatted() }}</p>
           </div>
 
-          <div class="header-controls">
-            <!-- Selector de Rango Temporal General -->
-            <div class="period-selector-wrapper">
-              <span class="period-label">RANGO:</span>
-              <select class="period-select" [ngModel]="selectedRango()" (ngModelChange)="cambiarRango($event)">
-                <option value="24H">Últimas 24 Horas</option>
-                <option value="7D">Últimos 7 Días</option>
-                <option value="30D">Últimos 30 Días</option>
-                <option value="MES_ACTUAL">Mes en Curso</option>
+          <div class="header-actions-block">
+            <!-- Selector de Rango Temporal -->
+            <div class="timeframe-select-pill">
+              <svg class="calendar-mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2" />
+                <line x1="16" y1="2" x2="16" y2="6" stroke-width="2" />
+                <line x1="8" y1="2" x2="8" y2="6" stroke-width="2" />
+                <line x1="3" y1="10" x2="21" y2="10" stroke-width="2" />
+              </svg>
+              <select [ngModel]="selectedRango()" (ngModelChange)="cambiarRango($event)" class="timeframe-dropdown">
+                <option value="24H">Últimas 24 horas</option>
+                <option value="7D">Últimos 7 días</option>
+                <option value="30D">Últimos 30 días</option>
+                <option value="MES_ACTUAL">Mes actual</option>
               </select>
             </div>
 
             <!-- Botón Exportar CSV -->
             <button
               type="button"
-              class="btn-export-csv"
+              class="btn-harbor-export"
               (click)="exportarReporte()"
-              [disabled]="exporting()">
-              <span *ngIf="!exporting()">↓ Exportar CSV</span>
-              <span *ngIf="exporting()">Generando...</span>
+              [disabled]="exporting()"
+              title="Exportar informe en formato CSV">
+              <svg class="export-mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <polyline points="7 10 12 15 17 10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <line x1="12" y1="15" x2="12" y2="3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <span>{{ exporting() ? 'Exportando...' : 'Exportar' }}</span>
             </button>
           </div>
         </header>
 
         <!-- ========================================================= -->
-        <!-- ASISTENTE DE VOZ IA UNIFICADO (ZERO BOTONERA CLUTTER)     -->
+        <!-- 2. ASISTENTE DE VOZ IA UNIFICADO (HAUTE COUTURE CONCIERGE)-->
         <!-- ========================================================= -->
-        <section class="voice-ai-bar-section">
+        <section class="harbor-voice-bar-section">
           <div class="voice-search-bar" [class.listening-active]="isListening()">
             <button
               type="button"
               class="voice-mic-trigger"
               (click)="toggleVoiceRecording()"
-              [title]="isListening() ? 'Detener dictado' : 'Hablar al Asistente IA'">
+              [title]="isListening() ? 'Detener dictado' : 'Hablar al Asistente IA'"
+              aria-label="Hablar al Asistente IA">
               <svg
                 *ngIf="!isListening()"
                 xmlns="http://www.w3.org/2000/svg"
@@ -82,11 +83,11 @@ import {
                 width="20"
                 height="20"
                 class="icon-mic"
-                aria-hidden="true"
-              >
+                aria-hidden="true">
                 <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" fill="#ffffff"/>
                 <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" fill="#ffffff"/>
               </svg>
+
               <div *ngIf="isListening()" class="audio-wave-bars">
                 <span class="bar bar-1"></span>
                 <span class="bar bar-2"></span>
@@ -100,7 +101,7 @@ import {
               class="voice-search-input"
               [(ngModel)]="textQueryInput"
               (keyup.enter)="ejecutarConsultaTexto()"
-              [placeholder]="isListening() ? (currentTranscript() || 'Escuchando tu consulta...') : 'Preguntá a la IA: ¿cuál es la prenda más vendida?, ¿cómo va el objetivo mensual? (escribí o pulsá el micro)...'"
+              [placeholder]="isListening() ? (currentTranscript() || 'Escuchando tu voz...') : 'Preguntá a la IA: ¿cuál es el producto más vendido?, ¿cómo va el objetivo mensual? (escribí o pulsá el micro)...'"
             />
 
             <button
@@ -113,8 +114,8 @@ import {
           </div>
 
           <!-- Sugerencias Rápidas -->
-          <div class="quick-prompts-subtle">
-            <span class="prompt-hint">Preguntas sugeridas:</span>
+          <div class="quick-prompts-row">
+            <span class="prompt-hint">Consultas sugeridas:</span>
             <button
               *ngFor="let p of quickPills"
               type="button"
@@ -124,7 +125,7 @@ import {
             </button>
           </div>
 
-          <!-- Diagnóstico de Voz Desplegable -->
+          <!-- Panel Desplegable de Diagnóstico IA -->
           <div *ngIf="voiceAnalysis() && !isProcessingVoice()" class="voice-result-card">
             <div class="voice-result-header">
               <div class="intent-zone">
@@ -165,624 +166,389 @@ import {
         </section>
 
         <!-- ========================================================= -->
-        <!-- 1. MÓDULO 1: RENDIMIENTO DE VENTAS (VISIÓN FINANCIERA)     -->
-        <!--    Inspirado fielmente en el boceto "VENTAS POR MES"      -->
+        <!-- 3. FILA SUPERIOR: 4 KPIS + SEMICIRCULAR SALES TARGET GAUGE-->
         <!-- ========================================================= -->
-        <section class="bi-card financial-module">
-          <!-- Header de la tarjeta con Switcher de Granularidad: Mes / Semana / Día -->
-          <div class="bi-card-header">
-            <div class="bi-header-left">
-              <h2 class="bi-title">
-                VENTAS POR {{ selectedGranularidad() === 'MES' ? 'MES' : (selectedGranularidad() === 'SEMANA' ? 'SEMANA' : 'DÍA') }}
-              </h2>
-              <p class="bi-subtitle">
-                Comparación de ventas acumuladas frente al período anterior con proyección de meta.
-              </p>
+        <section class="harbor-top-metrics-grid">
+          <!-- KPI 1: Facturación / Revenue -->
+          <article class="harbor-kpi-card">
+            <div class="kpi-header-row">
+              <span class="kpi-tag-name">Facturación</span>
+              <span class="kpi-icon-pill icon-revenue">&dollar;</span>
+            </div>
+            <div class="kpi-main-number">&dollar;{{ financialData().facturacion_actual | number:'1.2-2' }}</div>
+            <div class="kpi-comparison-row">
+              <span class="kpi-growth-pill positive">
+                <span class="growth-arrow">▲</span> {{ financialData().variacion_pct }}%
+              </span>
+              <span class="kpi-period-ref">vs período anterior</span>
+            </div>
+          </article>
+
+          <!-- KPI 2: Pedidos Totales / Orders -->
+          <article class="harbor-kpi-card">
+            <div class="kpi-header-row">
+              <span class="kpi-tag-name">Pedidos Totales</span>
+              <span class="kpi-icon-pill icon-orders">📦</span>
+            </div>
+            <div class="kpi-main-number">{{ financialData().pedidos_totales }}</div>
+            <div class="kpi-comparison-row">
+              <span class="kpi-growth-pill positive">
+                <span class="growth-arrow">▲</span> 8.2%
+              </span>
+              <span class="kpi-period-ref">vs período anterior</span>
+            </div>
+          </article>
+
+          <!-- KPI 3: Ticket Promedio / Avg Order Value -->
+          <article class="harbor-kpi-card">
+            <div class="kpi-header-row">
+              <span class="kpi-tag-name">Ticket Promedio</span>
+              <span class="kpi-icon-pill icon-ticket">💳</span>
+            </div>
+            <div class="kpi-main-number">&dollar;{{ financialData().ticket_medio | number:'1.2-2' }}</div>
+            <div class="kpi-comparison-row">
+              <span class="kpi-growth-pill positive">
+                <span class="growth-arrow">▲</span> 3.1%
+              </span>
+              <span class="kpi-period-ref">vs período anterior</span>
+            </div>
+          </article>
+
+          <!-- KPI 4: Conversión Global / Conversion Rate -->
+          <article class="harbor-kpi-card">
+            <div class="kpi-header-row">
+              <span class="kpi-tag-name">Conversión Global</span>
+              <span class="kpi-icon-pill icon-conversion">⚡</span>
+            </div>
+            <div class="kpi-main-number">{{ dashboardData()?.kpis?.conversion_rate || 9.9 }}%</div>
+            <div class="kpi-comparison-row">
+              <span class="kpi-growth-pill positive">
+                <span class="growth-arrow">▲</span> 0.6 pp
+              </span>
+              <span class="kpi-period-ref">probador a compra</span>
+            </div>
+          </article>
+
+          <!-- Card 5: Meta de Ventas (Semicircle Radial Gauge) -->
+          <article class="harbor-kpi-card target-gauge-card">
+            <div class="target-gauge-wrapper">
+              <svg class="semicircle-svg" viewBox="0 0 160 95">
+                <!-- Pista base semicircular (gris muy suave) -->
+                <path
+                  d="M 24 82 A 56 56 0 0 1 136 82"
+                  fill="none"
+                  stroke="#f1f5f9"
+                  stroke-width="12"
+                  stroke-linecap="round"
+                />
+                <!-- Arco de progreso (Dorado Haute Couture) -->
+                <path
+                  d="M 24 82 A 56 56 0 0 1 136 82"
+                  fill="none"
+                  stroke="#d4af37"
+                  stroke-width="12"
+                  stroke-linecap="round"
+                  stroke-dasharray="175.93"
+                  [attr.stroke-dashoffset]="semicircleDashoffset()"
+                />
+              </svg>
+
+              <div class="gauge-center-caption">
+                <span class="gauge-bold-pct">{{ financialData().cumplimiento_pct }}%</span>
+                <span class="gauge-label">Meta de Ventas</span>
+              </div>
             </div>
 
-            <div class="bi-header-right">
-              <!-- Switcher de Granularidad (Día, Semana, Mes) -->
-              <div class="granularity-tabs">
+            <div class="target-footnote">
+              &dollar;{{ (financialData().facturacion_actual / 1000) | number:'1.1-1' }}k de &dollar;{{ (financialData().objetivo_mes / 1000) | number:'1.0-0' }}k mensual
+            </div>
+          </article>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- 4. FILA MEDIA: REVENUE ANALYTICS + ORDER FULFILLMENT      -->
+        <!-- ========================================================= -->
+        <section class="harbor-middle-grid">
+          <!-- Columna Izquierda (65%): Tendencia de Ingresos -->
+          <article class="harbor-card revenue-chart-card">
+            <div class="card-header-flex">
+              <div class="revenue-header-stats">
+                <span class="card-eyebrow">TENDENCIA DE INGRESOS</span>
+                <div class="revenue-hero-row">
+                  <span class="revenue-hero-number">&dollar;{{ financialData().facturacion_actual | number:'1.2-2' }}</span>
+                  <span class="hero-growth-badge">▲ +{{ financialData().variacion_pct }}%</span>
+                </div>
+              </div>
+
+              <!-- Selector de Granularidad: Día, Semana, Mes -->
+              <div class="granularity-switcher-tabs">
                 <button
                   type="button"
-                  class="gran-tab"
+                  class="switcher-tab"
                   [class.active]="selectedGranularidad() === 'DIA'"
                   (click)="cambiarGranularidad('DIA')">
                   Día
                 </button>
                 <button
                   type="button"
-                  class="gran-tab"
+                  class="switcher-tab"
                   [class.active]="selectedGranularidad() === 'SEMANA'"
                   (click)="cambiarGranularidad('SEMANA')">
                   Semana
                 </button>
                 <button
                   type="button"
-                  class="gran-tab"
+                  class="switcher-tab"
                   [class.active]="selectedGranularidad() === 'MES'"
                   (click)="cambiarGranularidad('MES')">
                   Mes
                 </button>
               </div>
             </div>
-          </div>
 
-          <!-- Contenido Principal: Doble Anillo + Mini KPIs (Izquierda) & Curvas Comparativas (Derecha) -->
-          <div class="financial-main-layout">
+            <!-- Gráfico SVG Curva Fluida con Escala Y Cuantitativa -->
+            <div class="chart-stage-container">
+              <svg class="flowing-trend-svg" viewBox="0 0 660 210" preserveAspectRatio="none">
+                <!-- Escala Eje Y & Líneas de Guía Horizontales -->
+                <g *ngFor="let tick of trendYAxisTicks()">
+                  <text x="50" [attr.y]="tick.y + 4" text-anchor="end" class="chart-y-label">{{ tick.label }}</text>
+                  <line x1="56" [attr.y1]="tick.y" x2="655" [attr.y2]="tick.y" stroke="#f1f5f9" stroke-width="1" [attr.stroke-dasharray]="tick.y === 175 ? 'none' : '3,3'" />
+                </g>
 
-            <!-- Lado Izquierdo: Anillo de Facturación vs Objetivo & Métricas Clave -->
-            <div class="financial-left-col">
-              <div class="ring-and-main-value">
-                <!-- Concentric Double Ring Gauge (SVG) -->
-                <div class="ring-gauge-wrapper">
-                  <svg class="concentric-ring-svg" viewBox="0 0 140 140">
-                    <!-- Anillo de fondo exterior -->
-                    <circle cx="70" cy="70" r="56" fill="transparent" stroke="#f3f4f6" stroke-width="10" />
-                    <!-- Anillo de progreso exterior (Facturación vs Meta) -->
-                    <circle
-                      cx="70" cy="70" r="56"
-                      fill="transparent"
-                      stroke="#111111"
-                      stroke-width="10"
-                      stroke-linecap="round"
-                      stroke-dasharray="351.85"
-                      [attr.stroke-dashoffset]="outerRingDashoffset()"
-                      transform="rotate(-90 70 70)"
-                    />
-                    <!-- Anillo de fondo interior -->
-                    <circle cx="70" cy="70" r="42" fill="transparent" stroke="#fdf8e6" stroke-width="7" />
-                    <!-- Anillo de progreso interior (Dorado Haute Couture) -->
-                    <circle
-                      cx="70" cy="70" r="42"
-                      fill="transparent"
-                      stroke="#d4af37"
-                      stroke-width="7"
-                      stroke-linecap="round"
-                      stroke-dasharray="263.89"
-                      [attr.stroke-dashoffset]="innerRingDashoffset()"
-                      transform="rotate(-90 70 70)"
-                    />
-                  </svg>
-                  <div class="ring-center-text">
-                    <span class="ring-pct-number">{{ financialData().cumplimiento_pct }}%</span>
-                    <span class="ring-pct-label">Objetivo</span>
-                  </div>
-                </div>
+                <!-- Gradiente de Fondo Suave Haute Couture -->
+                <defs>
+                  <linearGradient id="harborCurveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#d4af37" stop-opacity="0.18" />
+                    <stop offset="100%" stop-color="#d4af37" stop-opacity="0.00" />
+                  </linearGradient>
+                </defs>
 
-                <!-- Monto Total Grande y Variación -->
-                <div class="main-revenue-block">
-                  <span class="revenue-caption">Facturación actual</span>
-                  <div class="revenue-big-row">
-                    <span class="revenue-currency">&dollar;</span>
-                    <span class="revenue-amount">{{ financialData().facturacion_actual | number:'1.2-2' }}</span>
-                  </div>
-                  <div class="growth-pill-badge">
-                    <span class="pill-arrow">▲</span>
-                    <span>+{{ financialData().variacion_pct }}%</span>
-                    <span class="pill-vs">vs anterior</span>
-                  </div>
-                </div>
-              </div>
+                <!-- Área Rellena del Período Actual -->
+                <path [attr.d]="svgAreaActual()" fill="url(#harborCurveGradient)" />
 
-              <!-- Mini Cuadrícula de 4 Métricas Clave -->
-              <div class="mini-kpis-grid">
-                <div class="mini-kpi-box">
-                  <span class="mini-kpi-label">Ticket medio</span>
-                  <span class="mini-kpi-val">&dollar;{{ financialData().ticket_medio | number:'1.2-2' }}</span>
-                </div>
-                <div class="mini-kpi-box">
-                  <span class="mini-kpi-label">Pedidos</span>
-                  <span class="mini-kpi-val">{{ financialData().pedidos_totales }}</span>
-                </div>
-                <div class="mini-kpi-box">
-                  <span class="mini-kpi-label">Uds. vendidas</span>
-                  <span class="mini-kpi-val">{{ financialData().unidades_vendidas }}</span>
-                </div>
-                <div class="mini-kpi-box">
-                  <span class="mini-kpi-label">Descuentos</span>
-                  <span class="mini-kpi-val">&dollar;{{ financialData().descuentos_totales | number:'1.2-2' }}</span>
-                </div>
-              </div>
-            </div>
+                <!-- Línea Guía Vertical Magnética al interactuar -->
+                <line
+                  *ngIf="hoveredTrendPoint"
+                  [attr.x1]="hoveredTrendPoint.x"
+                  y1="30"
+                  [attr.x2]="hoveredTrendPoint.x"
+                  y2="175"
+                  stroke="#111111"
+                  stroke-dasharray="3,3"
+                  stroke-width="1.2"
+                  opacity="0.35"
+                />
 
-            <!-- Lado Derecho: Curvas Comparativas de Tendencia (Este período vs Anterior) -->
-            <div class="financial-right-col">
-              <!-- Leyenda Gráfica Superior -->
-              <div class="comparative-legend-bar">
-                <div class="legend-series">
-                  <span class="legend-chip-color solid-black"></span>
-                  <span class="legend-label">Este período</span>
-                </div>
-                <div class="legend-series">
-                  <span class="legend-chip-color dashed-gray"></span>
-                  <span class="legend-label">Período anterior</span>
-                </div>
-              </div>
+                <!-- Curva Dotted: Período Anterior -->
+                <path [attr.d]="svgPathAnterior()" fill="none" stroke="#9ca3af" stroke-width="2" stroke-dasharray="4,4" />
 
-              <!-- Lienzo SVG con Curvas de Beziers Suaves, Escala Eje Y y Badge Activo -->
-              <div class="trend-chart-container">
-                <svg class="trend-svg" viewBox="0 0 660 200" preserveAspectRatio="none">
-                  <!-- Líneas de Guía Horizontal (Grid) y Etiquetas del Eje Y -->
-                  <g *ngFor="let tick of trendYAxisTicks()">
-                    <text x="50" [attr.y]="tick.y + 4" text-anchor="end" class="svg-y-axis-label">{{ tick.label }}</text>
-                    <line x1="56" [attr.y1]="tick.y" x2="655" [attr.y2]="tick.y" stroke="#f1f5f9" stroke-width="1" [attr.stroke-dasharray]="tick.y === 170 ? 'none' : '3,3'" />
-                  </g>
+                <!-- Curva Sólida: Este Período -->
+                <path [attr.d]="svgPathActual()" fill="none" stroke="#111111" stroke-width="2.6" />
 
-                  <!-- Gradiente para el Área Actual -->
-                  <defs>
-                    <linearGradient id="curveFillActual" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stop-color="#111111" stop-opacity="0.14" />
-                      <stop offset="100%" stop-color="#111111" stop-opacity="0.00" />
-                    </linearGradient>
-                  </defs>
-
-                  <!-- Área Rellena del Período Actual -->
-                  <path [attr.d]="svgAreaActual()" fill="url(#curveFillActual)" />
-
-                  <!-- Línea Guía Vertical Magnética al pasar el cursor -->
-                  <line
-                    *ngIf="hoveredTrendPoint"
-                    [attr.x1]="hoveredTrendPoint.x"
-                    y1="30"
-                    [attr.x2]="hoveredTrendPoint.x"
-                    y2="170"
+                <!-- Nodos Interactivos -->
+                <g *ngFor="let pt of trendChartCoords()">
+                  <circle
+                    [attr.cx]="pt.x"
+                    [attr.cy]="pt.yActual"
+                    r="4.5"
+                    fill="#ffffff"
                     stroke="#111111"
-                    stroke-dasharray="3,3"
-                    stroke-width="1.2"
-                    opacity="0.35"
+                    stroke-width="2.5"
+                    (mouseenter)="hoveredTrendPoint = pt"
+                    (mouseleave)="hoveredTrendPoint = null"
+                    class="interactive-node"
                   />
+                </g>
 
-                  <!-- Curva Dotted: Período Anterior -->
-                  <path [attr.d]="svgPathAnterior()" fill="none" stroke="#9ca3af" stroke-width="2" stroke-dasharray="4,4" />
+                <!-- Badge Flotante Fijado en el Último Punto (Current Value) -->
+                <g *ngIf="lastTrendPoint()" [attr.transform]="'translate(' + (lastTrendPoint()!.x - 38) + ',' + (lastTrendPoint()!.yActual - 28) + ')'" class="current-badge-group">
+                  <rect width="76" height="21" rx="3" fill="#111111" />
+                  <polygon points="38,21 34,25 42,25" fill="#111111" />
+                  <text x="38" y="14.5" text-anchor="middle" fill="#ffffff" font-size="10.5" font-weight="700" font-family="ui-monospace, monospace">
+                    &dollar;{{ lastTrendPoint()!.montoActual | number:'1.0-0' }}
+                  </text>
+                </g>
 
-                  <!-- Curva Sólida: Este Período -->
-                  <path [attr.d]="svgPathActual()" fill="none" stroke="#111111" stroke-width="2.6" />
+                <g *ngIf="lastTrendPoint()">
+                  <circle [attr.cx]="lastTrendPoint()!.x" [attr.cy]="lastTrendPoint()!.yActual" r="6" fill="#111111" stroke="#ffffff" stroke-width="2" />
+                </g>
+              </svg>
 
-                  <!-- Nodos Interactivos (Puntos Actuales) -->
-                  <g *ngFor="let pt of trendChartCoords()">
-                    <circle
-                      [attr.cx]="pt.x"
-                      [attr.cy]="pt.yActual"
-                      r="4.5"
-                      fill="#ffffff"
-                      stroke="#111111"
-                      stroke-width="2.5"
-                      (mouseenter)="hoveredTrendPoint = pt"
-                      (mouseleave)="hoveredTrendPoint = null"
-                      class="interactive-node"
-                    />
-                  </g>
-
-                  <!-- Badge Fijo / Pin en el Último Punto (Valor del Momento) -->
-                  <g *ngIf="lastTrendPoint()" [attr.transform]="'translate(' + (lastTrendPoint()!.x - 38) + ',' + (lastTrendPoint()!.yActual - 28) + ')'" class="current-badge-group">
-                    <rect width="76" height="21" rx="3" fill="#111111" />
-                    <polygon points="38,21 34,25 42,25" fill="#111111" />
-                    <text x="38" y="14.5" text-anchor="middle" fill="#ffffff" font-size="10.5" font-weight="700" font-family="ui-monospace, monospace">
-                      &dollar;{{ lastTrendPoint()!.montoActual | number:'1.0-0' }}
-                    </text>
-                  </g>
-
-                  <!-- Círculo Resaltado en el Último Punto -->
-                  <g *ngIf="lastTrendPoint()">
-                    <circle [attr.cx]="lastTrendPoint()!.x" [attr.cy]="lastTrendPoint()!.yActual" r="6" fill="#111111" stroke="#ffffff" stroke-width="2" />
-                  </g>
-                </svg>
-
-                <!-- Tooltip Dinámico en Hover -->
-                <div *ngIf="hoveredTrendPoint" class="trend-hover-tooltip" [style.left.px]="hoveredTrendPoint.x - 60">
-                  <div class="tooltip-title">{{ hoveredTrendPoint.periodo }}</div>
-                  <div class="tooltip-row">
-                    <span class="dot-cur"></span>
-                    <span>Actual: <strong>&dollar;{{ hoveredTrendPoint.montoActual | number:'1.2-2' }}</strong></span>
-                  </div>
-                  <div class="tooltip-row">
-                    <span class="dot-prev"></span>
-                    <span>Anterior: &dollar;{{ hoveredTrendPoint.montoAnterior | number:'1.2-2' }}</span>
-                  </div>
+              <!-- Tooltip Flotante de Punto Activo -->
+              <div *ngIf="hoveredTrendPoint" class="trend-hover-tooltip" [style.left.px]="hoveredTrendPoint.x - 60">
+                <div class="tooltip-title">{{ hoveredTrendPoint.periodo }}</div>
+                <div class="tooltip-row">
+                  <span class="dot-cur"></span>
+                  <span>Actual: <strong>&dollar;{{ hoveredTrendPoint.montoActual | number:'1.2-2' }}</strong></span>
                 </div>
+                <div class="tooltip-row">
+                  <span class="dot-prev"></span>
+                  <span>Anterior: &dollar;{{ hoveredTrendPoint.montoAnterior | number:'1.2-2' }}</span>
+                </div>
+              </div>
 
-                <!-- Eje X con Etiquetas de Granularidad (Días, Semanas o Meses) -->
-                <div class="trend-x-axis" style="padding-left: 56px; padding-right: 12px;">
-                  <span *ngFor="let pt of trendChartCoords()">{{ pt.periodo }}</span>
+              <!-- Eje X con Etiquetas Temporales -->
+              <div class="chart-x-axis-row" style="padding-left: 56px; padding-right: 12px;">
+                <span *ngFor="let pt of trendChartCoords()">{{ pt.periodo }}</span>
+              </div>
+            </div>
+
+            <!-- Insight inferior -->
+            <div class="chart-achievement-bar">
+              <span class="achievement-icon">🚀</span>
+              <span><strong>¡Excelente ritmo operativo!</strong> {{ financialData().mensaje_insight }}</span>
+            </div>
+          </article>
+
+          <!-- Columna Derecha (35%): Order Fulfillment (Cumplimiento Logístico) -->
+          <article class="harbor-card fulfillment-card">
+            <div class="card-header-flex">
+              <div>
+                <h3 class="card-main-title">Despacho de Pedidos</h3>
+                <p class="card-subtitle">{{ financialData().pedidos_totales }} pedidos gestionados este período</p>
+              </div>
+            </div>
+
+            <!-- Barras Horizontales de Estados de Pedido -->
+            <div class="fulfillment-bars-list">
+              <!-- Entregados -->
+              <div class="fulfillment-bar-item">
+                <div class="fulfillment-bar-label-row">
+                  <span class="status-name">Entregados</span>
+                  <span class="status-count-pct">222 &bull; <strong>65%</strong></span>
+                </div>
+                <div class="fulfillment-track">
+                  <div class="fulfillment-fill fill-delivered" style="width: 65%;"></div>
+                </div>
+              </div>
+
+              <!-- En Tránsito -->
+              <div class="fulfillment-bar-item">
+                <div class="fulfillment-bar-label-row">
+                  <span class="status-name">En Tránsito</span>
+                  <span class="status-count-pct">68 &bull; <strong>20%</strong></span>
+                </div>
+                <div class="fulfillment-track">
+                  <div class="fulfillment-fill fill-shipped" style="width: 20%;"></div>
+                </div>
+              </div>
+
+              <!-- En Preparación -->
+              <div class="fulfillment-bar-item">
+                <div class="fulfillment-bar-label-row">
+                  <span class="status-name">En Preparación</span>
+                  <span class="status-count-pct">41 &bull; <strong>12%</strong></span>
+                </div>
+                <div class="fulfillment-track">
+                  <div class="fulfillment-fill fill-pending" style="width: 12%;"></div>
+                </div>
+              </div>
+
+              <!-- Devoluciones / Cambios -->
+              <div class="fulfillment-bar-item">
+                <div class="fulfillment-bar-label-row">
+                  <span class="status-name">Devoluciones / Cambios</span>
+                  <span class="status-count-pct">11 &bull; <strong>3%</strong></span>
+                </div>
+                <div class="fulfillment-track">
+                  <div class="fulfillment-fill fill-returns" style="width: 3%;"></div>
                 </div>
               </div>
             </div>
 
-          </div>
-
-          <!-- Banner Inferior de Logro / Insight Gerencial -->
-          <div class="achievement-callout-banner">
-            <div class="achievement-icon">🚀</div>
-            <div class="achievement-text">
-              <strong>¡Excelente ritmo operativo!</strong>
-              <span>{{ financialData().mensaje_insight }}</span>
+            <!-- Indicadores Logísticos Inferiores -->
+            <div class="fulfillment-summary-footer">
+              <div class="logistics-stat-box">
+                <span class="logistics-stat-val">96.8%</span>
+                <span class="logistics-stat-lbl">Entregas a tiempo (SLA)</span>
+              </div>
+              <div class="logistics-stat-box">
+                <span class="logistics-stat-val">18 min</span>
+                <span class="logistics-stat-lbl">Tiempo prep. boutique</span>
+              </div>
             </div>
-          </div>
+          </article>
         </section>
 
         <!-- ========================================================= -->
-        <!-- 2. MÓDULO 2: ANÁLISIS DE PRODUCTOS E INVENTARIO           -->
-        <!--    Barras Horizontales (Top) + Barras Apiladas (Stock)     -->
+        <!-- 5. FILA INFERIOR: TOP PRODUCTS + TABLA DE PEDIDOS         -->
         <!-- ========================================================= -->
-        <section class="bi-grid-row two-columns-equal">
-
-          <!-- Gráfico de Barras Horizontales: Top Productos Más Vendidos -->
-          <article class="bi-card">
-            <div class="bi-card-header">
+        <section class="harbor-bottom-grid">
+          <!-- Columna Izquierda (35%): Productos Más Vendidos -->
+          <article class="harbor-card top-products-card">
+            <div class="card-header-flex">
               <div>
-                <h3 class="bi-title-medium">Top Productos Más Vendidos</h3>
-                <p class="bi-subtitle">Prendas con mayor demanda y facturación acumulada.</p>
+                <h3 class="card-main-title">Productos Más Vendidos</h3>
+                <p class="card-subtitle">Prendas líderes en facturación acumulada</p>
               </div>
-              <span class="subtle-badge">RANKING ATELIER</span>
+              <a routerLink="/catalogo" class="link-harbor-action">Ver catálogo &rarr;</a>
             </div>
 
-            <div class="horizontal-bars-container">
-              <div *ngFor="let p of topProductsList(); let idx = index" class="hbar-item">
-                <div class="hbar-meta-row">
-                  <div class="hbar-info">
-                    <span class="hbar-rank">#{{ idx + 1 }}</span>
-                    <img
-                      [src]="p.imagen_url || '/assets/catalog/vestido-noir.jpg'"
-                      class="hbar-thumb"
-                      [alt]="p.nombre"
-                    />
-                    <div class="hbar-names">
-                      <span class="hbar-product-name">{{ p.nombre }}</span>
-                      <span class="hbar-category">{{ p.categoria }} &bull; {{ p.unidades_vendidas }} unidades</span>
-                    </div>
-                  </div>
-                  <div class="hbar-amount">
-                    <strong>&dollar;{{ p.ingresos_totales | number:'1.2-2' }}</strong>
-                  </div>
+            <div class="top-products-list">
+              <div *ngFor="let p of topProductsList(); let i = index" class="product-rank-row">
+                <!-- Monograma o Miniatura estilo Harbor -->
+                <div class="product-avatar-monogram">
+                  {{ getInitials(p.nombre) }}
                 </div>
 
-                <!-- Barra Horizontal -->
-                <div class="hbar-track">
-                  <div
-                    class="hbar-fill"
-                    [style.width.%]="(p.ingresos_totales / maxProductRevenue()) * 100"
-                  ></div>
+                <div class="product-info-col">
+                  <span class="product-title-text">{{ p.nombre }}</span>
+                  <span class="product-category-text">{{ p.categoria }}</span>
+                </div>
+
+                <div class="product-revenue-col">
+                  <span class="product-amount-number">&dollar;{{ p.ingresos_totales | number:'1.0-0' }}</span>
+                  <span class="product-sold-units">{{ p.unidades_vendidas }} vendidos</span>
                 </div>
               </div>
             </div>
           </article>
 
-          <!-- Gráfico de Barras Apiladas: Stock Disponible vs Reservado vs Crítico -->
-          <article class="bi-card">
-            <div class="bi-card-header">
+          <!-- Columna Derecha (65%): Tabla Ejecutiva de Pedidos Recientes -->
+          <article class="harbor-card recent-orders-card">
+            <div class="card-header-flex">
               <div>
-                <h3 class="bi-title-medium">Inventario por Categoría (Barras Apiladas)</h3>
-                <p class="bi-subtitle">Disponibilidad en almacén, reservas en probador y riesgo crítico.</p>
+                <h3 class="card-main-title">Pedidos Recientes</h3>
+                <p class="card-subtitle">Últimas transacciones procesadas en boutique y e-commerce</p>
               </div>
-              <a routerLink="/inventario" class="link-action-header">Ver Almacén &rarr;</a>
+              <a routerLink="/ventas" class="link-harbor-action">Ver ventas &rarr;</a>
             </div>
 
-            <!-- Leyenda de Colores Apilados -->
-            <div class="stacked-legend-row">
-              <div class="stacked-legend-item">
-                <span class="color-dot bg-black"></span>
-                <span>Disponible</span>
-              </div>
-              <div class="stacked-legend-item">
-                <span class="color-dot bg-gold"></span>
-                <span>En Probador VIP / Carrito</span>
-              </div>
-              <div class="stacked-legend-item">
-                <span class="color-dot bg-red"></span>
-                <span>Alerta Crítica (&le;6 u.)</span>
-              </div>
-            </div>
-
-            <!-- Lista de Barras Apiladas por Categoría -->
-            <div class="stacked-bars-list">
-              <div *ngFor="let cat of inventoryStackedList()" class="stacked-bar-item">
-                <div class="stacked-bar-labels">
-                  <span class="cat-name">{{ cat.categoria }}</span>
-                  <span class="cat-total">{{ cat.disponible + cat.reservado_probadores + cat.alerta_critica }} u. totales</span>
-                </div>
-
-                <div class="stacked-bar-track">
-                  <!-- Segmento Disponible -->
-                  <div
-                    class="segment seg-disponible"
-                    [style.width.%]="getStackedPct(cat, 'disponible')"
-                    [title]="'Disponible: ' + cat.disponible + ' unidades'">
-                  </div>
-                  <!-- Segmento Reservado Probadores -->
-                  <div
-                    class="segment seg-reservado"
-                    [style.width.%]="getStackedPct(cat, 'reservado')"
-                    [title]="'En Probador: ' + cat.reservado_probadores + ' unidades'">
-                  </div>
-                  <!-- Segmento Alerta Crítica -->
-                  <div
-                    class="segment seg-alerta"
-                    [style.width.%]="getStackedPct(cat, 'alerta')"
-                    [title]="'Riesgo Crítico: ' + cat.alerta_critica + ' unidades'">
-                  </div>
-                </div>
-
-                <div class="stacked-values-breakdown">
-                  <span>Disp: <strong>{{ cat.disponible }}</strong></span>
-                  <span>Probadores: <strong>{{ cat.reservado_probadores }}</strong></span>
-                  <span class="text-critico">Alerta: <strong>{{ cat.alerta_critica }}</strong></span>
-                </div>
-              </div>
+            <div class="orders-table-wrapper">
+              <table class="harbor-table">
+                <thead>
+                  <tr>
+                    <th>ORDEN</th>
+                    <th>CLIENTE</th>
+                    <th>PRENDAS</th>
+                    <th>ESTADO</th>
+                    <th class="text-right">TOTAL</th>
+                    <th class="text-right">FECHA</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let ord of recentOrdersList()">
+                    <td class="col-order-code">{{ ord.codigo_pedido }}</td>
+                    <td class="col-customer">
+                      <div class="customer-cell">
+                        <span class="customer-avatar-dot">{{ getInitials(ord.cliente_nombre) }}</span>
+                        <span class="customer-name-text">{{ ord.cliente_nombre }}</span>
+                      </div>
+                    </td>
+                    <td class="col-items-summary">{{ ord.items_resumen }}</td>
+                    <td class="col-status">
+                      <span class="status-pill-badge" [ngClass]="getStatusBadgeClass(ord.estado)">
+                        <span class="status-dot-indicator"></span>
+                        {{ ord.estado }}
+                      </span>
+                    </td>
+                    <td class="col-total text-right">&dollar;{{ ord.monto_total | number:'1.2-2' }}</td>
+                    <td class="col-date text-right">{{ ord.fecha }}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </article>
-
-        </section>
-
-        <!-- ========================================================= -->
-        <!-- 3. MÓDULO 3: COMPORTAMIENTO Y CONVERSIÓN DEL CLIENTE      -->
-        <!--    Gráfico de Embudo (Funnel) + Gráfico Circular Canales   -->
-        <!-- ========================================================= -->
-        <section class="bi-grid-row two-columns-equal">
-
-          <!-- Gráfico de Embudo (Sales Funnel) -->
-          <article class="bi-card">
-            <div class="bi-card-header">
-              <div>
-                <h3 class="bi-title-medium">Embudo de Conversión de Clientes (Sales Funnel)</h3>
-                <p class="bi-subtitle">Desde la primera visita al catálogo hasta el cobro en caja o web.</p>
-              </div>
-              <span class="subtle-badge">CONVERSIÓN 4.4%</span>
-            </div>
-
-            <!-- Estructura Visual del Funnel Descendente -->
-            <div class="funnel-container">
-              <div *ngFor="let step of funnelStepsList(); let i = index" class="funnel-step-row">
-                <div class="funnel-step-info">
-                  <span class="step-badge">Paso {{ i + 1 }}</span>
-                  <span class="step-title">{{ step.etapa }}</span>
-                  <span class="step-count font-mono">{{ step.cantidad | number }} clientes</span>
-                </div>
-
-                <!-- Barra Trapecio del Funnel -->
-                <div class="funnel-bar-wrapper">
-                  <div
-                    class="funnel-trapezoid-bar"
-                    [style.width.%]="step.porcentaje"
-                    [class.funnel-step-final]="i === funnelStepsList().length - 1">
-                    <span class="funnel-pct-text">{{ step.porcentaje }}%</span>
-                  </div>
-                </div>
-
-                <div *ngIf="i < funnelStepsList().length - 1" class="funnel-drop-indicator">
-                  <span class="drop-arrow">&darr;</span>
-                  <span class="drop-rate">{{ step.conversion_siguiente }}% avanzan al siguiente paso</span>
-                </div>
-              </div>
-            </div>
-          </article>
-
-          <!-- Gráfico Circular / Anillo de Distribución de Canales -->
-          <article class="bi-card">
-            <div class="bi-card-header">
-              <div>
-                <h3 class="bi-title-medium">Distribución por Canales de Venta</h3>
-                <p class="bi-subtitle">Aportación de boutiques físicas, canal digital y citas VIP.</p>
-              </div>
-              <span class="subtle-badge">OMNICANAL</span>
-            </div>
-
-            <div class="donut-distribution-layout">
-              <!-- SVG Donut Chart -->
-              <div class="donut-canvas-box">
-                <svg class="donut-slice-svg" viewBox="0 0 160 160">
-                  <circle cx="80" cy="80" r="60" fill="transparent" stroke="#f3f4f6" stroke-width="20" />
-                  <!-- Slice 1: Tiendas Físicas (54.5%) -> 376.99 * 0.545 = 205.46 -->
-                  <circle
-                    cx="80" cy="80" r="60"
-                    fill="transparent"
-                    stroke="#111827"
-                    stroke-width="20"
-                    stroke-dasharray="205.46 376.99"
-                    stroke-dashoffset="0"
-                    transform="rotate(-90 80 80)"
-                  />
-                  <!-- Slice 2: E-Commerce Noir (32.2%) -> 376.99 * 0.322 = 121.39 -->
-                  <circle
-                    cx="80" cy="80" r="60"
-                    fill="transparent"
-                    stroke="#d4af37"
-                    stroke-width="20"
-                    stroke-dasharray="121.39 376.99"
-                    stroke-dashoffset="-205.46"
-                    transform="rotate(-90 80 80)"
-                  />
-                  <!-- Slice 3: Citas Privadas VIP (13.3%) -> 376.99 * 0.133 = 50.14 -->
-                  <circle
-                    cx="80" cy="80" r="60"
-                    fill="transparent"
-                    stroke="#9ca3af"
-                    stroke-width="20"
-                    stroke-dasharray="50.14 376.99"
-                    stroke-dashoffset="-326.85"
-                    transform="rotate(-90 80 80)"
-                  />
-                </svg>
-                <div class="donut-center-caption">
-                  <span class="donut-center-bold">342</span>
-                  <span class="donut-center-sub">Ventas Totales</span>
-                </div>
-              </div>
-
-              <!-- Lista de Leyendas del Canal -->
-              <div class="donut-details-list">
-                <div *ngFor="let ch of channelList()" class="donut-detail-item">
-                  <div class="donut-detail-header">
-                    <span class="detail-color-pill" [style.background-color]="ch.color"></span>
-                    <span class="detail-name">{{ ch.nombre }}</span>
-                  </div>
-                  <div class="donut-detail-metrics">
-                    <strong class="font-mono">{{ ch.porcentaje }}%</strong>
-                    <span class="detail-orders">({{ ch.cantidad }} pedidos)</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="client-loyalty-tip">
-              <strong>Estrategia Omnicanal:</strong> El 68% de las reservas en probadores físicos generan una compra complementaria en el canal online en menos de 14 días.
-            </div>
-          </article>
-
-        </section>
-
-        <!-- ========================================================= -->
-        <!-- 4. MÓDULO 4: OPERACIÓN Y LOGÍSTICA                         -->
-        <!--    Gráfico Circular de Estados + Mapa Geográfico Densidad  -->
-        <!-- ========================================================= -->
-        <section class="bi-grid-row two-columns-equal">
-
-          <!-- Gráfico Circular de Estados de Entrega -->
-          <article class="bi-card">
-            <div class="bi-card-header">
-              <div>
-                <h3 class="bi-title-medium">Estados Operativos de Pedidos</h3>
-                <p class="bi-subtitle">Monitoreo de fulfillment, tránsito y entregas efectivas.</p>
-              </div>
-              <span class="subtle-badge">LOGÍSTICA</span>
-            </div>
-
-            <div class="donut-distribution-layout">
-              <!-- SVG Donut de Estados -->
-              <div class="donut-canvas-box">
-                <svg class="donut-slice-svg" viewBox="0 0 160 160">
-                  <circle cx="80" cy="80" r="60" fill="transparent" stroke="#f3f4f6" stroke-width="20" />
-                  <!-- Entregados: 65% -> 245.04 -->
-                  <circle
-                    cx="80" cy="80" r="60"
-                    fill="transparent"
-                    stroke="#059669"
-                    stroke-width="20"
-                    stroke-dasharray="245.04 376.99"
-                    stroke-dashoffset="0"
-                    transform="rotate(-90 80 80)"
-                  />
-                  <!-- En Tránsito: 20% -> 75.40 -->
-                  <circle
-                    cx="80" cy="80" r="60"
-                    fill="transparent"
-                    stroke="#2563eb"
-                    stroke-width="20"
-                    stroke-dasharray="75.40 376.99"
-                    stroke-dashoffset="-245.04"
-                    transform="rotate(-90 80 80)"
-                  />
-                  <!-- En Preparación: 12% -> 45.24 -->
-                  <circle
-                    cx="80" cy="80" r="60"
-                    fill="transparent"
-                    stroke="#f59e0b"
-                    stroke-width="20"
-                    stroke-dasharray="45.24 376.99"
-                    stroke-dashoffset="-320.44"
-                    transform="rotate(-90 80 80)"
-                  />
-                  <!-- Devoluciones: 3% -> 11.31 -->
-                  <circle
-                    cx="80" cy="80" r="60"
-                    fill="transparent"
-                    stroke="#ef4444"
-                    stroke-width="20"
-                    stroke-dasharray="11.31 376.99"
-                    stroke-dashoffset="-365.68"
-                    transform="rotate(-90 80 80)"
-                  />
-                </svg>
-                <div class="donut-center-caption">
-                  <span class="donut-center-bold">96.8%</span>
-                  <span class="donut-center-sub">Efectividad</span>
-                </div>
-              </div>
-
-              <!-- Desglose de Estados -->
-              <div class="donut-details-list">
-                <div *ngFor="let st of orderStatusList()" class="donut-detail-item">
-                  <div class="donut-detail-header">
-                    <span class="detail-color-pill" [style.background-color]="st.color"></span>
-                    <span class="detail-name">{{ st.nombre }}</span>
-                  </div>
-                  <div class="donut-detail-metrics">
-                    <strong class="font-mono">{{ st.porcentaje }}%</strong>
-                    <span class="detail-orders">({{ st.cantidad }} despachos)</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Alerta logística -->
-            <div class="logistics-sla-alert">
-              <span class="sla-dot-green"></span>
-              <span><strong>SLA en cumplimiento:</strong> Tiempo medio de preparación en boutique: <strong>18 minutos</strong>.</span>
-            </div>
-          </article>
-
-          <!-- Mapa Geográfico de Densidad (Hubs de Entrega) -->
-          <article class="bi-card">
-            <div class="bi-card-header">
-              <div>
-                <h3 class="bi-title-medium">Mapa de Densidad & Cobertura Geográfica</h3>
-                <p class="bi-subtitle">Concentración de órdenes y tiempos de entrega concierge por sucursal.</p>
-              </div>
-              <span class="subtle-badge">EN TIEMPO REAL</span>
-            </div>
-
-            <!-- Visualización de Mapa de Densidad Estilizado -->
-            <div class="geographic-map-canvas">
-              <div class="map-radar-grid">
-                <div class="radar-circle radar-c1"></div>
-                <div class="radar-circle radar-c2"></div>
-                <div class="radar-circle radar-c3"></div>
-              </div>
-
-              <!-- Puntos de Densidad Geográfica -->
-              <div class="geo-node-pin pin-palermo">
-                <div class="pin-pulse"></div>
-                <div class="pin-core"></div>
-                <div class="pin-popup">
-                  <span class="popup-title">Boutique Palermo Soho</span>
-                  <span class="popup-meta">148 pedidos &bull; 35 min avg</span>
-                </div>
-              </div>
-
-              <div class="geo-node-pin pin-recoleta">
-                <div class="pin-pulse"></div>
-                <div class="pin-core"></div>
-                <div class="pin-popup">
-                  <span class="popup-title">Flagship Recoleta Luxury</span>
-                  <span class="popup-meta">112 pedidos &bull; 45 min avg</span>
-                </div>
-              </div>
-
-              <div class="geo-node-pin pin-sanisidro">
-                <div class="pin-pulse"></div>
-                <div class="pin-core"></div>
-                <div class="pin-popup">
-                  <span class="popup-title">Hub Atelier San Isidro</span>
-                  <span class="popup-meta">82 pedidos &bull; 90 min avg</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Tabla Resumen de Sedes Logísticas -->
-            <div class="hubs-summary-table">
-              <div *ngFor="let hub of geographicHubsList()" class="hub-summary-row">
-                <div class="hub-id-col">
-                  <span class="hub-name">{{ hub.sucursal }}</span>
-                  <span class="hub-city">{{ hub.ciudad }}</span>
-                </div>
-                <div class="hub-stats-col">
-                  <span class="hub-time">⏱ {{ hub.tiempo_entrega_promedio }}</span>
-                  <span class="hub-revenue font-mono">&dollar;{{ hub.monto | number:'1.0-0' }}</span>
-                </div>
-              </div>
-            </div>
-          </article>
-
         </section>
 
       </div>
@@ -790,127 +556,124 @@ import {
   `,
   styles: [`
     /* =========================================================================
-       FASHIONSTORE HAUTE COUTURE EXECUTIVE BI DASHBOARD - PURE SCOPED CSS
+       HARBOR HAUTE COUTURE EXECUTIVE DASHBOARD - PURE SCOPED CSS
        ========================================================================= */
 
-    .dashboard-page-wrapper {
-      background-color: #f9fafb;
-      color: #111111;
+    .harbor-page-wrapper {
+      background-color: #f8f9fa;
+      color: #111827;
       min-height: calc(100vh - 70px);
-      padding: 2rem 1.5rem 4rem 1.5rem;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 2rem 2rem 4rem 2rem;
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
     }
 
-    .dashboard-container {
-      max-width: 1440px;
+    .harbor-container {
+      max-width: 1400px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
     }
 
-    /* 1. Header Principal */
-    .dashboard-header {
+    /* 1. Header Ejecutivo */
+    .harbor-header {
       display: flex;
-      flex-wrap: wrap;
       justify-content: space-between;
       align-items: flex-end;
-      padding-bottom: 1.25rem;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      padding-bottom: 0.5rem;
+      flex-wrap: wrap;
       gap: 1rem;
     }
 
-    .header-eyebrow {
+    .header-greeting-block {
       display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.15em;
-      color: #4b5563;
-      margin-bottom: 0.25rem;
-      text-transform: uppercase;
+      flex-direction: column;
+      gap: 0.2rem;
     }
 
-    .gold-dot {
-      color: #d4af37;
-      font-size: 1.1rem;
-      line-height: 1;
-    }
-
-    .header-main-title {
+    .header-greeting {
       font-size: 1.75rem;
       font-weight: 800;
       letter-spacing: -0.02em;
-      color: #000000;
+      color: #111827;
       margin: 0;
       line-height: 1.2;
     }
 
-    .header-subtitle {
+    .header-date {
+      font-size: 0.82rem;
       color: #6b7280;
-      font-size: 0.88rem;
-      margin-top: 0.25rem;
+      margin: 0;
+      text-transform: capitalize;
     }
 
-    .header-controls {
+    .header-actions-block {
       display: flex;
       align-items: center;
       gap: 0.75rem;
     }
 
-    .period-selector-wrapper {
+    .timeframe-select-pill {
       display: flex;
       align-items: center;
       background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      padding: 0.35rem 0.65rem;
-      border-radius: 2px;
-      gap: 0.5rem;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      padding: 0.4rem 0.75rem;
+      gap: 0.45rem;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
     }
 
-    .period-label {
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
+    .calendar-mini-icon {
+      width: 14px;
+      height: 14px;
       color: #6b7280;
     }
 
-    .period-select {
+    .timeframe-dropdown {
       background: transparent;
       border: none;
       font-size: 0.78rem;
       font-weight: 600;
-      color: #111111;
+      color: #1f2937;
       cursor: pointer;
       outline: none;
     }
 
-    .btn-export-csv {
-      background-color: #000000;
+    .btn-harbor-export {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: #111827;
       color: #ffffff;
-      border: 1px solid #000000;
+      border: 1px solid #111827;
+      border-radius: 8px;
       padding: 0.45rem 1rem;
       font-size: 0.78rem;
       font-weight: 600;
-      border-radius: 2px;
       cursor: pointer;
       transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
-    .btn-export-csv:hover:not(:disabled) {
-      background-color: #d4af37;
+    .btn-harbor-export:hover:not(:disabled) {
+      background: #d4af37;
       border-color: #d4af37;
       color: #000000;
     }
 
-    .btn-export-csv:disabled {
+    .btn-harbor-export:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
 
+    .export-mini-icon {
+      width: 14px;
+      height: 14px;
+    }
+
     /* 2. Barra de Voz IA */
-    .voice-ai-bar-section {
+    .harbor-voice-bar-section {
       display: flex;
       flex-direction: column;
       gap: 0.65rem;
@@ -920,17 +683,17 @@ import {
       display: flex;
       align-items: center;
       background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.12);
-      border-radius: 2px;
-      padding: 0.4rem 0.75rem;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 12px;
+      padding: 0.45rem 0.85rem;
       gap: 0.75rem;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
 
     .voice-search-bar.listening-active {
       border-color: #d4af37;
-      box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
     }
 
     .voice-mic-trigger {
@@ -948,14 +711,13 @@ import {
       cursor: pointer;
       flex-shrink: 0 !important;
       transition: transform 0.15s ease, background-color 0.2s ease;
-      box-shadow: 0 2px 5px rgba(212, 175, 55, 0.35);
+      box-shadow: 0 2px 6px rgba(212, 175, 55, 0.35);
       padding: 0 !important;
     }
 
     .voice-mic-trigger:hover {
       background: #b89324 !important;
-      color: #ffffff !important;
-      transform: scale(1.06);
+      transform: scale(1.05);
     }
 
     .icon-mic {
@@ -966,7 +728,6 @@ import {
       fill: #ffffff !important;
       color: #ffffff !important;
       display: block !important;
-      flex-shrink: 0 !important;
       pointer-events: none;
     }
 
@@ -998,26 +759,26 @@ import {
       flex: 1;
       border: none;
       outline: none;
-      font-size: 0.88rem;
-      color: #111111;
+      font-size: 0.86rem;
+      color: #111827;
       background: transparent;
     }
 
     .voice-search-input::placeholder {
       color: #9ca3af;
-      font-size: 0.84rem;
+      font-size: 0.82rem;
     }
 
     .voice-submit-btn {
-      background: #111111;
+      background: #111827;
       color: #ffffff;
       border: none;
       padding: 0.45rem 1rem;
       font-size: 0.78rem;
-      font-weight: 700;
-      border-radius: 2px;
+      font-weight: 600;
+      border-radius: 8px;
       cursor: pointer;
-      transition: background 0.2s ease;
+      transition: background 0.2s;
     }
 
     .voice-submit-btn:hover:not(:disabled) {
@@ -1031,12 +792,12 @@ import {
       cursor: not-allowed;
     }
 
-    .quick-prompts-subtle {
+    .quick-prompts-row {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       gap: 0.4rem;
-      padding-left: 0.5rem;
+      padding-left: 0.25rem;
     }
 
     .prompt-hint {
@@ -1051,7 +812,7 @@ import {
       color: #374151;
       font-size: 0.72rem;
       padding: 0.25rem 0.6rem;
-      border-radius: 2px;
+      border-radius: 6px;
       cursor: pointer;
       transition: all 0.15s ease;
     }
@@ -1062,11 +823,10 @@ import {
       background: #fafafa;
     }
 
-    /* Diagnóstico IA */
     .voice-result-card {
       background: #ffffff;
       border: 1px solid #d4af37;
-      border-radius: 2px;
+      border-radius: 12px;
       padding: 1.25rem;
       box-shadow: 0 4px 12px rgba(212, 175, 55, 0.08);
     }
@@ -1087,13 +847,13 @@ import {
     }
 
     .intent-badge {
-      background: #111111;
+      background: #111827;
       color: #ffffff;
       font-size: 0.65rem;
       font-weight: 800;
       letter-spacing: 0.08em;
       padding: 0.25rem 0.55rem;
-      border-radius: 2px;
+      border-radius: 4px;
     }
 
     .query-echo {
@@ -1115,14 +875,8 @@ import {
       font-size: 0.75rem;
       font-weight: 700;
       padding: 0.35rem 0.75rem;
-      border-radius: 2px;
+      border-radius: 6px;
       cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .btn-tts-speak:hover {
-      background: #d4af37;
-      color: #000000;
     }
 
     .btn-tts-speak.speaking {
@@ -1149,7 +903,6 @@ import {
     .diag-title {
       font-size: 0.68rem;
       font-weight: 800;
-      letter-spacing: 0.08em;
       color: #6b7280;
       margin: 0 0 0.4rem 0;
     }
@@ -1174,308 +927,243 @@ import {
     }
 
     /* =========================================================
-       TARJETAS BI & LAYOUT MODULAR
+       3. FILA SUPERIOR: 4 KPIS + SEMICIRCULAR TARGET GAUGE
        ========================================================= */
 
-    .bi-card {
+    .harbor-top-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr) 1.2fr;
+      gap: 1rem;
+    }
+
+    .harbor-kpi-card {
       background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      border-radius: 2px;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      border-radius: 12px;
+      padding: 1.25rem 1.15rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    .kpi-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .kpi-tag-name {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #6b7280;
+    }
+
+    .kpi-icon-pill {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: #f3f4f6;
+      color: #111827;
+    }
+
+    .kpi-main-number {
+      font-size: 1.65rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #111827;
+      line-height: 1.1;
+    }
+
+    .kpi-comparison-row {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+    }
+
+    .kpi-growth-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      font-weight: 700;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+    }
+
+    .kpi-growth-pill.positive {
+      background: #ecfdf5;
+      color: #059669;
+    }
+
+    .growth-arrow {
+      font-size: 0.6rem;
+    }
+
+    .kpi-period-ref {
+      color: #9ca3af;
+    }
+
+    /* Card 5: Meta de Ventas con Gauge Semicircular */
+    .target-gauge-card {
+      align-items: center;
+      text-align: center;
+      padding: 1rem 1rem 0.85rem 1rem;
+      gap: 0.2rem;
+    }
+
+    .target-gauge-wrapper {
+      position: relative;
+      width: 150px;
+      height: 85px;
+    }
+
+    .semicircle-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .gauge-center-caption {
+      position: absolute;
+      bottom: 2px;
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .gauge-bold-pct {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #111827;
+      line-height: 1;
+    }
+
+    .gauge-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 2px;
+    }
+
+    .target-footnote {
+      font-size: 0.7rem;
+      color: #6b7280;
+      font-weight: 500;
+    }
+
+    /* =========================================================
+       4. FILA MEDIA: REVENUE ANALYTICS + ORDER FULFILLMENT
+       ========================================================= */
+
+    .harbor-middle-grid {
+      display: grid;
+      grid-template-columns: 1.8fr 1fr;
+      gap: 1.25rem;
+    }
+
+    .harbor-card {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      border-radius: 12px;
       padding: 1.5rem;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
       display: flex;
       flex-direction: column;
-      gap: 1.25rem;
+      gap: 1rem;
     }
 
-    .bi-card-header {
+    .card-header-flex {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      border-bottom: 1px solid #f3f4f6;
-      padding-bottom: 0.85rem;
     }
 
-    .bi-title {
-      font-size: 1.05rem;
-      font-weight: 800;
-      letter-spacing: -0.01em;
-      color: #000000;
-      margin: 0;
+    .card-eyebrow {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #9ca3af;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
     }
 
-    .bi-title-medium {
-      font-size: 0.95rem;
+    .revenue-hero-row {
+      display: flex;
+      align-items: baseline;
+      gap: 0.65rem;
+      margin-top: 0.2rem;
+    }
+
+    .revenue-hero-number {
+      font-size: 1.65rem;
       font-weight: 800;
-      color: #111111;
-      margin: 0;
+      letter-spacing: -0.02em;
+      color: #111827;
     }
 
-    .bi-subtitle {
-      font-size: 0.78rem;
-      color: #6b7280;
-      margin: 0.2rem 0 0 0;
-    }
-
-    .subtle-badge {
-      font-size: 0.65rem;
+    .hero-growth-badge {
+      background: #ecfdf5;
+      color: #059669;
+      font-size: 0.72rem;
       font-weight: 700;
-      letter-spacing: 0.08em;
-      background: #f3f4f6;
-      color: #4b5563;
-      padding: 0.25rem 0.5rem;
-      border-radius: 2px;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
     }
 
-    .link-action-header {
-      font-size: 0.74rem;
-      font-weight: 700;
-      color: #111111;
-      text-decoration: none;
-      transition: color 0.15s ease;
-    }
-
-    .link-action-header:hover {
-      color: #d4af37;
-    }
-
-    .bi-grid-row {
-      display: grid;
-      gap: 1.5rem;
-    }
-
-    .two-columns-equal {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    /* =========================================================
-       MÓDULO 1: RENDIMIENTO DE VENTAS (VISIÓN FINANCIERA)
-       ========================================================= */
-
-    .granularity-tabs {
+    .granularity-switcher-tabs {
       display: flex;
       background: #f3f4f6;
       padding: 3px;
-      border-radius: 2px;
+      border-radius: 8px;
       gap: 2px;
     }
 
-    .gran-tab {
+    .switcher-tab {
       background: transparent;
       border: none;
-      padding: 0.35rem 0.9rem;
+      padding: 0.35rem 0.85rem;
       font-size: 0.74rem;
       font-weight: 600;
-      color: #4b5563;
+      color: #6b7280;
       cursor: pointer;
-      border-radius: 2px;
+      border-radius: 6px;
       transition: all 0.15s ease;
     }
 
-    .gran-tab.active {
+    .switcher-tab.active {
       background: #ffffff;
-      color: #000000;
+      color: #111827;
       font-weight: 700;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
     }
 
-    .financial-main-layout {
-      display: grid;
-      grid-template-columns: 320px 1fr;
-      gap: 2rem;
-      align-items: center;
-    }
-
-    .financial-left-col {
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-      border-right: 1px solid #f3f4f6;
-      padding-right: 1.5rem;
-    }
-
-    .ring-and-main-value {
-      display: flex;
-      align-items: center;
-      gap: 1.25rem;
-    }
-
-    .ring-gauge-wrapper {
+    .chart-stage-container {
       position: relative;
-      width: 110px;
-      height: 110px;
-      flex-shrink: 0;
-    }
-
-    .concentric-ring-svg {
       width: 100%;
-      height: 100%;
+      height: 210px;
     }
 
-    .ring-center-text {
-      position: absolute;
-      top: 0;
-      left: 0;
+    .flowing-trend-svg {
       width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-    }
-
-    .ring-pct-number {
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: #111111;
-      line-height: 1;
-    }
-
-    .ring-pct-label {
-      font-size: 0.62rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #6b7280;
-      margin-top: 2px;
-    }
-
-    .main-revenue-block {
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-    }
-
-    .revenue-caption {
-      font-size: 0.68rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #6b7280;
-    }
-
-    .revenue-big-row {
-      display: flex;
-      align-items: baseline;
-      gap: 0.2rem;
-    }
-
-    .revenue-currency {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: #111111;
-    }
-
-    .revenue-amount {
-      font-size: 1.6rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      color: #000000;
-    }
-
-    .growth-pill-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      background: #ecfdf5;
-      color: #059669;
-      font-size: 0.68rem;
-      font-weight: 700;
-      padding: 0.2rem 0.5rem;
-      border-radius: 2px;
-      margin-top: 0.25rem;
-      width: fit-content;
-    }
-
-    .pill-arrow {
-      font-size: 0.6rem;
-    }
-
-    .pill-vs {
-      color: #065f46;
-      font-weight: 500;
-    }
-
-    .mini-kpis-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 0.65rem;
-    }
-
-    .mini-kpi-box {
-      background: #f9fafb;
-      border: 1px solid #f3f4f6;
-      padding: 0.65rem 0.75rem;
-      border-radius: 2px;
-      display: flex;
-      flex-direction: column;
-      gap: 0.15rem;
-    }
-
-    .mini-kpi-label {
-      font-size: 0.68rem;
-      color: #6b7280;
-      font-weight: 600;
-    }
-
-    .mini-kpi-val {
-      font-size: 0.95rem;
-      font-weight: 800;
-      color: #111111;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    }
-
-    .financial-right-col {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    .comparative-legend-bar {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      gap: 1.25rem;
-    }
-
-    .legend-series {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .legend-chip-color {
-      width: 14px;
-      height: 3px;
-      border-radius: 1px;
-    }
-
-    .legend-chip-color.solid-black {
-      background-color: #111111;
-    }
-
-    .legend-chip-color.dashed-gray {
-      background: repeating-linear-gradient(to right, #9ca3af, #9ca3af 3px, transparent 3px, transparent 6px);
-    }
-
-    .legend-label {
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: #4b5563;
-    }
-
-    .trend-chart-container {
-      position: relative;
-      height: 200px;
-      width: 100%;
-    }
-
-    .trend-svg {
-      width: 100%;
-      height: 175px;
+      height: 180px;
       overflow: visible;
+    }
+
+    .chart-y-label {
+      font-size: 0.65rem;
+      fill: #9ca3af;
+      font-weight: 600;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
 
     .interactive-node {
@@ -1489,13 +1177,18 @@ import {
       stroke: #d4af37;
     }
 
+    .current-badge-group {
+      filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.25));
+      pointer-events: none;
+    }
+
     .trend-hover-tooltip {
       position: absolute;
       top: 15px;
-      background: #111111;
+      background: #111827;
       color: #ffffff;
       padding: 0.4rem 0.65rem;
-      border-radius: 2px;
+      border-radius: 6px;
       font-size: 0.7rem;
       display: flex;
       flex-direction: column;
@@ -1510,7 +1203,6 @@ import {
       color: #d4af37;
       border-bottom: 1px solid rgba(255, 255, 255, 0.15);
       padding-bottom: 2px;
-      margin-bottom: 2px;
     }
 
     .tooltip-row {
@@ -1522,588 +1214,406 @@ import {
     .dot-cur { width: 6px; height: 6px; background: #ffffff; border-radius: 50%; }
     .dot-prev { width: 6px; height: 6px; background: #9ca3af; border-radius: 50%; }
 
-    .svg-y-axis-label {
-      font-size: 0.65rem;
-      fill: #9ca3af;
-      font-weight: 600;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    }
-
-    .current-badge-group {
-      filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.25));
-      pointer-events: none;
-    }
-
-    .trend-x-axis {
+    .chart-x-axis-row {
       display: flex;
       justify-content: space-between;
-      padding: 0.4rem 1.25rem 0 1.25rem;
       font-size: 0.68rem;
       font-weight: 600;
       color: #6b7280;
+      padding-top: 0.25rem;
     }
 
-    .achievement-callout-banner {
+    .chart-achievement-bar {
       background: #fdf8e6;
       border: 1px solid #fef08a;
       border-left: 3px solid #d4af37;
-      padding: 0.75rem 1rem;
-      border-radius: 2px;
+      padding: 0.65rem 0.9rem;
+      border-radius: 8px;
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      font-size: 0.8rem;
+      gap: 0.6rem;
+      font-size: 0.78rem;
       color: #854d0e;
     }
 
-    .achievement-icon {
-      font-size: 1.25rem;
-      line-height: 1;
+    /* Fulfillment de Pedidos */
+    .card-main-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #111827;
+      margin: 0;
+    }
+
+    .card-subtitle {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin: 0.15rem 0 0 0;
+    }
+
+    .fulfillment-bars-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    .fulfillment-bar-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .fulfillment-bar-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+    }
+
+    .status-name {
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .status-count-pct {
+      color: #6b7280;
+      font-size: 0.72rem;
+    }
+
+    .fulfillment-track {
+      height: 7px;
+      background: #f1f5f9;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .fulfillment-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+
+    .fill-delivered { background-color: #059669; }
+    .fill-shipped { background-color: #2563eb; }
+    .fill-pending { background-color: #d4af37; }
+    .fill-returns { background-color: #ef4444; }
+
+    .fulfillment-summary-footer {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      border-top: 1px solid #f3f4f6;
+      padding-top: 1rem;
+      margin-top: auto;
+    }
+
+    .logistics-stat-box {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+
+    .logistics-stat-val {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #111827;
+    }
+
+    .logistics-stat-lbl {
+      font-size: 0.68rem;
+      color: #6b7280;
     }
 
     /* =========================================================
-       MÓDULO 2: PRODUCTOS E INVENTARIO
+       5. FILA INFERIOR: TOP PRODUCTS + TABLA DE PEDIDOS
        ========================================================= */
 
-    .horizontal-bars-container {
+    .harbor-bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.8fr;
+      gap: 1.25rem;
+    }
+
+    .link-harbor-action {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: #111827;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .link-harbor-action:hover {
+      color: #d4af37;
+    }
+
+    .top-products-list {
       display: flex;
       flex-direction: column;
-      gap: 0.9rem;
+      gap: 0.85rem;
     }
 
-    .hbar-item {
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-    }
-
-    .hbar-meta-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .hbar-info {
+    .product-rank-row {
       display: flex;
       align-items: center;
-      gap: 0.65rem;
+      gap: 0.75rem;
+      padding-bottom: 0.65rem;
+      border-bottom: 1px solid #f9fafb;
     }
 
-    .hbar-rank {
+    .product-rank-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .product-avatar-monogram {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      background: #f3f4f6;
+      color: #374151;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 0.75rem;
       font-weight: 800;
-      color: #9ca3af;
-      width: 20px;
-    }
-
-    .hbar-thumb {
-      width: 32px;
-      height: 38px;
-      object-fit: cover;
-      border-radius: 1px;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
       border: 1px solid #e5e7eb;
     }
 
-    .hbar-names {
+    .product-info-col {
       display: flex;
       flex-direction: column;
+      flex: 1;
+      gap: 0.1rem;
     }
 
-    .hbar-product-name {
+    .product-title-text {
       font-size: 0.82rem;
       font-weight: 700;
-      color: #111111;
+      color: #111827;
     }
 
-    .hbar-category {
+    .product-category-text {
       font-size: 0.7rem;
       color: #6b7280;
     }
 
-    .hbar-amount {
+    .product-revenue-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.1rem;
+    }
+
+    .product-amount-number {
       font-size: 0.85rem;
       font-weight: 800;
-      color: #111111;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: #111827;
+      font-family: ui-monospace, monospace;
     }
 
-    .hbar-track {
-      height: 7px;
-      background: #f3f4f6;
-      border-radius: 3.5px;
-      overflow: hidden;
-    }
-
-    .hbar-fill {
-      height: 100%;
-      background: #111111;
-      border-radius: 3.5px;
-      transition: width 0.4s ease;
-    }
-
-    .hbar-item:first-child .hbar-fill {
-      background: #d4af37;
-    }
-
-    /* Barras Apiladas */
-    .stacked-legend-row {
-      display: flex;
-      gap: 1.25rem;
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: #4b5563;
-    }
-
-    .stacked-legend-item {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .color-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 1px;
-    }
-
-    .bg-black { background: #111827; }
-    .bg-gold { background: #d4af37; }
-    .bg-red { background: #ef4444; }
-
-    .stacked-bars-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.85rem;
-    }
-
-    .stacked-bar-item {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-    }
-
-    .stacked-bar-labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.76rem;
-      font-weight: 700;
-      color: #1f2937;
-    }
-
-    .cat-total {
-      font-weight: 600;
-      color: #6b7280;
-    }
-
-    .stacked-bar-track {
-      height: 10px;
-      background: #f3f4f6;
-      border-radius: 5px;
-      overflow: hidden;
-      display: flex;
-    }
-
-    .segment {
-      height: 100%;
-      transition: width 0.3s ease;
-    }
-
-    .seg-disponible { background: #111827; }
-    .seg-reservado { background: #d4af37; }
-    .seg-alerta { background: #ef4444; }
-
-    .stacked-values-breakdown {
-      display: flex;
-      gap: 1rem;
-      font-size: 0.68rem;
-      color: #6b7280;
-    }
-
-    .text-critico {
-      color: #dc2626;
-    }
-
-    /* =========================================================
-       MÓDULO 3: COMPORTAMIENTO Y CONVERSIÓN
-       ========================================================= */
-
-    .funnel-container {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    .funnel-step-row {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-    }
-
-    .funnel-step-info {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.74rem;
-    }
-
-    .step-badge {
-      font-size: 0.62rem;
-      font-weight: 800;
-      color: #9ca3af;
-      text-transform: uppercase;
-      margin-right: 0.4rem;
-    }
-
-    .step-title {
-      font-weight: 700;
-      color: #111111;
-      flex: 1;
-    }
-
-    .step-count {
-      color: #6b7280;
-      font-weight: 600;
-    }
-
-    .funnel-bar-wrapper {
-      height: 16px;
-      background: #f3f4f6;
-      border-radius: 2px;
-      overflow: hidden;
-    }
-
-    .funnel-trapezoid-bar {
-      height: 100%;
-      background: #111827;
-      border-radius: 2px;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      padding-right: 0.45rem;
-      transition: width 0.4s ease;
-    }
-
-    .funnel-trapezoid-bar.funnel-step-final {
-      background: #d4af37;
-    }
-
-    .funnel-pct-text {
-      font-size: 0.65rem;
-      font-weight: 800;
-      color: #ffffff;
-      line-height: 1;
-    }
-
-    .funnel-trapezoid-bar.funnel-step-final .funnel-pct-text {
-      color: #000000;
-    }
-
-    .funnel-drop-indicator {
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
+    .product-sold-units {
       font-size: 0.68rem;
       color: #9ca3af;
-      padding-left: 0.5rem;
     }
 
-    .drop-arrow {
-      color: #d4af37;
-      font-weight: 800;
+    /* Tabla de Pedidos Recientes */
+    .orders-table-wrapper {
+      overflow-x: auto;
     }
 
-    .donut-distribution-layout {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-    }
-
-    .donut-canvas-box {
-      position: relative;
-      width: 130px;
-      height: 130px;
-      flex-shrink: 0;
-    }
-
-    .donut-slice-svg {
+    .harbor-table {
       width: 100%;
-      height: 100%;
-    }
-
-    .donut-center-caption {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-    }
-
-    .donut-center-bold {
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: #111111;
-      line-height: 1;
-    }
-
-    .donut-center-sub {
-      font-size: 0.62rem;
-      font-weight: 600;
-      color: #6b7280;
-      margin-top: 2px;
-    }
-
-    .donut-details-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.55rem;
-      flex: 1;
-    }
-
-    .donut-detail-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      border-collapse: collapse;
       font-size: 0.76rem;
-      border-bottom: 1px solid #f9fafb;
-      padding-bottom: 0.3rem;
     }
 
-    .donut-detail-header {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
+    .harbor-table th {
+      text-align: left;
+      font-size: 0.66rem;
+      font-weight: 700;
+      color: #9ca3af;
+      letter-spacing: 0.08em;
+      padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid #f1f5f9;
     }
 
-    .detail-color-pill {
-      width: 10px;
-      height: 10px;
-      border-radius: 2px;
+    .harbor-table td {
+      padding: 0.75rem;
+      border-bottom: 1px solid #f8f9fa;
+      vertical-align: middle;
     }
 
-    .detail-name {
-      font-weight: 600;
-      color: #1f2937;
+    .harbor-table tr:hover td {
+      background-color: #fafafa;
     }
 
-    .donut-detail-metrics {
-      display: flex;
-      align-items: baseline;
-      gap: 0.35rem;
+    .col-order-code {
+      font-family: ui-monospace, monospace;
+      font-weight: 700;
+      color: #111827;
     }
 
-    .detail-orders {
-      font-size: 0.68rem;
-      color: #6b7280;
-    }
-
-    .client-loyalty-tip {
-      background: #f9fafb;
-      border-left: 2px solid #111111;
-      padding: 0.6rem 0.85rem;
-      font-size: 0.75rem;
-      color: #4b5563;
-      line-height: 1.4;
-    }
-
-    /* =========================================================
-       MÓDULO 4: OPERACIÓN Y LOGÍSTICA
-       ========================================================= */
-
-    .logistics-sla-alert {
+    .customer-cell {
       display: flex;
       align-items: center;
       gap: 0.45rem;
+    }
+
+    .customer-avatar-dot {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #e5e7eb;
+      color: #374151;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.58rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .customer-name-text {
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .col-items-summary {
+      color: #6b7280;
+      max-width: 180px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .status-pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+    }
+
+    .status-dot-indicator {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .badge-delivered {
       background: #ecfdf5;
       color: #065f46;
-      padding: 0.6rem 0.85rem;
-      border-radius: 2px;
-      font-size: 0.75rem;
     }
+    .badge-delivered .status-dot-indicator { background: #059669; }
 
-    .sla-dot-green {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #059669;
+    .badge-processing {
+      background: #eff6ff;
+      color: #1e40af;
     }
+    .badge-processing .status-dot-indicator { background: #2563eb; }
 
-    .geographic-map-canvas {
-      position: relative;
-      height: 160px;
-      background: #111827;
-      border-radius: 2px;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .badge-shipped {
+      background: #fdf8e6;
+      color: #854d0e;
     }
+    .badge-shipped .status-dot-indicator { background: #d4af37; }
 
-    .map-radar-grid {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .badge-neutral {
+      background: #f3f4f6;
+      color: #374151;
     }
+    .badge-neutral .status-dot-indicator { background: #6b7280; }
 
-    .radar-circle {
-      position: absolute;
-      border: 1px solid rgba(212, 175, 55, 0.15);
-      border-radius: 50%;
-    }
-
-    .radar-c1 { width: 70px; height: 70px; }
-    .radar-c2 { width: 140px; height: 140px; }
-    .radar-c3 { width: 220px; height: 220px; border-style: dashed; }
-
-    .geo-node-pin {
-      position: absolute;
-      cursor: pointer;
-    }
-
-    .pin-palermo { top: 38%; left: 34%; }
-    .pin-recoleta { top: 48%; left: 58%; }
-    .pin-sanisidro { top: 22%; left: 24%; }
-
-    .pin-core {
-      width: 10px;
-      height: 10px;
-      background: #d4af37;
-      border-radius: 50%;
-      border: 2px solid #ffffff;
-      position: relative;
-      z-index: 2;
-    }
-
-    .pin-pulse {
-      position: absolute;
-      top: -5px;
-      left: -5px;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: rgba(212, 175, 55, 0.35);
-      animation: pinRadarPulse 2s infinite ease-out;
-    }
-
-    @keyframes pinRadarPulse {
-      0% { transform: scale(0.6); opacity: 1; }
-      100% { transform: scale(2.2); opacity: 0; }
-    }
-
-    .pin-popup {
-      position: absolute;
-      top: -38px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.85);
-      color: #ffffff;
-      padding: 0.25rem 0.5rem;
-      border-radius: 2px;
-      white-space: nowrap;
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-      pointer-events: none;
-      z-index: 5;
-    }
-
-    .popup-title {
-      font-size: 0.65rem;
-      font-weight: 700;
-      color: #d4af37;
-    }
-
-    .popup-meta {
-      font-size: 0.58rem;
-      color: #d1d5db;
-    }
-
-    .hubs-summary-table {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .hub-summary-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.4rem 0.5rem;
-      background: #f9fafb;
-      border-radius: 2px;
-    }
-
-    .hub-id-col {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .hub-name {
-      font-size: 0.76rem;
-      font-weight: 700;
-      color: #111111;
-    }
-
-    .hub-city {
-      font-size: 0.65rem;
-      color: #6b7280;
-    }
-
-    .hub-stats-col {
-      display: flex;
-      align-items: center;
-      gap: 0.85rem;
-    }
-
-    .hub-time {
-      font-size: 0.7rem;
-      color: #4b5563;
-    }
-
-    .hub-revenue {
-      font-size: 0.82rem;
+    .col-total {
       font-weight: 800;
-      color: #111111;
+      color: #111827;
+      font-family: ui-monospace, monospace;
+    }
+
+    .col-date {
+      color: #9ca3af;
+      font-size: 0.72rem;
+    }
+
+    .text-right {
+      text-align: right;
     }
 
     /* Responsividad */
-    @media (max-width: 1024px) {
-      .two-columns-equal {
-        grid-template-columns: 1fr;
+    @media (max-width: 1100px) {
+      .harbor-top-metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
       }
-      .financial-main-layout {
-        grid-template-columns: 1fr;
+      .target-gauge-card {
+        grid-column: span 2;
       }
-      .financial-left-col {
-        border-right: none;
-        border-bottom: 1px solid #f3f4f6;
-        padding-right: 0;
-        padding-bottom: 1.5rem;
+      .harbor-middle-grid,
+      .harbor-bottom-grid {
+        grid-template-columns: 1fr;
       }
       .voice-diagnosis-grid {
         grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .harbor-container {
+        padding: 1rem;
+      }
+      .harbor-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .header-actions-block {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .harbor-top-metrics-grid {
+        grid-template-columns: 1fr;
+      }
+      .target-gauge-card {
+        grid-column: span 1;
+      }
+      .card-header-flex {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+      }
+      .granularity-switcher-tabs {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .switcher-tab {
+        text-align: center;
+      }
+      .quick-prompts-row {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 0.4rem;
+        -webkit-overflow-scrolling: touch;
+      }
+      .prompt-chip {
+        white-space: nowrap;
       }
     }
   `]
 })
 export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
   private reportesService = inject(ReportesService);
+  private authService = inject(AuthService);
 
-  // Señales de Estado
+  // Estados reactivos
   loading = signal<boolean>(true);
   exporting = signal<boolean>(false);
   selectedRango = signal<string>('30D');
   selectedGranularidad = signal<'DIA' | 'SEMANA' | 'MES'>('MES');
   dashboardData = signal<DashboardReporteResponse | null>(null);
 
-  // Señales de Asistente de Voz IA
+  // Asistente de Voz IA
   isListening = signal<boolean>(false);
   isSpeaking = signal<boolean>(false);
   isProcessingVoice = signal<boolean>(false);
@@ -2111,7 +1621,7 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
   voiceAnalysis = signal<AnalisisVozResponse | null>(null);
   textQueryInput = '';
 
-  // Interacción de Hover en la curva comparativa
+  // Interacción en gráfico
   hoveredTrendPoint: any = null;
 
   quickPills = [
@@ -2121,10 +1631,23 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
     { label: '⚠️ ¿Qué prendas tienen stock crítico?', query: 'Cuales prendas tienen stock critico o bajo?' }
   ];
 
-  // =========================================================================
-  // PROYECCIONES COMPUTADAS (SIGNALS)
-  // =========================================================================
+  // Computadas para la cabecera
+  currentUserName = computed(() => {
+    const user = this.authService.currentUser();
+    return user?.nombre || 'Administrador';
+  });
 
+  currentDateFormatted = computed(() => {
+    const d = new Date();
+    return d.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  });
+
+  // Datos Financieros y de Cumplimiento
   financialData = computed<FinancialIndicator>(() => {
     const d = this.dashboardData();
     if (d && d.financial) {
@@ -2133,111 +1656,25 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
     return {
       facturacion_actual: 148245.0,
       facturacion_anterior: 130480.0,
-      variacion_pct: 12.4,
+      variacion_pct: 12.5,
       objetivo_mes: 172000.0,
       cumplimiento_pct: 86.2,
       ticket_medio: 320.0,
       pedidos_totales: 342,
       unidades_vendidas: 712,
       descuentos_totales: 4850.0,
-      mensaje_insight: 'Estás al 86% del objetivo mensual con un incremento del +12.4% respecto al período anterior.'
+      mensaje_insight: 'Estás al 86.2% del objetivo fijado con un crecimiento intermensual del +12.5%.'
     };
   });
 
-  outerRingDashoffset = computed(() => {
+  // Offset del semicírculo de meta (arco de 180°, circunferencia media = 175.93)
+  semicircleDashoffset = computed(() => {
     const pct = Math.min(100, Math.max(0, this.financialData().cumplimiento_pct));
-    const circumference = 351.85; // 2 * PI * 56
-    return circumference * (1 - pct / 100);
+    const arcLength = 175.93; // PI * 56
+    return arcLength * (1 - pct / 100);
   });
 
-  innerRingDashoffset = computed(() => {
-    const pct = Math.min(100, Math.max(0, this.financialData().cumplimiento_pct * 0.88));
-    const circumference = 263.89; // 2 * PI * 42
-    return circumference * (1 - pct / 100);
-  });
-
-  topProductsList = computed<TopProductItem[]>(() => {
-    const d = this.dashboardData();
-    if (d && d.top_products && d.top_products.length > 0) {
-      return d.top_products;
-    }
-    return [
-      { prenda_id: 1, nombre: 'Cashmere Trench Coat Atelier', categoria: 'Alta Costura', unidades_vendidas: 142, ingresos_totales: 49200.0, imagen_url: null },
-      { prenda_id: 2, nombre: 'Vestido de Seda Georgette Noir', categoria: 'Alta Costura', unidades_vendidas: 118, ingresos_totales: 38940.0, imagen_url: null },
-      { prenda_id: 3, nombre: 'Tailored Wool Blazer Milano', categoria: 'Sastrería', unidades_vendidas: 95, ingresos_totales: 27455.0, imagen_url: null },
-      { prenda_id: 4, nombre: 'Pantalón Palazzo Seda Marfil', categoria: 'Gala & Noche', unidades_vendidas: 84, ingresos_totales: 18480.0, imagen_url: null }
-    ];
-  });
-
-  maxProductRevenue = computed(() => {
-    const list = this.topProductsList();
-    return Math.max(...list.map(p => p.ingresos_totales), 1);
-  });
-
-  inventoryStackedList = computed<InventoryStackedItem[]>(() => {
-    const d = this.dashboardData();
-    if (d && d.inventory_stacked && d.inventory_stacked.length > 0) {
-      return d.inventory_stacked;
-    }
-    return [
-      { categoria: 'Alta Costura', disponible: 185, reservado_probadores: 24, alerta_critica: 5 },
-      { categoria: 'Sastrería', disponible: 140, reservado_probadores: 18, alerta_critica: 3 },
-      { categoria: 'Gala & Noche', disponible: 95, reservado_probadores: 32, alerta_critica: 8 },
-      { categoria: 'Pret-à-Porter', disponible: 230, reservado_probadores: 15, alerta_critica: 2 },
-      { categoria: 'Accesorios', disponible: 310, reservado_probadores: 8, alerta_critica: 1 }
-    ];
-  });
-
-  funnelStepsList = computed<FunnelStepItem[]>(() => {
-    const d = this.dashboardData();
-    if (d && d.funnel_steps && d.funnel_steps.length > 0) {
-      return d.funnel_steps;
-    }
-    return [
-      { etapa: 'Visitas Catálogo', cantidad: 4500, porcentaje: 100.0, conversion_siguiente: 48.0 },
-      { etapa: 'Exploración Prendas', cantidad: 2160, porcentaje: 48.0, conversion_siguiente: 22.0 },
-      { etapa: 'Probador Virtual / Carrito', cantidad: 475, porcentaje: 10.5, conversion_siguiente: 42.0 },
-      { etapa: 'Ventas Concretadas', cantidad: 200, porcentaje: 4.4, conversion_siguiente: 100.0 }
-    ];
-  });
-
-  channelList = computed<DistributionSlice[]>(() => {
-    const d = this.dashboardData();
-    if (d && d.channel_distribution && d.channel_distribution.length > 0) {
-      return d.channel_distribution;
-    }
-    return [
-      { nombre: 'Boutiques Físicas', porcentaje: 54.5, cantidad: 186, color: '#111827' },
-      { nombre: 'E-Commerce Noir', porcentaje: 32.2, cantidad: 110, color: '#d4af37' },
-      { nombre: 'Citas Privadas VIP', porcentaje: 13.3, cantidad: 46, color: '#9ca3af' }
-    ];
-  });
-
-  orderStatusList = computed<DistributionSlice[]>(() => {
-    const d = this.dashboardData();
-    if (d && d.order_status_donut && d.order_status_donut.length > 0) {
-      return d.order_status_donut;
-    }
-    return [
-      { nombre: 'Entregados', porcentaje: 65.0, cantidad: 222, color: '#059669' },
-      { nombre: 'En Tránsito', porcentaje: 20.0, cantidad: 68, color: '#2563eb' },
-      { nombre: 'En Preparación', porcentaje: 12.0, cantidad: 41, color: '#f59e0b' },
-      { nombre: 'Devoluciones / Cambios', porcentaje: 3.0, cantidad: 11, color: '#ef4444' }
-    ];
-  });
-
-  geographicHubsList = computed<GeographicHub[]>(() => {
-    const d = this.dashboardData();
-    if (d && d.geographic_hubs && d.geographic_hubs.length > 0) {
-      return d.geographic_hubs;
-    }
-    return [
-      { sucursal: 'Boutique Palermo Soho', ciudad: 'Buenos Aires (Palermo)', pedidos: 148, monto: 62260.0, tiempo_entrega_promedio: '35 min (Same-Day)', lat_relativa: -34.588, lng_relativa: -58.430 },
-      { sucursal: 'Flagship Recoleta Luxury', ciudad: 'Buenos Aires (Recoleta)', pedidos: 112, monto: 51885.0, tiempo_entrega_promedio: '45 min (Concierge)', lat_relativa: -34.587, lng_relativa: -58.393 },
-      { sucursal: 'Hub Atelier San Isidro', ciudad: 'San Isidro (Zona Norte)', pedidos: 82, monto: 34100.0, tiempo_entrega_promedio: '90 min (Express)', lat_relativa: -34.471, lng_relativa: -58.528 }
-    ];
-  });
-
+  // Escala cuantitativa dinámica para el eje Y
   maxTrendVal = computed(() => {
     const d = this.dashboardData();
     const points: ComparativeTrendPoint[] = (d && d.comparative_trend && d.comparative_trend.length > 0)
@@ -2255,13 +1692,13 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
     const maxVal = this.maxTrendVal();
     return [
       { label: this.formatCurrencyShort(maxVal), y: 35 },
-      { label: this.formatCurrencyShort(Math.round(maxVal * 0.66)), y: 80 },
-      { label: this.formatCurrencyShort(Math.round(maxVal * 0.33)), y: 125 },
-      { label: '$0', y: 170 }
+      { label: this.formatCurrencyShort(Math.round(maxVal * 0.66)), y: 82 },
+      { label: this.formatCurrencyShort(Math.round(maxVal * 0.33)), y: 128 },
+      { label: '$0', y: 175 }
     ];
   });
 
-  // Coordenadas calculadas para la curva comparativa SVG
+  // Coordenadas calculadas para la curva SVG
   trendChartCoords = computed(() => {
     const d = this.dashboardData();
     const points: ComparativeTrendPoint[] = (d && d.comparative_trend && d.comparative_trend.length > 0)
@@ -2288,8 +1725,8 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
 
     return points.map((p, i) => {
       const x = startX + i * stepX;
-      const yAct = 170 - (p.monto_actual / maxVal) * 135;
-      const yAnt = 170 - (p.monto_anterior / maxVal) * 135;
+      const yAct = 175 - (p.monto_actual / maxVal) * 140;
+      const yAnt = 175 - (p.monto_anterior / maxVal) * 140;
       return {
         x: Math.round(x),
         yActual: Math.round(yAct),
@@ -2305,12 +1742,6 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
     const coords = this.trendChartCoords();
     return coords.length > 0 ? coords[coords.length - 1] : null;
   });
-
-  formatCurrencyShort(val: number): string {
-    if (val >= 1000000) return `$${(val / 1000000).toFixed(1)}M`;
-    if (val >= 1000) return `$${Math.round(val / 1000)}k`;
-    return `$${Math.round(val)}`;
-  }
 
   svgPathActual = computed(() => {
     const coords = this.trendChartCoords();
@@ -2331,7 +1762,7 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
     const line = this.svgPathActual();
     const last = coords[coords.length - 1];
     const first = coords[0];
-    return `${line} L${last.x},170 L${first.x},170 Z`;
+    return `${line} L${last.x},175 L${first.x},175 Z`;
   });
 
   svgPathAnterior = computed(() => {
@@ -2347,10 +1778,35 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
     return d;
   });
 
-  // =========================================================================
-  // CICLO DE VIDA Y ACCIONES
-  // =========================================================================
+  // Lista de Productos Más Vendidos
+  topProductsList = computed<TopProductItem[]>(() => {
+    const d = this.dashboardData();
+    if (d && d.top_products && d.top_products.length > 0) {
+      return d.top_products;
+    }
+    return [
+      { prenda_id: 1, nombre: 'Cashmere Trench Coat Atelier', categoria: 'Alta Costura', unidades_vendidas: 142, ingresos_totales: 49200.0, imagen_url: null },
+      { prenda_id: 2, nombre: 'Vestido de Seda Georgette Noir', categoria: 'Alta Costura', unidades_vendidas: 118, ingresos_totales: 38940.0, imagen_url: null },
+      { prenda_id: 3, nombre: 'Tailored Wool Blazer Milano', categoria: 'Sastrería', unidades_vendidas: 95, ingresos_totales: 27455.0, imagen_url: null },
+      { prenda_id: 4, nombre: 'Pantalón Palazzo Seda Marfil', categoria: 'Gala & Noche', unidades_vendidas: 84, ingresos_totales: 18480.0, imagen_url: null }
+    ];
+  });
 
+  // Lista de Pedidos Recientes
+  recentOrdersList = computed<RecentOrderRow[]>(() => {
+    const d = this.dashboardData();
+    if (d && d.recent_orders && d.recent_orders.length > 0) {
+      return d.recent_orders;
+    }
+    return [
+      { codigo_pedido: '#AT-9842', cliente_nombre: 'Helena Vance', items_resumen: 'Cashmere Trench Coat, Pañuelo Seda', sucursal_o_ciudad: 'Boutique Palermo', monto_total: 3450.00, estado: 'ENTREGADO', fecha: 'Hoy 14:20' },
+      { codigo_pedido: '#AT-9841', cliente_nombre: 'Julian Sterling', items_resumen: 'Tailored Wool Blazer, Camisa Noir', sucursal_o_ciudad: 'Flagship Centro', monto_total: 2890.00, estado: 'EN PROCESO', fecha: 'Hoy 13:45' },
+      { codigo_pedido: '#AT-9839', cliente_nombre: 'Camille Laurent', items_resumen: 'Vestido Sirena Terciopelo', sucursal_o_ciudad: 'E-Commerce Delivery', monto_total: 1850.00, estado: 'ENVIADO', fecha: 'Hoy 11:15' },
+      { codigo_pedido: '#AT-9835', cliente_nombre: 'Aethelgard Corp', items_resumen: 'Prendas de Gala Ejecutivas (x3)', sucursal_o_ciudad: 'Boutique Recoleta', monto_total: 4220.00, estado: 'PAGADA', fecha: 'Ayer 18:30' }
+    ];
+  });
+
+  // Ciclo de Vida
   ngOnInit(): void {
     this.cargarDashboard(this.selectedRango(), this.selectedGranularidad());
   }
@@ -2384,14 +1840,6 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
     this.cargarDashboard(this.selectedRango(), gran);
   }
 
-  getStackedPct(item: InventoryStackedItem, type: 'disponible' | 'reservado' | 'alerta'): number {
-    const total = item.disponible + item.reservado_probadores + item.alerta_critica;
-    if (total === 0) return 0;
-    if (type === 'disponible') return Math.round((item.disponible / total) * 100);
-    if (type === 'reservado') return Math.round((item.reservado_probadores / total) * 100);
-    return Math.round((item.alerta_critica / total) * 100);
-  }
-
   exportarReporte(): void {
     this.exporting.set(true);
     this.reportesService.exportarCSV().subscribe({
@@ -2399,7 +1847,7 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Informe_BI_FashionStore_${this.selectedGranularidad()}_${Date.now()}.csv`;
+        a.download = `Reporte_Ejecutivo_FashionStore_${this.selectedGranularidad()}_${Date.now()}.csv`;
         a.click();
         window.URL.revokeObjectURL(url);
         this.exporting.set(false);
@@ -2409,6 +1857,30 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
         this.exporting.set(false);
       }
     });
+  }
+
+  // Helpers de visualización
+  getInitials(name: string): string {
+    if (!name) return 'AT';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  }
+
+  getStatusBadgeClass(estado: string): string {
+    const st = (estado || '').toUpperCase();
+    if (st.includes('ENTREGAD') || st.includes('COMPLET')) return 'badge-delivered';
+    if (st.includes('PROCES') || st.includes('PREPARAC')) return 'badge-processing';
+    if (st.includes('ENVIAD') || st.includes('TRANSIT')) return 'badge-shipped';
+    return 'badge-neutral';
+  }
+
+  formatCurrencyShort(val: number): string {
+    if (val >= 1000000) return `$${(val / 1000000).toFixed(1)}M`;
+    if (val >= 1000) return `$${Math.round(val / 1000)}k`;
+    return `$${Math.round(val)}`;
   }
 
   // =========================================================================
