@@ -50,7 +50,7 @@ import { Notificacion } from '../models/notificaciones.models';
             }
           </header>
 
-          <!-- Filtros Rápidos por Categoría -->
+          <!-- Filtros Rápidos -->
           <div class="notif-filters-bar">
             <button
               type="button"
@@ -67,22 +67,6 @@ import { Notificacion } from '../models/notificaciones.models';
               (click)="setFilter('NO_LEIDAS')"
             >
               No Leídas
-            </button>
-            <button
-              type="button"
-              class="filter-pill"
-              [class.active]="activeFilter() === 'RESERVA_PROBADOR'"
-              (click)="setFilter('RESERVA_PROBADOR')"
-            >
-              🕒 Probadores
-            </button>
-            <button
-              type="button"
-              class="filter-pill"
-              [class.active]="activeFilter() === 'ESTADO_PEDIDO'"
-              (click)="setFilter('ESTADO_PEDIDO')"
-            >
-              🛍️ Pedidos
             </button>
           </div>
 
