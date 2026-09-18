@@ -33,7 +33,7 @@ import {
               <span class="audit-badge">AUDITORÍA HISTÓRICA</span> Período cerrado: {{ getNombreMes(selectedMes()) }} {{ selectedAnio() }}
             </p>
             <p class="header-date predictive-highlight" *ngIf="selectedRango() === 'MES_ESPECIFICO' && modoVista() === 'PREDICTIVO'">
-              <span class="predictive-badge">🔮 ESTIMACIÓN PREDICTIVA</span> Proyección estimada: {{ getNombreMes(selectedMes()) }} {{ selectedAnio() }}
+              <span class="predictive-badge">ESTIMACIÓN PREDICTIVA</span> Proyección estimada: {{ getNombreMes(selectedMes()) }} {{ selectedAnio() }}
             </p>
             <p class="header-date future-empty-highlight" *ngIf="selectedRango() === 'MES_ESPECIFICO' && modoVista() === 'SIN_DATOS_FUTURO'">
               <span class="future-empty-badge">FUERA DE HORIZONTE</span> {{ getNombreMes(selectedMes()) }} {{ selectedAnio() }}
@@ -214,7 +214,6 @@ import {
         <ng-container *ngIf="modoVista() !== 'SIN_DATOS_FUTURO'">
           <!-- Banner Superior de Estimación Predictiva -->
           <div *ngIf="modoVista() === 'PREDICTIVO'" class="predictive-banner">
-            <span class="predictive-banner-icon">🔮</span>
             <div class="predictive-banner-content">
               <strong>Modo Estimación Predictiva activado:</strong> Todas las métricas visualizadas para <strong>{{ getNombreMes(selectedMes()) }} {{ selectedAnio() }}</strong> son proyecciones calculadas automáticamente según el rendimiento del negocio en los meses pasados.
             </div>
