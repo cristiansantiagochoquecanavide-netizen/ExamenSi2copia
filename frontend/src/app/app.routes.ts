@@ -35,8 +35,13 @@ export const routes: Routes = [
     loadChildren: () => import('./features/ia-asistente/ia-asistente.routes').then(m => m.IA_ASISTENTE_ROUTES)
   },
   {
-    path: 'reportes',
+    path: 'dashboard',
     loadChildren: () => import('./features/reportes/reportes.routes').then(m => m.REPORTES_ROUTES)
+  },
+  {
+    path: 'reportes',
+    redirectTo: 'dashboard',
+    pathMatch: 'full'
   },
   {
     path: 'landing',

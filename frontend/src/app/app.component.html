@@ -31,6 +31,11 @@
     </div>
 
     <nav class="nav-links">
+      <!-- DASHBOARD EJECUTIVO (APARTADO DIRECTO) -->
+      <a routerLink="/dashboard" routerLinkActive="active-nav-link" class="nav-direct-link">
+        <span>Dashboard</span>
+      </a>
+
       <!-- 1. CATÁLOGO & MODA -->
       <div class="nav-dropdown" [class.active-module]="isModuleActive('/catalogo')">
         <button type="button" class="dropdown-trigger">
@@ -111,15 +116,12 @@
       </div>
 
       <!-- 5. ADMINISTRACIÓN & SEGURIDAD -->
-      <div class="nav-dropdown" [class.active-module]="isModuleActive('/usuarios') || isModuleActive('/reportes')">
+      <div class="nav-dropdown" [class.active-module]="isModuleActive('/usuarios')">
         <button type="button" class="dropdown-trigger">
           <span>Administración</span>
           <span class="dropdown-chevron">&#9662;</span>
         </button>
         <div class="dropdown-menu">
-          <a routerLink="/reportes" routerLinkActive="active">
-            <span class="menu-icon">&bull;</span> Reportes &amp; Dashboard (IA)
-          </a>
           <a routerLink="/usuarios/gestion" routerLinkActive="active">
             <span class="menu-icon">&bull;</span> Personal &amp; Clientes
           </a>
