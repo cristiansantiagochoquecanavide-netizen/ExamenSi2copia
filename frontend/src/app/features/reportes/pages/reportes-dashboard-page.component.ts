@@ -2365,10 +2365,10 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
   showComparative = signal<boolean>(true);
 
   quickPills = [
-    { label: '🏆 ¿Cuál es el producto más vendido?', query: 'Cual es el producto mas vendido?' },
-    { label: '📈 ¿Cómo están los ingresos este mes?', query: 'Como estan los ingresos este mes?' },
-    { label: '👗 ¿Cuál es la ocupación de probadores?', query: 'Cual es la ocupacion de probadores?' },
-    { label: '⚠️ ¿Qué prendas tienen stock crítico?', query: 'Cuales prendas tienen stock critico o bajo?' }
+    { label: '¿Cuál es el producto más vendido?', query: 'Cual es el producto mas vendido?' },
+    { label: '¿Cómo están los ingresos este mes?', query: 'Como estan los ingresos este mes?' },
+    { label: '¿Cuál es la ocupación de probadores?', query: 'Cual es la ocupacion de probadores?' },
+    { label: '¿Qué prendas tienen stock crítico?', query: 'Cuales prendas tienen stock critico o bajo?' }
   ];
 
   // Computadas para la cabecera
