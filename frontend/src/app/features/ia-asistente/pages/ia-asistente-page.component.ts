@@ -409,8 +409,8 @@ import { AuthService } from '../../../core/services/auth.service';
   styles: [`
     :host {
       display: block;
-      background-color: #0d0d0d;
-      color: #f5f5f5;
+      background-color: #ffffff;
+      color: #111111;
       min-height: 100vh;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
@@ -418,19 +418,20 @@ import { AuthService } from '../../../core/services/auth.service';
     .atelier-container {
       max-width: 1400px;
       margin: 0 auto;
-      padding: 2rem 1.5rem 5rem;
+      padding: 2.5rem 1.5rem 5rem;
     }
 
     /* 1. HERO BANNER */
     .atelier-hero {
       position: relative;
-      background: linear-gradient(135deg, #141414 0%, #1f1b16 100%);
-      border: 1px solid rgba(197, 168, 128, 0.3);
+      background: #fdfbf7;
+      border: 1px solid rgba(197, 168, 128, 0.4);
+      border-left: 4px solid #c5a880;
       padding: 3rem 2.5rem;
-      border-radius: 8px;
+      border-radius: 4px;
       margin-bottom: 2.5rem;
       overflow: hidden;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
     }
 
     .hero-badge {
@@ -438,9 +439,9 @@ import { AuthService } from '../../../core/services/auth.service';
       align-items: center;
       gap: 0.5rem;
       padding: 0.35rem 0.9rem;
-      background: rgba(197, 168, 128, 0.15);
+      background: #f4ede4;
       border: 1px solid #c5a880;
-      color: #dfcaa7;
+      color: #78350f;
       font-size: 0.72rem;
       font-weight: 700;
       letter-spacing: 0.12em;
@@ -449,25 +450,29 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .ai-sparkle {
-      color: #c5a880;
+      color: #b45309;
       font-size: 0.9rem;
     }
 
     .hero-title {
-      font-size: 2.5rem;
+      font-size: 2.4rem;
       font-weight: 800;
       letter-spacing: -0.02em;
       margin: 0 0 1rem;
-      color: #ffffff;
-      font-family: 'Cinzel', 'Playfair Display', Georgia, serif;
+      color: #000000 !important;
     }
 
     .hero-description {
       font-size: 1.05rem;
       line-height: 1.6;
-      color: #cccccc;
+      color: #4b5563;
       max-width: 850px;
       margin-bottom: 2rem;
+    }
+
+    .hero-description strong {
+      color: #000000;
+      font-weight: 700;
     }
 
     .hero-actions {
@@ -481,10 +486,10 @@ import { AuthService } from '../../../core/services/auth.service';
       display: inline-flex;
       align-items: center;
       gap: 0.6rem;
-      background: #c5a880;
-      color: #111111;
+      background: #000000;
+      color: #ffffff;
       font-weight: 700;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       padding: 0.85rem 1.6rem;
       border: none;
       border-radius: 4px;
@@ -495,9 +500,10 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .btn-quiz-cta:hover {
-      background: #dfcaa7;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(197, 168, 128, 0.35);
+      background: #c5a880;
+      color: #000000;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
     .profile-summary-pills {
@@ -507,12 +513,13 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .summary-pill {
-      background: rgba(255, 255, 255, 0.07);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #dfcaa7;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      color: #374151;
       padding: 0.4rem 0.85rem;
       border-radius: 50px;
       font-size: 0.8rem;
+      font-weight: 600;
     }
 
     /* 2. OCCASIONS BAR */
@@ -522,14 +529,15 @@ import { AuthService } from '../../../core/services/auth.service';
       gap: 1rem;
       margin-bottom: 3rem;
       padding-bottom: 1rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     }
 
     .bar-label {
       font-size: 0.82rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: #888888;
+      color: #6b7280;
+      font-weight: 600;
       white-space: nowrap;
     }
 
@@ -541,27 +549,27 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .occasion-pill {
-      background: #1a1a1a;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #bbbbbb;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      color: #4b5563;
       padding: 0.5rem 1.1rem;
       border-radius: 50px;
       font-size: 0.82rem;
-      font-weight: 500;
+      font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
       transition: all 0.2s ease;
     }
 
     .occasion-pill:hover {
-      border-color: #c5a880;
-      color: #ffffff;
+      border-color: #000000;
+      color: #000000;
     }
 
     .occasion-pill.active {
-      background: #c5a880;
-      border-color: #c5a880;
-      color: #111111;
+      background: #000000;
+      border-color: #000000;
+      color: #ffffff;
       font-weight: 700;
     }
 
@@ -571,7 +579,7 @@ import { AuthService } from '../../../core/services/auth.service';
       justify-content: space-between;
       align-items: flex-end;
       margin-bottom: 1.75rem;
-      border-bottom: 1px solid rgba(197, 168, 128, 0.2);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
       padding-bottom: 0.75rem;
     }
 
@@ -579,25 +587,25 @@ import { AuthService } from '../../../core/services/auth.service';
       font-size: 0.72rem;
       font-weight: 700;
       letter-spacing: 0.12em;
-      color: #c5a880;
+      color: #92400e;
       text-transform: uppercase;
     }
 
     .section-title {
       font-size: 1.6rem;
-      font-weight: 700;
-      color: #ffffff;
+      font-weight: 800;
+      color: #000000 !important;
       margin: 0.25rem 0 0;
-      font-family: 'Cinzel', 'Playfair Display', Georgia, serif;
     }
 
     .coordination-badge {
       font-size: 0.78rem;
-      color: #7dd3fc;
-      background: rgba(125, 211, 252, 0.1);
-      border: 1px solid rgba(125, 211, 252, 0.3);
-      padding: 0.3rem 0.75rem;
-      border-radius: 4px;
+      font-weight: 600;
+      color: #0369a1;
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      padding: 0.35rem 0.85rem;
+      border-radius: 50px;
     }
 
     /* 3. OUTFITS CARDS */
@@ -618,13 +626,20 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .outfit-card {
-      background: #141414;
-      border: 1px solid rgba(197, 168, 128, 0.35);
-      border-radius: 8px;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 6px;
       padding: 1.75rem;
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .outfit-card:hover {
+      border-color: rgba(0, 0, 0, 0.25);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
     }
 
     .outfit-header {
@@ -632,7 +647,7 @@ import { AuthService } from '../../../core/services/auth.service';
       justify-content: space-between;
       align-items: flex-start;
       gap: 1rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
       padding-bottom: 1rem;
     }
 
@@ -640,8 +655,9 @@ import { AuthService } from '../../../core/services/auth.service';
       display: inline-block;
       font-size: 0.75rem;
       font-weight: 700;
-      color: #dfcaa7;
-      background: rgba(197, 168, 128, 0.15);
+      color: #78350f;
+      background: #fbf6ee;
+      border: 1px solid #e7d8c5;
       padding: 0.25rem 0.6rem;
       border-radius: 4px;
       margin-bottom: 0.5rem;
@@ -650,13 +666,13 @@ import { AuthService } from '../../../core/services/auth.service';
     .outfit-title {
       font-size: 1.25rem;
       font-weight: 700;
-      color: #ffffff;
+      color: #000000 !important;
       margin: 0 0 0.3rem;
     }
 
     .outfit-desc {
       font-size: 0.88rem;
-      color: #aaaaaa;
+      color: #4b5563;
       margin: 0;
       line-height: 1.5;
     }
@@ -668,22 +684,24 @@ import { AuthService } from '../../../core/services/auth.service';
 
     .price-label {
       font-size: 0.72rem;
-      color: #888888;
+      color: #6b7280;
       display: block;
       text-transform: uppercase;
+      font-weight: 600;
     }
 
     .price-val {
       font-size: 1.4rem;
       font-weight: 800;
-      color: #ffffff;
+      color: #000000 !important;
       display: block;
     }
 
     .saving-tag {
       font-size: 0.72rem;
-      color: #4ade80;
-      background: rgba(74, 222, 128, 0.12);
+      font-weight: 700;
+      color: #15803d;
+      background: #dcfce7;
       padding: 0.2rem 0.5rem;
       border-radius: 4px;
       display: inline-block;
@@ -697,8 +715,8 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .outfit-item-card {
-      background: #1c1c1c;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.08);
       border-radius: 6px;
       overflow: hidden;
     }
@@ -706,6 +724,7 @@ import { AuthService } from '../../../core/services/auth.service';
     .item-img-wrapper {
       position: relative;
       height: 190px;
+      background: #f3f4f6;
       overflow: hidden;
     }
 
@@ -717,21 +736,20 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .item-img-wrapper:hover img {
-      transform: scale(1.05);
+      transform: scale(1.04);
     }
 
     .item-role-tag {
       position: absolute;
       bottom: 8px;
       left: 8px;
-      background: rgba(0, 0, 0, 0.75);
+      background: rgba(0, 0, 0, 0.8);
       backdrop-filter: blur(4px);
-      color: #dfcaa7;
+      color: #ffffff;
       font-size: 0.68rem;
       font-weight: 700;
       padding: 0.2rem 0.55rem;
       border-radius: 3px;
-      border: 1px solid rgba(197, 168, 128, 0.3);
     }
 
     .item-meta {
@@ -741,14 +759,15 @@ import { AuthService } from '../../../core/services/auth.service';
     .item-cat {
       font-size: 0.7rem;
       text-transform: uppercase;
-      color: #888888;
+      color: #6b7280;
       display: block;
       margin-bottom: 0.25rem;
     }
 
     .item-name {
       font-size: 0.92rem;
-      color: #ffffff;
+      font-weight: 700;
+      color: #111111;
       display: block;
       margin-bottom: 0.4rem;
       white-space: nowrap;
@@ -758,8 +777,8 @@ import { AuthService } from '../../../core/services/auth.service';
 
     .item-price {
       font-size: 0.95rem;
-      font-weight: 700;
-      color: #dfcaa7;
+      font-weight: 800;
+      color: #000000;
     }
 
     /* 4. RECOMMENDATIONS GRID */
@@ -769,7 +788,7 @@ import { AuthService } from '../../../core/services/auth.service';
 
     .section-subtitle {
       font-size: 0.9rem;
-      color: #999999;
+      color: #6b7280;
       margin: 0.3rem 0 0;
     }
 
@@ -780,20 +799,21 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .recom-card {
-      background: #141414;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 6px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       transition: all 0.25s ease;
       position: relative;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
     }
 
     .recom-card:hover {
-      border-color: #c5a880;
+      border-color: rgba(0, 0, 0, 0.3);
       transform: translateY(-4px);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
     }
 
     .card-badges-top {
@@ -808,21 +828,21 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .match-badge {
-      background: #c5a880;
-      color: #111111;
+      background: #000000;
+      color: #ffffff;
       font-size: 0.72rem;
       font-weight: 800;
       padding: 0.25rem 0.65rem;
       border-radius: 50px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     }
 
     .ia-tag {
-      background: rgba(0, 0, 0, 0.75);
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      color: #ffffff;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      color: #111111;
       font-size: 0.68rem;
-      font-weight: 600;
+      font-weight: 700;
       padding: 0.25rem 0.55rem;
       border-radius: 4px;
       backdrop-filter: blur(4px);
@@ -831,7 +851,7 @@ import { AuthService } from '../../../core/services/auth.service';
     .card-img-container {
       height: 340px;
       overflow: hidden;
-      background: #1a1a1a;
+      background: #f3f4f6;
       position: relative;
     }
 
@@ -875,22 +895,22 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .pill-category {
-      background: rgba(197, 168, 128, 0.12);
+      background: #fdfbf7;
       border: 1px solid #c5a880;
-      color: #dfcaa7;
+      color: #78350f;
     }
 
     .pill-sector {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #cccccc;
+      background: #f3f4f6;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      color: #374151;
     }
 
     /* Regla 4: Nombre comercial en negrita */
     .product-title {
       font-size: 1.15rem;
       font-weight: 800; /* Obligatoriamente negrita */
-      color: #ffffff;
+      color: #000000 !important;
       margin: 0 0 0.5rem;
       line-height: 1.35;
     }
@@ -910,16 +930,17 @@ import { AuthService } from '../../../core/services/auth.service';
 
     .rating-num {
       font-weight: 700;
-      color: #ffffff;
+      color: #111111;
     }
 
     .review-count {
-      color: #888888;
+      color: #6b7280;
     }
 
     /* Rationale Box */
     .ai-rationale-box {
-      background: rgba(197, 168, 128, 0.08);
+      background: #fdfbf7;
+      border: 1px solid rgba(197, 168, 128, 0.3);
       border-left: 3px solid #c5a880;
       padding: 0.65rem 0.85rem;
       border-radius: 0 4px 4px 0;
@@ -929,7 +950,7 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .quote-icon {
-      color: #c5a880;
+      color: #b45309;
       font-size: 1.2rem;
       line-height: 1;
       font-family: Georgia, serif;
@@ -937,7 +958,7 @@ import { AuthService } from '../../../core/services/auth.service';
 
     .rationale-text {
       font-size: 0.82rem;
-      color: #d1d5db;
+      color: #374151;
       font-style: italic;
       margin: 0;
       line-height: 1.45;
@@ -948,7 +969,7 @@ import { AuthService } from '../../../core/services/auth.service';
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
       padding-top: 1rem;
     }
 
@@ -959,13 +980,14 @@ import { AuthService } from '../../../core/services/auth.service';
 
     .currency {
       font-size: 0.68rem;
-      color: #888888;
+      color: #6b7280;
+      font-weight: 600;
     }
 
     .amount {
       font-size: 1.25rem;
       font-weight: 800;
-      color: #ffffff;
+      color: #000000 !important;
     }
 
     .actions-wrap {
@@ -974,9 +996,9 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .btn-look-modal {
-      background: transparent;
+      background: #ffffff;
       border: 1px solid #c5a880;
-      color: #dfcaa7;
+      color: #78350f;
       font-size: 0.78rem;
       font-weight: 600;
       padding: 0.5rem 0.85rem;
@@ -986,13 +1008,13 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .btn-look-modal:hover {
-      background: rgba(197, 168, 128, 0.15);
-      color: #ffffff;
+      background: #fdfbf7;
+      border-color: #78350f;
     }
 
     .btn-view-product {
-      background: #ffffff;
-      color: #111111;
+      background: #000000;
+      color: #ffffff;
       font-size: 0.78rem;
       font-weight: 700;
       padding: 0.5rem 0.95rem;
@@ -1010,8 +1032,8 @@ import { AuthService } from '../../../core/services/auth.service';
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(6px);
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
       z-index: 1000;
       display: flex;
       justify-content: center;
@@ -1021,15 +1043,15 @@ import { AuthService } from '../../../core/services/auth.service';
 
     .quiz-modal,
     .look-modal {
-      background: #161616;
-      border: 1px solid #c5a880;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.15);
       border-radius: 8px;
       width: 100%;
       max-width: 680px;
       max-height: 90vh;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
     }
 
     .modal-header {
@@ -1037,34 +1059,35 @@ import { AuthService } from '../../../core/services/auth.service';
       justify-content: space-between;
       align-items: flex-start;
       padding: 1.5rem;
-      border-bottom: 1px solid rgba(197, 168, 128, 0.25);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     }
 
     .modal-pre-tag {
       font-size: 0.72rem;
       font-weight: 700;
       letter-spacing: 0.12em;
-      color: #c5a880;
+      color: #78350f;
     }
 
     .modal-title {
       font-size: 1.35rem;
-      font-weight: 700;
-      color: #ffffff;
+      font-weight: 800;
+      color: #000000 !important;
       margin: 0.25rem 0 0;
     }
 
     .btn-close-modal {
       background: transparent;
       border: none;
-      color: #888888;
+      color: #6b7280;
       font-size: 1.3rem;
       cursor: pointer;
       line-height: 1;
+      transition: color 0.15s ease;
     }
 
     .btn-close-modal:hover {
-      color: #ffffff;
+      color: #000000;
     }
 
     .modal-body {
@@ -1077,7 +1100,7 @@ import { AuthService } from '../../../core/services/auth.service';
 
     .quiz-instruction {
       font-size: 0.9rem;
-      color: #aaaaaa;
+      color: #4b5563;
       margin: 0;
       line-height: 1.5;
     }
@@ -1085,8 +1108,8 @@ import { AuthService } from '../../../core/services/auth.service';
     .group-label {
       display: block;
       font-size: 0.88rem;
-      font-weight: 600;
-      color: #dfcaa7;
+      font-weight: 700;
+      color: #111111;
       margin-bottom: 0.6rem;
     }
 
@@ -1097,10 +1120,11 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .quiz-pill {
-      background: #202020;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #cccccc;
+      background: #f3f4f6;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      color: #374151;
       font-size: 0.82rem;
+      font-weight: 600;
       padding: 0.45rem 1rem;
       border-radius: 50px;
       cursor: pointer;
@@ -1108,14 +1132,14 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .quiz-pill:hover {
-      border-color: #c5a880;
-      color: #ffffff;
+      border-color: #000000;
+      color: #000000;
     }
 
     .quiz-pill.selected {
-      background: #c5a880;
-      border-color: #c5a880;
-      color: #111111;
+      background: #000000;
+      border-color: #000000;
+      color: #ffffff;
       font-weight: 700;
     }
 
@@ -1127,14 +1151,14 @@ import { AuthService } from '../../../core/services/auth.service';
 
     .budget-symbol {
       font-size: 1.2rem;
-      color: #c5a880;
-      font-weight: 700;
+      color: #78350f;
+      font-weight: 800;
     }
 
     .budget-field {
-      background: #202020;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #ffffff;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
       padding: 0.65rem 1rem;
       border-radius: 4px;
       font-size: 1rem;
@@ -1143,7 +1167,7 @@ import { AuthService } from '../../../core/services/auth.service';
 
     .budget-hint {
       font-size: 0.8rem;
-      color: #888888;
+      color: #6b7280;
     }
 
     .modal-footer {
@@ -1151,43 +1175,52 @@ import { AuthService } from '../../../core/services/auth.service';
       justify-content: flex-end;
       gap: 1rem;
       padding: 1.25rem 1.5rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      background: #121212;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      background: #f9fafb;
     }
 
     .btn-cancel {
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #bbbbbb;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #374151;
       padding: 0.75rem 1.25rem;
       border-radius: 4px;
       cursor: pointer;
       font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .btn-cancel:hover {
+      background: #f3f4f6;
+      color: #000000;
     }
 
     .btn-save-quiz {
-      background: #c5a880;
+      background: #000000;
       border: none;
-      color: #111111;
+      color: #ffffff;
       font-weight: 700;
       padding: 0.75rem 1.5rem;
       border-radius: 4px;
       cursor: pointer;
       font-size: 0.88rem;
       text-decoration: none;
+      transition: background 0.2s ease;
     }
 
     .btn-save-quiz:hover {
-      background: #dfcaa7;
+      background: #c5a880;
+      color: #000000;
     }
 
     /* LOOK MODAL STYLES */
     .look-desc-callout {
-      background: rgba(197, 168, 128, 0.1);
+      background: #fdfbf7;
+      border: 1px solid rgba(197, 168, 128, 0.3);
       border-left: 3px solid #c5a880;
       padding: 0.75rem 1rem;
       font-size: 0.88rem;
-      color: #dfcaa7;
+      color: #78350f;
       margin: 0;
     }
 
@@ -1201,8 +1234,8 @@ import { AuthService } from '../../../core/services/auth.service';
       display: flex;
       align-items: center;
       gap: 1.25rem;
-      background: #1f1f1f;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.08);
       border-radius: 6px;
       padding: 0.85rem;
     }
@@ -1221,29 +1254,29 @@ import { AuthService } from '../../../core/services/auth.service';
     .item-tag {
       font-size: 0.65rem;
       font-weight: 700;
-      color: #c5a880;
+      color: #78350f;
       display: block;
       margin-bottom: 0.2rem;
     }
 
     .item-cat-txt {
       font-size: 0.75rem;
-      color: #888888;
+      color: #6b7280;
       display: block;
       margin-bottom: 0.3rem;
     }
 
     .item-motivo {
       font-size: 0.78rem;
-      color: #cccccc;
+      color: #374151;
       font-style: italic;
       margin: 0;
     }
 
     .item-price-col {
       font-size: 1.15rem;
-      font-weight: 700;
-      color: #dfcaa7;
+      font-weight: 800;
+      color: #000000;
       white-space: nowrap;
     }
 
@@ -1251,25 +1284,26 @@ import { AuthService } from '../../../core/services/auth.service';
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
       padding-top: 1rem;
     }
 
     .look-total-label {
       font-size: 0.8rem;
-      color: #888888;
+      color: #6b7280;
       display: block;
     }
 
     .look-total-amount {
       font-size: 1.5rem;
-      color: #ffffff;
+      color: #000000;
+      font-weight: 800;
     }
 
     .saving-badge {
-      background: rgba(74, 222, 128, 0.15);
-      border: 1px solid #4ade80;
-      color: #4ade80;
+      background: #dcfce7;
+      border: 1px solid #86efac;
+      color: #15803d;
       font-size: 0.8rem;
       font-weight: 700;
       padding: 0.4rem 0.85rem;
@@ -1281,15 +1315,15 @@ import { AuthService } from '../../../core/services/auth.service';
     .empty-state {
       text-align: center;
       padding: 4rem 1rem;
-      color: #888888;
+      color: #6b7280;
     }
 
     .spinner {
       display: inline-block;
       width: 36px;
       height: 36px;
-      border: 3px solid rgba(197, 168, 128, 0.2);
-      border-top-color: #c5a880;
+      border: 3px solid rgba(0, 0, 0, 0.1);
+      border-top-color: #000000;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
       margin-bottom: 1rem;
