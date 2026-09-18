@@ -220,15 +220,15 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
               </svg>
             </button>
 
-            <textarea
+            <input
+              type="text"
               #inputArea
               [(ngModel)]="inputText"
               (keydown)="onKeydown($event)"
               class="chat-text-input"
-              rows="1"
               placeholder="Escribe tu consulta de moda..."
               aria-label="Mensaje para Atelier Concierge"
-            ></textarea>
+            />
 
             <!-- Send Button: Avión de Papel en Azul Vibrante -->
             <button
@@ -719,26 +719,27 @@ import { PrendaChatCard } from '../models/ia-asistente.models';
 
     /* Footer Input Bar */
     .chat-input-bar {
-      padding: 10px 14px;
+      padding: 12px 14px;
       background: #ffffff;
       border-top: 1px solid #eeeeee;
       display: flex;
       align-items: center;
-      gap: 9px;
+      gap: 10px;
+      box-sizing: border-box;
     }
 
     .chat-text-input {
       flex: 1;
+      height: 42px;
       border: 1.5px solid #dcdcdc;
-      border-radius: 20px;
-      padding: 9px 14px;
-      font-size: 14px;
+      border-radius: 22px;
+      padding: 0 16px;
+      font-size: 13.5px;
       outline: none;
-      resize: none;
-      line-height: 1.4;
-      max-height: 70px;
       font-family: inherit;
       color: #111111;
+      background: #ffffff;
+      box-sizing: border-box;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
 
@@ -874,7 +875,7 @@ export class ChatbotWidgetComponent implements AfterViewChecked {
   private readonly router = inject(Router);
 
   @ViewChild('messagesContainer') private messagesContainer?: ElementRef<HTMLDivElement>;
-  @ViewChild('inputArea') private inputArea?: ElementRef<HTMLTextAreaElement>;
+  @ViewChild('inputArea') private inputArea?: ElementRef<HTMLInputElement>;
 
   inputText = '';
   private shouldScrollBottom = false;
@@ -938,9 +939,10 @@ export class ChatbotWidgetComponent implements AfterViewChecked {
 
   onVoiceClick(): void {
     this.chatbotService.toggleVoiceRecognition((spokenText) => {
-      this.inputText = spokenText;
-      if (this.inputArea) {
-        this.inputArea.nativeElement.focus();
+      const query = spokenText.trim();
+      if (query) {
+        this.inputText = query;
+        this.onSend();
       }
     });
   }
