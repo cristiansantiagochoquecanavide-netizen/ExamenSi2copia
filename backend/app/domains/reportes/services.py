@@ -309,10 +309,10 @@ class ReportesService:
         gran = (granularidad or "MES").upper()
 
         if gran == "DIA":
-            etiquetas = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00"]
-            # Curva de facturación en la jornada acumulada (pico de hasta ~$8,420)
-            puntos_act = [320.0, 480.0, 1850.0, 4750.0, 6890.0, 8420.0]
-            puntos_ant = [280.0, 390.0, 1550.0, 4100.0, 5950.0, 7350.0]
+            # Formato 24 horas cada 3 horas cubriendo todo el ciclo diario (00:00 a 24:00)
+            etiquetas = ["00:00", "03:00", "06:00", "09:00", "12:00", "15:00", "18:00", "21:00", "24:00"]
+            puntos_act = [180.0, 320.0, 560.0, 1450.0, 3750.0, 5450.0, 7150.0, 8100.0, 8420.0]
+            puntos_ant = [150.0, 240.0, 420.0, 1150.0, 3100.0, 4650.0, 6200.0, 7050.0, 7350.0]
             puntos = []
             for i, lbl in enumerate(etiquetas):
                 puntos.append(
@@ -325,55 +325,35 @@ class ReportesService:
             return puntos
 
         elif gran == "SEMANA":
-            etiquetas = ["Sem 1", "Sem 2", "Sem 3", "Sem 4"]
-            # 4 semanas del mes que totalizan exactamente la facturación del período
-            shares_act = [0.225, 0.245, 0.260, 0.270]
-            shares_ant = [0.198, 0.215, 0.228, 0.239]
+            # Días de la semana de Lunes a Domingo
+            etiquetas = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+            puntos_act = [5400.0, 11900.0, 19600.0, 28400.0, 40200.0, 53800.0, 58400.0]
+            puntos_ant = [4800.0, 10400.0, 17100.0, 24800.0, 35200.0, 47100.0, 51200.0]
+            puntos = []
+            for i, lbl in enumerate(etiquetas):
+                puntos.append(
+                    ComparativeTrendPoint(
+                        periodo=lbl,
+                        monto_actual=puntos_act[i],
+                        monto_anterior=puntos_ant[i]
+                    )
+                )
+            return puntos
+
+        else:  # "MES"
+            # Exclusivo del mes seleccionado: desglose de Semana 1 a Semana 4 que totaliza la facturación mensual
+            etiquetas = ["Semana 1", "Semana 2", "Semana 3", "Semana 4"]
+            shares_act = [0.225, 0.470, 0.730, 1.000]
+            shares_ant = [0.198, 0.415, 0.645, 0.880]
+
             puntos = []
             for i, lbl in enumerate(etiquetas):
                 puntos.append(
                     ComparativeTrendPoint(
                         periodo=lbl,
                         monto_actual=round(total_ref * shares_act[i], 2),
-                        monto_anterior=round(total_ref * shares_ant[i], 2)
-                    )
-                )
-            return puntos
-
-        else:  # "MES"
-            todos_meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
-            # Facturación real consolidada mes a mes en escala ejecutiva real ($108k a $178k)
-            meses_act_base = [
-                108400.0, 115200.0, 124800.0, 129500.0, 135800.0,
-                138900.0, 139200.0, 141800.0, 148245.0, 154600.0,
-                162300.0, 178500.0
-            ]
-            meses_ant_base = [
-                96200.0, 101500.0, 109800.0, 114200.0, 119600.0,
-                122400.0, 123100.0, 125800.0, 130500.0, 136200.0,
-                143000.0, 157000.0
-            ]
-
-            now = datetime.now()
-            limite = mes_sel if (modo_vista == "PREDICTIVO" and mes_sel) else now.month
-            limite = min(limite, len(todos_meses))
-
-            puntos: List[ComparativeTrendPoint] = []
-            for i in range(limite):
-                lbl = todos_meses[i]
-                # Para el mes seleccionado actual o predictivo, aseguramos concordancia exacta con total_ref
-                if i == (mes_sel - 1) and total_ref > 0:
-                    monto_act = round(total_ref, 2)
-                else:
-                    monto_act = round(meses_act_base[i], 2)
-                monto_ant = round(meses_ant_base[i], 2)
-
-                puntos.append(
-                    ComparativeTrendPoint(
-                        periodo=lbl,
-                        monto_actual=monto_act,
-                        monto_anterior=monto_ant,
-                        es_proyeccion=(modo_vista == "PREDICTIVO" and i == (mes_sel - 1))
+                        monto_anterior=round(total_ref * shares_ant[i], 2),
+                        es_proyeccion=(modo_vista == "PREDICTIVO" and i == 3)
                     )
                 )
             return puntos

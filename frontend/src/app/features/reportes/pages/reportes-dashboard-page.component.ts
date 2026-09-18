@@ -2341,19 +2341,43 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
   // Coordenadas calculadas para la curva SVG
   trendChartCoords = computed(() => {
     const d = this.dashboardData();
-    const points: ComparativeTrendPoint[] = (d && d.comparative_trend && d.comparative_trend.length > 0)
+    const gran = this.selectedGranularidad();
+    let points: ComparativeTrendPoint[] = (d && d.comparative_trend && d.comparative_trend.length > 0)
       ? d.comparative_trend
-      : [
-          { periodo: 'Ene', monto_actual: 5200, monto_anterior: 4200 },
-          { periodo: 'Feb', monto_actual: 6300, monto_anterior: 4800 },
-          { periodo: 'Mar', monto_actual: 8100, monto_anterior: 6500 },
-          { periodo: 'Abr', monto_actual: 8900, monto_anterior: 7400 },
-          { periodo: 'May', monto_actual: 11200, monto_anterior: 9100 },
-          { periodo: 'Jun', monto_actual: 12400, monto_anterior: 10400 },
-          { periodo: 'Jul', monto_actual: 13900, monto_anterior: 11200 },
-          { periodo: 'Ago', monto_actual: 13100, monto_anterior: 11800 },
-          { periodo: 'Sep', monto_actual: 15400, monto_anterior: 12900 }
+      : [];
+
+    if (points.length === 0) {
+      if (gran === 'DIA') {
+        points = [
+          { periodo: '00:00', monto_actual: 180, monto_anterior: 150 },
+          { periodo: '03:00', monto_actual: 320, monto_anterior: 240 },
+          { periodo: '06:00', monto_actual: 560, monto_anterior: 420 },
+          { periodo: '09:00', monto_actual: 1450, monto_anterior: 1150 },
+          { periodo: '12:00', monto_actual: 3750, monto_anterior: 3100 },
+          { periodo: '15:00', monto_actual: 5450, monto_anterior: 4650 },
+          { periodo: '18:00', monto_actual: 7150, monto_anterior: 6200 },
+          { periodo: '21:00', monto_actual: 8100, monto_anterior: 7050 },
+          { periodo: '24:00', monto_actual: 8420, monto_anterior: 7350 }
         ];
+      } else if (gran === 'SEMANA') {
+        points = [
+          { periodo: 'Lun', monto_actual: 5400, monto_anterior: 4800 },
+          { periodo: 'Mar', monto_actual: 11900, monto_anterior: 10400 },
+          { periodo: 'Mié', monto_actual: 19600, monto_anterior: 17100 },
+          { periodo: 'Jue', monto_actual: 28400, monto_anterior: 24800 },
+          { periodo: 'Vie', monto_actual: 40200, monto_anterior: 35200 },
+          { periodo: 'Sáb', monto_actual: 53800, monto_anterior: 47100 },
+          { periodo: 'Dom', monto_actual: 58400, monto_anterior: 51200 }
+        ];
+      } else {
+        points = [
+          { periodo: 'Semana 1', monto_actual: 33355, monto_anterior: 29350 },
+          { periodo: 'Semana 2', monto_actual: 69675, monto_anterior: 61520 },
+          { periodo: 'Semana 3', monto_actual: 108218, monto_anterior: 95618 },
+          { periodo: 'Semana 4', monto_actual: 148245, monto_anterior: 130455 }
+        ];
+      }
+    }
 
     const maxVal = this.maxTrendVal();
     const startX = 72;
