@@ -344,10 +344,12 @@ async def run_seed():
             ("Pantalones", "Pantalones y sastrería masculina", "HOMBRES"),
             ("Shores", "Shores y bermudas de verano para hombre", "HOMBRES"),
             ("Camisas", "Camisas de lino y algodón egipcio para hombre", "HOMBRES"),
+            ("Trajes", "Trajes bespoke y smokings ejecutivos", "HOMBRES"),
             # UNISEX
             ("Camisas", "Camisas de corte fluido unisex", "UNISEX"),
             ("Abrigos", "Abrigos, trenchs y sobretodos unisex", "UNISEX"),
             ("Chaquetas", "Chaquetas arquitectónicas y blazers unisex", "UNISEX"),
+            ("Pantalones", "Pantalones y sastrería unisex", "UNISEX"),
         ]
         cats_map = {}
         for nom, desc, sec in categorias_base:
@@ -483,7 +485,7 @@ async def run_seed():
                 "nombre": "Vestido de Noche Atelier Noir",
                 "descripcion": "Vestido midi de silueta geométrica y escote sutil. Crepé de seda de alta densidad con forro interior suave de máxima elegancia.",
                 "precio_base": 450.00,
-                "cat": ("Vestidos", "MUJER"),
+                "cat": ("Vestidos", "MUJERES"),
                 "imagen": "/static/uploads/prendas/prenda_8706b2dd23d0.webp",
                 "tallas": ["S", "M", "L"],
                 "colores": ["Negro", "Rojo"]
@@ -503,7 +505,7 @@ async def run_seed():
                 "nombre": "Camisa de Popelina Premium",
                 "descripcion": "Camisa de corte relajado con cuello tradicional y puños ajustables. 100% algodón peinado de fibra larga.",
                 "precio_base": 280.00,
-                "cat": ("Camisas y Tops", "UNISEX"),
+                "cat": ("Camisas", "UNISEX"),
                 "imagen": "/static/uploads/prendas/prenda_0081d6ab4dd9.webp",
                 "tallas": ["S", "M", "L", "XL"],
                 "colores": ["Blanco", "Celeste"]
@@ -513,7 +515,7 @@ async def run_seed():
                 "nombre": "Traje Ejecutivo Bespoke Noir",
                 "descripcion": "Traje sastrero de dos piezas en lana merino Super 120s. Corte moderno con solapas de pico para eventos de alta distinción.",
                 "precio_base": 850.00,
-                "cat": ("Trajes", "HOMBRE"),
+                "cat": ("Trajes", "HOMBRES"),
                 "imagen": "/static/uploads/prendas/prenda_2f179d97aeae.webp",
                 "tallas": ["M", "L", "XL"],
                 "colores": ["Negro", "Azul Oscuro"]
@@ -523,16 +525,61 @@ async def run_seed():
                 "nombre": "Vestido Coctel Plisado",
                 "descripcion": "Vestido fluido de tirantes con detalles plisados artesanales y caída asimétrica refinada.",
                 "precio_base": 390.00,
-                "cat": ("Vestidos", "MUJER"),
+                "cat": ("Vestidos", "MUJERES"),
                 "imagen": "/static/uploads/prendas/prenda_157f081f037f.webp",
                 "tallas": ["S", "M", "L"],
                 "colores": ["Rosa", "Negro"]
+            },
+            {
+                "sku": "NOIR-BLS-008",
+                "nombre": "Blusa de Seda Crepé Editorial",
+                "descripcion": "Blusa drapeada de corte fluido en satén de seda pura con escote barco sutil.",
+                "precio_base": 320.00,
+                "cat": ("Blusas", "MUJERES"),
+                "imagen": "/static/uploads/prendas/prenda_456badfa13c5.jpg",
+                "tallas": ["S", "M", "L"],
+                "colores": ["Blanco", "Negro"]
+            },
+            {
+                "sku": "NOIR-POL-009",
+                "nombre": "Polera de Algodón Pima Signature",
+                "descripcion": "Polera de corte regular con cuello en canalé fino y tacto sedoso en algodón pima peruano.",
+                "precio_base": 190.00,
+                "cat": ("Poleras", "HOMBRES"),
+                "imagen": "/static/uploads/prendas/prenda_67e7d93056cf.webp",
+                "tallas": ["S", "M", "L", "XL"],
+                "colores": ["Negro", "Blanco"]
+            },
+            {
+                "sku": "NOIR-PNT-010",
+                "nombre": "Pantalón Cigarette Sartorial",
+                "descripcion": "Pantalón tobillero entallado de tiro medio con bolsillos laterales discretos.",
+                "precio_base": 360.00,
+                "cat": ("Pantalones", "MUJERES"),
+                "imagen": "/static/uploads/prendas/prenda_e130866225af.webp",
+                "tallas": ["S", "M", "L"],
+                "colores": ["Negro", "Gris"]
+            },
+            {
+                "sku": "NOIR-CAM-011",
+                "nombre": "Camisa Lino Italiano Pureza",
+                "descripcion": "Camisa de lino 100% transpirable con botones de nácar natural y cuello suave desestructurado.",
+                "precio_base": 310.00,
+                "cat": ("Camisas", "HOMBRES"),
+                "imagen": "/static/uploads/prendas/prenda_c0d4cb6a0865.webp",
+                "tallas": ["M", "L", "XL"],
+                "colores": ["Blanco", "Celeste"]
             }
         ]
 
         for p_data in prendas_seed_data:
             p_exist = (await session.execute(select(Prenda).where(Prenda.sku == p_data["sku"]))).scalar_one_or_none()
             cat_obj = cats_map.get(p_data["cat"])
+            if not cat_obj:
+                nom_c, sec_c = p_data["cat"]
+                cat_obj = (await session.execute(
+                    select(Categoria).where(Categoria.nombre == nom_c)
+                )).scalars().first()
             if not cat_obj:
                 continue
             if not p_exist:
