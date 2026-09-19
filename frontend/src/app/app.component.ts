@@ -24,6 +24,14 @@ export class AppComponent {
     return this.router.url.startsWith(prefix);
   }
 
+  isCatalogoActive(): boolean {
+    return this.router.url.startsWith('/catalogo') || this.router.url === '/inventario';
+  }
+
+  isInventarioActive(): boolean {
+    return this.router.url.startsWith('/inventario/recepcion') || this.router.url.startsWith('/inventario/transferencias');
+  }
+
   logout(): void {
     this.authService.logout();
   }
