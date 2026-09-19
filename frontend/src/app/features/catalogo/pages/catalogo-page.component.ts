@@ -332,26 +332,51 @@ import { OutfitSugerido } from '../../ia-asistente/models/ia-asistente.models';
             @if (activeModalTab() === 'info') {
               <div class="modal-body">
                 <div class="modal-media-column">
-                  <img [src]="getPortadaUrl(prenda)" [alt]="prenda.nombre" class="modal-main-img" />
-                  
-                  <div class="multimedia-add-box">
-                    <span class="add-box-title">+ Vincular Nuevo Archivo AR</span>
-                    <div class="add-box-row">
-                      <select [(ngModel)]="nuevoMultimedia.tipo">
-                        <option value="MODELO_3D_GLB">Modelo .GLB (Android/Web)</option>
-                        <option value="MODELO_3D_USDZ">Modelo .USDZ (iOS AR)</option>
-                        <option value="IMAGEN">Imagen de Galería</option>
-                      </select>
-                      <input 
-                        type="text" 
-                        [(ngModel)]="nuevoMultimedia.url" 
-                        placeholder="https://...modelo.glb"
-                      />
-                      <button type="button" class="btn-attach" (click)="attachMultimedia(prenda.id)">
-                        Adjuntar
+                  <div class="gallery-slider-container">
+                    <img 
+                      [src]="getPrendaImages(prenda)[currentDetailImageIndex()] || getPortadaUrl(prenda)" 
+                      [alt]="prenda.nombre" 
+                      class="modal-main-img" 
+                      (error)="handleImageError($event)" 
+                    />
+
+                    <!-- Controles para ver la siguiente / anterior foto si hay más de 1 -->
+                    @if (getPrendaImages(prenda).length > 1) {
+                      <button 
+                        type="button" 
+                        class="gallery-arrow arrow-prev" 
+                        (click)="prevDetailImage(getPrendaImages(prenda).length)"
+                        title="Foto anterior">
+                        &#10094;
                       </button>
-                    </div>
+                      <button 
+                        type="button" 
+                        class="gallery-arrow arrow-next" 
+                        (click)="nextDetailImage(getPrendaImages(prenda).length)"
+                        title="Foto siguiente">
+                        &#10095;
+                      </button>
+
+                      <div class="gallery-counter-pill">
+                        {{ currentDetailImageIndex() + 1 }} / {{ getPrendaImages(prenda).length }}
+                      </div>
+                    }
                   </div>
+
+                  <!-- Tiras de miniaturas clickeables si hay más de 1 foto -->
+                  @if (getPrendaImages(prenda).length > 1) {
+                    <div class="gallery-thumbs-row">
+                      @for (img of getPrendaImages(prenda); track $index) {
+                        <button 
+                          type="button" 
+                          class="gallery-thumb-btn" 
+                          [class.active]="$index === currentDetailImageIndex()"
+                          (click)="setDetailImage($index)">
+                          <img [src]="img" [alt]="prenda.nombre" (error)="handleImageError($event)" />
+                        </button>
+                      }
+                    </div>
+                  }
                 </div>
 
                 <div class="modal-info-column">
@@ -2534,63 +2559,123 @@ import { OutfitSugerido } from '../../ia-asistente/models/ia-asistente.models';
       padding: 2rem;
     }
 
-    .modal-main-img {
-      width: 100%;
-      height: 380px;
-      object-fit: cover;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      margin-bottom: 1rem;
-    }
-
-    .multimedia-add-box {
-      background: #f9fafb;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      padding: 1rem;
-    }
-
-    .add-box-title {
-      font-size: 0.75rem;
-      letter-spacing: 0.12em;
-      color: #000000;
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-
-    .add-box-row {
+    .modal-media-column {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.75rem;
+      min-width: 0;
     }
 
-    .add-box-row select,
-    .add-box-row input {
-      background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.2);
-      color: #111111;
-      padding: 0.5rem;
-      font-size: 0.8rem;
-      border-radius: 0;
-      outline: none;
+    .gallery-slider-container {
+      position: relative;
+      width: 100%;
+      height: 480px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f8fafc;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .btn-attach {
-      background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.3);
-      color: #000000;
-      padding: 0.55rem 1.25rem;
-      font-size: 0.75rem;
-      font-weight: 700;
+    .modal-main-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      margin: 0;
+      border: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .gallery-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(4px);
+      color: #ffffff;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
       cursor: pointer;
+      transition: all 0.2s ease;
+      z-index: 10;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    }
+    .gallery-arrow:hover {
+      background: #0f172a;
+      transform: translateY(-50%) scale(1.1);
+    }
+    .arrow-prev {
+      left: 10px;
+    }
+    .arrow-next {
+      right: 10px;
+    }
+
+    .gallery-counter-pill {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(4px);
+      color: #ffffff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 0.25rem 0.65rem;
       border-radius: 9999px;
+      z-index: 10;
+    }
+
+    .gallery-thumbs-row {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding: 0.2rem 0;
+    }
+    .gallery-thumbs-row::-webkit-scrollbar {
+      height: 4px;
+    }
+    .gallery-thumbs-row::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 4px;
+    }
+    .gallery-thumbs-row::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .gallery-thumb-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 6px;
+      border: 2px solid #e2e8f0;
+      padding: 0;
+      overflow: hidden;
+      cursor: pointer;
+      background: #f8fafc;
+      flex-shrink: 0;
       transition: all 0.2s ease;
     }
-
-    .btn-attach:hover {
-      background: #000000;
-      color: #ffffff;
-      border-color: #000000;
+    .gallery-thumb-btn:hover {
+      border-color: #94a3b8;
+    }
+    .gallery-thumb-btn.active {
+      border-color: #0f172a;
+      box-shadow: 0 0 0 1px #0f172a;
+    }
+    .gallery-thumb-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
     }
 
     .modal-desc {
@@ -3170,6 +3255,7 @@ export class CatalogoPageComponent implements OnInit {
   searchQuery = '';
   searchTermActive = signal<string>('');
   selectedPrenda = signal<Prenda | null>(null);
+  currentDetailImageIndex = signal<number>(0);
 
   // Modals visibility
   showCreateModal = signal<boolean>(false);
@@ -3455,6 +3541,37 @@ export class CatalogoPageComponent implements OnInit {
     return 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&q=80';
   }
 
+  getPrendaImages(prenda: Prenda): string[] {
+    if (!prenda) return [];
+    const imgs: string[] = [];
+    if (prenda.multimedia && prenda.multimedia.length > 0) {
+      const portada = prenda.multimedia.find(m => m.es_portada && m.tipo === 'IMAGEN');
+      if (portada) imgs.push(this.resolveImageUrl(portada.url));
+
+      prenda.multimedia
+        .filter(m => m.tipo === 'IMAGEN' && m !== portada)
+        .forEach(m => imgs.push(this.resolveImageUrl(m.url)));
+    }
+    if (imgs.length === 0) {
+      imgs.push(this.getPortadaUrl(prenda));
+    }
+    return imgs;
+  }
+
+  nextDetailImage(total: number): void {
+    if (total <= 1) return;
+    this.currentDetailImageIndex.update(i => (i + 1) % total);
+  }
+
+  prevDetailImage(total: number): void {
+    if (total <= 1) return;
+    this.currentDetailImageIndex.update(i => (i - 1 + total) % total);
+  }
+
+  setDetailImage(index: number): void {
+    this.currentDetailImageIndex.set(index);
+  }
+
   has3DModel(prenda: Prenda): boolean {
     return prenda.multimedia?.some(m => m.tipo === 'MODELO_3D_GLB' || m.tipo === 'MODELO_3D_USDZ') ?? false;
   }
@@ -3536,6 +3653,7 @@ export class CatalogoPageComponent implements OnInit {
 
   openDetail(prenda: Prenda, initialTab: 'info' | 'resenas' | 'look' = 'info'): void {
     this.selectedPrenda.set(prenda);
+    this.currentDetailImageIndex.set(0);
     this.activeModalTab.set(initialTab);
     this.showReviewForm.set(false);
     this.loadCalificaciones(prenda.id);
