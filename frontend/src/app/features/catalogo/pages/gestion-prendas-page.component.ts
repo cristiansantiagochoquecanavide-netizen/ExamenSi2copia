@@ -483,7 +483,7 @@ interface FotoLocal {
                     </div>
 
                     <!-- Chips de Colores -->
-                    <div class="chips-group-section" style="margin-top: 0.65rem;">
+                    <div class="chips-group-section color-section-wrap" style="margin-top: 0.65rem;">
                       <div class="color-header-row">
                         <label class="chips-label">COLORES DISPONIBLES:</label>
                         <span class="color-palette-legend">Tono Claro &larr; &bull; &rarr; Tono Fuerte</span>
@@ -1112,6 +1112,7 @@ interface FotoLocal {
       border-radius: 8px;
       padding: 0.75rem 1rem 0.85rem;
       background: #fafafa;
+      min-width: 0;
     }
     .section-legend {
       font-size: 0.76rem;
@@ -1348,6 +1349,13 @@ interface FotoLocal {
       .field-clasificacion-wrap {
         grid-template-columns: 1fr;
       }
+      .color-section-wrap {
+        width: 100%;
+      }
+      .color-chips-grid {
+        grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
+        width: 100%;
+      }
     }
 
     .form-grid-2 {
@@ -1455,24 +1463,34 @@ interface FotoLocal {
       border: 1px solid rgba(0, 0, 0, 0.2);
       flex-shrink: 0;
     }
+    .color-section-wrap {
+      width: fit-content;
+      max-width: 100%;
+    }
     .color-header-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 0.35rem;
+      gap: 1.25rem;
+      width: 100%;
     }
     .color-palette-legend {
       font-size: 0.68rem;
       font-weight: 700;
       color: #64748b;
       letter-spacing: 0.04em;
+      white-space: nowrap;
     }
     .color-chips-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0.35rem;
+      grid-template-columns: max-content max-content max-content;
+      gap: 0.35rem 0.55rem;
+      width: fit-content;
+      max-width: 100%;
       max-height: 220px;
       overflow-y: auto;
+      overflow-x: hidden;
       padding-right: 0.35rem;
     }
     .color-chips-grid::-webkit-scrollbar,
@@ -1494,7 +1512,7 @@ interface FotoLocal {
       background: #94a3b8;
     }
     .selectable-chip.color-chip {
-      padding: 0.35rem 0.55rem;
+      padding: 0.32rem 0.55rem;
       font-size: 0.73rem;
       justify-content: flex-start;
       width: 100%;
