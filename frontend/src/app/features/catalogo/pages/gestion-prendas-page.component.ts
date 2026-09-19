@@ -358,8 +358,9 @@ interface FotoLocal {
                   <fieldset class="form-section-box">
                     <legend class="section-legend">DATOS COMERCIALES</legend>
 
-                    <div class="form-grid-3">
-                      <div class="form-field">
+                    <div class="comerciales-grid">
+                      <!-- Fila 1: Campos superiores con ancho ajustado a su título -->
+                      <div class="form-field field-sku">
                         <label>SKU Identificador *</label>
                         <input
                           type="text"
@@ -372,7 +373,7 @@ interface FotoLocal {
                         <small class="field-hint">Código único</small>
                       </div>
 
-                      <div class="form-field">
+                      <div class="form-field field-precio">
                         <label>Precio Base (Bs.) *</label>
                         <input
                           type="number"
@@ -386,7 +387,7 @@ interface FotoLocal {
                         <small class="field-hint">Moneda nacional</small>
                       </div>
 
-                      <div class="form-field">
+                      <div class="form-field field-stock">
                         <label>Stock Inicial (Uds) *</label>
                         <input
                           type="number"
@@ -399,61 +400,64 @@ interface FotoLocal {
                         />
                         <small class="field-hint">Por variante en tienda</small>
                       </div>
-                    </div>
 
-                    <div class="form-field" style="margin-top: 0.55rem;">
-                      <label>Nombre Comercial de la Prenda *</label>
-                      <input
-                        type="text"
-                        [(ngModel)]="formData.nombre"
-                        name="nombre"
-                        placeholder="Ej. Cashmere Atelier Trench"
-                        required
-                        class="form-ctrl"
-                      />
-                    </div>
-
-                    <div class="form-field" style="margin-top: 0.55rem;">
-                      <label>Descripción Editorial *</label>
-                      <textarea
-                        [(ngModel)]="formData.descripcion"
-                        name="descripcion"
-                        rows="2"
-                        placeholder="Detalles sobre cortes arquitectónicos, caída de la tela, etc."
-                        required
-                        class="form-ctrl textarea-ctrl"
-                      ></textarea>
-                    </div>
-
-                    <div class="form-grid-2" style="margin-top: 0.55rem;">
-                      <div class="form-field">
-                        <label>Categoría *</label>
-                        <select [(ngModel)]="formData.categoria_id" name="categoria_id" required class="form-ctrl">
-                          <optgroup label="MUJERES">
-                            <option *ngFor="let cat of categoriasMujer()" [value]="cat.id">
-                              {{ cat.nombre }}
-                            </option>
-                          </optgroup>
-                          <optgroup label="HOMBRES">
-                            <option *ngFor="let cat of categoriasHombre()" [value]="cat.id">
-                              {{ cat.nombre }}
-                            </option>
-                          </optgroup>
-                          <optgroup label="UNISEX">
-                            <option *ngFor="let cat of categoriasUnisex()" [value]="cat.id">
-                              {{ cat.nombre }}
-                            </option>
-                          </optgroup>
-                        </select>
+                      <!-- Fila 2: Nombre Comercial que termina exactamente en el borde derecho de Stock Inicial -->
+                      <div class="form-field field-nombre">
+                        <label>Nombre Comercial de la Prenda *</label>
+                        <input
+                          type="text"
+                          [(ngModel)]="formData.nombre"
+                          name="nombre"
+                          placeholder="Ej. Cashmere Atelier Trench"
+                          required
+                          class="form-ctrl"
+                        />
                       </div>
 
-                      <div class="form-field">
-                        <label>Temporada Comercial *</label>
-                        <select [(ngModel)]="formData.temporada_id" name="temporada_id" required class="form-ctrl">
-                          <option *ngFor="let temp of temporadas()" [value]="temp.id">
-                            {{ temp.nombre }}{{ temp.codigo && temp.codigo !== 'CASUAL' && temp.codigo !== 'SIN-TEMP' ? ' (' + temp.codigo + ')' : '' }}
-                          </option>
-                        </select>
+                      <!-- Fila 3: Descripción Editorial alineada al mismo borde derecho -->
+                      <div class="form-field field-descripcion">
+                        <label>Descripción Editorial *</label>
+                        <textarea
+                          [(ngModel)]="formData.descripcion"
+                          name="descripcion"
+                          rows="2"
+                          placeholder="Detalles sobre cortes arquitectónicos, caída de la tela, etc."
+                          required
+                          class="form-ctrl textarea-ctrl"
+                        ></textarea>
+                      </div>
+
+                      <!-- Fila 4: Categoría y Temporada alineadas al mismo ancho total -->
+                      <div class="field-clasificacion-wrap">
+                        <div class="form-field">
+                          <label>Categoría *</label>
+                          <select [(ngModel)]="formData.categoria_id" name="categoria_id" required class="form-ctrl">
+                            <optgroup label="MUJERES">
+                              <option *ngFor="let cat of categoriasMujer()" [value]="cat.id">
+                                {{ cat.nombre }}
+                              </option>
+                            </optgroup>
+                            <optgroup label="HOMBRES">
+                              <option *ngFor="let cat of categoriasHombre()" [value]="cat.id">
+                                {{ cat.nombre }}
+                              </option>
+                            </optgroup>
+                            <optgroup label="UNISEX">
+                              <option *ngFor="let cat of categoriasUnisex()" [value]="cat.id">
+                                {{ cat.nombre }}
+                              </option>
+                            </optgroup>
+                          </select>
+                        </div>
+
+                        <div class="form-field">
+                          <label>Temporada Comercial *</label>
+                          <select [(ngModel)]="formData.temporada_id" name="temporada_id" required class="form-ctrl">
+                            <option *ngFor="let temp of temporadas()" [value]="temp.id">
+                              {{ temp.nombre }}{{ temp.codigo && temp.codigo !== 'CASUAL' && temp.codigo !== 'SIN-TEMP' ? ' (' + temp.codigo + ')' : '' }}
+                            </option>
+                          </select>
+                        </div>
                       </div>
                     </div>
                   </fieldset>
@@ -1285,7 +1289,67 @@ interface FotoLocal {
       margin: 0.5rem 0 0 0;
     }
 
-    /* Form Inputs */
+    /* Form Inputs & Comerciales Grid */
+    .comerciales-grid {
+      display: grid;
+      grid-template-columns: auto auto auto;
+      gap: 0.55rem 0.85rem;
+      width: fit-content;
+      max-width: 100%;
+    }
+    .field-sku {
+      width: 160px;
+    }
+    .field-sku .form-ctrl {
+      width: 100%;
+    }
+    .field-precio {
+      width: 155px;
+    }
+    .field-precio .form-ctrl {
+      width: 100%;
+    }
+    .field-stock {
+      width: 180px;
+    }
+    .field-stock .form-ctrl {
+      width: 100%;
+    }
+    .field-nombre {
+      grid-column: 1 / 4;
+      width: 100%;
+    }
+    .field-nombre .form-ctrl {
+      width: 100%;
+    }
+    .field-descripcion {
+      grid-column: 1 / 4;
+      width: 100%;
+    }
+    .field-descripcion .form-ctrl {
+      width: 100%;
+    }
+    .field-clasificacion-wrap {
+      grid-column: 1 / 4;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+      width: 100%;
+    }
+    @media (max-width: 640px) {
+      .comerciales-grid {
+        grid-template-columns: 1fr;
+        width: 100%;
+      }
+      .field-sku, .field-precio, .field-stock, .field-nombre, .field-descripcion, .field-clasificacion-wrap {
+        grid-column: 1 / -1;
+        width: 100%;
+      }
+      .field-clasificacion-wrap {
+        grid-template-columns: 1fr;
+      }
+    }
+
     .form-grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
