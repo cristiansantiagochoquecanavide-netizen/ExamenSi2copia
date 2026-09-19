@@ -1,11 +1,16 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { InventarioService } from '../services/inventario.service';
+import { CatalogoService } from '../../catalogo/services/catalogo.service';
 import { UsuariosService } from '../../usuarios/services/usuarios.service';
 import {
   Ciudad, Sucursal, CiudadCreate, SucursalCreate, SucursalUpdate
 } from '../models/inventario.models';
+import {
+  InventarioStock, AjusteInventarioRequest
+} from '../../catalogo/models/catalogo.models';
 import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
 
 @Component({
@@ -18,11 +23,21 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
       <div class="header-section">
         <div class="eyebrow">
           <span class="gold-dot">&bull;</span>
-          <span>EXPANSIÓN GEOGRÁFICA Y TIENDAS FÍSICAS &bull; CASO DE USO #4</span>
+          <span>EXPANSIÓN GEOGRÁFICA Y CONTROL DE INVENTARIO MULTISUCURSAL</span>
         </div>
-        <h1 class="page-title">Ciudades y Sucursales</h1>
+        <h1 class="page-title">
+          @if (activeTab() === 'STOCK') { Matriz de Stock por Tienda }
+          @else if (activeTab() === 'SUCURSALES') { Sucursales Físicas }
+          @else { Cobertura y Ciudades }
+        </h1>
         <p class="subtitle">
-          Administración de puntos de venta físicos, asignación de encargados y capacidad de probadores inteligentes.
+          @if (activeTab() === 'STOCK') {
+            Supervisión en tiempo real de existencias, reservas en probadores AR y umbrales de reabastecimiento por punto de venta.
+          } @else if (activeTab() === 'SUCURSALES') {
+            Administración de tiendas físicas, asignación de encargados y capacidad de probadores inteligentes.
+          } @else {
+            Configuración de plazas geográficas activas y centros de distribución logística.
+          }
         </p>
 
         <!-- Tabs -->
@@ -31,8 +46,16 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
             <button
               type="button"
               class="tab-btn"
+              [class.active]="activeTab() === 'STOCK'"
+              (click)="setTab('STOCK')"
+            >
+              MATRIZ DE STOCK POR TIENDA
+            </button>
+            <button
+              type="button"
+              class="tab-btn"
               [class.active]="activeTab() === 'SUCURSALES'"
-              (click)="activeTab.set('SUCURSALES')"
+              (click)="setTab('SUCURSALES')"
             >
               SUCURSALES FÍSICAS ({{ sucursales().length }})
             </button>
@@ -40,7 +63,7 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
               type="button"
               class="tab-btn"
               [class.active]="activeTab() === 'CIUDADES'"
-              (click)="activeTab.set('CIUDADES')"
+              (click)="setTab('CIUDADES')"
             >
               CIUDADES COBERTURA ({{ ciudades().length }})
             </button>
@@ -51,9 +74,13 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
               <button type="button" class="btn-action-gold" (click)="openSucursalModal()">
                 + REGISTRAR SUCURSAL
               </button>
-            } @else {
+            } @else if (activeTab() === 'CIUDADES') {
               <button type="button" class="btn-action-gold" (click)="openCiudadModal()">
                 + REGISTRAR CIUDAD
+              </button>
+            } @else {
+              <button type="button" class="btn-action-gold" (click)="openAjusteGenericoModal()">
+                + AJUSTAR INVENTARIO
               </button>
             }
           </div>
@@ -72,15 +99,222 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
         </div>
       }
 
-      <!-- Loading -->
+      <!-- Loading General -->
       @if (isLoading()) {
         <div class="loading-box">
           <span class="spinner"></span>
-          <span>CARGANDO SUCURSALES Y CIUDADES...</span>
+          <span>CARGANDO DATOS DE INVENTARIO...</span>
         </div>
       }
 
-      <!-- TAB: SUCURSALES -->
+      <!-- ========================================== -->
+      <!-- TAB 1: MATRIZ DE STOCK POR TIENDA          -->
+      <!-- ========================================== -->
+      @if (!isLoading() && activeTab() === 'STOCK') {
+        <div class="stock-tab-content">
+          <!-- Control Panel -->
+          <div class="stock-controls-panel">
+            <div class="control-col">
+              <label class="control-label">PUNTO DE VENTA / SUCURSAL</label>
+              <select
+                class="control-select"
+                [ngModel]="selectedSucursalId()"
+                (ngModelChange)="onSucursalChange($event)"
+              >
+                @for (s of sucursales(); track s.id) {
+                  <option [value]="s.id">
+                    {{ s.nombre }} — {{ s.ciudad?.nombre || 'Ciudad #' + s.ciudad_id }} {{ !s.activo ? '(INACTIVA)' : '' }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div class="control-col search-col">
+              <label class="control-label">BUSCAR PRENDA O SKU</label>
+              <div class="search-input-wrap">
+                <input
+                  type="text"
+                  class="control-input"
+                  placeholder="Ej: Camisa, Blazer, NOIR-6647..."
+                  [ngModel]="stockSearchTerm()"
+                  (ngModelChange)="stockSearchTerm.set($event)"
+                />
+                @if (stockSearchTerm()) {
+                  <button type="button" class="btn-clear-search" (click)="stockSearchTerm.set('')">&times;</button>
+                }
+              </div>
+            </div>
+
+            <div class="control-col">
+              <label class="control-label">FILTRAR DISPONIBILIDAD</label>
+              <div class="filter-pills">
+                <button
+                  type="button"
+                  class="filter-pill"
+                  [class.active]="stockFilter() === 'ALL'"
+                  (click)="stockFilter.set('ALL')"
+                >
+                  TODOS ({{ stockList().length }})
+                </button>
+                <button
+                  type="button"
+                  class="filter-pill warning"
+                  [class.active]="stockFilter() === 'LOW'"
+                  (click)="stockFilter.set('LOW')"
+                >
+                  BAJO STOCK ({{ totalBajoStock() }})
+                </button>
+                <button
+                  type="button"
+                  class="filter-pill danger"
+                  [class.active]="stockFilter() === 'OUT'"
+                  (click)="stockFilter.set('OUT')"
+                >
+                  AGOTADOS ({{ totalAgotadas() }})
+                </button>
+              </div>
+            </div>
+
+            <div class="control-col refresh-col">
+              <button
+                type="button"
+                class="btn-refresh-stock"
+                (click)="loadStockForSelectedSucursal()"
+                title="Recargar inventario"
+              >
+                &#x21bb; REFRESCAR
+              </button>
+            </div>
+          </div>
+
+          <!-- KPI Cards -->
+          <div class="stock-kpis-grid">
+            <div class="kpi-card">
+              <span class="kpi-label">STOCK TOTAL DISPONIBLE</span>
+              <span class="kpi-value">{{ totalUnidades() }} <small>unid.</small></span>
+              <span class="kpi-sub">Listas para despacho inmediato</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-label">UNIDADES RESERVADAS</span>
+              <span class="kpi-value gold">{{ totalReservadas() }} <small>unid.</small></span>
+              <span class="kpi-sub">Comprometidas en Probador AR / Web</span>
+            </div>
+            <div class="kpi-card" [class.alert-border]="totalBajoStock() > 0">
+              <span class="kpi-label">ALERTAS DE REABASTECIMIENTO</span>
+              <span class="kpi-value" [class.danger-val]="totalBajoStock() > 0">
+                {{ totalBajoStock() }} <small>variantes</small>
+              </span>
+              <span class="kpi-sub">Existencias en o bajo el stock mínimo</span>
+            </div>
+            <div class="kpi-card" [class.danger-border]="totalAgotadas() > 0">
+              <span class="kpi-label">VARIANTES AGOTADAS</span>
+              <span class="kpi-value" [class.danger-val]="totalAgotadas() > 0">
+                {{ totalAgotadas() }} <small>variantes</small>
+              </span>
+              <span class="kpi-sub">Requieren recepción de lote urgente</span>
+            </div>
+          </div>
+
+          <!-- Stock Table -->
+          @if (isStockLoading()) {
+            <div class="loading-box">
+              <span class="spinner"></span>
+              <span>CONSULTANDO STOCK DE LA TIENDA...</span>
+            </div>
+          } @else if (filteredStock().length === 0) {
+            <div class="empty-stock-box">
+              <div class="empty-icon">&#128230;</div>
+              <h3 class="empty-title">Sin registros de stock coincidentes</h3>
+              <p class="empty-desc">
+                No se encontraron variantes con los filtros seleccionados para esta sucursal.
+              </p>
+            </div>
+          } @else {
+            <div class="table-card">
+              <table class="stock-table">
+                <thead>
+                  <tr>
+                    <th>PRENDA / PRODUCTO</th>
+                    <th>SKU VARIANTE</th>
+                    <th>COLOR</th>
+                    <th>TALLA</th>
+                    <th class="text-center">DISPONIBLE</th>
+                    <th class="text-center">RESERVADO</th>
+                    <th class="text-center">MÍNIMO</th>
+                    <th class="text-center">ESTADO</th>
+                    <th class="text-right">ACCIONES</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of filteredStock(); track item.id) {
+                    <tr>
+                      <td class="product-cell">
+                        <div class="product-name">
+                          {{ item.variante?.prenda?.nombre || 'Prenda #' + item.variante?.prenda_id }}
+                        </div>
+                        <div class="product-sku">
+                          {{ item.variante?.prenda?.sku || 'SKU BASE' }}
+                        </div>
+                      </td>
+                      <td>
+                        <span class="variant-sku">{{ item.variante?.sku_variante }}</span>
+                      </td>
+                      <td>
+                        <div class="color-wrap">
+                          <span
+                            class="color-dot"
+                            [style.background-color]="item.variante?.color?.codigo_hex || '#777777'"
+                          ></span>
+                          <span>{{ item.variante?.color?.nombre || 'Color #' + item.variante?.color_id }}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="talla-badge">{{ item.variante?.talla?.codigo || 'N/A' }}</span>
+                      </td>
+                      <td class="text-center">
+                        <span class="stock-num bold" [class.zero-stock]="item.cantidad_disponible === 0">
+                          {{ item.cantidad_disponible }}
+                        </span>
+                      </td>
+                      <td class="text-center">
+                        <span class="stock-num" [class.has-reserved]="item.cantidad_reservada > 0">
+                          {{ item.cantidad_reservada }}
+                        </span>
+                      </td>
+                      <td class="text-center">
+                        <span class="stock-num muted-num">{{ item.stock_minimo }}</span>
+                      </td>
+                      <td class="text-center">
+                        @if (item.cantidad_disponible === 0) {
+                          <span class="status-pill-out">AGOTADO</span>
+                        } @else if (item.cantidad_disponible <= item.stock_minimo) {
+                          <span class="status-pill-low">BAJO STOCK</span>
+                        } @else {
+                          <span class="status-pill-ok">DISPONIBLE</span>
+                        }
+                      </td>
+                      <td class="text-right">
+                        <button
+                          type="button"
+                          class="btn-adjust-row"
+                          (click)="openAjusteItemModal(item)"
+                          title="Ajustar inventario de esta variante"
+                        >
+                          AJUSTAR
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ========================================== -->
+      <!-- TAB 2: SUCURSALES FÍSICAS                  -->
+      <!-- ========================================== -->
       @if (!isLoading() && activeTab() === 'SUCURSALES') {
         <div class="branches-grid">
           @for (s of sucursales(); track s.id) {
@@ -126,7 +360,9 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
         </div>
       }
 
-      <!-- TAB: CIUDADES -->
+      <!-- ========================================== -->
+      <!-- TAB 3: CIUDADES COBERTURA                  -->
+      <!-- ========================================== -->
       @if (!isLoading() && activeTab() === 'CIUDADES') {
         <div class="cities-grid">
           @for (c of ciudades(); track c.id) {
@@ -143,13 +379,98 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
         </div>
       }
 
-      <!-- Modal Sucursal -->
+      <!-- ========================================== -->
+      <!-- MODAL: AJUSTE DE INVENTARIO                -->
+      <!-- ========================================== -->
+      @if (isAjusteModalOpen()) {
+        <div class="modal-backdrop" (click)="closeModals()">
+          <div class="modal-container" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <div>
+                <span class="modal-eyebrow">CONTROL KARDEX DE INVENTARIO</span>
+                <h2 class="modal-title">Ajuste de Stock por Sucursal</h2>
+              </div>
+              <button type="button" class="btn-close" (click)="closeModals()">&times;</button>
+            </div>
+
+            <form (ngSubmit)="submitAjuste()" class="modal-form">
+              <div class="modal-body form-grid">
+                <!-- Sucursal Info -->
+                <div class="form-group full-span info-banner">
+                  <span class="info-label">SUCURSAL DESTINO:</span>
+                  <strong class="info-val">{{ getSelectedSucursalNombre() }}</strong>
+                </div>
+
+                <!-- Variante Info -->
+                @if (selectedItemForAjuste(); as item) {
+                  <div class="form-group full-span info-banner">
+                    <span class="info-label">VARIANTE SELECCIONADA:</span>
+                    <strong class="info-val">
+                      {{ item.variante?.prenda?.nombre || 'Prenda' }} — {{ item.variante?.sku_variante }} ({{ item.variante?.color?.nombre }}, {{ item.variante?.talla?.codigo }})
+                    </strong>
+                    <span class="info-sub">Stock Disponible Actual: {{ item.cantidad_disponible }} un.</span>
+                  </div>
+                }
+
+                <div class="form-group">
+                  <label class="form-label">TIPO DE AJUSTE *</label>
+                  <select [(ngModel)]="ajusteTipo" name="ajusteTipo" class="form-input">
+                    <option value="AJUSTE_POSITIVO">AJUSTE POSITIVO (+ SUMAR STOCK)</option>
+                    <option value="AJUSTE_NEGATIVO">AJUSTE NEGATIVO (- RESTAR STOCK / MERMA)</option>
+                    <option value="INGRESO_INICIAL">INGRESO INICIAL</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">CANTIDAD DE UNIDADES *</label>
+                  <input
+                    type="number"
+                    [(ngModel)]="ajusteCantidad"
+                    name="ajusteCantidad"
+                    min="1"
+                    max="1000"
+                    required
+                    class="form-input"
+                  />
+                </div>
+
+                <div class="form-group full-span">
+                  <label class="form-label">MOTIVO DEL AJUSTE *</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="ajusteMotivo"
+                    name="ajusteMotivo"
+                    required
+                    class="form-input"
+                    placeholder="Ej: Conteo físico mensual, Merma de prendas, Devolución de bodega"
+                  />
+                </div>
+              </div>
+
+              <div class="modal-footer">
+                <button type="button" class="btn-cancel" (click)="closeModals()">CANCELAR</button>
+                <button
+                  type="submit"
+                  class="btn-save"
+                  [disabled]="isSubmitting() || ajusteCantidad <= 0 || !ajusteMotivo"
+                >
+                  {{ isSubmitting() ? 'PROCESANDO...' : 'CONFIRMAR AJUSTE' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      }
+
+      <!-- ========================================== -->
+      <!-- MODAL: REGISTRAR / EDITAR SUCURSAL         -->
+      <!-- ========================================== -->
       @if (isSucursalModalOpen()) {
         <div class="modal-backdrop" (click)="closeModals()">
           <div class="modal-container" (click)="$event.stopPropagation()">
             <div class="modal-header">
               <div>
-                <span class="modal-eyebrow">{{ editingSucursalId() ? 'EDITAR SUCURSAL' : 'NUEVA SUCURSAL' }} &bull; CU4</span>
+                <span class="modal-eyebrow">{{ editingSucursalId() ? 'EDITAR SUCURSAL' : 'NUEVA SUCURSAL' }}</span>
                 <h2 class="modal-title">{{ editingSucursalId() ? sNombre : 'Registrar Sucursal' }}</h2>
               </div>
               <button type="button" class="btn-close" (click)="closeModals()">&times;</button>
@@ -208,13 +529,15 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
         </div>
       }
 
-      <!-- Modal Ciudad -->
+      <!-- ========================================== -->
+      <!-- MODAL: REGISTRAR CIUDAD                    -->
+      <!-- ========================================== -->
       @if (isCiudadModalOpen()) {
         <div class="modal-backdrop" (click)="closeModals()">
           <div class="modal-container sm" (click)="$event.stopPropagation()">
             <div class="modal-header">
               <div>
-                <span class="modal-eyebrow">COBERTURA &bull; CU4</span>
+                <span class="modal-eyebrow">COBERTURA GEOGRÁFICA</span>
                 <h2 class="modal-title">Registrar Ciudad</h2>
               </div>
               <button type="button" class="btn-close" (click)="closeModals()">&times;</button>
@@ -303,6 +626,7 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
     .tabs-left {
       display: flex;
       gap: 0.5rem;
+      flex-wrap: wrap;
     }
 
     .tab-btn {
@@ -370,18 +694,459 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
     }
 
     .loading-box {
-      text-align: center;
-      padding: 4rem;
-      color: #4b5563;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 3rem;
+      font-size: 0.8rem;
       letter-spacing: 0.15em;
-      font-size: 0.85rem;
-      font-weight: 600;
+      color: #6b7280;
     }
 
+    .spinner {
+      width: 1.5rem;
+      height: 1.5rem;
+      border: 2px solid #e5e7eb;
+      border-top-color: #000000;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ========================================== */
+    /* STOCK TAB STYLES                           */
+    /* ========================================== */
+    .stock-tab-content {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .stock-controls-panel {
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 1.25rem;
+    }
+
+    .control-col {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .control-col.search-col {
+      flex: 1;
+      min-width: 240px;
+    }
+
+    .control-col.refresh-col {
+      margin-left: auto;
+    }
+
+    .control-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      color: #4b5563;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .control-select, .control-input {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #111111;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.82rem;
+      border-radius: 0;
+      height: 38px;
+    }
+
+    .control-select:focus, .control-input:focus {
+      outline: none;
+      border-color: #000000;
+    }
+
+    .search-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input-wrap .control-input {
+      width: 100%;
+      padding-right: 2rem;
+    }
+
+    .btn-clear-search {
+      position: absolute;
+      right: 0.5rem;
+      background: transparent;
+      border: none;
+      font-size: 1.2rem;
+      color: #9ca3af;
+      cursor: pointer;
+    }
+
+    .btn-clear-search:hover {
+      color: #111111;
+    }
+
+    .filter-pills {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .filter-pill {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.18);
+      color: #4b5563;
+      padding: 0.5rem 0.85rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      border-radius: 0;
+      transition: all 0.2s ease;
+      height: 38px;
+    }
+
+    .filter-pill:hover {
+      background: #f3f4f6;
+      color: #000000;
+    }
+
+    .filter-pill.active {
+      background: #000000;
+      border-color: #000000;
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .filter-pill.warning.active {
+      background: #b45309;
+      border-color: #b45309;
+      color: #ffffff;
+    }
+
+    .filter-pill.danger.active {
+      background: #b91c1c;
+      border-color: #b91c1c;
+      color: #ffffff;
+    }
+
+    .btn-refresh-stock {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      color: #000000;
+      padding: 0.5rem 1rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 0;
+      height: 38px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-refresh-stock:hover {
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
+    }
+
+    /* KPI Cards */
+    .stock-kpis-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .kpi-card {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      border-radius: 0;
+    }
+
+    .kpi-card.alert-border {
+      border-left: 4px solid #f59e0b;
+    }
+
+    .kpi-card.danger-border {
+      border-left: 4px solid #ef4444;
+    }
+
+    .kpi-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.15em;
+      color: #6b7280;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .kpi-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #000000;
+      line-height: 1;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .kpi-value small {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #6b7280;
+    }
+
+    .kpi-value.gold {
+      color: #c5a059;
+    }
+
+    .kpi-value.danger-val {
+      color: #dc2626;
+    }
+
+    .kpi-sub {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-top: 0.5rem;
+    }
+
+    /* Stock Table */
+    .table-card {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      overflow-x: auto;
+      border-radius: 0;
+    }
+
+    .stock-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      text-align: left;
+    }
+
+    .stock-table th {
+      background: #fafafa;
+      padding: 0.85rem 1.25rem;
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      font-weight: 700;
+      color: #4b5563;
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .stock-table td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      vertical-align: middle;
+    }
+
+    .stock-table tr:hover {
+      background: #fafafa;
+    }
+
+    .product-cell {
+      max-width: 280px;
+    }
+
+    .product-name {
+      font-weight: 700;
+      color: #000000;
+      font-size: 0.88rem;
+    }
+
+    .product-sku {
+      font-size: 0.72rem;
+      color: #6b7280;
+      font-family: monospace;
+      margin-top: 2px;
+    }
+
+    .variant-sku {
+      font-family: monospace;
+      font-weight: 600;
+      color: #374151;
+      font-size: 0.78rem;
+      background: #f3f4f6;
+      padding: 2px 6px;
+    }
+
+    .color-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .color-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      flex-shrink: 0;
+    }
+
+    .talla-badge {
+      display: inline-block;
+      font-family: monospace;
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      background: #111111;
+      color: #ffffff;
+    }
+
+    .stock-num {
+      font-size: 0.95rem;
+      font-family: 'Inter', monospace;
+      color: #111111;
+    }
+
+    .stock-num.bold {
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+
+    .stock-num.zero-stock {
+      color: #dc2626;
+      font-weight: 800;
+    }
+
+    .stock-num.has-reserved {
+      color: #c5a059;
+      font-weight: 700;
+    }
+
+    .stock-num.muted-num {
+      color: #9ca3af;
+    }
+
+    .status-pill-ok {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #065f46;
+      background: #ecfdf5;
+      border: 1px solid #10b981;
+      padding: 3px 8px;
+    }
+
+    .status-pill-low {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #92400e;
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      padding: 3px 8px;
+    }
+
+    .status-pill-out {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #991b1b;
+      background: #fef2f2;
+      border: 1px solid #ef4444;
+      padding: 3px 8px;
+    }
+
+    .btn-adjust-row {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.25);
+      color: #000000;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      cursor: pointer;
+      border-radius: 0;
+      transition: all 0.2s ease;
+    }
+
+    .btn-adjust-row:hover {
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
+    }
+
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+
+    .empty-stock-box {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      padding: 4rem 2rem;
+      text-align: center;
+    }
+
+    .empty-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .empty-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #000000;
+      margin-bottom: 0.35rem;
+    }
+
+    .empty-desc {
+      font-size: 0.85rem;
+      color: #6b7280;
+    }
+
+    .info-banner {
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      padding: 0.85rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .info-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: #6b7280;
+    }
+
+    .info-val {
+      font-size: 0.9rem;
+      color: #111111;
+    }
+
+    .info-sub {
+      font-size: 0.75rem;
+      color: #4b5563;
+      margin-top: 2px;
+    }
+
+    /* ========================================== */
+    /* SUCURSALES & CIUDADES GRIDS               */
+    /* ========================================== */
     .branches-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
-      gap: 2rem;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 1.5rem;
     }
 
     .branch-card {
@@ -390,10 +1155,8 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
       padding: 1.75rem;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      transition: border-color 0.2s ease;
-      box-shadow: none;
       border-radius: 0;
+      transition: all 0.2s ease;
     }
 
     .branch-card:hover {
@@ -709,7 +1472,10 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
 })
 export class InventarioPageComponent implements OnInit {
   private readonly inventarioService = inject(InventarioService);
+  private readonly catalogoService = inject(CatalogoService);
   private readonly usuariosService = inject(UsuariosService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   readonly sucursales = signal<Sucursal[]>([]);
   readonly ciudades = signal<Ciudad[]>([]);
@@ -719,9 +1485,23 @@ export class InventarioPageComponent implements OnInit {
   readonly errorMessage = signal<string | null>(null);
   readonly successMessage = signal<string | null>(null);
 
-  readonly activeTab = signal<'SUCURSALES' | 'CIUDADES'>('SUCURSALES');
+  readonly activeTab = signal<'STOCK' | 'SUCURSALES' | 'CIUDADES'>('STOCK');
 
-  // Modals
+  // Stock Tab State
+  readonly stockList = signal<InventarioStock[]>([]);
+  readonly isStockLoading = signal<boolean>(false);
+  readonly selectedSucursalId = signal<number | null>(null);
+  readonly stockSearchTerm = signal<string>('');
+  readonly stockFilter = signal<'ALL' | 'LOW' | 'OUT'>('ALL');
+
+  // Ajuste Modal State
+  readonly isAjusteModalOpen = signal(false);
+  readonly selectedItemForAjuste = signal<InventarioStock | null>(null);
+  ajusteTipo: 'AJUSTE_POSITIVO' | 'AJUSTE_NEGATIVO' | 'INGRESO_INICIAL' = 'AJUSTE_POSITIVO';
+  ajusteCantidad = 1;
+  ajusteMotivo = 'Ajuste de inventario físico en tienda';
+
+  // Modals Sucursal & Ciudad
   readonly isSucursalModalOpen = signal(false);
   readonly isCiudadModalOpen = signal(false);
   readonly editingSucursalId = signal<number | null>(null);
@@ -743,8 +1523,79 @@ export class InventarioPageComponent implements OnInit {
     return this.personal().filter(u => u.tipo_usuario === 'PERSONAL');
   });
 
+  // Filtered Stock Computed
+  readonly filteredStock = computed(() => {
+    const list = this.stockList();
+    const term = this.stockSearchTerm().trim().toLowerCase();
+    const filter = this.stockFilter();
+
+    return list.filter(item => {
+      const prendaNombre = (item.variante?.prenda?.nombre || '').toLowerCase();
+      const prendaSKU = (item.variante?.prenda?.sku || '').toLowerCase();
+      const varianteSKU = (item.variante?.sku_variante || '').toLowerCase();
+      const colorNombre = (item.variante?.color?.nombre || '').toLowerCase();
+      const tallaCodigo = (item.variante?.talla?.codigo || '').toLowerCase();
+
+      const matchesSearch = !term ||
+        prendaNombre.includes(term) ||
+        prendaSKU.includes(term) ||
+        varianteSKU.includes(term) ||
+        colorNombre.includes(term) ||
+        tallaCodigo.includes(term);
+
+      if (!matchesSearch) return false;
+
+      if (filter === 'LOW') {
+        return item.cantidad_disponible <= item.stock_minimo && item.cantidad_disponible > 0;
+      }
+      if (filter === 'OUT') {
+        return item.cantidad_disponible === 0;
+      }
+      return true;
+    });
+  });
+
+  // KPI Computeds
+  readonly totalUnidades = computed(() => {
+    return this.stockList().reduce((acc, curr) => acc + (curr.cantidad_disponible || 0), 0);
+  });
+
+  readonly totalReservadas = computed(() => {
+    return this.stockList().reduce((acc, curr) => acc + (curr.cantidad_reservada || 0), 0);
+  });
+
+  readonly totalBajoStock = computed(() => {
+    return this.stockList().filter(
+      item => item.cantidad_disponible <= item.stock_minimo && item.cantidad_disponible > 0
+    ).length;
+  });
+
+  readonly totalAgotadas = computed(() => {
+    return this.stockList().filter(item => item.cantidad_disponible === 0).length;
+  });
+
   ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      const tab = params['tab'];
+      if (tab === 'SUCURSALES') {
+        this.activeTab.set('SUCURSALES');
+      } else if (tab === 'CIUDADES') {
+        this.activeTab.set('CIUDADES');
+      } else if (tab === 'STOCK') {
+        this.activeTab.set('STOCK');
+      }
+    });
+
     this.loadData();
+  }
+
+  setTab(tab: 'STOCK' | 'SUCURSALES' | 'CIUDADES'): void {
+    this.activeTab.set(tab);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab },
+      queryParamsHandling: 'merge'
+    });
   }
 
   loadData(): void {
@@ -754,6 +1605,14 @@ export class InventarioPageComponent implements OnInit {
     this.inventarioService.getSucursales().subscribe({
       next: (sList) => {
         this.sucursales.set(sList);
+
+        if (sList.length > 0 && !this.selectedSucursalId()) {
+          this.selectedSucursalId.set(sList[0].id);
+          this.loadStockForSelectedSucursal();
+        } else if (this.selectedSucursalId()) {
+          this.loadStockForSelectedSucursal();
+        }
+
         this.inventarioService.getCiudades().subscribe({
           next: (cList) => {
             this.ciudades.set(cList);
@@ -778,12 +1637,89 @@ export class InventarioPageComponent implements OnInit {
     });
   }
 
+  onSucursalChange(sucId: any): void {
+    const numericId = Number(sucId);
+    this.selectedSucursalId.set(numericId);
+    this.loadStockForSelectedSucursal();
+  }
+
+  loadStockForSelectedSucursal(): void {
+    const sucId = this.selectedSucursalId();
+    if (!sucId) return;
+
+    this.isStockLoading.set(true);
+    this.catalogoService.getStockPorSucursal(sucId).subscribe({
+      next: (data) => {
+        this.stockList.set(data);
+        this.isStockLoading.set(false);
+      },
+      error: (err) => {
+        this.isStockLoading.set(false);
+        this.errorMessage.set(err.error?.detail || 'Error al consultar stock de la sucursal.');
+      }
+    });
+  }
+
+  getSelectedSucursalNombre(): string {
+    const id = this.selectedSucursalId();
+    const suc = this.sucursales().find(s => s.id === id);
+    return suc ? `${suc.nombre} (${suc.ciudad?.nombre || 'Sucursal #' + suc.id})` : 'Sucursal actual';
+  }
+
   getEncargadoNombre(encargadoId?: number | null): string {
     if (!encargadoId) return 'Por asignar';
     const enc = this.personal().find(p => p.id === encargadoId);
     return enc ? `${enc.nombre} ${enc.apellido}` : `Personal #${encargadoId}`;
   }
 
+  // --- MODALS STOCK ADJUSTMENT ---
+  openAjusteGenericoModal(): void {
+    if (this.filteredStock().length > 0) {
+      this.openAjusteItemModal(this.filteredStock()[0]);
+    } else if (this.stockList().length > 0) {
+      this.openAjusteItemModal(this.stockList()[0]);
+    }
+  }
+
+  openAjusteItemModal(item: InventarioStock): void {
+    this.selectedItemForAjuste.set(item);
+    this.ajusteTipo = 'AJUSTE_POSITIVO';
+    this.ajusteCantidad = 1;
+    this.ajusteMotivo = 'Ajuste de inventario físico en tienda';
+    this.isAjusteModalOpen.set(true);
+  }
+
+  submitAjuste(): void {
+    const item = this.selectedItemForAjuste();
+    if (!item) return;
+
+    this.isSubmitting.set(true);
+    const payload: AjusteInventarioRequest = {
+      variante_id: item.variante_id,
+      sucursal_id: item.sucursal_id,
+      tipo_movimiento: this.ajusteTipo,
+      cantidad: this.ajusteCantidad,
+      motivo: this.ajusteMotivo
+    };
+
+    this.catalogoService.ajustarInventario(payload).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.closeModals();
+        this.successMessage.set(
+          `Stock ajustado exitosamente para la variante '${item.variante?.sku_variante || ''}'.`
+        );
+        this.loadStockForSelectedSucursal();
+        setTimeout(() => this.successMessage.set(null), 4000);
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        this.errorMessage.set(err.error?.detail || 'Error al procesar el ajuste de inventario.');
+      }
+    });
+  }
+
+  // --- MODALS SUCURSALES & CIUDADES ---
   openSucursalModal(): void {
     this.editingSucursalId.set(null);
     this.sNombre = '';
@@ -817,6 +1753,8 @@ export class InventarioPageComponent implements OnInit {
   closeModals(): void {
     this.isSucursalModalOpen.set(false);
     this.isCiudadModalOpen.set(false);
+    this.isAjusteModalOpen.set(false);
+    this.selectedItemForAjuste.set(null);
   }
 
   saveSucursal(): void {

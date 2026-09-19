@@ -228,7 +228,7 @@ import {
             <div class="kpi-header-row">
               <span class="kpi-tag-name">Facturación</span>
             </div>
-            <div class="kpi-main-number">&dollar;{{ financialData().facturacion_actual | number:'1.2-2' }}</div>
+            <div class="kpi-main-number">Bs. {{ financialData().facturacion_actual | number:'1.2-2' }}</div>
             <div class="kpi-comparison-row">
               <span class="kpi-growth-pill positive">
                 <span class="growth-arrow">▲</span> {{ financialData().variacion_pct }}%
@@ -256,7 +256,7 @@ import {
             <div class="kpi-header-row">
               <span class="kpi-tag-name">Ticket Promedio</span>
             </div>
-            <div class="kpi-main-number">&dollar;{{ financialData().ticket_medio | number:'1.2-2' }}</div>
+            <div class="kpi-main-number">Bs. {{ financialData().ticket_medio | number:'1.2-2' }}</div>
             <div class="kpi-comparison-row">
               <span class="kpi-growth-pill positive">
                 <span class="growth-arrow">▲</span> 3.1%
@@ -319,8 +319,8 @@ import {
               </div>
 
               <div class="target-side-info">
-                <div class="target-main-amount">&dollar;{{ (financialData().facturacion_actual / 1000) | number:'1.1-1' }}k</div>
-                <div class="target-goal-text">Meta: &dollar;{{ (financialData().objetivo_mes / 1000) | number:'1.0-0' }}k</div>
+                <div class="target-main-amount">Bs. {{ (financialData().facturacion_actual / 1000) | number:'1.1-1' }}k</div>
+                <div class="target-goal-text">Meta: Bs. {{ (financialData().objetivo_mes / 1000) | number:'1.0-0' }}k</div>
               </div>
             </div>
           </article>
@@ -335,7 +335,7 @@ import {
             <div class="card-header-flex revenue-chart-header">
               <div class="revenue-header-left">
                 <span class="card-eyebrow">TENDENCIA DE INGRESOS</span>
-                <span class="revenue-hero-number">&dollar;{{ financialData().facturacion_actual | number:'1.2-2' }}</span>
+                <span class="revenue-hero-number">Bs. {{ financialData().facturacion_actual | number:'1.2-2' }}</span>
               </div>
 
               <!-- Selector de Granularidad: Día, Semana, Mes arriba a la derecha -->
@@ -435,10 +435,10 @@ import {
                   </g>
 
                   <!-- Badge Flotante en el Último Punto (Live Value) -->
-                  <g *ngIf="lastTrendPoint() && !hoveredTrendPoint" [attr.transform]="'translate(' + (lastTrendPoint()!.x - 50) + ',' + (lastTrendPoint()!.yActual - 32) + ')'" class="current-badge-group">
-                    <rect width="100" height="24" rx="12" fill="#111827" filter="drop-shadow(0 3px 6px rgba(0,0,0,0.25))" />
-                    <text x="50" y="16.5" text-anchor="middle" fill="#ffffff" font-size="11.5" font-weight="800" font-family="ui-monospace, monospace">
-                      &dollar;{{ lastTrendPoint()!.montoActual | number:'1.0-0' }}
+                  <g *ngIf="lastTrendPoint() && !hoveredTrendPoint" [attr.transform]="'translate(' + (lastTrendPoint()!.x - 55) + ',' + (lastTrendPoint()!.yActual - 32) + ')'" class="current-badge-group">
+                    <rect width="110" height="24" rx="12" fill="#111827" filter="drop-shadow(0 3px 6px rgba(0,0,0,0.25))" />
+                    <text x="55" y="16.5" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="800" font-family="ui-monospace, monospace">
+                      Bs. {{ lastTrendPoint()!.montoActual | number:'1.0-0' }}
                     </text>
                   </g>
                 </ng-container>
@@ -529,16 +529,16 @@ import {
                 <div class="tooltip-metric-grid">
                   <div class="tooltip-stat">
                     <span class="stat-lbl"><span class="dot-cur"></span> Este período:</span>
-                    <span class="stat-val highlight">&dollar;{{ hoveredTrendPoint.montoActual | number:'1.2-2' }}</span>
+                    <span class="stat-val highlight">Bs. {{ hoveredTrendPoint.montoActual | number:'1.2-2' }}</span>
                   </div>
                   <div class="tooltip-stat" *ngIf="showComparative()">
                     <span class="stat-lbl"><span class="dot-prev"></span> Período anterior:</span>
-                    <span class="stat-val text-muted">&dollar;{{ hoveredTrendPoint.montoAnterior | number:'1.2-2' }}</span>
+                    <span class="stat-val text-muted">Bs. {{ hoveredTrendPoint.montoAnterior | number:'1.2-2' }}</span>
                   </div>
                   <div class="tooltip-stat tooltip-diff-row" *ngIf="showComparative()">
                     <span class="stat-lbl">Diferencia neta:</span>
                     <span class="stat-val" [class.highlight]="hoveredTrendPoint.montoActual >= hoveredTrendPoint.montoAnterior">
-                      {{ hoveredTrendPoint.montoActual >= hoveredTrendPoint.montoAnterior ? '+' : '-' }}&dollar;{{ getPointDiffMonto(hoveredTrendPoint) | number:'1.2-2' }}
+                      {{ hoveredTrendPoint.montoActual >= hoveredTrendPoint.montoAnterior ? '+' : '-' }}Bs. {{ getPointDiffMonto(hoveredTrendPoint) | number:'1.2-2' }}
                     </span>
                   </div>
                 </div>
@@ -561,7 +561,7 @@ import {
                 <span class="bi-chip-bullet bullet-peak"></span>
                 <div class="bi-chip-content">
                   <span class="bi-chip-title">Pico Máximo</span>
-                  <span class="bi-chip-num">{{ trendPeakPoint()?.periodo }} &bull; &dollar;{{ trendPeakPoint()?.montoActual | number:'1.0-0' }}</span>
+                  <span class="bi-chip-num">{{ trendPeakPoint()?.periodo }} &bull; Bs. {{ trendPeakPoint()?.montoActual | number:'1.0-0' }}</span>
                 </div>
               </div>
 
@@ -569,7 +569,7 @@ import {
                 <span class="bi-chip-bullet bullet-avg"></span>
                 <div class="bi-chip-content">
                   <span class="bi-chip-title">Promedio</span>
-                  <span class="bi-chip-num">&dollar;{{ trendAverageVal() | number:'1.0-0' }}</span>
+                  <span class="bi-chip-num">Bs. {{ trendAverageVal() | number:'1.0-0' }}</span>
                 </div>
               </div>
 
@@ -651,7 +651,7 @@ import {
                 </div>
 
                 <div class="product-revenue-col">
-                  <span class="product-amount-number">&dollar;{{ p.ingresos_totales | number:'1.0-0' }}</span>
+                  <span class="product-amount-number">Bs. {{ p.ingresos_totales | number:'1.0-0' }}</span>
                   <span class="product-sold-units">{{ p.unidades_vendidas }} vendidos</span>
                 </div>
               </div>
@@ -696,7 +696,7 @@ import {
                         {{ ord.estado }}
                       </span>
                     </td>
-                    <td class="col-total text-right">&dollar;{{ ord.monto_total | number:'1.2-2' }}</td>
+                    <td class="col-total text-right">Bs. {{ ord.monto_total | number:'1.2-2' }}</td>
                     <td class="col-date text-right">{{ ord.fecha }}</td>
                   </tr>
                 </tbody>
@@ -2336,7 +2336,7 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
       { label: this.formatCurrencyShort(Math.round(maxVal * 0.75)), y: 75 },
       { label: this.formatCurrencyShort(Math.round(maxVal * 0.50)), y: 120 },
       { label: this.formatCurrencyShort(Math.round(maxVal * 0.25)), y: 165 },
-      { label: '$0', y: 210 }
+      { label: 'Bs. 0', y: 210 }
     ];
   });
 
@@ -2628,13 +2628,13 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
   }
 
   formatCurrencyShort(val: number): string {
-    if (val === 0) return '$0';
-    if (val >= 1000000) return `$${(val / 1000000).toFixed(1)}M`;
+    if (val === 0) return 'Bs. 0';
+    if (val >= 1000000) return `Bs. ${(val / 1000000).toFixed(1)}M`;
     if (val >= 1000) {
       const kVal = val / 1000;
-      return kVal % 1 === 0 ? `$${kVal}k` : `$${kVal.toFixed(1)}k`;
+      return kVal % 1 === 0 ? `Bs. ${kVal}k` : `Bs. ${kVal.toFixed(1)}k`;
     }
-    return `$${Math.round(val)}`;
+    return `Bs. ${Math.round(val)}`;
   }
 
   // =========================================================================

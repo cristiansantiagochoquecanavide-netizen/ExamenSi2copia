@@ -36,7 +36,7 @@ type TabPOS = 'POS' | 'HISTORIAL';
         <div class="topbar-left">
           <div class="pos-badge">
             <span class="gold-dot">&bull;</span>
-            <span>PUNTO DE VENTA (POS) &bull; CASO DE USO #10</span>
+            <span>PUNTO DE VENTA (POS)</span>
           </div>
           <h1 class="pos-title">Terminal de Caja</h1>
         </div>

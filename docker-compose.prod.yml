@@ -1,0 +1,54 @@
+# docker-compose.prod.yml
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# This file OVERRIDES docker-compose.yml for production.
+# It does NOT replace it — both files are always used together.
+
+services:
+  db:
+    restart: always
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      ENVIRONMENT: production
+      DEBUG: "False"
+      # In production, uvicorn runs WITHOUT --reload for performance
+      # entrypoint.sh is replaced here to remove --reload
+    command: >
+      sh -c "
+        python - <<'EOF'
+      import socket, time, os
+      db_host = os.getenv('DB_HOST', 'db')
+      db_port = int(os.getenv('DB_PORT', 5432))
+      for i in range(30):
+          try:
+              s = socket.create_connection((db_host, db_port), timeout=2)
+              s.close()
+              print(f'==> PostgreSQL ready at {db_host}:{db_port}!')
+              break
+          except OSError:
+              time.sleep(1)
+      else:
+          print('==> Error: Timed out waiting for PostgreSQL.')
+          exit(1)
+      EOF
+        python init_db.py &&
+        python seed.py &&
+        exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
+      "
+    volumes: []  # No source mounts in production
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    restart: always
+    ports:
+      - "80:80"
+    volumes: []  # No source mounts in production
+    environment:
+      - NODE_ENV=production

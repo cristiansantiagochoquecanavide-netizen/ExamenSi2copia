@@ -25,11 +25,11 @@ export class AppComponent {
   }
 
   isCatalogoActive(): boolean {
-    return this.router.url.startsWith('/catalogo') || this.router.url === '/inventario';
+    return this.router.url.startsWith('/catalogo');
   }
 
   isInventarioActive(): boolean {
-    return this.router.url.startsWith('/inventario/recepcion') || this.router.url.startsWith('/inventario/transferencias');
+    return this.router.url.startsWith('/inventario');
   }
 
   logout(): void {

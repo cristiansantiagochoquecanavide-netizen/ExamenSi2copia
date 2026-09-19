@@ -1,4 +1,4 @@
-﻿services:
+services:
   db:
     image: postgres:16-alpine
     container_name: fashionstore_db
@@ -37,6 +37,9 @@
       SECRET_KEY: ${SECRET_KEY:-super-secret-key-change-in-production}
       ALGORITHM: HS256
       ACCESS_TOKEN_EXPIRE_MINUTES: 60
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
+      STRIPE_CURRENCY: ${STRIPE_CURRENCY:-bob}
     ports:
       - "8000:8000"
     volumes:

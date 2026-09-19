@@ -214,10 +214,14 @@ interface FotoLocal {
                 </span>
               </td>
 
-              <!-- Estado Activo -->
+              <!-- Estado Activo / Inactivo Informativo -->
               <td>
-                <span class="status-badge" [class.active]="p.activo" [class.inactive]="!p.activo">
-                  {{ p.activo ? 'ACTIVA' : 'INACTIVA' }}
+                <span
+                  class="status-badge"
+                  [class.active]="p.activo"
+                  [class.inactive]="!p.activo">
+                  <span class="status-indicator-dot"></span>
+                  <span class="status-txt-main">{{ p.activo ? 'ACTIVA' : 'INACTIVA' }}</span>
                 </span>
               </td>
 
@@ -457,6 +461,25 @@ interface FotoLocal {
                               {{ temp.nombre }}{{ temp.codigo && temp.codigo !== 'CASUAL' && temp.codigo !== 'SIN-TEMP' ? ' (' + temp.codigo + ')' : '' }}
                             </option>
                           </select>
+                        </div>
+                      </div>
+
+                      <!-- Fila 5: Estado de Publicación / Visibilidad en Tienda -->
+                      <div class="field-visibilidad-wrap">
+                        <label class="field-visibilidad-label">ESTADO DE PUBLICACIÓN (VISIBILIDAD EN TIENDA)</label>
+                        <div class="visibilidad-toggle-card" [class.is-active]="formData.activo" (click)="formData.activo = !formData.activo">
+                          <label class="switch-toggle" (click)="$event.stopPropagation()">
+                            <input type="checkbox" [(ngModel)]="formData.activo" name="activo" />
+                            <span class="switch-slider"></span>
+                          </label>
+                          <div class="visibilidad-info">
+                            <span class="visibilidad-title">
+                              {{ formData.activo ? '🟢 Prenda Activa (Visible al público)' : '⚪ Prenda Pausada (Oculta para clientes)' }}
+                            </span>
+                            <span class="visibilidad-sub">
+                              {{ formData.activo ? 'Los clientes pueden buscarla, verla y comprarla en el catálogo.' : 'Oculta en la web. Ideal para preparar promociones y activarlas en horarios específicos.' }}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -928,18 +951,44 @@ interface FotoLocal {
       border-radius: 4px;
       display: inline-block;
     }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.32rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      user-select: none;
+    }
     .status-badge.active {
-      background: #dcfce7;
-      color: #15803d;
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
     }
     .status-badge.inactive {
-      background: #f1f5f9;
-      color: #64748b;
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fca5a5;
+    }
+    .status-indicator-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+    .status-badge.active .status-indicator-dot {
+      background: #10b981;
+      box-shadow: 0 0 6px #10b981;
+    }
+    .status-badge.inactive .status-indicator-dot {
+      background: #ef4444;
+      box-shadow: 0 0 6px #ef4444;
     }
 
     .row-actions {
       display: flex;
-      gap: 0.6rem;
+      gap: 0.5rem;
       justify-content: flex-end;
     }
     .btn-icon-action {
@@ -1341,12 +1390,98 @@ interface FotoLocal {
       gap: 0.85rem;
       width: 100%;
     }
+    .field-visibilidad-wrap {
+      grid-column: 1 / 4;
+      width: 100%;
+      margin-top: 0.35rem;
+    }
+    .field-visibilidad-label {
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: #475569;
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+      display: block;
+    }
+    .visibilidad-toggle-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .visibilidad-toggle-card.is-active {
+      background: #f0fdf4;
+      border-color: #86efac;
+    }
+    .switch-toggle {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .switch-toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .switch-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #cbd5e1;
+      transition: 0.25s;
+      border-radius: 24px;
+    }
+    .switch-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.25s;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    .switch-toggle input:checked + .switch-slider {
+      background-color: #10b981;
+    }
+    .switch-toggle input:checked + .switch-slider:before {
+      transform: translateX(20px);
+    }
+    .visibilidad-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+    .visibilidad-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .visibilidad-sub {
+      font-size: 0.74rem;
+      color: #64748b;
+      line-height: 1.35;
+    }
     @media (max-width: 640px) {
       .comerciales-grid {
         grid-template-columns: 1fr;
         width: 100%;
       }
-      .field-sku, .field-precio, .field-stock, .field-nombre, .field-descripcion, .field-clasificacion-wrap {
+      .field-sku, .field-precio, .field-stock, .field-nombre, .field-descripcion, .field-clasificacion-wrap, .field-visibilidad-wrap {
         grid-column: 1 / -1;
         width: 100%;
       }
@@ -1748,7 +1883,8 @@ export class GestionPrendasPageComponent implements OnInit {
     precio_base: 180,
     categoria_id: 1,
     temporada_id: 1,
-    stock_inicial: 25
+    stock_inicial: 25,
+    activo: true
   };
   fotosSubidas = signal<FotoLocal[]>([]);
   selectedTallasIds = signal<number[]>([]);
@@ -1786,7 +1922,7 @@ export class GestionPrendasPageComponent implements OnInit {
 
   cargarDatos(): void {
     this.isLoading.set(true);
-    this.catalogoService.getPrendas().subscribe({
+    this.catalogoService.getPrendas({ activo_solo: false }).subscribe({
       next: (data) => {
         this.prendas.set(data);
         this.isLoading.set(false);
@@ -1834,7 +1970,8 @@ export class GestionPrendasPageComponent implements OnInit {
       precio_base: 250,
       categoria_id: this.categorias()[0]?.id || 1,
       temporada_id: this.temporadas()[0]?.id || 1,
-      stock_inicial: 25
+      stock_inicial: 25,
+      activo: true
     };
     this.fotosSubidas.set([]);
     // Default select standard sizes and first color
@@ -1854,7 +1991,8 @@ export class GestionPrendasPageComponent implements OnInit {
       precio_base: Number(prenda.precio_base),
       categoria_id: prenda.categoria_id,
       temporada_id: prenda.temporada_id,
-      stock_inicial: prenda.stock_total !== undefined ? prenda.stock_total : 25
+      stock_inicial: prenda.stock_total !== undefined ? prenda.stock_total : 25,
+      activo: prenda.activo ?? true
     };
 
     // Load existing photos
@@ -2040,6 +2178,7 @@ export class GestionPrendasPageComponent implements OnInit {
         categoria_id: Number(this.formData.categoria_id),
         temporada_id: Number(this.formData.temporada_id),
         stock_inicial: Number(this.formData.stock_inicial || 0),
+        activo: this.formData.activo,
         tallas_ids: this.selectedTallasIds(),
         colores_ids: this.selectedColoresIds(),
         multimedia: multimediaPayload
@@ -2067,6 +2206,7 @@ export class GestionPrendasPageComponent implements OnInit {
         categoria_id: Number(this.formData.categoria_id),
         temporada_id: Number(this.formData.temporada_id),
         stock_inicial: Number(this.formData.stock_inicial || 0),
+        activo: this.formData.activo,
         tallas_ids: this.selectedTallasIds(),
         colores_ids: this.selectedColoresIds(),
         multimedia: multimediaPayload
@@ -2085,6 +2225,25 @@ export class GestionPrendasPageComponent implements OnInit {
         }
       });
     }
+  }
+
+  // Activar / Pausar prenda directamente (para promociones u horarios)
+  toggleActivoPrenda(prenda: Prenda, event?: Event): void {
+    if (event) event.stopPropagation();
+    const nuevoEstado = !prenda.activo;
+
+    this.catalogoService.updatePrenda(prenda.id, { activo: nuevoEstado }).subscribe({
+      next: () => {
+        this.prendas.update(list => list.map(p => p.id === prenda.id ? { ...p, activo: nuevoEstado } : p));
+        const msg = nuevoEstado
+          ? `Prenda '${prenda.nombre}' ACTIVADA (ahora es visible en el catálogo y tienda pública).`
+          : `Prenda '${prenda.nombre}' PAUSADA (oculta del catálogo para clientes; lista para promoción).`;
+        this.mostrarMensaje(msg);
+      },
+      error: (err) => {
+        this.mostrarMensaje('Error al cambiar visibilidad de la prenda: ' + (err.error?.detail || err.message), true);
+      }
+    });
   }
 
   // Eliminar Prenda

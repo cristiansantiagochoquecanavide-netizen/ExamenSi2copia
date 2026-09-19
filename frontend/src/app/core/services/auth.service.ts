@@ -1,4 +1,4 @@
-﻿import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
@@ -40,6 +40,36 @@ export class AuthService {
 
   getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
+  }
+
+  get userRole(): string {
+    return (this.currentUser()?.rol?.nombre || '').toUpperCase();
+  }
+
+  hasRole(...roles: string[]): boolean {
+    const current = this.userRole;
+    return roles.some(r => r.toUpperCase() === current);
+  }
+
+  isAdmin(): boolean {
+    return this.userRole === 'ADMINISTRADOR' || this.userRole === 'ADMIN';
+  }
+
+  isEncargado(): boolean {
+    return this.userRole === 'ENCARGADO' || this.userRole === 'ENCARGADO_SUCURSAL';
+  }
+
+  isCajero(): boolean {
+    return this.userRole === 'CAJERO';
+  }
+
+  isCliente(): boolean {
+    // Si no está autenticado o su rol es CLIENTE
+    return !this.isStaff() || this.userRole === 'CLIENTE';
+  }
+
+  isStaff(): boolean {
+    return this.isAdmin() || this.isEncargado() || this.isCajero();
   }
 
   private getStoredUser(): UsuarioResponse | null {

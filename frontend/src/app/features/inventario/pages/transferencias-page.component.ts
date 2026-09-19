@@ -25,7 +25,7 @@ interface LineaTransferenciaForm {
       <section class="editorial-hero">
         <div class="eyebrow">
           <span class="gold-dot">&bull;</span>
-          <span>LOGÍSTICA &amp; KARDEX &bull; CASO DE USO #9</span>
+          <span>LOGÍSTICA &amp; KARDEX</span>
         </div>
         <div class="hero-main-row">
           <div>
@@ -210,7 +210,7 @@ interface LineaTransferenciaForm {
           <div class="modal-dialog-large" (click)="$event.stopPropagation()">
             <div class="modal-header">
               <div>
-                <span class="modal-eyebrow">REBALANCEO DE INVENTARIO &bull; CU9</span>
+                <span class="modal-eyebrow">REBALANCEO DE INVENTARIO</span>
                 <h3 class="modal-title">Registrar Transferencia entre Sucursales</h3>
               </div>
               <button type="button" class="btn-close" (click)="showCreateModal.set(false)">&times;</button>
@@ -318,22 +318,22 @@ interface LineaTransferenciaForm {
                     </button>
                   </div>
 
-                  <div class="table-responsive">
-                    <table class="editorial-table nested-table">
+                  <div class="table-responsive-modal">
+                    <table class="nested-table">
                       <thead>
                         <tr>
-                          <th>PRENDA &amp; VARIANTE (TALLA / COLOR / SKU) *</th>
-                          <th width="150" class="text-center">STOCK ORIGEN</th>
-                          <th width="160">CANTIDAD A ENVIAR *</th>
-                          <th width="50" class="text-center"></th>
+                          <th class="col-prenda">PRENDA &amp; VARIANTE (TALLA / COLOR / SKU) *</th>
+                          <th class="col-stock text-center">STOCK ORIGEN</th>
+                          <th class="col-qty text-center">CANTIDAD A ENVIAR *</th>
+                          <th class="col-del text-center"></th>
                         </tr>
                       </thead>
                       <tbody>
                         @for (linea of lineasTransferencia; track $index) {
                           <tr>
-                            <td>
+                            <td class="col-prenda">
                               <select
-                                class="form-input"
+                                class="form-input select-variant"
                                 [(ngModel)]="linea.variante_id"
                                 [name]="'var_' + $index"
                                 (change)="onVarianteSeleccionada(linea)"
@@ -350,28 +350,34 @@ interface LineaTransferenciaForm {
                                   </optgroup>
                                 }
                               </select>
+                              @if (linea.variante_id && linea.stock_origen_disponible === 0) {
+                                <div class="no-stock-alert">
+                                  &excl; Sin existencias en esta sucursal de origen (0 disp.)
+                                </div>
+                              }
                             </td>
-                            <td class="text-center">
+                            <td class="col-stock text-center">
                               <span
                                 class="stock-avail-badge"
-                                [class.low]="linea.stock_origen_disponible < 5"
+                                [class.low]="linea.stock_origen_disponible < 5 && linea.stock_origen_disponible > 0"
                                 [class.zero]="linea.stock_origen_disponible === 0"
                               >
                                 {{ linea.stock_origen_disponible }} uds disp.
                               </span>
                             </td>
-                            <td>
+                            <td class="col-qty text-center">
                               <input
                                 type="number"
-                                class="form-input text-right"
+                                class="form-input qty-input"
                                 min="1"
-                                [max]="linea.stock_origen_disponible"
+                                [max]="linea.stock_origen_disponible || 9999"
                                 [(ngModel)]="linea.cantidad"
                                 [name]="'cant_' + $index"
+                                placeholder="Cant."
                                 required
                               />
                             </td>
-                            <td class="text-center">
+                            <td class="col-del text-center">
                               @if (lineasTransferencia.length > 1) {
                                 <button type="button" class="btn-remove-line" (click)="quitarLinea($index)">&times;</button>
                               }
@@ -414,7 +420,7 @@ interface LineaTransferenciaForm {
           <div class="modal-dialog" (click)="$event.stopPropagation()">
             <div class="modal-header">
               <div>
-                <span class="modal-eyebrow">DETALLE DE GUÍA LOGÍSTICA &bull; CU9</span>
+                <span class="modal-eyebrow">DETALLE DE GUÍA LOGÍSTICA</span>
                 <h3 class="modal-title">Guía {{ t.codigo }}</h3>
               </div>
               <button type="button" class="btn-close" (click)="selectedTransferencia.set(null)">&times;</button>
@@ -918,8 +924,8 @@ interface LineaTransferenciaForm {
       background: #ffffff;
       border: 1px solid rgba(0, 0, 0, 0.15);
       width: 100%;
-      max-width: 950px;
-      max-height: 90vh;
+      max-width: 1040px;
+      max-height: 92vh;
       overflow-y: auto;
       box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2);
       border-radius: 0;
@@ -1105,10 +1111,74 @@ interface LineaTransferenciaForm {
       border-color: #000000;
     }
 
+    .table-responsive-modal {
+      width: 100%;
+      overflow-x: hidden;
+    }
+
+    .nested-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
     .nested-table th {
       background: #f3f4f6;
       color: #000000;
       font-weight: 700;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      padding: 0.75rem 0.85rem;
+      border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+      text-transform: uppercase;
+    }
+
+    .nested-table td {
+      padding: 0.75rem 0.5rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      vertical-align: middle;
+    }
+
+    .col-prenda {
+      width: auto;
+    }
+
+    .col-stock {
+      width: 130px;
+    }
+
+    .col-qty {
+      width: 130px;
+    }
+
+    .col-del {
+      width: 40px;
+    }
+
+    .select-variant {
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      font-size: 0.8rem;
+    }
+
+    .qty-input {
+      width: 100%;
+      box-sizing: border-box;
+      text-align: center;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 0.65rem 0.5rem;
+    }
+
+    .no-stock-alert {
+      font-size: 0.72rem;
+      color: #b91c1c;
+      font-weight: 600;
+      margin-top: 0.35rem;
     }
 
     .stock-avail-badge {

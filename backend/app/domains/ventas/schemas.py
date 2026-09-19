@@ -2,7 +2,7 @@
 from datetime import datetime, date
 from decimal import Decimal
 from typing import List, Optional, Any
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator, field_validator
 
 from app.domains.inventario.schemas import SucursalResponse
 from app.domains.usuarios.schemas import UsuarioResponse
@@ -198,10 +198,30 @@ class VentaParaDevolucionResponse(BaseModel):
 # ----------------- CU12: PAGOS ELECTRÓNICOS SCHEMAS -----------------
 class DatosTarjetaInput(BaseModel):
     numero: str = Field(..., min_length=13, max_length=19)
-    mes_exp: str = Field(..., pattern="^(0[1-9]|1[0-2])$")
-    anio_exp: str = Field(..., pattern="^(2[4-9]|[3-9][0-9])$")
+    mes_exp: str = Field(...)
+    anio_exp: str = Field(...)
     cvc: str = Field(..., min_length=3, max_length=4)
     titular: str = Field(..., min_length=3, max_length=100)
+
+    @field_validator("mes_exp", mode="before")
+    @classmethod
+    def normalizar_mes(cls, v: Any) -> str:
+        s = str(v).strip()
+        if len(s) == 1:
+            s = f"0{s}"
+        if not s.isdigit() or int(s) < 1 or int(s) > 12:
+            raise ValueError("Mes de expiración debe ser entre 01 y 12")
+        return s
+
+    @field_validator("anio_exp", mode="before")
+    @classmethod
+    def normalizar_anio(cls, v: Any) -> str:
+        s = str(v).strip()
+        if len(s) == 4 and s.startswith("20"):
+            s = s[2:]
+        if not s.isdigit() or int(s) < 24 or int(s) > 99:
+            raise ValueError("Año de expiración inválido (mínimo 24)")
+        return s
 
 
 class PagoElectronicoCreate(BaseModel):

@@ -51,7 +51,9 @@ mimetypes.add_type("image/png", ".png")
 from fastapi.staticfiles import StaticFiles
 static_dir = os.path.join(os.path.dirname(__file__), "static")
 uploads_prendas_dir = os.path.join(static_dir, "uploads", "prendas")
+uploads_nobg_dir = os.path.join(uploads_prendas_dir, "nobg")
 os.makedirs(uploads_prendas_dir, exist_ok=True)
+os.makedirs(uploads_nobg_dir, exist_ok=True)
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # Registro centralizado de enrutadores por dominio de negocio

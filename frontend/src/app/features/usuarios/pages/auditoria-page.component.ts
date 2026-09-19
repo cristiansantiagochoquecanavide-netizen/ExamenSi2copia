@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuditoriaService } from '../services/auditoria.service';
@@ -12,14 +12,34 @@ import { BitacoraAuditoriaResponse } from '../models/usuarios.models';
     <div class="auditoria-container">
       <!-- Header Editorial -->
       <div class="header-section">
-        <div class="eyebrow">
-          <span class="gold-dot">&bull;</span>
-          <span>SEGURIDAD, TRAZABILIDAD Y LOGS &bull; CASO DE USO #7</span>
+        <div class="header-top-bar">
+          <div class="header-titles">
+            <div class="eyebrow">
+              <span class="gold-dot">&bull;</span>
+              <span>SEGURIDAD, TRAZABILIDAD Y LOGS</span>
+            </div>
+            <h1 class="page-title">Bitácora de Auditoría</h1>
+            <p class="subtitle">
+              Registro inmutable de transacciones, mutaciones de estado y eventos críticos del sistema.
+            </p>
+          </div>
+
+          <!-- Reloj Digital en Tiempo Real -->
+          <div class="system-clock-widget">
+            <div class="clock-badge">
+              <span class="pulse-dot"></span>
+              <span>HORA DEL SISTEMA (EN VIVO)</span>
+            </div>
+            <div class="clock-digits">
+              <span class="clock-icon">&#9200;</span>
+              <span class="clock-time">{{ currentTime() }}</span>
+            </div>
+            <div class="clock-meta">
+              <span>{{ currentDate() }}</span>
+              <span class="clock-tz">&bull; BOT (UTC-4)</span>
+            </div>
+          </div>
         </div>
-        <h1 class="page-title">Bitácora de Auditoría</h1>
-        <p class="subtitle">
-          Registro inmutable de transacciones, mutaciones de estado y eventos críticos del sistema.
-        </p>
 
         <!-- Filters Bar -->
         <div class="filters-bar">
@@ -78,20 +98,23 @@ import { BitacoraAuditoriaResponse } from '../models/usuarios.models';
             <table class="audit-table">
               <thead>
                 <tr>
-                  <th>TIMESTAMP (UTC)</th>
-                  <th>MÓDULO</th>
-                  <th>ACCIÓN</th>
-                  <th>USUARIO</th>
-                  <th>DIRECCIÓN IP</th>
+                  <th style="width: 105px;">FECHA</th>
+                  <th style="width: 125px;">HORA / TIEMPO</th>
+                  <th style="width: 110px;">MÓDULO</th>
+                  <th style="width: 160px;">ACCIÓN</th>
+                  <th style="width: 180px;">USUARIO</th>
+                  <th style="width: 115px;">DIRECCIÓN IP</th>
                   <th>DETALLE DE LA OPERACIÓN</th>
-                  <th class="text-right">VALORES</th>
                 </tr>
               </thead>
               <tbody>
                 @for (log of logs(); track log.id) {
                   <tr class="audit-row">
-                    <td class="timestamp-cell">
-                      <span class="date-txt">{{ log.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</span>
+                    <td class="date-cell">
+                      <span class="date-txt">{{ log.timestamp | date:'dd/MM/yyyy' }}</span>
+                    </td>
+                    <td class="time-cell">
+                      <span class="time-badge">&#9201; {{ log.timestamp | date:'HH:mm:ss' }}</span>
                     </td>
                     <td>
                       <span class="modulo-badge" [attr.data-mod]="log.modulo">
@@ -108,16 +131,14 @@ import { BitacoraAuditoriaResponse } from '../models/usuarios.models';
                       <code>{{ log.ip_address || '127.0.0.1' }}</code>
                     </td>
                     <td class="detail-cell">
-                      {{ log.detalle }}
-                    </td>
-                    <td class="text-right">
-                      @if (log.valores_anteriores || log.valores_nuevos) {
-                        <button type="button" class="btn-diff" (click)="openDiffModal(log)">
-                          VER DIFF
-                        </button>
-                      } @else {
-                        <span class="no-diff">-</span>
-                      }
+                      <div class="detail-content-wrap">
+                        <span class="detail-text">{{ log.detalle }}</span>
+                        @if (log.valores_anteriores || log.valores_nuevos) {
+                          <button type="button" class="btn-diff-pill" (click)="openDiffModal(log)" title="Inspeccionar cambios técnicos JSON">
+                            &#128269; Ver JSON
+                          </button>
+                        }
+                      </div>
                     </td>
                   </tr>
                 }
@@ -174,6 +195,91 @@ import { BitacoraAuditoriaResponse } from '../models/usuarios.models';
       padding: 0 0 2rem 0;
       border-bottom: 1px solid rgba(0, 0, 0, 0.08);
       margin-bottom: 2rem;
+    }
+
+    .header-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .header-titles {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .system-clock-widget {
+      background: #0b0f19;
+      color: #ffffff;
+      border-radius: 10px;
+      padding: 0.85rem 1.35rem;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      min-width: 230px;
+    }
+
+    .clock-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: #9ca3af;
+      margin-bottom: 0.35rem;
+    }
+
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulseLive 1.5s infinite;
+    }
+
+    @keyframes pulseLive {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .clock-digits {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .clock-icon {
+      font-size: 1.1rem;
+      opacity: 0.85;
+    }
+
+    .clock-time {
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: #ffffff;
+      line-height: 1;
+    }
+
+    .clock-meta {
+      display: flex;
+      gap: 0.5rem;
+      font-size: 0.72rem;
+      color: #9ca3af;
+      margin-top: 0.4rem;
+      font-weight: 500;
+    }
+
+    .clock-tz {
+      color: #e5e7eb;
+      font-weight: 600;
     }
 
     .eyebrow {
@@ -320,10 +426,26 @@ import { BitacoraAuditoriaResponse } from '../models/usuarios.models';
       color: #374151;
     }
 
-    .timestamp-cell .date-txt {
+    .date-cell .date-txt {
       font-family: monospace;
-      color: #6b7280;
+      color: #4b5563;
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+
+    .time-cell .time-badge {
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      color: #111827;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 600;
       font-size: 0.8rem;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
     }
 
     .modulo-badge {
@@ -375,35 +497,46 @@ import { BitacoraAuditoriaResponse } from '../models/usuarios.models';
     }
 
     .detail-cell {
-      max-width: 320px;
-      line-height: 1.4;
-      color: #4b5563;
+      line-height: 1.5;
+      color: #374151;
+      width: auto;
     }
 
-    .text-right {
-      text-align: right;
+    .detail-content-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.25rem;
     }
 
-    .btn-diff {
-      background: #ffffff;
+    .detail-text {
+      flex: 1;
+      font-size: 0.84rem;
+      color: #1f2937;
+      word-break: break-word;
+    }
+
+    .btn-diff-pill {
+      background: #f9fafb;
       border: 1px solid #d1d5db;
-      color: #111827;
+      color: #4b5563;
       font-size: 0.7rem;
       font-weight: 600;
-      padding: 4px 8px;
+      padding: 3px 8px;
       border-radius: 4px;
       cursor: pointer;
-      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
     }
 
-    .btn-diff:hover {
-      background: #000000;
+    .btn-diff-pill:hover {
+      background: #111827;
       color: #ffffff;
-      border-color: #000000;
-    }
-
-    .no-diff {
-      color: #9ca3af;
+      border-color: #111827;
     }
 
     /* Modal Diff */
@@ -562,7 +695,7 @@ import { BitacoraAuditoriaResponse } from '../models/usuarios.models';
     }
   `]
 })
-export class AuditoriaPageComponent implements OnInit {
+export class AuditoriaPageComponent implements OnInit, OnDestroy {
   private readonly auditoriaService = inject(AuditoriaService);
 
   readonly logs = signal<BitacoraAuditoriaResponse[]>([]);
@@ -574,8 +707,37 @@ export class AuditoriaPageComponent implements OnInit {
 
   readonly selectedLog = signal<BitacoraAuditoriaResponse | null>(null);
 
+  // Reloj digital en tiempo real (horas a segundos)
+  readonly currentTime = signal<string>('00:00:00');
+  readonly currentDate = signal<string>('');
+  private clockInterval: any = null;
+
   ngOnInit(): void {
+    this.updateClock();
+    this.clockInterval = setInterval(() => this.updateClock(), 1000);
     this.loadLogs();
+  }
+
+  ngOnDestroy(): void {
+    if (this.clockInterval) {
+      clearInterval(this.clockInterval);
+    }
+  }
+
+  private updateClock(): void {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    this.currentTime.set(`${h}:${m}:${s}`);
+
+    const options: Intl.DateTimeFormatOptions = { 
+      weekday: 'short', 
+      day: '2-digit', 
+      month: 'short', 
+      year: 'numeric' 
+    };
+    this.currentDate.set(now.toLocaleDateString('es-BO', options).toUpperCase());
   }
 
   loadLogs(): void {

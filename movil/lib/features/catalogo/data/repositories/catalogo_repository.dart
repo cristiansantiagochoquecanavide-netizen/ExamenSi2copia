@@ -85,4 +85,37 @@ class CatalogoRepository {
     } catch (_) {}
     return null;
   }
+
+  Future<VtonTryOnModel> probarPrendaVton({
+    required List<int> imageBytes,
+    required String filename,
+    required int prendaId,
+  }) async {
+    try {
+      final formData = FormData.fromMap({
+        'foto_usuario': MultipartFile.fromBytes(imageBytes, filename: filename),
+        'prenda_id': prendaId,
+      });
+
+      final response = await _apiClient.dio.post(
+        '/catalogo/vton/try-on',
+        data: formData,
+        options: Options(
+          receiveTimeout: const Duration(seconds: 45),
+          sendTimeout: const Duration(seconds: 20),
+        ),
+      );
+
+      if (response.statusCode == 200 && response.data is Map<String, dynamic>) {
+        return VtonTryOnModel.fromJson(response.data as Map<String, dynamic>);
+      } else {
+        throw Exception('Respuesta inesperada del servidor de Virtual Try-On');
+      }
+    } on DioException catch (e) {
+      final detail = e.response?.data is Map ? e.response?.data['detail'] : e.message;
+      throw Exception('Fallo en Virtual Try-On: $detail');
+    } catch (e) {
+      throw Exception('Error en Virtual Try-On: $e');
+    }
+  }
 }

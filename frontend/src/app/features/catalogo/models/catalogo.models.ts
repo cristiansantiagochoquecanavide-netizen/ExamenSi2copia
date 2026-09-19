@@ -114,6 +114,7 @@ export interface PrendaCreate {
   categoria_id: number;
   temporada_id: number;
   stock_inicial?: number;
+  activo?: boolean;
   variantes?: PrendaVarianteInput[];
   multimedia?: PrendaMultimediaCreate[];
   tallas_ids?: number[];

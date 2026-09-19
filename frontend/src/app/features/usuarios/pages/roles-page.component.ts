@@ -19,7 +19,7 @@ interface ModuloPermisos {
       <div class="header-section">
         <div class="eyebrow">
           <span class="gold-dot">&bull;</span>
-          <span>SEGURIDAD RBAC &bull; CASO DE USO #2</span>
+          <span>SEGURIDAD RBAC</span>
         </div>
         <h1 class="page-title">Gestión de Roles y Permisos</h1>
         <p class="subtitle">
@@ -113,7 +113,7 @@ interface ModuloPermisos {
           <div class="modal-container" (click)="$event.stopPropagation()">
             <div class="modal-header">
               <div>
-                <span class="modal-eyebrow">{{ editingRolId() ? 'EDITAR ROL' : 'NUEVO ROL' }} &bull; CU2 RBAC</span>
+                <span class="modal-eyebrow">{{ editingRolId() ? 'EDITAR ROL' : 'NUEVO ROL' }} &bull; RBAC</span>
                 <h2 class="modal-title">{{ editingRolId() ? formNombre : 'Crear Nuevo Rol' }}</h2>
               </div>
               <button type="button" class="btn-close" (click)="closeModal()">&times;</button>

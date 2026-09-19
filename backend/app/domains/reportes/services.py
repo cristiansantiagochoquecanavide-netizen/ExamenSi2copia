@@ -188,10 +188,10 @@ MONTHLY_PROFILES: Dict[int, Dict[str, Any]] = {
             ("Pantalón Palazzo Seda Marfil", "Gala & Noche", 84, 18480.0),
         ],
         "recent_orders": [
-            ("#AT-9842", "Helena Vance", "Cashmere Trench Coat Atelier, Pañuelo Seda", "Boutique Palermo", 3450.0, "ENTREGADO", "Hoy 14:20"),
-            ("#AT-9841", "Julian Sterling", "Tailored Wool Blazer, Camisa Lino Noir", "Flagship Centro", 2890.0, "EN PROCESO", "Hoy 13:45"),
-            ("#AT-9839", "Camille Laurent", "Vestido Sirena Terciopelo", "E-Commerce Delivery", 1850.0, "ENVIADO", "Hoy 11:15"),
-            ("#AT-9835", "Aethelgard Corp", "Prendas de Gala Ejecutivas (x3)", "Boutique Recoleta", 4220.0, "PAGADA", "Ayer 18:30"),
+            ("#AT-9842", "Helena Vance", "Cashmere Trench Coat Atelier, Pañuelo Seda", "Boutique Equipetrol", 3450.0, "ENTREGADO", "Hoy 14:20"),
+            ("#AT-9841", "Julian Sterling", "Tailored Wool Blazer, Camisa Lino Noir", "Flagship Calacoto", 2890.0, "EN PROCESO", "Hoy 13:45"),
+            ("#AT-9839", "Camille Laurent", "Vestido Sirena Terciopelo", "E-Commerce Web Delivery", 1850.0, "ENVIADO", "Hoy 11:15"),
+            ("#AT-9835", "Aethelgard Corp", "Prendas de Gala Ejecutivas (x3)", "Hub El Prado", 4220.0, "PAGADA", "Ayer 18:30"),
         ]
     },
     10: {  # Octubre: Primavera plena, temporada alta eventos y proyección predictiva
@@ -343,10 +343,10 @@ class ReportesService:
             tasa_ocupacion = prof["tasa_ocupacion"]
             conversion_rate = prof["conversion"]
         else:
-            # 1. Métricas de Ventas
+            # 1. Métricas de Ventas (incluye ventas Web y POS confirmadas)
             query_ventas = select(Venta).where(
                 and_(
-                    Venta.estado == "COMPLETADA",
+                    Venta.estado.in_(["PAGADA", "COMPLETADA", "EN_PREPARACION", "ENVIADO", "ENTREGADO"]),
                     Venta.created_at >= fecha_limite,
                     Venta.created_at <= fecha_fin
                 )
@@ -370,17 +370,20 @@ class ReportesService:
                 conversion_rate = prof["conversion"]
                 tasa_ocupacion = prof["tasa_ocupacion"]
                 total_probadores = int(cant_ventas * 0.28)
+                active_orders = 24
+                in_progress_fulfillment = 6
             else:
-                # 2. Pedidos Activos (Online en curso)
+                # 2. Pedidos Activos (Online en curso / Web)
                 query_pedidos = select(func.count(Venta.id)).where(
                     and_(
-                        Venta.canal_venta == "ONLINE",
-                        Venta.estado != "CANCELADA"
+                        Venta.canal_venta.in_(["ONLINE", "ONLINE_WEB"]),
+                        Venta.estado.in_(["PAGADA", "EN_PREPARACION", "ENVIADO"])
                     )
                 )
                 res_pedidos = await self.db.execute(query_pedidos)
-                active_orders = res_pedidos.scalar() or 24
-                in_progress_fulfillment = max(3, int(active_orders * 0.25))
+                active_orders_db = res_pedidos.scalar() or 0
+                active_orders = active_orders_db if active_orders_db > 0 else 24
+                in_progress_fulfillment = max(1, int(active_orders * 0.25))
 
                 # 3. Probadores & Reservas (CU13/CU14)
                 query_reservas = select(Reserva).where(Reserva.created_at >= fecha_limite)
@@ -399,9 +402,6 @@ class ReportesService:
             if modo_vista == "HISTORICO" and mes_sel < 9:
                 active_orders = 0
                 in_progress_fulfillment = 0
-            else:
-                active_orders = 24
-                in_progress_fulfillment = 6
 
         kpis = KPISummaryResponse(
             total_revenue=round(total_revenue, 2),
@@ -516,9 +516,9 @@ class ReportesService:
         unidades_vendidas = max(cant_ventas * 2, int(facturacion_actual / 190.0))
 
         if modo_vista == "PREDICTIVO":
-            mensaje_insight = f"Estimación predictiva para {mes_audit_nombre}: facturación proyectada de ${facturacion_actual:,.2f} basada en la tendencia de meses pasados."
+            mensaje_insight = f"Estimación predictiva para {mes_audit_nombre}: facturación proyectada de Bs. {facturacion_actual:,.2f} basada en la tendencia de meses pasados."
         elif mes_audit_nombre:
-            mensaje_insight = f"Auditoría de {mes_audit_nombre}: facturación consolidada de ${facturacion_actual:,.2f} ({cumplimiento_pct}% del objetivo fijado)."
+            mensaje_insight = f"Auditoría de {mes_audit_nombre}: facturación consolidada de Bs. {facturacion_actual:,.2f} ({cumplimiento_pct}% del objetivo fijado)."
         elif cumplimiento_pct >= 85:
             mensaje_insight = f"Estás al {cumplimiento_pct}% del objetivo fijado con un crecimiento intermensual del +{variacion_pct}%."
         else:
@@ -668,31 +668,31 @@ class ReportesService:
     def _calcular_geographic_hubs(self, total_revenue: float) -> List[GeographicHub]:
         return [
             GeographicHub(
-                sucursal="Boutique Palermo Soho",
-                ciudad="Buenos Aires (Palermo)",
+                sucursal="Boutique Equipetrol Luxury",
+                ciudad="Santa Cruz (Equipetrol)",
                 pedidos=148,
-                monto=round(total_revenue * 0.42, 2),
+                monto=round(total_revenue * 0.48, 2),
                 tiempo_entrega_promedio="35 min (Same-Day)",
-                lat_relativa=-34.588,
-                lng_relativa=-58.430
+                lat_relativa=-17.776,
+                lng_relativa=-63.195
             ),
             GeographicHub(
-                sucursal="Flagship Recoleta Luxury",
-                ciudad="Buenos Aires (Recoleta)",
+                sucursal="Flagship Calacoto Atelier",
+                ciudad="La Paz (Zona Sur)",
                 pedidos=112,
-                monto=round(total_revenue * 0.35, 2),
-                tiempo_entrega_promedio="45 min (Concierge)",
-                lat_relativa=-34.587,
-                lng_relativa=-58.393
+                monto=round(total_revenue * 0.32, 2),
+                tiempo_entrega_promedio="45 min (Express)",
+                lat_relativa=-16.539,
+                lng_relativa=-68.089
             ),
             GeographicHub(
-                sucursal="Hub Atelier San Isidro",
-                ciudad="San Isidro (Zona Norte)",
+                sucursal="Hub Atelier El Prado",
+                ciudad="Cochabamba (Central)",
                 pedidos=82,
-                monto=round(total_revenue * 0.23, 2),
-                tiempo_entrega_promedio="90 min (Express)",
-                lat_relativa=-34.471,
-                lng_relativa=-58.528
+                monto=round(total_revenue * 0.20, 2),
+                tiempo_entrega_promedio="60 min (Express)",
+                lat_relativa=-17.389,
+                lng_relativa=-66.158
             )
         ]
 
@@ -806,12 +806,17 @@ class ReportesService:
         filas = []
         for v in ventas:
             if v.created_at and v.created_at.month == mes_sel:
-                items_desc = f"{len(v.detalles)} prendas de alta costura" if v.detalles else "Colección Exclusiva"
-                suc_nom = v.sucursal.nombre if v.sucursal else "Buenos Aires / Flagship"
+                items_desc = f"{len(v.detalles)} prenda(s)" if v.detalles else "Colección Exclusiva"
+                if v.canal_venta == "ONLINE_WEB":
+                    suc_nom = "Tienda Online (Web)"
+                elif v.sucursal:
+                    suc_nom = f"{v.sucursal.nombre} (POS)"
+                else:
+                    suc_nom = "Santa Cruz / Central"
                 filas.append(
                     RecentOrderRow(
                         codigo_pedido=v.codigo_venta or f"#AT-{v.id:04d}",
-                        cliente_nombre=v.cliente_nombre or "Cliente VIP Atelier",
+                        cliente_nombre=v.cliente_nombre or "Cliente Atelier",
                         items_resumen=items_desc,
                         sucursal_o_ciudad=suc_nom,
                         monto_total=float(v.total),
@@ -820,9 +825,11 @@ class ReportesService:
                     )
                 )
 
-        if not filas:
+        if len(filas) < 5:
             prof = MONTHLY_PROFILES.get(mes_sel, MONTHLY_PROFILES[9])
             for (cod, cliente, items, suc, monto, estado, fecha) in prof["recent_orders"]:
+                if len(filas) >= 5:
+                    break
                 filas.append(
                     RecentOrderRow(
                         codigo_pedido=cod,

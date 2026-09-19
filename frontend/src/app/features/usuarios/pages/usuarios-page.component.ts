@@ -19,7 +19,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       <div class="header-section">
         <div class="eyebrow">
           <span class="gold-dot">&bull;</span>
-          <span>ADMINISTRACIÓN DE PERSONAL Y CLIENTES &bull; CASO DE USO #3</span>
+          <span>ADMINISTRACIÓN DE PERSONAL Y CLIENTES</span>
         </div>
         <h1 class="page-title">Directorio de Usuarios</h1>
         <p class="subtitle">
@@ -172,7 +172,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
           <div class="modal-container" (click)="$event.stopPropagation()">
             <div class="modal-header">
               <div>
-                <span class="modal-eyebrow">PERSONAL CON SUCURSAL &bull; CU3</span>
+                <span class="modal-eyebrow">PERSONAL CON SUCURSAL</span>
                 <h2 class="modal-title">Registrar Personal Interno</h2>
               </div>
               <button type="button" class="btn-close" (click)="closeModals()">&times;</button>
@@ -245,7 +245,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
           <div class="modal-container" (click)="$event.stopPropagation()">
             <div class="modal-header">
               <div>
-                <span class="modal-eyebrow">CUENTA E-COMMERCE &bull; CU3</span>
+                <span class="modal-eyebrow">CUENTA E-COMMERCE</span>
                 <h2 class="modal-title">Registrar Cliente</h2>
               </div>
               <button type="button" class="btn-close" (click)="closeModals()">&times;</button>
@@ -300,7 +300,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
           <div class="modal-container" (click)="$event.stopPropagation()">
             <div class="modal-header">
               <div>
-                <span class="modal-eyebrow">ACTUALIZACIÓN DE PERFIL &bull; CU3</span>
+                <span class="modal-eyebrow">ACTUALIZACIÓN DE PERFIL</span>
                 <h2 class="modal-title">Editar Usuario</h2>
               </div>
               <button type="button" class="btn-close" (click)="closeModals()">&times;</button>

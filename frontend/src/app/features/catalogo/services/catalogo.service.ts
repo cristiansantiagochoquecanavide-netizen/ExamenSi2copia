@@ -122,6 +122,7 @@ export class CatalogoService {
     sector?: string;
     sucursal_id?: number;
     search?: string;
+    activo_solo?: boolean;
   }): Observable<Prenda[]> {
     let httpParams = new HttpParams();
     if (params?.categoria_id) {
@@ -135,6 +136,9 @@ export class CatalogoService {
     }
     if (params?.sucursal_id) {
       httpParams = httpParams.set('sucursal_id', params.sucursal_id.toString());
+    }
+    if (params?.activo_solo !== undefined) {
+      httpParams = httpParams.set('activo_solo', params.activo_solo.toString());
     }
     return this.http.get<Prenda[]>(`${this.baseUrl}/prendas`, { params: httpParams });
   }

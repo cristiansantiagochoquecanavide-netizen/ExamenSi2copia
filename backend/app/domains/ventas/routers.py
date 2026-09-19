@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.domains.usuarios.models import Usuario
-from app.domains.usuarios.routers import get_current_user, require_permissions
+from app.domains.usuarios.routers import get_current_user, get_optional_current_user, require_permissions
 from app.domains.ventas.services import VentasService
 from app.domains.ventas.schemas import (
     VentasStatusResponse, VentaPOSCreate, VentaResponse,
@@ -217,7 +217,7 @@ async def obtener_pago(
 async def procesar_checkout_online(
     data: VentaOnlineCheckoutRequest,
     request: Request,
-    current_user: Usuario = Depends(get_current_user),
+    current_user: Optional[Usuario] = Depends(get_optional_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     ip = request.client.host if request.client else None

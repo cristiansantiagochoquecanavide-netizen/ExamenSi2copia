@@ -86,7 +86,7 @@ import { AuthService } from '../../../core/services/auth.service';
           </form>
 
           <div class="card-footer">
-            <span class="footer-note">SISTEMA SEGURO CON TOKENS JWT (CU1)</span>
+            <span class="footer-note">SISTEMA SEGURO CON TOKENS JWT</span>
             <a routerLink="/catalogo" class="link-guest">Explorar catálogo como invitado &rarr;</a>
           </div>
         </div>

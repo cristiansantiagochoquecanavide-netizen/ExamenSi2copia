@@ -103,6 +103,8 @@ class PrendaMultimediaModel {
       esPortada: json['es_portada'] as bool? ?? false,
     );
   }
+
+  String get urlResuelta => PrendaModel.resolveImageUrl(url);
 }
 
 class PrendaVarianteModel {
@@ -167,6 +169,36 @@ class PrendaModel {
     this.variantes = const [],
   });
 
+  static String resolveImageUrl(
+    String? rawUrl, {
+    String defaultFallback =
+        'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=800&auto=format&fit=crop',
+  }) {
+    if (rawUrl == null || rawUrl.trim().isEmpty) {
+      return defaultFallback;
+    }
+    var u = rawUrl.trim();
+    if (u.startsWith('blob:') || u.startsWith('data:')) {
+      return u;
+    }
+    if (u.startsWith('/static/')) {
+      return 'http://10.0.2.2:8000$u';
+    }
+    if (u.startsWith('static/')) {
+      return 'http://10.0.2.2:8000/$u';
+    }
+    if (u.contains('localhost:8000')) {
+      return u.replaceAll('localhost:8000', '10.0.2.2:8000');
+    }
+    if (u.contains('127.0.0.1:8000')) {
+      return u.replaceAll('127.0.0.1:8000', '10.0.2.2:8000');
+    }
+    if (u.contains('backend:8000')) {
+      return u.replaceAll('backend:8000', '10.0.2.2:8000');
+    }
+    return u;
+  }
+
   String get portadaUrl {
     if (multimedia.isEmpty) {
       if (nombre.toLowerCase().contains('trench')) {
@@ -182,13 +214,13 @@ class PrendaModel {
       ),
     );
     final url = portada.url.trim();
-    if (url.isEmpty || url.contains('photo-1539533018447-63fcce667883') || url.startsWith('http://localhost') || url.startsWith('http://127.0.0.1')) {
+    if (url.isEmpty) {
       if (nombre.toLowerCase().contains('trench')) {
         return 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=800&auto=format&fit=crop';
       }
       return 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=800&auto=format&fit=crop';
     }
-    return url;
+    return resolveImageUrl(url);
   }
 
   bool get tieneModelo3D {
@@ -218,6 +250,44 @@ class PrendaModel {
               ?.map((v) => PrendaVarianteModel.fromJson(v as Map<String, dynamic>))
               .toList() ??
           [],
+    );
+  }
+}
+
+class VtonTryOnModel {
+  final String status;
+  final String resultUrl;
+  final int prendaId;
+  final String prendaNombre;
+  final String prendaCategoria;
+  final double precio;
+  final double calceScore;
+  final int anchoHombrosPx;
+  final String mensaje;
+
+  const VtonTryOnModel({
+    required this.status,
+    required this.resultUrl,
+    required this.prendaId,
+    required this.prendaNombre,
+    required this.prendaCategoria,
+    required this.precio,
+    required this.calceScore,
+    required this.anchoHombrosPx,
+    required this.mensaje,
+  });
+
+  factory VtonTryOnModel.fromJson(Map<String, dynamic> json) {
+    return VtonTryOnModel(
+      status: json['status'] as String? ?? 'success',
+      resultUrl: PrendaModel.resolveImageUrl(json['result_url'] as String? ?? ''),
+      prendaId: json['prenda_id'] as int? ?? 0,
+      prendaNombre: json['prenda_nombre'] as String? ?? '',
+      prendaCategoria: json['prenda_categoria'] as String? ?? 'Alta Costura',
+      precio: (json['precio'] is num) ? (json['precio'] as num).toDouble() : 0.0,
+      calceScore: (json['calce_score'] is num) ? (json['calce_score'] as num).toDouble() : 95.0,
+      anchoHombrosPx: json['ancho_hombros_px'] as int? ?? 200,
+      mensaje: json['mensaje'] as String? ?? '',
     );
   }
 }

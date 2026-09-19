@@ -48,7 +48,7 @@ import { AuthService } from '../../../core/services/auth.service';
                 <span class="summary-pill">Silueta: {{ dashboard()?.preferencias?.sector_preferido }}</span>
                 <span class="summary-pill">Ocasión: {{ dashboard()?.preferencias?.ocasion_frecuente }}</span>
                 @if (dashboard()?.preferencias?.presupuesto_max) {
-                  <span class="summary-pill">Hasta \${{ dashboard()?.preferencias?.presupuesto_max }}</span>
+                  <span class="summary-pill">Hasta Bs. {{ dashboard()?.preferencias?.presupuesto_max }}</span>
                 }
               </div>
             }
@@ -95,9 +95,9 @@ import { AuthService } from '../../../core/services/auth.service';
                   </div>
                   <div class="outfit-pricing">
                     <span class="price-label">Conjunto Completo</span>
-                    <span class="price-val">\${{ outfit.precio_total | number:'1.2-2' }}</span>
+                    <span class="price-val">Bs. {{ outfit.precio_total | number:'1.2-2' }}</span>
                     @if (outfit.ahorro_estimado > 0) {
-                      <span class="saving-tag">Ahorro: -\${{ outfit.ahorro_estimado | number:'1.2-2' }}</span>
+                      <span class="saving-tag">Ahorro: -Bs. {{ outfit.ahorro_estimado | number:'1.2-2' }}</span>
                     }
                   </div>
                 </div>
@@ -112,7 +112,7 @@ import { AuthService } from '../../../core/services/auth.service';
                       <div class="item-meta">
                         <span class="item-cat">{{ prenda.categoria_nombre }}</span>
                         <strong class="item-name">{{ prenda.nombre }}</strong>
-                        <span class="item-price">\${{ prenda.precio_base | number:'1.2-2' }}</span>
+                        <span class="item-price">Bs. {{ prenda.precio_base | number:'1.2-2' }}</span>
                       </div>
                     </div>
                   }

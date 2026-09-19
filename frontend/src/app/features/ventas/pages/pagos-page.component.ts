@@ -1741,7 +1741,7 @@ export class PagosPageComponent implements OnInit, OnDestroy {
     this.ventasService.iniciarPagoElectronico(payload).subscribe({
       next: (res) => {
         this.procesandoTarjeta = false;
-        this.mensajeExito = `Cobro aprobado por Stripe Sandbox. Auth Token: ${res.pago.transaccion_externa_id}`;
+        this.mensajeExito = `¡Tu compra / pago ha sido exitoso! Cobro autorizado por Stripe. Ref: ${res.pago.transaccion_externa_id}`;
         this.abrirVoucher(res.pago);
         this.cargarHistorial();
       },

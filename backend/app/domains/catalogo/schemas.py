@@ -119,6 +119,7 @@ class PrendaCreate(BaseModel):
     categoria_id: int
     temporada_id: int
     stock_inicial: Optional[int] = Field(50, ge=0)
+    activo: bool = True
     variantes: List[PrendaVarianteInput] = []
     multimedia: List[PrendaMultimediaCreate] = []
     tallas_ids: Optional[List[int]] = None
@@ -146,6 +147,13 @@ class PrendaMultimediaResponse(BaseSchema):
     es_portada: bool
     created_at: datetime
 
+class PrendaSimpleResponse(BaseSchema):
+    id: int
+    sku: str
+    nombre: str
+    precio_base: Decimal
+    activo: bool
+
 class PrendaVarianteResponse(BaseSchema):
     id: int
     prenda_id: int
@@ -156,6 +164,7 @@ class PrendaVarianteResponse(BaseSchema):
     activo: bool
     talla: Optional[TallaResponse] = None
     color: Optional[ColorResponse] = None
+    prenda: Optional[PrendaSimpleResponse] = None
 
 class PrendaResponse(BaseSchema):
     id: int
@@ -258,4 +267,17 @@ class ListadoCalificacionesResponse(BaseModel):
     calificaciones: List[CalificacionResponse] = []
     mi_calificacion: Optional[CalificacionResponse] = None
     es_comprador_verificado: bool = False
+
+
+# ----------------- VIRTUAL TRY-ON (V-TON) SCHEMAS -----------------
+class VtonTryOnResponse(BaseModel):
+    status: str = "success"
+    result_url: str
+    prenda_id: int
+    prenda_nombre: str
+    prenda_categoria: str
+    precio: float
+    calce_score: float
+    ancho_hombros_px: int
+    mensaje: str
 

@@ -54,6 +54,13 @@ class UsuarioModel {
   });
 
   String get nombreCompleto => '$nombre $apellido'.trim();
+  String get rolNombre => (rol?.nombre.isNotEmpty == true ? rol!.nombre : tipoUsuario).toUpperCase();
+
+  bool get isAdmin => rolNombre == 'ADMINISTRADOR' || rolNombre == 'ADMIN';
+  bool get isEncargado => rolNombre == 'ENCARGADO' || rolNombre == 'ENCARGADO_SUCURSAL';
+  bool get isCajero => rolNombre == 'CAJERO';
+  bool get isStaff => isAdmin || isEncargado || isCajero;
+  bool get isCliente => !isStaff || rolNombre == 'CLIENTE';
 
   factory UsuarioModel.fromJson(Map<String, dynamic> json) {
     return UsuarioModel(

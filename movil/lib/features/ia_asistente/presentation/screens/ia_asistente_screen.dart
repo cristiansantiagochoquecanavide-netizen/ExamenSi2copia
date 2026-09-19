@@ -28,11 +28,11 @@ class _IaAsistenteScreenState extends State<IaAsistenteScreen> {
   bool _isLoading = false;
 
   final List<String> _quickPrompts = [
-    '✨ Outfit para gala de noche',
-    '💼 Look formal para oficina',
-    '🌿 Casual chic de verano',
-    '👗 ¿Cómo combinar un vestido negro?',
-    '🏷️ Colección y precios vigentes',
+    'Outfit para gala de noche',
+    'Look formal para oficina',
+    'Casual chic de verano',
+    '¿Cómo combinar un vestido negro?',
+    'Colección y precios vigentes',
   ];
 
   @override
@@ -504,11 +504,7 @@ class _IaAsistenteScreenState extends State<IaAsistenteScreen> {
             backgroundColor: AppTheme.surfaceContainer,
             side: const BorderSide(color: Color(0xFFE5E7EB)),
             shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-            onPressed: () {
-              // Extraer texto limpio sin emoji
-              final clean = prompt.replaceFirst(RegExp(r'^[^\w¿]+'), '').trim();
-              _enviarMensaje(clean);
-            },
+            onPressed: () => _enviarMensaje(prompt),
           );
         },
       ),

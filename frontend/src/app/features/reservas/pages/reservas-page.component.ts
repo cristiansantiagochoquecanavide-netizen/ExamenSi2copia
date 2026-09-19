@@ -7,7 +7,7 @@ import { ReservasService } from '../services/reservas.service';
 import { InventarioService } from '../../inventario/services/inventario.service';
 import { CatalogoService } from '../../catalogo/services/catalogo.service';
 import { Reserva, ReservaCreate, DetalleReservaCreate } from '../models/reservas.models';
-import { Sucursal } from '../../inventario/models/inventario.models';
+import { Sucursal, Ciudad } from '../../inventario/models/inventario.models';
 import { Prenda, PrendaVariante, InventarioStock } from '../../catalogo/models/catalogo.models';
 
 interface PrendaEnReserva {
@@ -80,22 +80,40 @@ interface PrendaEnReserva {
           </div>
 
           <div class="form-grid">
-            <!-- SUCURSAL -->
-            <div class="form-group full-width">
-              <label>Seleccionar Boutique / Sucursal *</label>
+            <!-- CIUDAD / DEPARTAMENTO (MACRO FILTRO) -->
+            <div class="form-group">
+              <label>1. Ciudad / Departamento</label>
+              <select
+                [(ngModel)]="ciudadSeleccionadaId"
+                (change)="onCiudadChange()"
+                class="atelier-select">
+                <option [ngValue]="null">-- Todas las ciudades --</option>
+                <option *ngFor="let c of ciudadesList" [ngValue]="c.id">
+                  {{ c.nombre }} ({{ c.codigo }})
+                </option>
+              </select>
+            </div>
+
+            <!-- SUCURSAL / BOUTIQUE (MICRO SELECCIÓN) -->
+            <div class="form-group">
+              <label>2. Boutique / Sucursal *</label>
               <select
                 [(ngModel)]="sucursalSeleccionadaId"
                 (change)="onSucursalChange()"
                 class="atelier-select">
                 <option [ngValue]="null">-- Elegir boutique --</option>
-                <option *ngFor="let s of sucursalesList" [ngValue]="s.id">
-                  {{ s.nombre }} ({{ s.direccion }})
+                <option *ngFor="let s of sucursalesFiltradas" [ngValue]="s.id">
+                  {{ s.nombre }} — {{ getCiudadNombre(s) }} ({{ s.direccion }})
                 </option>
               </select>
             </div>
 
             <!-- DETALLES SUCURSAL SELECCIONADA -->
             <div *ngIf="sucursalActual" class="sucursal-info-box full-width">
+              <div class="info-line">
+                <span class="lbl">&#127961;&#65039; Ciudad / Departamento:</span>
+                <span class="val font-bold highlight-gold">{{ getCiudadNombre(sucursalActual) }}</span>
+              </div>
               <div class="info-line">
                 <span class="lbl">&#128205; Dirección:</span>
                 <span class="val">{{ sucursalActual.direccion }}</span>
@@ -152,8 +170,8 @@ interface PrendaEnReserva {
             <div class="form-group">
               <label>Moneda</label>
               <select [(ngModel)]="moneda" class="atelier-select">
-                <option value="USD">USD ($)</option>
                 <option value="BOB">BOB (Bs.)</option>
+                <option value="USD">USD ($)</option>
               </select>
             </div>
 
@@ -194,6 +212,9 @@ interface PrendaEnReserva {
             <!-- GRILLA DE PRENDAS DISPONIBLES EN LA BOUTIQUE -->
             <div class="prendas-selector-list">
               <div *ngFor="let p of prendasFiltradas()" class="prenda-mini-card">
+                <div class="prenda-mini-thumb">
+                  <img [src]="getPortadaUrl(p)" [alt]="p.nombre" class="thumb-img" (error)="onImgError($event)" />
+                </div>
                 <div class="prenda-mini-body">
                   <strong class="prenda-name">{{ p.nombre }}</strong>
                   <div class="prenda-meta">
@@ -234,6 +255,7 @@ interface PrendaEnReserva {
 
               <div *ngIf="prendasApartadas.length > 0" class="basket-items-list">
                 <div *ngFor="let item of prendasApartadas; let i = index" class="basket-item-row">
+                  <img [src]="getPortadaUrl(item.prenda)" [alt]="item.prenda.nombre" class="basket-thumb-img" (error)="onImgError($event)" />
                   <div class="basket-item-info">
                     <strong>{{ item.prenda.nombre }}</strong>
                     <small class="basket-item-specs">
@@ -318,7 +340,7 @@ interface PrendaEnReserva {
             <div class="card-reserva-body">
               <div class="reserva-info-row">
                 <span class="lbl">&#128205; Boutique:</span>
-                <span class="val font-bold">{{ r.sucursal?.nombre || 'Boutique Atelier' }}</span>
+                <span class="val font-bold">{{ r.sucursal?.nombre || 'Boutique Atelier' }} ({{ getCiudadNombre(r.sucursal) }})</span>
               </div>
               <div class="reserva-info-row">
                 <span class="lbl">&#128197; Fecha &amp; Hora:</span>
@@ -390,7 +412,7 @@ interface PrendaEnReserva {
             <div class="pase-details-table">
               <div class="pase-row">
                 <span class="lbl">BOUTIQUE:</span>
-                <span class="val font-bold">{{ reservaActualPase.sucursal?.nombre }}</span>
+                <span class="val font-bold">{{ reservaActualPase.sucursal?.nombre }} ({{ getCiudadNombre(reservaActualPase.sucursal) }})</span>
               </div>
               <div class="pase-row">
                 <span class="lbl">DIRECCIÓN:</span>
@@ -665,7 +687,7 @@ interface PrendaEnReserva {
     .notice-icon { font-size: 2rem; color: #111827; display: block; margin-bottom: 0.5rem; }
     .prendas-search-box { margin-bottom: 1rem; }
     .prendas-selector-list {
-      max-height: 280px;
+      max-height: 380px;
       overflow-y: auto;
       border: 1px solid #e5e7eb;
       border-radius: 8px;
@@ -676,11 +698,34 @@ interface PrendaEnReserva {
       padding: 0.85rem 1rem;
       border-bottom: 1px solid #f3f4f6;
       display: flex;
-      justify-content: space-between;
+      gap: 1rem;
       align-items: center;
+      transition: background 0.15s ease;
+    }
+    .prenda-mini-card:hover {
+      background: #fafafa;
+    }
+    .prenda-mini-thumb {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+    }
+    .thumb-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.2s ease;
+    }
+    .prenda-mini-card:hover .thumb-img {
+      transform: scale(1.05);
     }
     .prenda-mini-card:last-child { border-bottom: none; }
-    .prenda-mini-body { width: 100%; }
+    .prenda-mini-body { flex: 1; min-width: 0; }
     .prenda-name {
       display: block;
       font-size: 0.9rem;
@@ -753,13 +798,22 @@ interface PrendaEnReserva {
     .basket-item-row {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.85rem;
       padding: 0.75rem 0;
       border-bottom: 1px solid #e5e7eb;
       font-size: 0.85rem;
       color: #111827;
     }
-    .basket-item-info { flex: 1; }
+    .basket-thumb-img {
+      width: 44px;
+      height: 44px;
+      border-radius: 6px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+    }
+    .basket-item-info { flex: 1; min-width: 0; }
     .basket-item-specs { display: block; color: #6b7280; font-size: 0.75rem; }
     .basket-item-qty {
       display: flex;
@@ -1149,7 +1203,10 @@ export class ReservasPageComponent implements OnInit {
   activeTab: 'agendar' | 'mis-reservas' = 'agendar';
 
   // Paso 1: Sucursal y Cita
+  ciudadesList: Ciudad[] = [];
+  ciudadSeleccionadaId: number | null = null;
   sucursalesList: Sucursal[] = [];
+  sucursalesFiltradas: Sucursal[] = [];
   sucursalSeleccionadaId: number | null = null;
   sucursalActual: Sucursal | null = null;
 
@@ -1157,7 +1214,7 @@ export class ReservasPageComponent implements OnInit {
   fechaReserva: string = new Date().toISOString().split('T')[0];
   horaEstimada: string = '15:30';
   montoAnticipo: number = 0;
-  moneda: 'USD' | 'BOB' = 'USD';
+  moneda: 'USD' | 'BOB' = 'BOB';
   observaciones: string = '';
 
   // Paso 2: Catálogo y Prendas Apartadas
@@ -1183,21 +1240,77 @@ export class ReservasPageComponent implements OnInit {
   mensajeError: string | null = null;
 
   ngOnInit(): void {
+    this.cargarCiudades();
     this.cargarSucursales();
     this.cargarCatalogo();
+  }
+
+  cargarCiudades(): void {
+    this.inventarioService.getCiudades().subscribe({
+      next: (ciudades) => {
+        this.ciudadesList = ciudades;
+      },
+      error: (err) => console.error('Error cargando ciudades:', err)
+    });
   }
 
   cargarSucursales(): void {
     this.inventarioService.getSucursales().subscribe({
       next: (sucursales) => {
         this.sucursalesList = sucursales;
-        if (sucursales.length > 0 && !this.sucursalSeleccionadaId) {
-          this.sucursalSeleccionadaId = sucursales[0].id;
-          this.onSucursalChange();
-        }
+        this.filtrarSucursales();
       },
       error: (err) => console.error('Error cargando sucursales:', err)
     });
+  }
+
+  onCiudadChange(): void {
+    this.filtrarSucursales();
+  }
+
+  filtrarSucursales(): void {
+    if (this.ciudadSeleccionadaId) {
+      this.sucursalesFiltradas = this.sucursalesList.filter(s => s.ciudad_id === this.ciudadSeleccionadaId);
+    } else {
+      this.sucursalesFiltradas = [...this.sucursalesList];
+    }
+
+    const existe = this.sucursalesFiltradas.some(s => s.id === this.sucursalSeleccionadaId);
+    if (!existe) {
+      this.sucursalSeleccionadaId = this.sucursalesFiltradas.length > 0 ? this.sucursalesFiltradas[0].id : null;
+    }
+    this.onSucursalChange();
+  }
+
+  getCiudadNombre(sucursal: Sucursal | null | undefined): string {
+    if (!sucursal) return 'Bolivia';
+    if (sucursal.ciudad?.nombre) return sucursal.ciudad.nombre;
+    const c = this.ciudadesList.find(item => item.id === sucursal.ciudad_id);
+    return c?.nombre || 'Bolivia';
+  }
+
+  resolveImageUrl(url?: string): string {
+    if (!url) return 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&q=80';
+    if (url.startsWith('blob:') || url.startsWith('data:')) return url;
+    if (url.startsWith('/static/')) return `http://localhost:8000${url}`;
+    if (url.includes('backend:8000')) return url.replace('backend:8000', 'localhost:8000');
+    return url;
+  }
+
+  getPortadaUrl(prenda: Prenda | undefined | null): string {
+    if (!prenda) return 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&q=80';
+    const portada = prenda.multimedia?.find(m => m.es_portada && m.tipo === 'IMAGEN');
+    if (portada) return this.resolveImageUrl(portada.url);
+    const primeraImg = prenda.multimedia?.find(m => m.tipo === 'IMAGEN');
+    if (primeraImg) return this.resolveImageUrl(primeraImg.url);
+    return 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&q=80';
+  }
+
+  onImgError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    if (img) {
+      img.src = 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&q=80';
+    }
   }
 
   cargarCatalogo(): void {

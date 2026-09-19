@@ -144,15 +144,17 @@ import { CartService } from '../../ventas/services/cart.service';
           <span class="status-label">CATÁLOGO CON AR &bull; SINCRONIZADO</span>
         </div>
         <div class="action-buttons-group">
-          <button type="button" class="btn-action-gold" (click)="router.navigate(['/catalogo/gestion'])">
-            ⚙ GESTIONAR PRENDAS
-          </button>
-          <button type="button" class="btn-action-outline" (click)="router.navigate(['/catalogo/gestion'])">
-            + AÑADIR PRENDA
-          </button>
-          <button type="button" class="btn-action-outline" (click)="openAjusteModal()">
-            AJUSTAR STOCK SUCURSAL
-          </button>
+          @if (authService.isStaff()) {
+            <button type="button" class="btn-action-gold" (click)="router.navigate(['/catalogo/gestion'])">
+              ⚙ GESTIONAR PRENDAS
+            </button>
+            <button type="button" class="btn-action-outline" (click)="router.navigate(['/catalogo/gestion'])">
+              + AÑADIR PRENDA
+            </button>
+            <button type="button" class="btn-action-outline" (click)="openAjusteModal()">
+              AJUSTAR STOCK SUCURSAL
+            </button>
+          }
           <button type="button" class="btn-refresh" (click)="loadPrendas()" [disabled]="isLoading()">
             &#x21bb; Actualizar
           </button>
@@ -194,10 +196,12 @@ import { CartService } from '../../ventas/services/cart.service';
         @if (filteredPrendas().length === 0) {
           <div class="empty-state">
             <h3 class="empty-title">CATÁLOGO LISTO PARA NUEVAS PRENDAS</h3>
-            <p class="empty-text">No hay prendas registradas con el filtro actual. Podés añadir prendas con fotos, categorías y variantes.</p>
-            <button type="button" class="btn-action-gold" style="margin-top: 1.5rem;" (click)="router.navigate(['/catalogo/gestion'])">
-              + Ir al Gestor y Añadir Prenda
-            </button>
+            <p class="empty-text">No hay prendas registradas con el filtro actual.</p>
+            @if (authService.isStaff()) {
+              <button type="button" class="btn-action-gold" style="margin-top: 1.5rem;" (click)="router.navigate(['/catalogo/gestion'])">
+                + Ir al Gestor y Añadir Prenda
+              </button>
+            }
           </div>
         } @else {
           <div class="products-grid">
@@ -386,9 +390,15 @@ import { CartService } from '../../ventas/services/cart.service';
 
                   <div class="modal-price-box">
                     <div class="price-col">
-                      <span class="modal-price-label">PRECIO BASE:</span>
+                      <span class="modal-price-label">PRECIO UNIDAD:</span>
                       <span class="modal-price-value"><span class="currency">Bs.</span> {{ prenda.precio_base | number:'1.2-2' }}</span>
                     </div>
+                    @if (modalCantidad() > 1) {
+                      <div class="price-col subtotal-col">
+                        <span class="modal-price-label">SUBTOTAL ({{ modalCantidad() }} UDS):</span>
+                        <span class="modal-price-value subtotal-highlight"><span class="currency">Bs.</span> {{ (prenda.precio_base * modalCantidad()) | number:'1.2-2' }}</span>
+                      </div>
+                    }
                     <div class="modal-stock-info">
                       <span class="modal-price-label">STOCK TOTAL:</span>
                       <span class="modal-stock-badge" [class.in-stock]="(prenda.stock_total || 0) > 0" [class.out-of-stock]="(prenda.stock_total || 0) <= 0">
@@ -2823,7 +2833,12 @@ import { CartService } from '../../ventas/services/cart.service';
     .modal-price-value {
       font-size: 1.4rem;
       font-weight: 800;
-      color: #000000;
+      color: #111827;
+      font-family: 'Playfair Display', serif;
+    }
+
+    .subtotal-highlight {
+      color: #b45309;
     }
 
     .modal-stock-badge {
@@ -3698,16 +3713,17 @@ export class CatalogoPageComponent implements OnInit {
   categoriasDelSector = computed(() => {
     const sector = this.selectedSector();
     const cats = this.categorias();
-    if (sector === 'TODAS') {
-      const seen = new Set<string>();
-      return cats.filter(c => {
-        const key = c.nombre.trim().toLowerCase();
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
-    }
-    return cats.filter(c => c.sector === sector || c.sector === 'UNISEX');
+    const sectorCats = sector === 'TODAS'
+      ? cats
+      : cats.filter(c => c.sector === sector || c.sector === 'UNISEX');
+
+    const seen = new Set<string>();
+    return sectorCats.filter(c => {
+      const key = c.nombre.trim().toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
   });
 
   filteredPrendas = computed(() => {
@@ -3721,10 +3737,10 @@ export class CatalogoPageComponent implements OnInit {
       list = list.filter(p => p.categoria?.sector === sector || p.categoria?.sector === 'UNISEX');
     }
 
-    // 2. Filtrar por Categoría específica
+    // 2. Filtrar por Categoría específica (incluye categorías con el mismo nombre entre sectores)
     if (catId !== 'ALL') {
       const selectedCat = this.categorias().find(c => c.id === catId);
-      if (selectedCat && sector === 'TODAS') {
+      if (selectedCat) {
         const sameNameIds = this.categorias()
           .filter(c => c.nombre.trim().toLowerCase() === selectedCat.nombre.trim().toLowerCase())
           .map(c => c.id);

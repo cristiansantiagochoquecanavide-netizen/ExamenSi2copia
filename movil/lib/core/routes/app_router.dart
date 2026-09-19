@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import '../../features/catalogo/domain/models/catalogo_models.dart';
 import '../../features/catalogo/presentation/screens/catalogo_screen.dart';
 import '../../features/catalogo/presentation/screens/vestidor_ar_screen.dart';
 import '../../features/usuarios/presentation/screens/usuarios_screen.dart';
@@ -18,7 +19,9 @@ final GoRouter appRouter = GoRouter(
       routes: [
         GoRoute(
           path: 'vestidor_ar',
-          builder: (context, state) => const VestidorArScreen(),
+          builder: (context, state) => VestidorArScreen(
+            initialPrenda: state.extra is PrendaModel ? state.extra as PrendaModel : null,
+          ),
         ),
       ],
     ),

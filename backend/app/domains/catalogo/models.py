@@ -129,7 +129,7 @@ class PrendaVariante(Base):
     prenda: Mapped["Prenda"] = relationship("Prenda", back_populates="variantes")
     talla: Mapped["Talla"] = relationship("Talla", lazy="selectin")
     color: Mapped["Color"] = relationship("Color", lazy="selectin")
-    stock_items: Mapped[List["InventarioStock"]] = relationship("InventarioStock", back_populates="variante", lazy="selectin")
+    stock_items: Mapped[List["InventarioStock"]] = relationship("InventarioStock", back_populates="variante", cascade="all, delete-orphan", lazy="selectin")
 
 
 class InventarioStock(Base):
@@ -147,7 +147,7 @@ class InventarioStock(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     variante: Mapped["PrendaVariante"] = relationship("PrendaVariante", back_populates="stock_items", lazy="selectin")
-    movimientos: Mapped[List["MovimientoInventario"]] = relationship("MovimientoInventario", back_populates="stock")
+    movimientos: Mapped[List["MovimientoInventario"]] = relationship("MovimientoInventario", back_populates="stock", cascade="all, delete-orphan")
 
 
 class MovimientoInventario(Base):

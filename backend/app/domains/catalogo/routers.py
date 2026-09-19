@@ -1,7 +1,9 @@
 import os
 import uuid
+from pathlib import Path
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Request, status, UploadFile, File, HTTPException
+from fastapi import APIRouter, Depends, Request, status, UploadFile, File, Form, HTTPException
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -15,9 +17,11 @@ from app.domains.catalogo.schemas import (
     PrendaCreate, PrendaUpdate, PrendaResponse,
     PrendaMultimediaCreate, PrendaMultimediaResponse, UploadImagenResponse,
     AjusteInventarioRequest, InventarioStockResponse, MensajeCatalogoResponse,
-    CalificacionCreate, CalificacionUpdate, CalificacionResponse, ListadoCalificacionesResponse
+    CalificacionCreate, CalificacionUpdate, CalificacionResponse, ListadoCalificacionesResponse,
+    VtonTryOnResponse
 )
 from app.domains.catalogo.services import ParametrosModaService, PrendaService, StockService, CalificacionService
+from app.domains.catalogo.vton_service import VtonService
 
 
 router = APIRouter(prefix="/catalogo", tags=["Cat?logo & Moda"])
@@ -248,6 +252,127 @@ async def subir_imagen_prenda(
         tamano_bytes=len(content)
     )
 
+@router.post(
+    "/prendas/{prenda_id}/remove-background",
+    summary="Quitar Fondo de Prenda con IA (V-TON)",
+    tags=["V-TON AR"],
+)
+async def remove_background_prenda(
+    prenda_id: int,
+    request: Request,
+    force: bool = False,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Uses rembg (U2Net AI model) to remove the background from the prenda's
+    portada image. Returns a transparent PNG URL ready for overlay on the
+    live camera feed in the Flutter V-TON screen.
+
+    - `force=true` re-processes even if a cached nobg PNG exists.
+    """
+    from app.domains.catalogo.bg_removal import (
+        process_image_file,
+        build_nobg_url,
+        NOBG_DIR,
+        get_nobg_path_for_source,
+    )
+
+    # 1. Fetch prenda
+    prenda = await PrendaService.obtener_por_id(db, prenda_id)
+    if not prenda:
+        raise HTTPException(status_code=404, detail="Prenda no encontrada")
+
+    # 2. Find the portada image from multimedia list
+    portada = next(
+        (m for m in (prenda.multimedia or []) if m.es_portada),
+        None
+    )
+    if portada is None and prenda.multimedia:
+        portada = prenda.multimedia[0]  # Fallback: first image
+
+    if portada is None:
+        raise HTTPException(status_code=422, detail="La prenda no tiene imágenes registradas")
+
+    portada_url: str = portada.url or ""
+    if not portada_url:
+        raise HTTPException(status_code=422, detail="La prenda no tiene imagen portada configurada")
+
+    # Extract filename from URL (e.g. http://localhost:8000/static/uploads/prendas/prenda_abc.webp)
+    source_filename = portada_url.split("/")[-1]
+    source_path = os.path.join(UPLOAD_DIR, source_filename)
+
+    if not os.path.exists(source_path):
+        raise HTTPException(
+            status_code=404,
+            detail=f"Imagen fuente no encontrada en disco: {source_filename}"
+        )
+
+    # 3. Run AI background removal (may take 2-8 seconds on first call while model loads)
+    try:
+        out_path = process_image_file(source_path, force=force)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error al procesar la imagen: {exc}"
+        ) from exc
+
+    # 4. Build public URL for the resulting PNG
+    out_filename = Path(out_path).name
+    nobg_url = build_nobg_url(request, out_filename)
+
+    return JSONResponse(content={
+        "prenda_id": prenda_id,
+        "nobg_url": nobg_url,
+        "source_filename": source_filename,
+        "cached": not force and os.path.exists(out_path),
+    })
+
+@router.post(
+    "/vton/try-on",
+    response_model=VtonTryOnResponse,
+    summary="Virtual Try-On Generativo con Foto Real del Usuario (CU17)",
+    tags=["V-TON AR"],
+)
+async def virtual_try_on(
+    request: Request,
+    foto_usuario: UploadFile = File(...),
+    prenda_id: int = Form(...),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Procesa la fotografía capturada del usuario y la prenda del catálogo seleccionada:
+    1. Aísla la prenda (removiendo el fondo y el modelo de catálogo).
+    2. Detecta la postura y dimensiones anatómicas (hombros/torso) del usuario.
+    3. Amolda la prenda con compensación de iluminación, escala y sombras de contacto.
+    4. Retorna la imagen resultante del usuario vistiendo la prenda.
+    """
+    from app.domains.catalogo.vton_service import VtonService
+
+    foto_bytes = await foto_usuario.read()
+    if not foto_bytes:
+        raise HTTPException(status_code=400, detail="No se recibió la fotografía del usuario.")
+
+    base = "http://localhost:8000"
+    if request and request.base_url:
+        b = str(request.base_url).rstrip("/")
+        if "backend:8000" not in b:
+            base = b
+
+    service = VtonService(db)
+    try:
+        resultado = await service.procesar_try_on(
+            foto_usuario_bytes=foto_bytes,
+            prenda_id=prenda_id,
+            base_url=base
+        )
+        return VtonTryOnResponse(**resultado)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al procesar Virtual Try-On: {str(e)}")
+
 @router.put("/prendas/{prenda_id}", response_model=PrendaResponse, summary="Actualizar Prenda (CU6)")
 async def actualizar_prenda(
     prenda_id: int,
@@ -343,3 +468,56 @@ async def eliminar_calificacion(
     await CalificacionService.eliminar(db, calificacion_id, current_user, ip)
     return MensajeCatalogoResponse(mensaje="Calificación eliminada exitosamente")
 
+
+# ----------------- CU17: VIRTUAL TRY-ON (V-TON) -----------------
+@router.post(
+    "/vton/try-on",
+    response_model=VtonTryOnResponse,
+    summary="Virtual Try-On con IA (CU17)",
+    description=(
+        "Recibe la foto del usuario y el ID de la prenda del catálogo. "
+        "Aísla la prenda textil con u2net_cloth_seg, detecta el torso del usuario con OpenCV "
+        "y devuelve la imagen compuesta en Base64. "
+        "Las fotos personales se procesan en memoria y NUNCA se persisten en disco."
+    ),
+)
+async def virtual_try_on(
+    foto_usuario: UploadFile = File(..., description="Foto del usuario (JPEG/PNG desde cámara)"),
+    prenda_id: int = Form(..., description="ID de la prenda del catálogo"),
+    request: Request = None,
+    db: AsyncSession = Depends(get_db),
+):
+    # Validate file type
+    content_type = foto_usuario.content_type or ""
+    if not content_type.startswith("image/"):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="El archivo enviado no es una imagen válida (JPEG o PNG requerido).",
+        )
+
+    foto_bytes = await foto_usuario.read()
+    if len(foto_bytes) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="La imagen recibida está vacía.",
+        )
+
+    base_url = str(request.base_url).rstrip("/") if request else "http://localhost:8000"
+
+    try:
+        service = VtonService(db)
+        result = await service.procesar_try_on(
+            foto_usuario_bytes=foto_bytes,
+            prenda_id=prenda_id,
+            base_url=base_url,
+        )
+        return result
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error en el pipeline de Virtual Try-On: {exc}",
+        )

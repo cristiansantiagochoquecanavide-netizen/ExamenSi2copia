@@ -84,6 +84,33 @@
   font-weight: 700;
 }
 
+/* --- ENLACES DIRECTOS PARA CLIENTE & CAJERO --- */
+.client-nav-link {
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #4b5563;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.6rem 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.client-nav-link:hover,
+.client-nav-link.active {
+  color: #000000;
+  border-bottom-color: #000000;
+  font-weight: 700;
+}
+
 /* --- ESTILOS DE MENÚS DESPLEGABLES --- */
 .nav-dropdown {
   position: relative;

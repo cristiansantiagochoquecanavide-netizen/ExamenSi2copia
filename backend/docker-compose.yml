@@ -43,8 +43,12 @@ services:
       - ./app:/app/app
       - ./init_db.py:/app/init_db.py
       - ./seed.py:/app/seed.py
+      - static_uploads:/app/app/static/uploads
 
 volumes:
   postgres_data:
     name: fashionstore_postgres_data
+    driver: local
+  static_uploads:
+    name: fashionstore_static_uploads
     driver: local

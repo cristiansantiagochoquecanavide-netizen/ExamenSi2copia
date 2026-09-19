@@ -1,9 +1,10 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:go_router/go_router.dart';
 import '../../../../shared/widgets/atelier_scaffold.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../usuarios/data/repositories/auth_repository.dart';
+import '../../../usuarios/domain/models/usuario_model.dart';
 
 class ReportesScreen extends StatefulWidget {
   const ReportesScreen({super.key});
@@ -13,7 +14,12 @@ class ReportesScreen extends StatefulWidget {
 }
 
 class _ReportesScreenState extends State<ReportesScreen> {
+  final ApiClient _apiClient = ApiClient();
+  final AuthRepository _authRepository = AuthRepository();
+
   bool _isLoading = true;
+  bool _isCheckingAuth = true;
+  UsuarioModel? _currentUser;
   String _selectedRango = '30D';
   Map<String, dynamic>? _dashboardData;
   Map<String, dynamic>? _voiceAnalysis;
@@ -32,19 +38,31 @@ class _ReportesScreenState extends State<ReportesScreen> {
   @override
   void initState() {
     super.initState();
-    _cargarDashboard();
+    _checkAuthAndLoad();
+  }
+
+  Future<void> _checkAuthAndLoad() async {
+    final user = await _authRepository.getCurrentUser();
+    if (mounted) {
+      setState(() {
+        _currentUser = user;
+        _isCheckingAuth = false;
+      });
+      if (user != null && (user.isAdmin || user.isEncargado)) {
+        _cargarDashboard();
+      } else {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   Future<void> _cargarDashboard() async {
     setState(() => _isLoading = true);
     try {
-      final baseUrl = ApiClient.baseUrl;
-      final uri = Uri.parse('$baseUrl/reportes/dashboard?rango=$_selectedRango');
-      final res = await http.get(uri);
-      if (res.statusCode == 200) {
-        final data = jsonDecode(utf8.decode(res.bodyBytes));
+      final res = await _apiClient.dio.get('/reportes/dashboard', queryParameters: {'rango': _selectedRango});
+      if (res.statusCode == 200 && res.data is Map<String, dynamic>) {
         setState(() {
-          _dashboardData = data;
+          _dashboardData = res.data as Map<String, dynamic>;
           _isLoading = false;
         });
       } else {
@@ -109,17 +127,13 @@ class _ReportesScreenState extends State<ReportesScreen> {
   Future<void> _consultarVozIA(String query) async {
     setState(() => _isAnalyzingVoice = true);
     try {
-      final baseUrl = ApiClient.baseUrl;
-      final uri = Uri.parse('$baseUrl/reportes/analisis-voz');
-      final res = await http.post(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'query': query, 'rango_tiempo': _selectedRango}),
+      final res = await _apiClient.dio.post(
+        '/reportes/analisis-voz',
+        data: {'query': query, 'rango_tiempo': _selectedRango},
       );
-      if (res.statusCode == 200) {
-        final data = jsonDecode(utf8.decode(res.bodyBytes));
+      if (res.statusCode == 200 && res.data is Map<String, dynamic>) {
         setState(() {
-          _voiceAnalysis = data;
+          _voiceAnalysis = res.data as Map<String, dynamic>;
           _isAnalyzingVoice = false;
         });
       } else {
@@ -153,6 +167,83 @@ class _ReportesScreenState extends State<ReportesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isCheckingAuth) {
+      return const AtelierScaffold(
+        currentRoute: '/reportes',
+        child: Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
+      );
+    }
+
+    final hasAccess = _currentUser != null && (_currentUser!.isAdmin || _currentUser!.isEncargado);
+
+    if (!hasAccess) {
+      return AtelierScaffold(
+        currentRoute: '/reportes',
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(28.0),
+            child: Container(
+              padding: const EdgeInsets.all(24.0),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFAFAFA),
+                border: Border.all(color: const Color(0xFFE5E7EB)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFEF2F2),
+                      border: Border.all(color: const Color(0xFFFECACA)),
+                    ),
+                    child: const Icon(
+                      Icons.lock_outline,
+                      color: Color(0xFFDC2626),
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Text(
+                    'ACCESO RESTRINGIDO',
+                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                          fontSize: 16,
+                          letterSpacing: 2.0,
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'El panel de Reportes & Business Intelligence está reservado exclusivamente para la administración y gerencia de FashionStore.',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppTheme.mutedColor,
+                          height: 1.4,
+                        ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: () => context.go('/catalogo'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                    ),
+                    child: const Text(
+                      'VOLVER AL CATÁLOGO',
+                      style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1.2),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return AtelierScaffold(
       currentRoute: '/reportes',
       child: _isLoading
@@ -190,7 +281,7 @@ class _ReportesScreenState extends State<ReportesScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE9C349).withOpacity(0.15),
+                          color: const Color(0xFFE9C349).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(4),
                           border: Border.all(color: const Color(0xFFE9C349)),
                         ),
@@ -232,7 +323,7 @@ class _ReportesScreenState extends State<ReportesScreen> {
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
-                                  color: selected ? Colors.white : Colors.black89,
+                                  color: selected ? Colors.white : Colors.black87,
                                 ),
                               ),
                             ),
@@ -300,10 +391,10 @@ class _ReportesScreenState extends State<ReportesScreen> {
       decoration: BoxDecoration(
         color: const Color(0xFF1B1B1B),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: const Color(0xFFE9C349).withOpacity(0.5)),
+        border: Border.all(color: const Color(0xFFE9C349).withValues(alpha: 0.5)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -530,7 +621,7 @@ class _ReportesScreenState extends State<ReportesScreen> {
         border: Border.all(color: const Color(0xFFE5E7EB)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),

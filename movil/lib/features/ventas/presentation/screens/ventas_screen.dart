@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../shared/widgets/atelier_scaffold.dart';
@@ -591,6 +593,8 @@ class _VentasScreenState extends State<VentasScreen> with SingleTickerProviderSt
   }
 }
 
+enum _CheckoutStep { form, qrDisplay, success }
+
 class _CheckoutModal extends StatefulWidget {
   final CartService cartService;
   final String tipoEntrega;
@@ -616,9 +620,22 @@ class _CheckoutModalState extends State<_CheckoutModal> {
   late TextEditingController _direccionCtrl;
   late TextEditingController _ciudadCtrl;
 
+  // Controladores de Tarjeta de Crédito
+  late TextEditingController _tarjetaNumeroCtrl;
+  late TextEditingController _tarjetaTitularCtrl;
+  late TextEditingController _tarjetaExpCtrl;
+  late TextEditingController _tarjetaCvcCtrl;
+
+  _CheckoutStep _step = _CheckoutStep.form;
   String _metodoPago = 'QR_SIMPLE'; // QR_SIMPLE o TARJETA
   bool _isLoading = false;
+  bool _isVerifying = false;
   String? _errorMessage;
+
+  String _codigoRecaudacion = '';
+  Timer? _countdownTimer;
+  int _remainingSeconds = 300; // 5 minutos para expiración QR
+  VentaResponseModel? _createdVenta;
 
   @override
   void initState() {
@@ -627,18 +644,158 @@ class _CheckoutModalState extends State<_CheckoutModal> {
     _emailCtrl = TextEditingController(text: widget.currentUser?.email ?? 'cliente@fashionstore.com');
     _direccionCtrl = TextEditingController(text: widget.currentUser?.direccion ?? 'Av. San Martín #123');
     _ciudadCtrl = TextEditingController(text: 'Santa Cruz');
+
+    _tarjetaNumeroCtrl = TextEditingController(text: '4532 0000 0000 1234');
+    _tarjetaTitularCtrl = TextEditingController(text: widget.currentUser?.nombreCompleto.toUpperCase() ?? 'CLIENTE FASHION');
+    _tarjetaExpCtrl = TextEditingController(text: '12/28');
+    _tarjetaCvcCtrl = TextEditingController(text: '123');
   }
 
   @override
   void dispose() {
+    _countdownTimer?.cancel();
     _nombreCtrl.dispose();
     _emailCtrl.dispose();
     _direccionCtrl.dispose();
     _ciudadCtrl.dispose();
+    _tarjetaNumeroCtrl.dispose();
+    _tarjetaTitularCtrl.dispose();
+    _tarjetaExpCtrl.dispose();
+    _tarjetaCvcCtrl.dispose();
     super.dispose();
   }
 
-  Future<void> _submitCheckout() async {
+  void _startCountdown() {
+    _countdownTimer?.cancel();
+    _remainingSeconds = 300;
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_remainingSeconds > 0) {
+        if (mounted) setState(() => _remainingSeconds--);
+      } else {
+        timer.cancel();
+      }
+    });
+  }
+
+  String _formatCountdown(int seconds) {
+    final m = (seconds ~/ 60).toString().padLeft(2, '0');
+    final s = (seconds % 60).toString().padLeft(2, '0');
+    return '$m:$s';
+  }
+
+  void _generateAndShowQR() {
+    if (_nombreCtrl.text.trim().isEmpty) {
+      setState(() => _errorMessage = 'Por favor ingresa tu nombre completo.');
+      return;
+    }
+    if (_emailCtrl.text.trim().isEmpty) {
+      setState(() => _errorMessage = 'Por favor ingresa tu correo electrónico.');
+      return;
+    }
+
+    final randHex = Random().nextInt(0xFFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase();
+    final now = DateTime.now();
+    final dateStr = '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
+
+    setState(() {
+      _codigoRecaudacion = 'LIB-QR-$dateStr-$randHex';
+      _errorMessage = null;
+      _step = _CheckoutStep.qrDisplay;
+    });
+
+    _startCountdown();
+  }
+
+  Future<void> _verifyQRPayment() async {
+    setState(() {
+      _isVerifying = true;
+      _errorMessage = null;
+    });
+
+    // Simulación de 3 segundos de verificación con la pasarela bancaria / Libélula
+    await Future.delayed(const Duration(seconds: 3));
+
+    try {
+      final detalles = widget.cartService.items
+          .map((i) => DetalleVentaInput(
+                varianteId: i.varianteId,
+                cantidad: i.cantidad,
+                precioUnitario: i.prenda.precioBase,
+              ))
+          .toList();
+
+      final request = VentaOnlineCheckoutRequest(
+        clienteNombre: _nombreCtrl.text.trim(),
+        clienteEmail: _emailCtrl.text.trim(),
+        clienteNit: widget.currentUser?.ciNit ?? '0',
+        detalles: detalles,
+        envio: DatosEnvioInput(
+          tipoEntrega: widget.tipoEntrega,
+          direccionLinea1: _direccionCtrl.text.trim(),
+          ciudad: _ciudadCtrl.text.trim(),
+        ),
+        pago: PagoOnlineInput(
+          metodoPago: 'QR_SIMPLE',
+          pasarela: 'LIBELULA_BOLIVIA',
+          monto: widget.cartService.total,
+          moneda: 'USD',
+          clienteEmail: _emailCtrl.text.trim(),
+        ),
+      );
+
+      final result = await _repository.procesarCheckout(request);
+
+      if (mounted) {
+        _countdownTimer?.cancel();
+        widget.cartService.clear();
+        widget.onSuccess();
+        setState(() {
+          _isVerifying = false;
+          _createdVenta = result;
+          _step = _CheckoutStep.success;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString().replaceAll('Exception: ', '');
+          _isVerifying = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _submitCardCheckout() async {
+    if (_nombreCtrl.text.trim().isEmpty) {
+      setState(() => _errorMessage = 'Por favor ingresa el nombre completo del destinatario.');
+      return;
+    }
+    if (_emailCtrl.text.trim().isEmpty) {
+      setState(() => _errorMessage = 'Por favor ingresa el correo electrónico.');
+      return;
+    }
+    if (_tarjetaNumeroCtrl.text.trim().isEmpty) {
+      setState(() => _errorMessage = 'Por favor ingresa el número de tarjeta.');
+      return;
+    }
+    if (_tarjetaTitularCtrl.text.trim().isEmpty) {
+      setState(() => _errorMessage = 'Por favor ingresa el nombre del titular.');
+      return;
+    }
+    if (_tarjetaExpCtrl.text.trim().isEmpty) {
+      setState(() => _errorMessage = 'Por favor ingresa la fecha de expiración (MM/AA).');
+      return;
+    }
+    if (_tarjetaCvcCtrl.text.trim().isEmpty) {
+      setState(() => _errorMessage = 'Por favor ingresa el código CVC / CVV.');
+      return;
+    }
+
+    final expParts = _tarjetaExpCtrl.text.trim().split('/');
+    final mesExp = expParts.isNotEmpty ? expParts[0].trim().padLeft(2, '0') : '12';
+    final anioExp = expParts.length > 1 ? expParts[1].trim() : '28';
+    final rawCardNumber = _tarjetaNumeroCtrl.text.replaceAll(' ', '').replaceAll('-', '').trim();
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -664,20 +821,18 @@ class _CheckoutModalState extends State<_CheckoutModal> {
           ciudad: _ciudadCtrl.text.trim(),
         ),
         pago: PagoOnlineInput(
-          metodoPago: _metodoPago,
-          pasarela: _metodoPago == 'QR_SIMPLE' ? 'LIBELULA_BOLIVIA' : 'STRIPE_INTL',
+          metodoPago: 'TARJETA',
+          pasarela: 'STRIPE_INTL',
           monto: widget.cartService.total,
           moneda: 'USD',
           clienteEmail: _emailCtrl.text.trim(),
-          datosTarjeta: _metodoPago == 'TARJETA'
-              ? const DatosTarjetaInput(
-                  numero: '4532000000001234',
-                  mesExp: '12',
-                  anioExp: '28',
-                  cvc: '123',
-                  titular: 'CLIENTE FASHION',
-                )
-              : null,
+          datosTarjeta: DatosTarjetaInput(
+            numero: rawCardNumber,
+            mesExp: mesExp,
+            anioExp: anioExp,
+            cvc: _tarjetaCvcCtrl.text.trim(),
+            titular: _tarjetaTitularCtrl.text.trim().toUpperCase(),
+          ),
         ),
       );
 
@@ -685,16 +840,12 @@ class _CheckoutModalState extends State<_CheckoutModal> {
 
       if (mounted) {
         widget.cartService.clear();
-        Navigator.pop(context);
         widget.onSuccess();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            duration: const Duration(seconds: 3),
-            backgroundColor: Colors.black,
-            content: Text('¡Compra procesada con éxito! Orden: ${result.codigoVenta}'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        setState(() {
+          _isLoading = false;
+          _createdVenta = result;
+          _step = _CheckoutStep.success;
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -709,7 +860,7 @@ class _CheckoutModalState extends State<_CheckoutModal> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.88,
+      height: MediaQuery.of(context).size.height * 0.90,
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
@@ -728,137 +879,684 @@ class _CheckoutModalState extends State<_CheckoutModal> {
           ),
 
           Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text('CHECKOUT & PASARELA DE PAGO', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.5, color: AppTheme.mutedColor)),
-                  const SizedBox(height: 4),
-                  Text('Finalizar Compra', style: Theme.of(context).textTheme.displayMedium),
-                  const SizedBox(height: 16),
-
-                  if (_errorMessage != null) ...[
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      color: const Color(0xFFFEF2F2),
-                      child: Text(_errorMessage!, style: const TextStyle(color: Color(0xFF991B1B), fontSize: 12)),
-                    ),
-                    const SizedBox(height: 14),
-                  ],
-
-                  // Datos del Cliente
-                  const Text('DATOS DEL DESTINATARIO', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _nombreCtrl,
-                    decoration: const InputDecoration(labelText: 'Nombre Completo', border: OutlineInputBorder(borderRadius: BorderRadius.zero)),
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: _emailCtrl,
-                    decoration: const InputDecoration(labelText: 'Correo Electrónico', border: OutlineInputBorder(borderRadius: BorderRadius.zero)),
-                  ),
-                  if (widget.tipoEntrega == 'DOMICILIO') ...[
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _direccionCtrl,
-                      decoration: const InputDecoration(labelText: 'Dirección de Entrega', border: OutlineInputBorder(borderRadius: BorderRadius.zero)),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _ciudadCtrl,
-                      decoration: const InputDecoration(labelText: 'Ciudad / Departamento', border: OutlineInputBorder(borderRadius: BorderRadius.zero)),
-                    ),
-                  ],
-                  const SizedBox(height: 20),
-
-                  // Pasarela de Pagos Selector
-                  const Text('SELECCIONAR PASARELA DE PAGO', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: InkWell(
-                          onTap: () => setState(() => _metodoPago = 'QR_SIMPLE'),
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: _metodoPago == 'QR_SIMPLE' ? const Color(0xFFF3F4F6) : Colors.white,
-                              border: Border.all(color: _metodoPago == 'QR_SIMPLE' ? Colors.black : const Color(0xFFD1D5DB), width: _metodoPago == 'QR_SIMPLE' ? 1.5 : 1.0),
-                            ),
-                            child: const Column(
-                              children: [
-                                Icon(Icons.qr_code_2, size: 28),
-                                SizedBox(height: 4),
-                                Text('QR Simple', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
-                                Text('Libélula Bolivia', style: TextStyle(fontSize: 10, color: AppTheme.mutedColor)),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: InkWell(
-                          onTap: () => setState(() => _metodoPago = 'TARJETA'),
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: _metodoPago == 'TARJETA' ? const Color(0xFFF3F4F6) : Colors.white,
-                              border: Border.all(color: _metodoPago == 'TARJETA' ? Colors.black : const Color(0xFFD1D5DB), width: _metodoPago == 'TARJETA' ? 1.5 : 1.0),
-                            ),
-                            child: const Column(
-                              children: [
-                                Icon(Icons.credit_card, size: 28),
-                                SizedBox(height: 4),
-                                Text('Tarjeta Crédito', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
-                                Text('Stripe Sandbox', style: TextStyle(fontSize: 10, color: AppTheme.mutedColor)),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Total a Pagar
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    color: const Color(0xFFF9FAFB),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('TOTAL A PAGAR:', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
-                        Text('\$${widget.cartService.total.toStringAsFixed(2)} USD', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Submit Button
-                  ElevatedButton(
-                    onPressed: _isLoading ? null : _submitCheckout,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                    ),
-                    child: _isLoading
-                        ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                        : Text(
-                            _metodoPago == 'QR_SIMPLE' ? 'PAGAR CON QR SIMPLE' : 'CONFIRMAR PAGO CON TARJETA',
-                            style: const TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1.0),
-                          ),
-                  ),
-                ],
-              ),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              child: _buildCurrentStep(),
             ),
           ),
         ],
       ),
     );
   }
+
+  Widget _buildCurrentStep() {
+    switch (_step) {
+      case _CheckoutStep.form:
+        return _buildFormStep();
+      case _CheckoutStep.qrDisplay:
+        return _buildQRDisplayStep();
+      case _CheckoutStep.success:
+        return _buildSuccessStep();
+    }
+  }
+
+  // -------------------------------------------------------------
+  // PASO 1: Formulario de Destinatario & Selección de Pasarela
+  // -------------------------------------------------------------
+  Widget _buildFormStep() {
+    return SingleChildScrollView(
+      key: const ValueKey('form_step'),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text('CHECKOUT & PASARELA DE PAGO', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.5, color: AppTheme.mutedColor)),
+          const SizedBox(height: 4),
+          Text('Finalizar Compra', style: Theme.of(context).textTheme.displayMedium),
+          const SizedBox(height: 16),
+
+          if (_errorMessage != null) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              color: const Color(0xFFFEF2F2),
+              child: Row(
+                children: [
+                  const Icon(Icons.error_outline, color: Color(0xFF991B1B), size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(_errorMessage!, style: const TextStyle(color: Color(0xFF991B1B), fontSize: 12)),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+          ],
+
+          // Datos del Cliente
+          const Text('DATOS DEL DESTINATARIO', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _nombreCtrl,
+            decoration: const InputDecoration(labelText: 'Nombre Completo', border: OutlineInputBorder(borderRadius: BorderRadius.zero)),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _emailCtrl,
+            decoration: const InputDecoration(labelText: 'Correo Electrónico', border: OutlineInputBorder(borderRadius: BorderRadius.zero)),
+          ),
+          if (widget.tipoEntrega == 'DOMICILIO') ...[
+            const SizedBox(height: 10),
+            TextField(
+              controller: _direccionCtrl,
+              decoration: const InputDecoration(labelText: 'Dirección de Entrega', border: OutlineInputBorder(borderRadius: BorderRadius.zero)),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _ciudadCtrl,
+              decoration: const InputDecoration(labelText: 'Ciudad / Departamento', border: OutlineInputBorder(borderRadius: BorderRadius.zero)),
+            ),
+          ],
+          const SizedBox(height: 20),
+
+          // Pasarela de Pagos Selector
+          const Text('SELECCIONAR PASARELA DE PAGO', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: InkWell(
+                  onTap: () => setState(() {
+                    _metodoPago = 'QR_SIMPLE';
+                    _errorMessage = null;
+                  }),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: _metodoPago == 'QR_SIMPLE' ? const Color(0xFFF3F4F6) : Colors.white,
+                      border: Border.all(color: _metodoPago == 'QR_SIMPLE' ? Colors.black : const Color(0xFFD1D5DB), width: _metodoPago == 'QR_SIMPLE' ? 1.5 : 1.0),
+                    ),
+                    child: const Column(
+                      children: [
+                        Icon(Icons.qr_code_2, size: 28),
+                        SizedBox(height: 4),
+                        Text('QR Simple', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
+                        Text('Libélula Bolivia', style: TextStyle(fontSize: 10, color: AppTheme.mutedColor)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: InkWell(
+                  onTap: () => setState(() {
+                    _metodoPago = 'TARJETA';
+                    _errorMessage = null;
+                  }),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: _metodoPago == 'TARJETA' ? const Color(0xFFF3F4F6) : Colors.white,
+                      border: Border.all(color: _metodoPago == 'TARJETA' ? Colors.black : const Color(0xFFD1D5DB), width: _metodoPago == 'TARJETA' ? 1.5 : 1.0),
+                    ),
+                    child: const Column(
+                      children: [
+                        Icon(Icons.credit_card, size: 28),
+                        SizedBox(height: 4),
+                        Text('Tarjeta Crédito', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
+                        Text('Stripe Sandbox', style: TextStyle(fontSize: 10, color: AppTheme.mutedColor)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // Formulario Dinámico de Tarjeta de Crédito (Stripe Sandbox)
+          if (_metodoPago == 'TARJETA') ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF9FAFB),
+                border: Border.all(color: const Color(0xFFD1D5DB)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('DATOS DE LA TARJETA', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.8)),
+                      Row(
+                        children: [
+                          Icon(Icons.lock_outline, size: 12, color: Color(0xFF047857)),
+                          SizedBox(width: 4),
+                          Text('STRIPE SECURE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF047857))),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _tarjetaNumeroCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Número de Tarjeta',
+                      prefixIcon: Icon(Icons.credit_card, size: 20),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                      hintText: '4532 0000 0000 1234',
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: _tarjetaTitularCtrl,
+                    textCapitalization: TextCapitalization.characters,
+                    decoration: const InputDecoration(
+                      labelText: 'Nombre del Titular (como figura en la tarjeta)',
+                      prefixIcon: Icon(Icons.person_outline, size: 20),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _tarjetaExpCtrl,
+                          keyboardType: TextInputType.datetime,
+                          decoration: const InputDecoration(
+                            labelText: 'Vencimiento (MM/AA)',
+                            prefixIcon: Icon(Icons.calendar_today_outlined, size: 18),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                            hintText: '12/28',
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: TextField(
+                          controller: _tarjetaCvcCtrl,
+                          keyboardType: TextInputType.number,
+                          obscureText: true,
+                          decoration: const InputDecoration(
+                            labelText: 'CVC / CVV',
+                            prefixIcon: Icon(Icons.lock_outline, size: 18),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                            hintText: '123',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 24),
+
+          // Total a Pagar
+          Container(
+            padding: const EdgeInsets.all(14),
+            color: const Color(0xFFF9FAFB),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('TOTAL A PAGAR:', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
+                Text('\$${widget.cartService.total.toStringAsFixed(2)} USD', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Action Button
+          ElevatedButton(
+            onPressed: _isLoading
+                ? null
+                : (_metodoPago == 'QR_SIMPLE' ? _generateAndShowQR : _submitCardCheckout),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            ),
+            child: _isLoading
+                ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                : Text(
+                    _metodoPago == 'QR_SIMPLE' ? 'PAGAR CON QR SIMPLE' : 'CONFIRMAR PAGO CON TARJETA',
+                    style: const TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1.0),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // -------------------------------------------------------------
+  // PASO 2: Visualización de Código QR & Botón "VERIFICAR PAGO"
+  // -------------------------------------------------------------
+  Widget _buildQRDisplayStep() {
+    final totalUsd = widget.cartService.total;
+    final totalBob = totalUsd * 6.96; // Conversión estimada a Bs
+
+    return SingleChildScrollView(
+      key: const ValueKey('qr_step'),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Header de Pasarela
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('PASARELA DE PAGO BOLIVIA', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.2, color: AppTheme.mutedColor)),
+                  SizedBox(height: 2),
+                  Text('QR Simple Libélula', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF3C7),
+                  border: Border.all(color: const Color(0xFFF59E0B)),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.timer_outlined, size: 14, color: Color(0xFFB45309)),
+                    const SizedBox(width: 4),
+                    Text(
+                      _formatCountdown(_remainingSeconds),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Color(0xFFB45309)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          if (_errorMessage != null) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              color: const Color(0xFFFEF2F2),
+              child: Row(
+                children: [
+                  const Icon(Icons.error_outline, color: Color(0xFF991B1B), size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(_errorMessage!, style: const TextStyle(color: Color(0xFF991B1B), fontSize: 12)),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+          ],
+
+          // Tarjeta del QR
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: const Color(0xFFD4AF37), width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                // Monto
+                Text(
+                  '\$${totalUsd.toStringAsFixed(2)} USD',
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.black),
+                ),
+                Text(
+                  'Equivalente: Bs. ${totalBob.toStringAsFixed(2)} BOB',
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.mutedColor),
+                ),
+                const SizedBox(height: 16),
+
+                // Canvas del QR Code
+                Container(
+                  width: 210,
+                  height: 210,
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: const Color(0xFFE5E7EB)),
+                  ),
+                  child: CustomPaint(
+                    size: const Size(190, 190),
+                    painter: _QRCodePainter(
+                      data: 'LIBELULA-BO|REC:$_codigoRecaudacion|MONTO:$totalUsd|CLI:${_emailCtrl.text}',
+                      primaryColor: Colors.black,
+                      backgroundColor: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Código de Recaudación
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  color: const Color(0xFFF3F4F6),
+                  child: Text(
+                    _codigoRecaudacion,
+                    style: const TextStyle(fontFamily: 'monospace', fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.8),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Instrucciones de Pago
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF9FAFB),
+              border: Border.all(color: const Color(0xFFE5E7EB)),
+            ),
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('INSTRUCCIONES DE PAGO:', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.8)),
+                SizedBox(height: 6),
+                Text('1. Abre tu aplicación bancaria móvil (BNB, BCP, Banco Unión, GanaMóvil, etc.)', style: TextStyle(fontSize: 11, color: Color(0xFF4B5563))),
+                SizedBox(height: 3),
+                Text('2. Selecciona la opción de Pago con QR Simple.', style: TextStyle(fontSize: 11, color: Color(0xFF4B5563))),
+                SizedBox(height: 3),
+                Text('3. Escanea el código superior y confirma la transferencia.', style: TextStyle(fontSize: 11, color: Color(0xFF4B5563))),
+                SizedBox(height: 3),
+                Text('4. Presiona el botón "VERIFICAR PAGO" para confirmar tu pedido.', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.black)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Botón Principal: VERIFICAR PAGO
+          ElevatedButton.icon(
+            onPressed: _isVerifying ? null : _verifyQRPayment,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFD4AF37),
+              foregroundColor: Colors.black,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            ),
+            icon: _isVerifying
+                ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2))
+                : const Icon(Icons.verified_user_outlined, size: 20),
+            label: Text(
+              _isVerifying ? 'VERIFICANDO PAGO CON EL BANCO...' : 'VERIFICAR PAGO',
+              style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.0, fontSize: 13),
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          // Botón Secundario: Volver
+          OutlinedButton(
+            onPressed: _isVerifying
+                ? null
+                : () {
+                    _countdownTimer?.cancel();
+                    setState(() => _step = _CheckoutStep.form);
+                  },
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.black,
+              side: const BorderSide(color: Color(0xFFD1D5DB)),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            ),
+            child: const Text('CAMBIAR MÉTODO DE PAGO', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // -------------------------------------------------------------
+  // PASO 3: Pantalla de ¡PAGO EXITOSO!
+  // -------------------------------------------------------------
+  Widget _buildSuccessStep() {
+    final orderCode = _createdVenta?.codigoVenta ?? 'VTA-ONL-2026';
+    final tracking = _createdVenta?.envio?.codigoSeguimiento ?? 'ENV-SEGUIMIENTO-ACTIVO';
+    final total = _createdVenta?.total ?? widget.cartService.total;
+
+    return SingleChildScrollView(
+      key: const ValueKey('success_step'),
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 10),
+          // Icono Éxito
+          Center(
+            child: Container(
+              width: 76,
+              height: 76,
+              decoration: const BoxDecoration(
+                color: Color(0xFFECFDF5),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.check_circle_rounded,
+                color: Color(0xFF10B981),
+                size: 54,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          const Center(
+            child: Text(
+              '¡PAGO EXITOSO!',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.0,
+                color: Color(0xFF047857),
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Center(
+            child: Text(
+              'Tu compra ha sido acreditada y registrada con éxito en Atelier Noir.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 12, color: Color(0xFF4B5563)),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Resumen de Orden
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF9FAFB),
+              border: Border.all(color: const Color(0xFFE5E7EB)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildReceiptRow('N° de Orden:', orderCode, isBold: true),
+                const Divider(height: 16, color: Color(0xFFE5E7EB)),
+                _buildReceiptRow('Destinatario:', _nombreCtrl.text.trim()),
+                const SizedBox(height: 6),
+                _buildReceiptRow('Método:', _metodoPago == 'QR_SIMPLE' ? 'QR Simple (Libélula)' : 'Tarjeta de Crédito'),
+                const SizedBox(height: 6),
+                _buildReceiptRow('Código de Envío:', tracking, isHighlight: true),
+                const Divider(height: 16, color: Color(0xFFE5E7EB)),
+                _buildReceiptRow('Total Pagado:', '\$${total.toStringAsFixed(2)} USD', isTotal: true),
+              ],
+            ),
+          ),
+          const SizedBox(height: 28),
+
+          // Botón Finalizar
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            ),
+            child: const Text(
+              'VER MIS PEDIDOS / CONTINUAR',
+              style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.0),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReceiptRow(String label, String value, {bool isBold = false, bool isTotal = false, bool isHighlight = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: isTotal ? 13 : 11,
+            fontWeight: isTotal ? FontWeight.w800 : FontWeight.w500,
+            color: const Color(0xFF6B7280),
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: isTotal ? 15 : 12,
+            fontWeight: (isBold || isTotal) ? FontWeight.w900 : FontWeight.w700,
+            color: isHighlight
+                ? const Color(0xFF047857)
+                : (isTotal ? Colors.black : const Color(0xFF111827)),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Painter personalizado que renderiza un código QR estilizado con estética Atelier
+class _QRCodePainter extends CustomPainter {
+  final String data;
+  final Color primaryColor;
+  final Color backgroundColor;
+
+  _QRCodePainter({
+    required this.data,
+    this.primaryColor = Colors.black,
+    this.backgroundColor = Colors.white,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final bgPaint = Paint()..color = backgroundColor;
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), bgPaint);
+
+    final modulePaint = Paint()..color = primaryColor;
+    const int matrixSize = 25;
+    final double moduleSize = size.width / matrixSize;
+
+    void drawModule(int r, int c) {
+      canvas.drawRect(
+        Rect.fromLTWH(c * moduleSize, r * moduleSize, moduleSize, moduleSize),
+        modulePaint,
+      );
+    }
+
+    void drawFinderPattern(int startRow, int startCol) {
+      for (int r = 0; r < 7; r++) {
+        for (int c = 0; c < 7; c++) {
+          if (r == 0 || r == 6 || c == 0 || c == 6 || (r >= 2 && r <= 4 && c >= 2 && c <= 4)) {
+            drawModule(startRow + r, startCol + c);
+          }
+        }
+      }
+    }
+
+    // Dibujar 3 Finder Patterns (esquinas)
+    drawFinderPattern(0, 0);
+    drawFinderPattern(0, matrixSize - 7);
+    drawFinderPattern(matrixSize - 7, 0);
+
+    // Dibujar Timing Patterns
+    for (int i = 8; i < matrixSize - 8; i++) {
+      if (i % 2 == 0) {
+        drawModule(6, i);
+        drawModule(i, 6);
+      }
+    }
+
+    // Dibujar Alignment Pattern en esquina inferior derecha
+    const alignRow = matrixSize - 9;
+    const alignCol = matrixSize - 9;
+    for (int r = 0; r < 5; r++) {
+      for (int c = 0; c < 5; c++) {
+        if (r == 0 || r == 4 || c == 0 || c == 4 || (r == 2 && c == 2)) {
+          drawModule(alignRow + r, alignCol + c);
+        }
+      }
+    }
+
+    // Matriz de datos pseudo-determinística a partir del hash de la transacción
+    int hash = 0;
+    for (int i = 0; i < data.length; i++) {
+      hash = (hash * 31 + data.codeUnitAt(i)) & 0x7FFFFFFF;
+    }
+
+    for (int r = 0; r < matrixSize; r++) {
+      for (int c = 0; c < matrixSize; c++) {
+        // Omitir zonas de finder patterns
+        if ((r < 8 && c < 8) || (r < 8 && c >= matrixSize - 8) || (r >= matrixSize - 8 && c < 8)) {
+          continue;
+        }
+        // Omitir timing
+        if (r == 6 || c == 6) continue;
+        // Omitir alignment
+        if (r >= alignRow && r < alignRow + 5 && c >= alignCol && c < alignCol + 5) continue;
+        // Omitir zona central de logo
+        if (r >= 10 && r <= 14 && c >= 10 && c <= 14) continue;
+
+        final val = ((r * 13 + c * 37 + hash) ^ (r * c + 7)) % 100;
+        if (val < 52) {
+          drawModule(r, c);
+        }
+      }
+    }
+
+    // Emblema central dorado
+    final centerRect = Rect.fromCenter(
+      center: Offset(size.width / 2, size.height / 2),
+      width: moduleSize * 5.2,
+      height: moduleSize * 5.2,
+    );
+    canvas.drawRRect(RRect.fromRectAndRadius(centerRect, const Radius.circular(4)), Paint()..color = Colors.white);
+    canvas.drawRRect(RRect.fromRectAndRadius(centerRect, const Radius.circular(4)), Paint()..color = const Color(0xFFD4AF37)..style = PaintingStyle.stroke..strokeWidth = 1.5);
+
+    final emblemPath = Path();
+    final cx = size.width / 2;
+    final cy = size.height / 2;
+    final halfW = moduleSize * 1.5;
+    emblemPath.moveTo(cx, cy - halfW);
+    emblemPath.lineTo(cx + halfW, cy);
+    emblemPath.lineTo(cx, cy + halfW);
+    emblemPath.lineTo(cx - halfW, cy);
+    emblemPath.close();
+    canvas.drawPath(emblemPath, Paint()..color = const Color(0xFFD4AF37));
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

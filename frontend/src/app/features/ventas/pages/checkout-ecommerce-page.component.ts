@@ -78,11 +78,16 @@ import {
       <div *ngIf="activeTab === 'checkout'" class="checkout-layout">
 
         <!-- SI HAY UN PEDIDO RECIÉN CONFIRMADO: VISTA COMPROBANTE -->
-        <div *ngIf="pedidoConfirmado" class="order-confirmed-panel">
+        <div *ngIf="pedidoConfirmado" class="order-confirmed-panel animate-fade">
           <div class="success-crest">
             <div class="crest-icon">✦</div>
-            <h2>¡Gracias por su compra en Atelier Noir!</h2>
-            <p class="order-subtitle">Su pedido digital ha sido procesado y el comprobante fiscal fue emitido.</p>
+            <div class="stripe-success-tag" [ngSwitch]="ultimoMetodoPagoUtilizado">
+              <span *ngSwitchCase="'LIBELULA_BOLIVIA'">✓ PAGO ACREDITADO CON QR SIMPLE (LIBÉLULA)</span>
+              <span *ngSwitchCase="'PAYPAL_EXPRESS'">✓ PAGO AUTORIZADO CON PAYPAL EXPRESS</span>
+              <span *ngSwitchDefault>✓ PAGO AUTORIZADO CON STRIPE</span>
+            </div>
+            <h2>¡Tu compra ha sido exitosa!</h2>
+            <p class="order-subtitle">Su pedido digital fue procesado, el pago ha sido confirmado y el comprobante fiscal fue emitido.</p>
           </div>
 
           <div class="order-summary-box">
@@ -330,7 +335,7 @@ import {
                     </div>
                     <p class="delivery-desc">Despacho courier a su puerta con número de seguimiento en tiempo real.</p>
                     <span class="delivery-cost" [class.free]="costoCalculadoEnvio === 0">
-                      {{ costoCalculadoEnvio === 0 ? 'GRATIS (VIP)' : '$5.00 USD' }}
+                      {{ costoCalculadoEnvio === 0 ? 'GRATIS (VIP)' : 'Bs. 5.00' }}
                     </span>
                   </div>
                 </div>
@@ -358,48 +363,97 @@ import {
               <div *ngIf="tipoEntrega === 'DOMICILIO'" class="delivery-subform animate-fade">
                 <div class="form-grid">
                   <div class="form-group col-12">
-                    <label>Dirección (Calle, Número, Edificio) *</label>
-                    <input type="text" class="atelier-input" [(ngModel)]="direccionLinea1" placeholder="Ej: Av. Ballivián #1234, Edif. Torre Zafiro, Dpto 4B">
-                  </div>
-                  <div class="form-group col-6">
                     <label>Ciudad *</label>
-                    <input type="text" class="atelier-input" [(ngModel)]="ciudad" placeholder="La Paz">
+                    <select class="atelier-select" [(ngModel)]="ciudad" (change)="onCiudadChange()">
+                      <option *ngFor="let c of getCiudadesDisponibles()" [value]="c">{{ c }}</option>
+                    </select>
                   </div>
-                  <div class="form-group col-6">
-                    <label>Departamento / Región *</label>
-                    <input type="text" class="atelier-input" [(ngModel)]="departamento" placeholder="La Paz">
+                  <div class="form-group col-12">
+                    <label>Sucursal / Tienda de Despacho *</label>
+                    <select class="atelier-select" [(ngModel)]="sucursalDespachoId">
+                      <option *ngFor="let s of getSucursalesPorCiudad()" [value]="s.id">
+                        {{ s.nombre }} - {{ s.direccion || 'Boutique Oficial' }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="form-group col-12">
+                    <label>Dirección de Entrega (Calle, Número, Edificio, Dpto) *</label>
+                    <input type="text" class="atelier-input" [(ngModel)]="direccionLinea1" placeholder="Ej: Condominio La Riviera #12B">
                   </div>
                   <div class="form-group col-12">
                     <label>Instrucciones de Entrega (Opcional)</label>
                     <input type="text" class="atelier-input" [(ngModel)]="instruccionesEntrega" placeholder="Ej: Tocar timbre 4B o dejar en recepción">
-                  </div>
-                  <div class="form-group col-12">
-                    <label>Boutique de Despacho (Inventario Físico) *</label>
-                    <select class="atelier-select" [(ngModel)]="sucursalDespachoId">
-                      <option *ngFor="let s of sucursales" [value]="s.id">{{ s.nombre }} ({{ s.ciudad?.nombre || 'Bolivia' }})</option>
-                    </select>
                   </div>
                 </div>
               </div>
 
               <!-- CAMPOS SI ES CLICK & COLLECT -->
               <div *ngIf="tipoEntrega === 'CLICK_AND_COLLECT'" class="delivery-subform animate-fade">
-                <div class="form-group">
-                  <label>Seleccione Boutique para Retiro *</label>
-                  <select class="atelier-select" [(ngModel)]="sucursalDespachoId">
-                    <option *ngFor="let s of sucursales" [value]="s.id">{{ s.nombre }} - {{ s.direccion || 'Boutique Oficial' }}</option>
-                  </select>
+                <div class="form-grid">
+                  <div class="form-group col-12">
+                    <label>Ciudad *</label>
+                    <select class="atelier-select" [(ngModel)]="ciudad" (change)="onCiudadChange()">
+                      <option *ngFor="let c of getCiudadesDisponibles()" [value]="c">{{ c }}</option>
+                    </select>
+                  </div>
+                  <div class="form-group col-12">
+                    <label>Sucursal / Tienda para Retiro *</label>
+                    <select class="atelier-select" [(ngModel)]="sucursalDespachoId">
+                      <option *ngFor="let s of getSucursalesPorCiudad()" [value]="s.id">
+                        {{ s.nombre }} - {{ s.direccion || 'Boutique Oficial' }}
+                      </option>
+                    </select>
+                  </div>
                 </div>
                 <div class="collect-notice">
-                  <span>ℹ️ Su pedido estará listo para retiro en un plazo máximo de 2 horas tras confirmar el pago.</span>
+                  <span>ℹ️ Su pedido estará listo para retiro en boutique en un plazo máximo de 2 horas tras confirmar el pago.</span>
                 </div>
               </div>
             </div>
 
-            <!-- PASO 3: PASARELA DE PAGO INTEGRADA (CU12) -->
-            <div class="panel-box form-section">
+            <!-- PASO 3: CUPÓN DE DESCUENTO (CU16) -->
+            <div class="panel-box form-section coupon-box">
               <div class="section-title">
                 <span class="step-num">3</span>
+                <h3>Cupón de Promoción o Descuento</h3>
+              </div>
+              <div class="coupon-content">
+                <div *ngIf="!cuponAplicado || !cuponAplicado.valido" class="coupon-input-group">
+                  <input
+                    type="text"
+                    class="atelier-input font-mono uppercase"
+                    [(ngModel)]="codigoCuponInput"
+                    placeholder="Ej: ATELIER20, NOIR50, ENVIOGRATIS"
+                    (keyup.enter)="aplicarCupon()">
+                  <button
+                    type="button"
+                    class="btn-apply-coupon"
+                    [disabled]="validandoCupon || !codigoCuponInput.trim()"
+                    (click)="aplicarCupon()">
+                    {{ validandoCupon ? 'Validando...' : 'Aplicar Cupón' }}
+                  </button>
+                </div>
+
+                <div *ngIf="mensajeCupon" class="coupon-feedback" [class.success]="cuponAplicado?.valido" [class.error]="cuponAplicado && !cuponAplicado.valido">
+                  <span>{{ mensajeCupon }}</span>
+                </div>
+
+                <div *ngIf="cuponAplicado && cuponAplicado.valido" class="coupon-badge-applied">
+                  <div class="coupon-applied-info">
+                    <span class="coupon-tag">✓ {{ cuponAplicado.codigo }}</span>
+                    <span class="coupon-benefit">
+                      {{ cuponAplicado.tipo_descuento === 'ENVIO_GRATIS' ? 'Envío Yaigo Bonificado (GRATIS)' : ('- Bs. ' + (cuponAplicado.descuento_calculado | number:'1.2-2') + ' de Descuento') }}
+                    </span>
+                  </div>
+                  <button type="button" class="btn-remove-coupon" (click)="quitarCupon()" title="Quitar cupón">&times;</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- PASO 4: PASARELA DE PAGO INTEGRADA (CU12) -->
+            <div class="panel-box form-section">
+              <div class="section-title">
+                <span class="step-num">4</span>
                 <h3>Pasarela de Pago Electrónico</h3>
               </div>
 
@@ -429,13 +483,65 @@ import {
 
               <!-- DETALLES DE CADA PASARELA -->
               <div class="payment-method-body">
-                <!-- QR LIBÉLULA -->
-                <div *ngIf="pasarelaSeleccionada === 'LIBELULA_BOLIVIA'" class="pay-body-item">
-                  <div class="qr-preview-badge">
-                    <span class="badge-icon">📷</span>
-                    <div>
-                      <strong>Pago Rápido Interoperable</strong>
-                      <p>Al confirmar el pedido se generará automáticamente el código QR fiscal para escanear desde cualquier aplicación bancaria boliviana.</p>
+                <!-- QR LIBÉLULA INTERACTIVO -->
+                <div *ngIf="pasarelaSeleccionada === 'LIBELULA_BOLIVIA'" class="pay-body-item animate-fade">
+                  <div class="qr-checkout-layout">
+                    <!-- FRAME DEL CÓDIGO QR -->
+                    <div class="qr-frame-wrapper">
+                      <div class="qr-code-box">
+                        <img
+                          [src]="getQrImageUrl()"
+                          (error)="$any($event.target).src = svgFallbackQr"
+                          alt="QR Simple Interoperable"
+                          class="qr-main-image" />
+
+                        <!-- OVERLAY DE VERIFICACIÓN (3 SEGUNDOS) -->
+                        <div *ngIf="isVerificandoPago" class="qr-verify-overlay animate-fade">
+                          <div class="luxury-spinner"></div>
+                          <strong class="verifying-text">Verificando Pago...</strong>
+                          <span class="countdown-badge">{{ segundosRestantesQR }}s</span>
+                          <small class="verifying-hint">Consultando compensación en red bancaria (Libélula / Simple)</small>
+                        </div>
+                      </div>
+                      <span class="qr-fiscal-label">✓ QR FISCAL INTEROPERABLE &bull; ASOBAN</span>
+                    </div>
+
+                    <!-- METADATOS Y BOTÓN DE VERIFICACIÓN -->
+                    <div class="qr-meta-panel">
+                      <div class="qr-amount-card">
+                        <span class="qr-amount-title">Total a Pagar por QR:</span>
+                        <div class="qr-amount-val"><span class="currency">Bs.</span> {{ totalFinal | number:'1.2-2' }}</div>
+                        <div class="qr-timer-pill">
+                          <span class="pulse-dot"></span>
+                          <span>Vigencia del QR: <strong>09:50 min</strong></span>
+                        </div>
+                      </div>
+
+                      <div class="qr-instructions-list">
+                        <div class="qr-step-item">
+                          <span class="step-circle">1</span>
+                          <span>Abra la app de su <strong>banca móvil boliviana</strong> (BCP, BNB, Banco Unión, Ganadero, etc.).</span>
+                        </div>
+                        <div class="qr-step-item">
+                          <span class="step-circle">2</span>
+                          <span>Escanee el código QR y confirme la transferencia por <strong>Bs. {{ totalFinal | number:'1.2-2' }}</strong>.</span>
+                        </div>
+                        <div class="qr-step-item">
+                          <span class="step-circle">3</span>
+                          <span>Presione el botón de abajo para <strong>verificar la acreditación</strong> inmediata.</span>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        class="btn-verify-qr-now"
+                        [disabled]="isVerificandoPago || isSubmitting || cartItems.length === 0"
+                        (click)="iniciarVerificacionQR()">
+                        <span *ngIf="!isVerificandoPago">🔄 Verificar Pago</span>
+                        <span *ngIf="isVerificandoPago">
+                          <span class="spinner-dot"></span> Verificando pago bancario... ({{ segundosRestantesQR }}s)
+                        </span>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -452,8 +558,8 @@ import {
                       <input type="text" class="atelier-input font-mono" [(ngModel)]="mesExp" placeholder="12" maxlength="2">
                     </div>
                     <div class="form-group col-4">
-                      <label>Año (YYYY) *</label>
-                      <input type="text" class="atelier-input font-mono" [(ngModel)]="anioExp" placeholder="2028" maxlength="4">
+                      <label>Año (YY o YYYY) *</label>
+                      <input type="text" class="atelier-input font-mono" [(ngModel)]="anioExp" placeholder="28" maxlength="4">
                     </div>
                     <div class="form-group col-4">
                       <label>CVC *</label>
@@ -468,54 +574,51 @@ import {
 
                 <!-- PAYPAL EXPRESS -->
                 <div *ngIf="pasarelaSeleccionada === 'PAYPAL_EXPRESS'" class="pay-body-item animate-fade">
-                  <div class="paypal-info-box">
-                    <strong>Billetera Digital Internacional</strong>
-                    <p>Será autenticado directamente con su cuenta PayPal Express de manera cifrada y segura.</p>
+                  <div class="paypal-checkout-layout">
+                    <div class="paypal-header-row">
+                      <div class="paypal-brand-title">
+                        <span class="paypal-logo-icon">🅿️</span>
+                        <strong>PayPal Express Checkout</strong>
+                      </div>
+                      <span class="paypal-secure-pill">🔒 Sandbox Internacional</span>
+                    </div>
+
+                    <p class="paypal-desc">
+                      Autorice el cargo en dólares estadounidenses de manera protegida mediante su saldo PayPal o tarjetas internacionales vinculadas.
+                    </p>
+
+                    <div class="paypal-conversion-box">
+                      <div class="conv-item">
+                        <span class="conv-label">Monto en Moneda Local:</span>
+                        <span class="conv-val">Bs. {{ totalFinal | number:'1.2-2' }}</span>
+                      </div>
+                      <div class="conv-divider">➔</div>
+                      <div class="conv-item">
+                        <span class="conv-label">Total a Autorizar (T/C 6.96):</span>
+                        <span class="conv-val font-bold gold-text font-lg">$ {{ (totalFinal / 6.96) | number:'1.2-2' }} USD</span>
+                      </div>
+                    </div>
+
+                    <div *ngIf="isVerificandoPago && pasarelaSeleccionada === 'PAYPAL_EXPRESS'" class="paypal-processing-overlay animate-fade">
+                      <div class="luxury-spinner"></div>
+                      <p class="font-semibold">Conectando con pasarela PayPal...</p>
+                      <small>Confirmando token de autorización en {{ segundosRestantesQR }}s...</small>
+                    </div>
+
+                    <button
+                      type="button"
+                      *ngIf="!(isVerificandoPago && pasarelaSeleccionada === 'PAYPAL_EXPRESS')"
+                      class="btn-paypal-main"
+                      [disabled]="isSubmitting || cartItems.length === 0"
+                      (click)="iniciarPagoPaypal()">
+                      <span>🅿️ Pagar con PayPal Express ($ {{ (totalFinal / 6.96) | number:'1.2-2' }} USD)</span>
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- CUPÓN DE DESCUENTO (CU16) -->
-            <div class="panel-box form-section coupon-box">
-              <div class="section-title">
-                <span class="step-num">🏷️</span>
-                <h3>Cupón de Promoción o Descuento (CU16)</h3>
-              </div>
-              <div class="coupon-content">
-                <div *ngIf="!cuponAplicado || !cuponAplicado.valido" class="coupon-input-group">
-                  <input
-                    type="text"
-                    class="atelier-input font-mono uppercase"
-                    [(ngModel)]="codigoCuponInput"
-                    placeholder="Ej: ATELIER20, NOIR50, ENVIOGRATIS"
-                    (keyup.enter)="aplicarCupon()">
-                  <button
-                    type="button"
-                    class="btn-apply-coupon"
-                    [disabled]="validandoCupon || !codigoCuponInput.trim()"
-                    (click)="aplicarCupon()">
-                    {{ validandoCupon ? 'Validando...' : 'Aplicar Cupón' }}
-                  </button>
-                </div>
-
-                <div *ngIf="mensajeCupon" class="coupon-feedback" [class.success]="cuponAplicado?.valido" [class.error]="cuponAplicado && !cuponAplicado.valido">
-                  <span>{{ mensajeCupon }}</span>
-                </div>
-
-                <div *ngIf="cuponAplicado && cuponAplicado.valido" class="coupon-badge-applied">
-                  <div class="coupon-applied-info">
-                    <span class="coupon-tag">✓ {{ cuponAplicado.codigo }}</span>
-                    <span class="coupon-benefit">
-                      {{ cuponAplicado.tipo_descuento === 'ENVIO_GRATIS' ? 'Envío Yaigo Bonificado (GRATIS)' : ('-$' + (cuponAplicado.descuento_calculado | number:'1.2-2') + ' USD de Descuento') }}
-                    </span>
-                  </div>
-                  <button type="button" class="btn-remove-coupon" (click)="quitarCupon()" title="Quitar cupón">&times;</button>
-                </div>
-              </div>
-            </div>
-
-            <!-- PASO 4: TOTAL Y BOTÓN DE CONFIRMACIÓN -->
+            <!-- RESUMEN FINAL Y BOTÓN DE CONFIRMACIÓN -->
             <div class="panel-box checkout-summary-box">
               <div class="summary-line">
                 <span>Subtotal Prendas:</span>
@@ -539,13 +642,20 @@ import {
               <button
                 type="button"
                 class="btn-confirm-checkout"
-                [disabled]="isSubmitting || cartItems.length === 0"
-                (click)="procesarCheckout()">
-                <span *ngIf="!isSubmitting">
-                  CONFIRMAR PEDIDO &bull; <span class="currency">Bs.</span> {{ totalFinal | number:'1.2-2' }}
+                [disabled]="isSubmitting || isVerificandoPago || cartItems.length === 0"
+                (click)="accionConfirmar()">
+                <span *ngIf="!isSubmitting && !isVerificandoPago">
+                  <ng-container [ngSwitch]="pasarelaSeleccionada">
+                    <span *ngSwitchCase="'LIBELULA_BOLIVIA'">📱 VERIFICAR PAGO QR &bull; <span class="currency">Bs.</span> {{ totalFinal | number:'1.2-2' }}</span>
+                    <span *ngSwitchCase="'PAYPAL_EXPRESS'">🅿️ PAGAR CON PAYPAL &bull; $ {{ (totalFinal / 6.96) | number:'1.2-2' }} USD</span>
+                    <span *ngSwitchDefault>CONFIRMAR CON STRIPE &bull; <span class="currency">Bs.</span> {{ totalFinal | number:'1.2-2' }}</span>
+                  </ng-container>
                 </span>
-                <span *ngIf="isSubmitting">
-                  <span class="spinner-dot"></span> Procesando con Pasarela...
+                <span *ngIf="isVerificandoPago">
+                  <span class="spinner-dot"></span> Verificando Pago Bancario... ({{ segundosRestantesQR }}s)
+                </span>
+                <span *ngIf="isSubmitting && !isVerificandoPago">
+                  <span class="spinner-dot"></span> Registrando Pedido y Comprobante...
                 </span>
               </button>
 
@@ -567,7 +677,8 @@ import {
         <div class="panel-box">
           <div class="panel-header-filter">
             <div class="header-filter-title">
-              <h3>Control Logístico de Envíos &amp; Pedidos Online</h3>
+              <h3 *ngIf="authService.isStaff()">Control Logístico de Envíos &amp; Pedidos Online</h3>
+              <h3 *ngIf="!authService.isStaff()">Mis Pedidos &amp; Seguimiento de Envíos</h3>
               <span class="filter-count">{{ pedidosOnline.length }} pedidos registrados</span>
             </div>
 
@@ -585,7 +696,7 @@ import {
                 </select>
               </div>
 
-              <div class="filter-item">
+              <div class="filter-item" *ngIf="authService.isStaff()">
                 <label>Sucursal:</label>
                 <select class="atelier-select compact" [(ngModel)]="filtroSucursal" (change)="aplicarFiltrosPedidos()">
                   <option [ngValue]="null">Todas las Sucursales</option>
@@ -649,7 +760,7 @@ import {
                     </div>
                   </td>
                   <td class="text-right font-bold gold-text">
-                    <span class="currency">$</span>{{ v.total | number:'1.2-2' }}
+                    <span class="currency">Bs.</span> {{ v.total | number:'1.2-2' }}
                   </td>
                   <td class="text-center">
                     <span class="status-pill" [ngClass]="v.envio?.estado_envio || 'PREPARANDO'">
@@ -668,7 +779,7 @@ import {
                       <button
                         type="button"
                         class="btn-row-action highlight"
-                        *ngIf="v.envio && v.envio.estado_envio !== 'ENTREGADO' && v.envio.estado_envio !== 'CANCELADO'"
+                        *ngIf="authService.isStaff() && v.envio && v.envio.estado_envio !== 'ENTREGADO' && v.envio.estado_envio !== 'CANCELADO'"
                         (click)="abrirModalActualizarEstado(v)">
                         ⚡ Avanzar Estado
                       </button>
@@ -1332,39 +1443,300 @@ import {
       border-radius: 4px;
       padding: 1.25rem;
     }
-    .qr-preview-badge {
+    /* QR CHECKOUT INTERACTIVO */
+    .qr-checkout-layout {
+      display: grid;
+      grid-template-columns: 210px 1fr;
+      gap: 1.25rem;
+      align-items: start;
+    }
+    @media (max-width: 640px) {
+      .qr-checkout-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+    .qr-frame-wrapper {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      padding: 10px;
+      border-radius: 4px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    }
+    .qr-code-box {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
       display: flex;
       align-items: center;
-      gap: 14px;
+      justify-content: center;
+      background: #ffffff;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .qr-main-image {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .qr-verify-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(3px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      text-align: center;
+      gap: 6px;
+      z-index: 10;
+    }
+    .luxury-spinner {
+      width: 34px;
+      height: 34px;
+      border: 3px solid rgba(0, 0, 0, 0.1);
+      border-top: 3px solid #000000;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .verifying-text {
+      font-size: 0.85rem;
+      color: #000000;
+    }
+    .countdown-badge {
+      background: #000000;
+      color: #ffffff;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .verifying-hint {
+      font-size: 0.7rem;
+      color: #6b7280;
+      line-height: 1.2;
+    }
+    .qr-fiscal-label {
+      display: block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #10b981;
+      letter-spacing: 0.5px;
+      margin-top: 8px;
+      text-transform: uppercase;
+    }
+    .qr-meta-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+    .qr-amount-card {
       background: #ffffff;
       border: 1px solid rgba(0, 0, 0, 0.08);
-      padding: 1rem;
+      padding: 10px 14px;
       border-radius: 4px;
     }
-    .badge-icon {
-      font-size: 2.2rem;
-    }
-    .qr-preview-badge strong {
+    .qr-amount-title {
       display: block;
-      color: #000000;
-      margin-bottom: 2px;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #6b7280;
     }
-    .qr-preview-badge p {
-      margin: 0;
+    .qr-amount-val {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #000000;
+      margin: 2px 0;
+    }
+    .qr-timer-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: #b45309;
+      font-weight: 500;
+    }
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      animation: pulse-dot-anim 1.5s infinite;
+    }
+    @keyframes pulse-dot-anim {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+    .qr-instructions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: #374151;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      padding: 10px 12px;
+      border-radius: 4px;
+    }
+    .qr-step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.35;
+    }
+    .step-circle {
+      background: #000000;
+      color: #ffffff;
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .btn-verify-qr-now {
+      background: #000000;
+      color: #ffffff;
+      border: 1px solid #000000;
+      padding: 11px 16px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.8px;
+      border-radius: 3px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-verify-qr-now:hover:not(:disabled) {
+      background: #27272a;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+    .btn-verify-qr-now:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    /* PAYPAL EXPRESS CARD */
+    .paypal-checkout-layout {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 4px;
+      padding: 1.25rem;
+    }
+    .paypal-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .paypal-brand-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      color: #003087;
+    }
+    .paypal-secure-pill {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+    .paypal-desc {
       font-size: 0.8rem;
       color: #6b7280;
+      margin: 0 0 1rem 0;
+      line-height: 1.4;
     }
-    .paypal-info-box {
-      font-size: 0.85rem;
+    .paypal-conversion-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 10px 14px;
+      border-radius: 4px;
+      margin-bottom: 1.15rem;
     }
-    .paypal-info-box strong {
-      display: block;
-      color: #000000;
-      margin-bottom: 4px;
+    .conv-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
-    .paypal-info-box p {
+    .conv-label {
+      font-size: 0.7rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .conv-val {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .conv-divider {
+      font-size: 1.1rem;
+      color: #94a3b8;
+    }
+    .paypal-processing-overlay {
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      padding: 1.25rem;
+      border-radius: 4px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .paypal-processing-overlay p {
       margin: 0;
-      color: #6b7280;
+      color: #003087;
+    }
+    .paypal-processing-overlay small {
+      color: #64748b;
+    }
+    .btn-paypal-main {
+      width: 100%;
+      background: #ffc439;
+      color: #111827;
+      border: 1px solid #f2ba36;
+      border-radius: 4px;
+      padding: 12px 18px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s ease;
+      box-shadow: 0 2px 6px rgba(255, 196, 57, 0.35);
+    }
+    .btn-paypal-main:hover:not(:disabled) {
+      background: #f4b628;
+    }
+    .btn-paypal-main:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
 
     /* FINAL SUMMARY & BUTTON */
@@ -1440,6 +1812,17 @@ import {
       font-size: 3rem;
       color: #000000;
       margin-bottom: 0.5rem;
+    }
+    .stripe-success-tag {
+      display: inline-block;
+      background: #000000;
+      color: #ffffff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-bottom: 0.75rem;
     }
     .success-crest h2 {
       font-family: 'Inter', sans-serif;
@@ -1931,7 +2314,7 @@ export class CheckoutEcommercePageComponent implements OnInit {
   private readonly ventasService = inject(VentasService);
   private readonly inventarioService = inject(InventarioService);
   private readonly catalogoService = inject(CatalogoService);
-  private readonly authService = inject(AuthService);
+  readonly authService = inject(AuthService);
 
   activeTab: 'checkout' | 'pedidos' = 'checkout';
   cartItems: CartItem[] = [];
@@ -1958,11 +2341,16 @@ export class CheckoutEcommercePageComponent implements OnInit {
   instruccionesEntrega = '';
   sucursalDespachoId: number = 2; // Default Calacoto
 
-  // Pasarelas
+  // Pasarelas y Verificación Interactiva
   pasarelaSeleccionada: 'LIBELULA_BOLIVIA' | 'STRIPE_INTL' | 'PAYPAL_EXPRESS' = 'LIBELULA_BOLIVIA';
+  ultimoMetodoPagoUtilizado: 'LIBELULA_BOLIVIA' | 'STRIPE_INTL' | 'PAYPAL_EXPRESS' = 'LIBELULA_BOLIVIA';
+  isVerificandoPago = false;
+  segundosRestantesQR = 3;
+  svgFallbackQr = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23ffffff'/><rect x='10' y='10' width='25' height='25' fill='%23000000'/><rect x='14' y='14' width='17' height='17' fill='%23ffffff'/><rect x='18' y='18' width='9' height='9' fill='%23000000'/><rect x='65' y='10' width='25' height='25' fill='%23000000'/><rect x='69' y='14' width='17' height='17' fill='%23ffffff'/><rect x='73' y='18' width='9' height='9' fill='%23000000'/><rect x='10' y='65' width='25' height='25' fill='%23000000'/><rect x='14' y='69' width='17' height='17' fill='%23ffffff'/><rect x='18' y='73' width='9' height='9' fill='%23000000'/><rect x='42' y='12' width='6' height='15' fill='%23000000'/><rect x='52' y='20' width='6' height='12' fill='%23000000'/><rect x='42' y='32' width='16' height='6' fill='%23000000'/><rect x='12' y='42' width='20' height='6' fill='%23000000'/><rect x='25' y='52' width='12' height='6' fill='%23000000'/><rect x='42' y='45' width='15' height='15' fill='%23000000'/><rect x='65' y='45' width='20' height='8' fill='%23000000'/><rect x='65' y='60' width='10' height='15' fill='%23000000'/><rect x='80' y='60' width='10' height='25' fill='%23000000'/><rect x='42' y='68' width='15' height='17' fill='%23000000'/><text x='50' y='96' font-size='5.5' text-anchor='middle' font-weight='bold' fill='%23111827'>QR SIMPLE BOLIVIA</text></svg>";
+
   numeroTarjeta = '4242 4242 4242 4242';
   mesExp = '12';
-  anioExp = '2028';
+  anioExp = '28';
   cvc = '123';
   titularTarjeta = 'CLIENTE ATELIER';
 
@@ -2016,8 +2404,18 @@ export class CheckoutEcommercePageComponent implements OnInit {
     this.inventarioService.getSucursales().subscribe({
       next: (sucursales) => {
         this.sucursales = sucursales;
-        if (sucursales.length > 0 && !this.sucursalDespachoId) {
-          this.sucursalDespachoId = sucursales[0].id;
+        if (sucursales.length > 0) {
+          const ciudades = this.getCiudadesDisponibles();
+          if (ciudades.length > 0) {
+            this.ciudad = ciudades[0];
+            this.departamento = ciudades[0];
+          }
+          const sucsEnCiudad = this.getSucursalesPorCiudad();
+          if (sucsEnCiudad.length > 0) {
+            this.sucursalDespachoId = sucsEnCiudad[0].id;
+          } else {
+            this.sucursalDespachoId = sucursales[0].id;
+          }
         }
       },
       error: (err) => console.error('Error al cargar sucursales:', err)
@@ -2106,6 +2504,32 @@ export class CheckoutEcommercePageComponent implements OnInit {
     this.calcularTotales();
   }
 
+  getCiudadesDisponibles(): string[] {
+    const ciudadesSet = new Set<string>();
+    for (const s of this.sucursales) {
+      if (s.activo) {
+        const nom = s.ciudad?.nombre || 'Santa Cruz';
+        ciudadesSet.add(nom);
+      }
+    }
+    const arr = Array.from(ciudadesSet);
+    return arr.length > 0 ? arr : ['Santa Cruz', 'La Paz', 'Cochabamba'];
+  }
+
+  getSucursalesPorCiudad(): Sucursal[] {
+    if (!this.ciudad) return this.sucursales.filter(s => s.activo);
+    const filtered = this.sucursales.filter(s => s.activo && (s.ciudad?.nombre?.toLowerCase() === this.ciudad.toLowerCase()));
+    return filtered.length > 0 ? filtered : this.sucursales.filter(s => s.activo);
+  }
+
+  onCiudadChange(): void {
+    const sucursalesEnCiudad = this.getSucursalesPorCiudad();
+    if (sucursalesEnCiudad.length > 0) {
+      this.sucursalDespachoId = sucursalesEnCiudad[0].id;
+    }
+    this.departamento = this.ciudad;
+  }
+
   seleccionarPasarela(pasarela: 'LIBELULA_BOLIVIA' | 'STRIPE_INTL' | 'PAYPAL_EXPRESS'): void {
     this.pasarelaSeleccionada = pasarela;
   }
@@ -2142,6 +2566,77 @@ export class CheckoutEcommercePageComponent implements OnInit {
     }, 1);
     this.mensajeExito = `Añadido "${prenda.nombre}" a su bolsa de compras.`;
     setTimeout(() => this.mensajeExito = null, 3000);
+  }
+
+  getQrImageUrl(): string {
+    const dataText = encodeURIComponent(`SIMPLE_BOLIVIA_BOB_${this.totalFinal.toFixed(2)}_CU12_ATELIER_NOIR`);
+    return `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=8&data=${dataText}`;
+  }
+
+  iniciarVerificacionQR(): void {
+    if (this.cartItems.length === 0) {
+      this.mensajeError = 'Su bolsa de compras está vacía.';
+      return;
+    }
+    if (!this.clienteNombre || !this.clienteEmail) {
+      this.mensajeError = 'Por favor complete su nombre y correo electrónico en el Paso 1.';
+      return;
+    }
+    if (this.tipoEntrega === 'DOMICILIO' && !this.direccionLinea1) {
+      this.mensajeError = 'Debe indicar la dirección de entrega en el Paso 2.';
+      return;
+    }
+
+    this.mensajeError = null;
+    this.isVerificandoPago = true;
+    this.segundosRestantesQR = 3;
+
+    const timer = setInterval(() => {
+      this.segundosRestantesQR--;
+      if (this.segundosRestantesQR <= 0) {
+        clearInterval(timer);
+        this.isVerificandoPago = false;
+        this.procesarCheckout();
+      }
+    }, 1000);
+  }
+
+  iniciarPagoPaypal(): void {
+    if (this.cartItems.length === 0) {
+      this.mensajeError = 'Su bolsa de compras está vacía.';
+      return;
+    }
+    if (!this.clienteNombre || !this.clienteEmail) {
+      this.mensajeError = 'Por favor complete su nombre y correo electrónico en el Paso 1.';
+      return;
+    }
+    if (this.tipoEntrega === 'DOMICILIO' && !this.direccionLinea1) {
+      this.mensajeError = 'Debe indicar la dirección de entrega en el Paso 2.';
+      return;
+    }
+
+    this.mensajeError = null;
+    this.isVerificandoPago = true;
+    this.segundosRestantesQR = 2;
+
+    const timer = setInterval(() => {
+      this.segundosRestantesQR--;
+      if (this.segundosRestantesQR <= 0) {
+        clearInterval(timer);
+        this.isVerificandoPago = false;
+        this.procesarCheckout();
+      }
+    }, 1000);
+  }
+
+  accionConfirmar(): void {
+    if (this.pasarelaSeleccionada === 'LIBELULA_BOLIVIA') {
+      this.iniciarVerificacionQR();
+    } else if (this.pasarelaSeleccionada === 'PAYPAL_EXPRESS') {
+      this.iniciarPagoPaypal();
+    } else {
+      this.procesarCheckout();
+    }
   }
 
   // PROCESAMIENTO CHECKOUT
@@ -2198,16 +2693,16 @@ export class CheckoutEcommercePageComponent implements OnInit {
         metodo_pago: metodoPagoFinal,
         pasarela: this.pasarelaSeleccionada,
         monto: this.totalFinal,
-        moneda: 'USD',
+        moneda: 'BOB',
         cliente_email: this.clienteEmail,
         datos_tarjeta: this.pasarelaSeleccionada === 'STRIPE_INTL' ? {
-          numero: this.numeroTarjeta.replace(/\s+/g, ''),
-          mes_exp: this.mesExp,
-          anio_exp: this.anioExp,
-          cvc: this.cvc,
-          titular: this.titularTarjeta
+          numero: (this.numeroTarjeta || '').replace(/\s+/g, ''),
+          mes_exp: (this.mesExp || '').trim().padStart(2, '0'),
+          anio_exp: (this.anioExp || '').trim().length === 4 ? (this.anioExp || '').trim().slice(2) : (this.anioExp || '').trim(),
+          cvc: (this.cvc || '').trim(),
+          titular: (this.titularTarjeta || '').trim()
         } : undefined,
-        concepto: `Compra Online E-Commerce Atelier Noir - Total $${this.totalFinal.toFixed(2)} USD`
+        concepto: `Compra Online E-Commerce Atelier Noir - Total Bs. ${this.totalFinal.toFixed(2)}`
       }
     };
 
@@ -2215,8 +2710,14 @@ export class CheckoutEcommercePageComponent implements OnInit {
       next: (res) => {
         this.isSubmitting = false;
         this.pedidoConfirmado = res;
+        this.ultimoMetodoPagoUtilizado = this.pasarelaSeleccionada;
         this.cartService.clear();
-        this.mensajeExito = `¡Pedido ${res.codigo_venta} procesado con éxito! Se descontó stock y se generó el tracking ${res.envio?.codigo_seguimiento}.`;
+
+        let pasarelaNombre = 'Stripe';
+        if (this.pasarelaSeleccionada === 'LIBELULA_BOLIVIA') pasarelaNombre = 'QR Simple Libélula';
+        if (this.pasarelaSeleccionada === 'PAYPAL_EXPRESS') pasarelaNombre = 'PayPal Express';
+
+        this.mensajeExito = `¡Tu compra ha sido exitosa! Pedido #${res.codigo_venta} confirmado con ${pasarelaNombre}. Tracking logístico: ${res.envio?.codigo_seguimiento || 'Generado'}.`;
       },
       error: (err) => {
         this.isSubmitting = false;
@@ -2265,10 +2766,19 @@ export class CheckoutEcommercePageComponent implements OnInit {
 
   aplicarFiltrosPedidos(): void {
     let filtrados = [...this.todosLosPedidos];
+    if (!this.authService.isStaff()) {
+      const user = this.authService.currentUser();
+      if (user?.email) {
+        filtrados = filtrados.filter(p =>
+          (p.cliente?.email && p.cliente.email.toLowerCase() === user.email.toLowerCase()) ||
+          (p.cliente_nombre && p.cliente_nombre.toLowerCase() === user.nombre.toLowerCase())
+        );
+      }
+    }
     if (this.filtroEstado !== 'TODOS') {
       filtrados = filtrados.filter(p => p.envio?.estado_envio === this.filtroEstado);
     }
-    if (this.filtroSucursal) {
+    if (this.filtroSucursal && this.authService.isStaff()) {
       filtrados = filtrados.filter(p => p.sucursal_id === this.filtroSucursal);
     }
     this.pedidosOnline = filtrados;

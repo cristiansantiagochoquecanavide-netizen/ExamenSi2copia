@@ -280,7 +280,7 @@ class _PrendaDetailModalState extends State<PrendaDetailModal> {
                   ElevatedButton.icon(
                     onPressed: () {
                       Navigator.pop(context);
-                      appRouter.go('/catalogo/vestidor_ar');
+                      appRouter.go('/catalogo/vestidor_ar', extra: prenda);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,

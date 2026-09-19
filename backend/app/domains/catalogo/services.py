@@ -331,7 +331,8 @@ class PrendaService:
             descripcion=data.descripcion,
             precio_base=float(data.precio_base),
             categoria_id=data.categoria_id,
-            temporada_id=data.temporada_id
+            temporada_id=data.temporada_id,
+            activo=data.activo if data.activo is not None else True
         )
         db.add(prenda)
         await db.flush()
@@ -604,13 +605,15 @@ class PrendaService:
         prenda = await PrendaService.obtener_por_id(db, prenda_id)
         sku = prenda.sku
         nombre = prenda.nombre
+        admin_id = admin.id if admin else None
+
         await db.delete(prenda)
         await db.commit()
 
         await AuditoriaService.registrar_evento(
             db, accion="ELIMINAR_PRENDA", modulo="catalogo",
             detalle=f"Eliminacion de prenda {nombre} (SKU: {sku})",
-            usuario_id=admin.id if admin else None, ip_address=ip
+            usuario_id=admin_id, ip_address=ip
         )
         return True
 

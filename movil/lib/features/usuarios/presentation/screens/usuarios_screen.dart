@@ -473,22 +473,88 @@ class _UsuariosScreenState extends State<UsuariosScreen> {
         const SizedBox(height: 24),
 
         // Navigation & Actions
-        ElevatedButton.icon(
-          onPressed: () => context.go('/reportes'),
-          icon: const Icon(Icons.bar_chart, color: Color(0xFFE9C349)),
-          label: const Text(
-            'REPORTES & DASHBOARD (IA)',
-            style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1.2),
+        if (user.isAdmin || user.isEncargado) ...[
+          ElevatedButton.icon(
+            onPressed: () => context.go('/reportes'),
+            icon: const Icon(Icons.bar_chart, color: Color(0xFFE9C349)),
+            label: const Text(
+              'REPORTES & DASHBOARD (IA)',
+              style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1.2),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF131313),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+              side: const BorderSide(color: Color(0xFFE9C349)),
+            ),
           ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF131313),
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-            side: const BorderSide(color: Color(0xFFE9C349)),
+          const SizedBox(height: 12),
+        ] else if (user.isCajero) ...[
+          ElevatedButton.icon(
+            onPressed: () => context.go('/ventas'),
+            icon: const Icon(Icons.point_of_sale, color: Color(0xFFE9C349)),
+            label: const Text(
+              'PUNTO DE VENTA (POS)',
+              style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1.2),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF131313),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+              side: const BorderSide(color: Color(0xFFE9C349)),
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
+          const SizedBox(height: 12),
+        ] else ...[
+          ElevatedButton.icon(
+            onPressed: () => context.go('/reservas'),
+            icon: const Icon(Icons.event_seat, color: Color(0xFFE9C349)),
+            label: const Text(
+              'MIS RESERVAS DE PROBADOR',
+              style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1.2),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF131313),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+              side: const BorderSide(color: Color(0xFFE9C349)),
+            ),
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton.icon(
+            onPressed: () => context.go('/ventas'),
+            icon: const Icon(Icons.shopping_bag_outlined, color: Colors.white),
+            label: const Text(
+              'MI BOLSA DE COMPRAS',
+              style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1.2),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF131313),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            ),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: () => context.go('/ia_asistente'),
+            icon: const Icon(Icons.auto_awesome, color: Color(0xFF131313)),
+            label: const Text(
+              'ASESOR DE MODA (IA)',
+              style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1.2),
+            ),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFF131313),
+              side: const BorderSide(color: Color(0xFF131313)),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
         ElevatedButton(
           onPressed: () => context.go('/catalogo'),
           style: ElevatedButton.styleFrom(

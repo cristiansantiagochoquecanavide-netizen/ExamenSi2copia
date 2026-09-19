@@ -21,7 +21,7 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
       <div class="param-hero">
         <div class="eyebrow">
           <span class="gold-dot">&bull;</span>
-          <span>SISTEMA DE TAXONOMÍA &bull; CASO DE USO #5 (CU5)</span>
+          <span>SISTEMA DE TAXONOMÍA</span>
         </div>
         <h1 class="hero-title">Parámetros de Moda</h1>
         <p class="hero-desc">

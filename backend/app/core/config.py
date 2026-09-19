@@ -18,6 +18,11 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 horas para entorno de desarrollo y pruebas
 
+    # Stripe Payment Gateway
+    STRIPE_SECRET_KEY: str = ""
+    STRIPE_PUBLISHABLE_KEY: str = ""
+    STRIPE_CURRENCY: str = "bob"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

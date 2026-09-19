@@ -201,18 +201,37 @@ class IaasistenteService:
 
         scored_items: List[Tuple[int, RecomendacionPrendaItem]] = []
 
+        def normalizar_sector(s: Optional[str]) -> str:
+            if not s:
+                return "UNISEX"
+            norm = s.upper().strip()
+            if norm in ("MUJER", "MUJERES", "DAMA", "DAMAS", "FEMENINO"):
+                return "MUJERES"
+            if norm in ("HOMBRE", "HOMBRES", "CABALLERO", "CABALLEROS", "MASCULINO"):
+                return "HOMBRES"
+            return "UNISEX"
+
+        sec_objetivo = normalizar_sector(filtro_sector)
+
         for p in prendas:
             score = 65  # Base score
             motivos = []
-            p_sector = p.categoria.sector.upper() if p.categoria else "UNISEX"
-            cat_nombre = p.categoria.nombre if p.categoria else "Indumentaria"
+            p_sec = normalizar_sector(p.categoria.sector if p.categoria else "UNISEX")
+            cat_nombre = (p.categoria.nombre if p.categoria else "Indumentaria").lower()
+            cat_desc = (p.categoria.descripcion if p.categoria and p.categoria.descripcion else "").lower()
             temp_nombre = p.temporada.nombre if p.temporada else "Colección Actual"
+            texto_completo = f"{p.nombre} {p.descripcion} {cat_nombre} {cat_desc}".lower()
 
-            # A. Afinidad de Sector (+15 pts)
-            if filtro_sector in ("UNISEX", "TODOS") or p_sector == "UNISEX" or p_sector == filtro_sector:
+            # A. Afinidad de Sector (Silueta)
+            if sec_objetivo in ("TODOS", "UNISEX"):
                 score += 15
+            elif p_sec == sec_objetivo:
+                score += 30  # Coincidencia directa con silueta elegida (MUJERES o HOMBRES)
+                motivos.append(f"Corte y silueta adaptados para {sec_objetivo.lower()}")
+            elif p_sec == "UNISEX":
+                score += 5   # Unisex tiene cabida secundaria
             else:
-                score -= 10
+                score -= 50  # Si busca MUJER y la prenda es de HOMBRE, penalización estricta
 
             # B. Presupuesto (+10 pts)
             if pref and pref.presupuesto_max:
@@ -220,30 +239,41 @@ class IaasistenteService:
                     score += 10
                     motivos.append("Se ajusta perfectamente a tu rango de presupuesto")
                 else:
-                    score -= 5
+                    score -= 15
 
             # C. Afinidad con Historial de Compras y Reservas (+15 pts)
             if p.categoria_id in categorias_compradas:
                 score += 15
-                motivos.append(f"Afinidad alta con tus compras y elecciones previas en {cat_nombre}")
+                motivos.append(f"Afinidad alta con tus compras y elecciones previas en {p.categoria.nombre if p.categoria else ''}")
             elif p.id in prendas_interactuadas:
                 score += 10
                 motivos.append("Seleccionado por tu interés en prendas de esta silueta")
 
-            # D. Ocasión de Uso (+15 pts)
-            desc_lower = (p.descripcion + " " + p.nombre).lower()
-            if filtro_ocasion == "GALA" and ("gala" in desc_lower or "noche" in desc_lower or "seda" in desc_lower):
-                score += 15
-                motivos.append("Ideal para tus eventos nocturnos y galas de alta costura")
-            elif filtro_ocasion in ("FORMAL_OFICINA", "FORMAL") and ("sartorial" in desc_lower or "blazer" in desc_lower or "oficina" in desc_lower):
-                score += 15
-                motivos.append("Alineado a tu estilo ejecutivo formal y cortes sartoriales")
-            elif filtro_ocasion == "COCTEL" and ("coctel" in desc_lower or "vestido" in desc_lower):
-                score += 15
-                motivos.append("Corte sofisticado óptimo para ocasiones de cóctel")
-            elif filtro_ocasion == "URBANO" and ("algodón" in desc_lower or "casual" in desc_lower):
-                score += 12
-                motivos.append("Confort premium y versatilidad para estilo urbano")
+            # D. Ocasión de Uso (+25 pts / -30 pts)
+            if filtro_ocasion == "GALA":
+                palabras_gala = ["gala", "noche", "seda", "vestido", "elegante", "editorial", "volado", "volados", "gasa", "fiesta", "abullonada"]
+                palabras_informales = ["short", "bermuda", "jogger", "buzo", "drill", "skater", "cargo"]
+                if any(w in texto_completo for w in palabras_gala) or "vestido" in cat_nombre or "blusa" in cat_nombre:
+                    score += 25
+                    motivos.append("Pieza de alta costura idónea para galas y veladas elegantes")
+                elif any(w in texto_completo for w in palabras_informales):
+                    score -= 30  # Ropa informal desciende fuertemente en gala
+            elif filtro_ocasion in ("FORMAL_OFICINA", "FORMAL"):
+                if any(w in texto_completo for w in ["sartorial", "blazer", "oficina", "pantalon", "pantalón", "formal"]):
+                    score += 25
+                    motivos.append("Alineado a tu estilo ejecutivo formal y cortes sartoriales")
+            elif filtro_ocasion == "COCTEL":
+                if any(w in texto_completo for w in ["coctel", "cóctel", "vestido", "blusa", "volado", "elegante"]):
+                    score += 25
+                    motivos.append("Corte sofisticado óptimo para ocasiones de cóctel")
+            elif filtro_ocasion == "CASUAL":
+                if any(w in texto_completo for w in ["casual", "polera", "camisa", "short", "algodón"]):
+                    score += 20
+                    motivos.append("Confort premium y versatilidad casual de temporada")
+            elif filtro_ocasion == "URBANO":
+                if any(w in texto_completo for w in ["drill", "cargo", "oversized", "urbano", "jogger", "streetwear"]):
+                    score += 25
+                    motivos.append("Estilo urbano vanguardista con corte moderno")
 
             # E. Temporada Activa (+10 pts)
             if p.temporada and p.temporada.activo:
@@ -253,19 +283,19 @@ class IaasistenteService:
 
             # F. Calificaciones Altas del CU18 (+10 pts)
             rating = p.rating_promedio
-            if rating >= 4.5:
+            if rating and rating >= 4.5:
                 score += 10
                 motivos.append(f"Excelencia ratificada con {rating}★ por compradoras verificadas")
 
-            # Normalizar score a 70..99
-            final_score = min(99, max(72, score))
+            # Normalizar score a 65..99
+            final_score = min(99, max(65, score))
 
-            # Definir Etiqueta
-            if final_score >= 96:
-                etiqueta = "MATCH PERFECTO (98%)"
+            # Definir Etiqueta limpia (sin porcentaje hardcodeado duplicado)
+            if final_score >= 95:
+                etiqueta = "MATCH PERFECTO"
             elif p.categoria_id in categorias_compradas:
                 etiqueta = "BASADO EN TUS COMPRAS"
-            elif rating >= 4.8:
+            elif rating and rating >= 4.8:
                 etiqueta = f"TOP RATED {rating}★"
             elif p.temporada and p.temporada.activo:
                 etiqueta = "TENDENCIA DE TEMPORADA"
