@@ -61,7 +61,7 @@ interface FotoLocal {
       <!-- Filters & Search Toolbar -->
       <section class="toolbar-section">
         <div class="search-wrap">
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
@@ -631,7 +631,10 @@ interface FotoLocal {
       left: 14px;
       top: 50%;
       transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
       color: #94a3b8;
+      pointer-events: none;
     }
     .search-input {
       width: 100%;
