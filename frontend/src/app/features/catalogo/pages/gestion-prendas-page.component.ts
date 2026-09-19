@@ -248,221 +248,238 @@ interface FotoLocal {
             <button type="button" class="btn-close-modal" (click)="cerrarModalForm()">&times;</button>
           </header>
 
-          <form (ngSubmit)="guardarPrenda()" class="modal-body-form">
-            <!-- SECCIÓN 1: GALERÍA DE FOTOS (1 A 5 OBLIGATORIAS) -->
-            <fieldset class="form-section-box">
-              <legend class="section-legend">
-                <span>GALERÍA DE FOTOS (1 A 5 FOTOS)</span>
-                <span class="legend-hint">* Mínimo 1 foto obligatoria. Máximo 5.</span>
-              </legend>
+          <form (ngSubmit)="guardarPrenda()" class="modal-form-wrapper">
+            <div class="modal-scroll-body">
+              <div class="modal-two-cols">
+                <!-- COLUMNA IZQUIERDA: GALERÍA DE FOTOS -->
+                <div class="col-photos">
+                  <fieldset class="form-section-box">
+                    <legend class="section-legend">
+                      <span>GALERÍA DE FOTOS (1 A 5)</span>
+                    </legend>
+                    <p class="section-desc">Mínimo 1 foto obligatoria. Máximo 5 fotos.</p>
 
-              <!-- Upload Drag & Drop Area -->
-              <div
-                class="upload-dropzone"
-                [class.drag-over]="isDragging()"
-                [class.disabled]="fotosSubidas().length >= 5"
-                (dragover)="onDragOver($event)"
-                (dragleave)="onDragLeave($event)"
-                (drop)="onFileDrop($event)"
-                (click)="fileInput.click()">
-                <input
-                  #fileInput
-                  type="file"
-                  multiple
-                  accept=".jpg,.jpeg,.png,.webp,.avif,image/jpeg,image/png,image/webp,image/avif"
-                  (change)="onFileSelected($event)"
-                  style="display: none;"
-                />
+                    <!-- Upload Drag & Drop Area -->
+                    <div
+                      class="upload-dropzone"
+                      [class.drag-over]="isDragging()"
+                      [class.disabled]="fotosSubidas().length >= 5"
+                      (dragover)="onDragOver($event)"
+                      (dragleave)="onDragLeave($event)"
+                      (drop)="onFileDrop($event)"
+                      (click)="fileInput.click()">
+                      <input
+                        #fileInput
+                        type="file"
+                        multiple
+                        accept=".jpg,.jpeg,.png,.webp,.avif,image/jpeg,image/png,image/webp,image/avif"
+                        (change)="onFileSelected($event)"
+                        style="display: none;"
+                      />
 
-                <div class="dropzone-content">
-                  <svg class="dropzone-icon" viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                    <polyline points="21 15 16 10 5 21"></polyline>
-                  </svg>
-                  <p class="dropzone-main-text">
-                    {{ isUploadingImage() ? 'Subiendo imagen...' : 'Arrastrá fotos aquí o hacé clic para seleccionar' }}
-                  </p>
-                  <div class="format-badges">
-                    <span class="fmt-pill">JPG</span>
-                    <span class="fmt-pill">PNG</span>
-                    <span class="fmt-pill">WEBP</span>
-                    <span class="fmt-pill">AVIF</span>
-                    <span class="fmt-limit">Hasta 10 MB c/u &bull; {{ fotosSubidas().length }}/5 cargadas</span>
-                  </div>
+                      <div class="dropzone-content">
+                        <svg class="dropzone-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                          <polyline points="21 15 16 10 5 21"></polyline>
+                        </svg>
+                        <p class="dropzone-main-text">
+                          {{ isUploadingImage() ? 'Subiendo imagen...' : 'Arrastrá fotos o hacé clic' }}
+                        </p>
+                        <div class="format-badges">
+                          <span class="fmt-pill">JPG</span>
+                          <span class="fmt-pill">PNG</span>
+                          <span class="fmt-pill">WEBP</span>
+                          <span class="fmt-pill">AVIF</span>
+                        </div>
+                        <span class="fmt-limit">Hasta 10 MB c/u &bull; {{ fotosSubidas().length }}/5 cargadas</span>
+                      </div>
+                    </div>
+
+                    <!-- Upload Spinner / Error -->
+                    <div *ngIf="uploadError()" class="upload-error-alert">
+                      <span>⚠️ {{ uploadError() }}</span>
+                    </div>
+
+                    <!-- Gallery Grid -->
+                    <div *ngIf="fotosSubidas().length > 0" class="photos-grid">
+                      <div
+                        *ngFor="let f of fotosSubidas(); let i = index"
+                        class="photo-card"
+                        [class.is-cover]="f.es_portada">
+                        <img [src]="f.url" alt="Foto prenda {{ i + 1 }}" class="photo-card-img" />
+
+                        <!-- Cover Badge -->
+                        <div class="cover-indicator" *ngIf="f.es_portada">
+                          ★ PORTADA
+                        </div>
+
+                        <!-- Actions overlay -->
+                        <div class="photo-card-overlay">
+                          <button
+                            *ngIf="!f.es_portada"
+                            type="button"
+                            class="btn-make-cover"
+                            (click)="marcarComoPortada(i)"
+                            title="Establecer como foto de portada">
+                            Hacer Portada
+                          </button>
+                          <button
+                            type="button"
+                            class="btn-remove-photo"
+                            (click)="eliminarFotoLocal(i)"
+                            title="Eliminar esta foto">
+                            &times;
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Required warning if 0 photos -->
+                    <p *ngIf="fotosSubidas().length === 0" class="field-warning">
+                      ⚠️ Es obligatorio agregar al menos 1 foto para guardar la prenda.
+                    </p>
+                  </fieldset>
+                </div>
+
+                <!-- COLUMNA DERECHA: DATOS COMERCIALES Y VARIANTES -->
+                <div class="col-data">
+                  <!-- SECCIÓN 2: DATOS COMERCIALES MAESTROS -->
+                  <fieldset class="form-section-box">
+                    <legend class="section-legend">DATOS COMERCIALES</legend>
+
+                    <div class="form-grid-2">
+                      <div class="form-field">
+                        <label>SKU Identificador *</label>
+                        <input
+                          type="text"
+                          [(ngModel)]="formData.sku"
+                          name="sku"
+                          placeholder="Ej. NOIR-TRN-001"
+                          required
+                          class="form-ctrl"
+                        />
+                        <small class="field-hint">Código único de inventario</small>
+                      </div>
+
+                      <div class="form-field">
+                        <label>Precio Base ($ USD) *</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="1"
+                          [(ngModel)]="formData.precio_base"
+                          name="precio_base"
+                          required
+                          class="form-ctrl"
+                        />
+                      </div>
+                    </div>
+
+                    <div class="form-field" style="margin-top: 0.85rem;">
+                      <label>Nombre Comercial de la Prenda *</label>
+                      <input
+                        type="text"
+                        [(ngModel)]="formData.nombre"
+                        name="nombre"
+                        placeholder="Ej. Cashmere Atelier Trench"
+                        required
+                        class="form-ctrl"
+                      />
+                    </div>
+
+                    <div class="form-field" style="margin-top: 0.85rem;">
+                      <label>Descripción Editorial *</label>
+                      <textarea
+                        [(ngModel)]="formData.descripcion"
+                        name="descripcion"
+                        rows="2"
+                        placeholder="Detalles sobre cortes arquitectónicos, caída de la tela, etc."
+                        required
+                        class="form-ctrl textarea-ctrl"
+                      ></textarea>
+                    </div>
+
+                    <div class="form-grid-2" style="margin-top: 0.85rem;">
+                      <div class="form-field">
+                        <label>Categoría *</label>
+                        <select [(ngModel)]="formData.categoria_id" name="categoria_id" required class="form-ctrl">
+                          <option *ngFor="let cat of categorias()" [value]="cat.id">
+                            {{ cat.nombre }} ({{ cat.sector }})
+                          </option>
+                        </select>
+                      </div>
+
+                      <div class="form-field">
+                        <label>Temporada Comercial *</label>
+                        <select [(ngModel)]="formData.temporada_id" name="temporada_id" required class="form-ctrl">
+                          <option *ngFor="let temp of temporadas()" [value]="temp.id">
+                            {{ temp.nombre }} ({{ temp.codigo }})
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+                  </fieldset>
+
+                  <!-- SECCIÓN 3: VARIANTES DE MODA (TALLAS Y COLORES) -->
+                  <fieldset class="form-section-box" style="margin-top: 1rem;">
+                    <legend class="section-legend">VARIANTES DISPONIBLES (TALLAS & COLORES)</legend>
+                    <p class="section-desc">Seleccioná las tallas y colores que tendrá la prenda.</p>
+
+                    <!-- Chips de Tallas -->
+                    <div class="chips-group-section">
+                      <label class="chips-label">TALLAS DISPONIBLES:</label>
+                      <div class="interactive-chips">
+                        <button
+                          *ngFor="let t of tallas()"
+                          type="button"
+                          class="selectable-chip"
+                          [class.selected]="selectedTallasIds().includes(t.id)"
+                          (click)="toggleTalla(t.id)">
+                          {{ t.codigo }} ({{ t.descripcion }})
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Chips de Colores -->
+                    <div class="chips-group-section" style="margin-top: 0.85rem;">
+                      <label class="chips-label">COLORES DISPONIBLES:</label>
+                      <div class="interactive-chips">
+                        <button
+                          *ngFor="let c of colores()"
+                          type="button"
+                          class="selectable-chip color-chip"
+                          [class.selected]="selectedColoresIds().includes(c.id)"
+                          (click)="toggleColor(c.id)">
+                          <span class="color-dot" [style.background-color]="c.codigo_hex || '#333'"></span>
+                          {{ c.nombre }}
+                        </button>
+                      </div>
+                    </div>
+                  </fieldset>
                 </div>
               </div>
+            </div>
 
-              <!-- Upload Spinner / Error -->
-              <div *ngIf="uploadError()" class="upload-error-alert">
-                <span>⚠️ {{ uploadError() }}</span>
-              </div>
-
-              <!-- Gallery Grid -->
-              <div *ngIf="fotosSubidas().length > 0" class="photos-grid">
-                <div
-                  *ngFor="let f of fotosSubidas(); let i = index"
-                  class="photo-card"
-                  [class.is-cover]="f.es_portada">
-                  <img [src]="f.url" alt="Foto prenda {{ i + 1 }}" class="photo-card-img" />
-
-                  <!-- Cover Badge -->
-                  <div class="cover-indicator" *ngIf="f.es_portada">
-                    ★ PORTADA
-                  </div>
-
-                  <!-- Actions overlay -->
-                  <div class="photo-card-overlay">
-                    <button
-                      *ngIf="!f.es_portada"
-                      type="button"
-                      class="btn-make-cover"
-                      (click)="marcarComoPortada(i)"
-                      title="Establecer como foto de portada">
-                      Hacer Portada
-                    </button>
-                    <button
-                      type="button"
-                      class="btn-remove-photo"
-                      (click)="eliminarFotoLocal(i)"
-                      title="Eliminar esta foto">
-                      &times;
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Required warning if 0 photos -->
-              <p *ngIf="fotosSubidas().length === 0" class="field-warning">
-                ⚠️ Es obligatorio agregar al menos 1 foto para guardar la prenda.
-              </p>
-            </fieldset>
-
-            <!-- SECCIÓN 2: DATOS COMERCIALES MAESTROS -->
-            <fieldset class="form-section-box">
-              <legend class="section-legend">DATOS COMERCIALES DE LA PRENDA</legend>
-
-              <div class="form-grid-2">
-                <div class="form-field">
-                  <label>SKU Identificador *</label>
-                  <input
-                    type="text"
-                    [(ngModel)]="formData.sku"
-                    name="sku"
-                    placeholder="Ej. NOIR-TRN-001"
-                    required
-                    class="form-ctrl"
-                  />
-                  <small class="field-hint">Código único de inventario</small>
-                </div>
-
-                <div class="form-field">
-                  <label>Nombre Comercial de la Prenda *</label>
-                  <input
-                    type="text"
-                    [(ngModel)]="formData.nombre"
-                    name="nombre"
-                    placeholder="Ej. Cashmere Atelier Trench"
-                    required
-                    class="form-ctrl"
-                  />
-                </div>
-              </div>
-
-              <div class="form-field" style="margin-top: 1rem;">
-                <label>Descripción Editorial *</label>
-                <textarea
-                  [(ngModel)]="formData.descripcion"
-                  name="descripcion"
-                  rows="3"
-                  placeholder="Detalles sobre cortes arquitectónicos, caída de la tela, forro, etc."
-                  required
-                  class="form-ctrl textarea-ctrl"
-                ></textarea>
-              </div>
-
-              <div class="form-grid-3" style="margin-top: 1rem;">
-                <div class="form-field">
-                  <label>Precio Base ($ USD) *</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="1"
-                    [(ngModel)]="formData.precio_base"
-                    name="precio_base"
-                    required
-                    class="form-ctrl"
-                  />
-                </div>
-
-                <div class="form-field">
-                  <label>Categoría *</label>
-                  <select [(ngModel)]="formData.categoria_id" name="categoria_id" required class="form-ctrl">
-                    <option *ngFor="let cat of categorias()" [value]="cat.id">
-                      {{ cat.nombre }} ({{ cat.sector }})
-                    </option>
-                  </select>
-                </div>
-
-                <div class="form-field">
-                  <label>Temporada Comercial *</label>
-                  <select [(ngModel)]="formData.temporada_id" name="temporada_id" required class="form-ctrl">
-                    <option *ngFor="let temp of temporadas()" [value]="temp.id">
-                      {{ temp.nombre }} ({{ temp.codigo }})
-                    </option>
-                  </select>
-                </div>
-              </div>
-            </fieldset>
-
-            <!-- SECCIÓN 3: VARIANTES DE MODA (TALLAS Y COLORES) -->
-            <fieldset class="form-section-box">
-              <legend class="section-legend">VARIANTES DISPONIBLES (TALLAS & COLORES)</legend>
-              <p class="section-desc">Seleccioná las tallas y colores que tendrá la prenda para generar sus variantes de stock.</p>
-
-              <!-- Chips de Tallas -->
-              <div class="chips-group-section">
-                <label class="chips-label">TALLAS DISPONIBLES:</label>
-                <div class="interactive-chips">
-                  <button
-                    *ngFor="let t of tallas()"
-                    type="button"
-                    class="selectable-chip"
-                    [class.selected]="selectedTallasIds().includes(t.id)"
-                    (click)="toggleTalla(t.id)">
-                    {{ t.codigo }} ({{ t.descripcion }})
-                  </button>
-                </div>
-              </div>
-
-              <!-- Chips de Colores -->
-              <div class="chips-group-section" style="margin-top: 1rem;">
-                <label class="chips-label">COLORES DISPONIBLES:</label>
-                <div class="interactive-chips">
-                  <button
-                    *ngFor="let c of colores()"
-                    type="button"
-                    class="selectable-chip color-chip"
-                    [class.selected]="selectedColoresIds().includes(c.id)"
-                    (click)="toggleColor(c.id)">
-                    <span class="color-dot" [style.background-color]="c.codigo_hex || '#333'"></span>
-                    {{ c.nombre }}
-                  </button>
-                </div>
-              </div>
-            </fieldset>
-
-            <!-- Modal Footer Actions -->
+            <!-- Modal Footer Actions (FIXED AT BOTTOM) -->
             <footer class="modal-footer-actions">
-              <button type="button" class="btn-modal-cancel" (click)="cerrarModalForm()">
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                class="btn-modal-submit"
-                [disabled]="isSaving() || fotosSubidas().length === 0 || !formData.sku || !formData.nombre">
-                {{ isSaving() ? 'Guardando...' : (isEditing() ? 'Actualizar Prenda' : 'Guardar Prenda') }}
-              </button>
+              <div class="footer-info">
+                <span class="footer-status-pill" [class.ready]="fotosSubidas().length > 0 && formData.sku && formData.nombre">
+                  {{ fotosSubidas().length === 0 ? 'Falta agregar foto' : (!formData.sku || !formData.nombre ? 'Completar datos obligatorios' : 'Listo para guardar') }}
+                </span>
+                <span class="footer-hint">{{ fotosSubidas().length }}/5 fotos &bull; {{ selectedTallasIds().length }} tallas &bull; {{ selectedColoresIds().length }} colores</span>
+              </div>
+              <div class="footer-buttons">
+                <button type="button" class="btn-modal-cancel" (click)="cerrarModalForm()">
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  class="btn-modal-submit"
+                  [disabled]="isSaving() || fotosSubidas().length === 0 || !formData.sku || !formData.nombre">
+                  {{ isSaving() ? 'Guardando...' : (isEditing() ? 'Actualizar Prenda' : 'Guardar Prenda') }}
+                </button>
+              </div>
             </footer>
           </form>
         </div>
@@ -931,24 +948,26 @@ interface FotoLocal {
 
     .modal-dialog {
       background: #ffffff;
-      border-radius: 12px;
+      border-radius: 14px;
       width: 100%;
-      max-width: 860px;
-      max-height: 92vh;
-      overflow-y: auto;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-      border: 1px solid #e2e8f0;
+      max-width: 1080px;
+      height: 88vh;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+      border: 1px solid #cbd5e1;
     }
 
     .modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1.5rem 2rem;
+      padding: 1.25rem 2rem;
       border-bottom: 1px solid #f1f5f9;
-      position: sticky;
-      top: 0;
       background: #ffffff;
+      flex-shrink: 0;
       z-index: 10;
     }
     .modal-badge {
@@ -961,7 +980,7 @@ interface FotoLocal {
       margin-bottom: 0.25rem;
     }
     .modal-title {
-      font-size: 1.4rem;
+      font-size: 1.35rem;
       font-weight: 800;
       color: #0f172a;
       margin: 0;
@@ -973,28 +992,55 @@ interface FotoLocal {
       color: #94a3b8;
       cursor: pointer;
       line-height: 1;
+      padding: 0.25rem;
+      border-radius: 6px;
+      transition: all 0.15s ease;
     }
     .btn-close-modal:hover {
       color: #0f172a;
+      background: #f1f5f9;
     }
 
-    .modal-body-form {
-      padding: 2rem;
+    .modal-form-wrapper {
       display: flex;
       flex-direction: column;
-      gap: 1.75rem;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .modal-scroll-body {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 1.5rem 2rem;
+    }
+
+    .modal-two-cols {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    .col-photos,
+    .col-data {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
     }
 
     .form-section-box {
       border: 1px solid #e2e8f0;
       border-radius: 8px;
-      padding: 1.25rem 1.5rem 1.5rem;
+      padding: 1.15rem 1.25rem 1.25rem;
       background: #fafafa;
     }
     .section-legend {
       font-size: 0.78rem;
       font-weight: 800;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.08em;
       color: #0f172a;
       padding: 0 0.5rem;
       display: flex;
@@ -1002,27 +1048,28 @@ interface FotoLocal {
       align-items: center;
     }
     .legend-hint {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 500;
       color: #64748b;
       letter-spacing: normal;
     }
     .section-desc {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: #64748b;
-      margin: 0 0 1rem 0;
+      margin: 0 0 0.75rem 0;
+      line-height: 1.4;
     }
 
     /* Dropzone */
     .upload-dropzone {
       border: 2px dashed #cbd5e1;
       border-radius: 8px;
-      padding: 2rem 1.5rem;
+      padding: 1.25rem 1rem;
       text-align: center;
       background: #ffffff;
       cursor: pointer;
       transition: all 0.2s ease;
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
     }
     .upload-dropzone:hover {
       border-color: #0f172a;
@@ -1038,55 +1085,56 @@ interface FotoLocal {
     }
     .dropzone-icon {
       color: #94a3b8;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.4rem;
     }
     .dropzone-main-text {
-      font-size: 0.95rem;
+      font-size: 0.85rem;
       font-weight: 700;
       color: #0f172a;
-      margin: 0 0 0.75rem 0;
+      margin: 0 0 0.45rem 0;
     }
     .format-badges {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.35rem;
       flex-wrap: wrap;
     }
     .fmt-pill {
       background: #f1f5f9;
       color: #334155;
-      font-size: 0.68rem;
+      font-size: 0.65rem;
       font-weight: 800;
-      padding: 0.2rem 0.45rem;
+      padding: 0.15rem 0.4rem;
       border-radius: 4px;
     }
     .fmt-limit {
-      font-size: 0.75rem;
+      display: block;
+      font-size: 0.7rem;
       color: #64748b;
-      margin-left: 0.5rem;
+      margin-top: 0.4rem;
     }
 
     .upload-error-alert {
       background: #fef2f2;
       border: 1px solid #fecaca;
       color: #991b1b;
-      padding: 0.75rem;
+      padding: 0.65rem;
       border-radius: 6px;
-      font-size: 0.82rem;
-      margin-bottom: 1rem;
+      font-size: 0.8rem;
+      margin-bottom: 0.75rem;
     }
 
     /* Photos Grid */
     .photos-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-      gap: 1rem;
-      margin-top: 1rem;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+      margin-top: 0.75rem;
     }
     .photo-card {
       position: relative;
-      height: 160px;
+      height: 125px;
       border-radius: 6px;
       overflow: hidden;
       border: 2px solid #e2e8f0;
@@ -1260,11 +1308,43 @@ interface FotoLocal {
 
     /* Modal Footer */
     .modal-footer-actions {
+      flex-shrink: 0;
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
       gap: 1rem;
-      padding-top: 1rem;
-      border-top: 1px solid #f1f5f9;
+    }
+    .footer-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .footer-status-pill {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .footer-status-pill.ready {
+      background: #dcfce7;
+      color: #15803d;
+    }
+    .footer-hint {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+    .footer-buttons {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
     }
     .btn-modal-cancel {
       background: #ffffff;
@@ -1275,9 +1355,11 @@ interface FotoLocal {
       padding: 0.75rem 1.4rem;
       border-radius: 6px;
       cursor: pointer;
+      transition: all 0.2s ease;
     }
     .btn-modal-cancel:hover {
       background: #f8fafc;
+      border-color: #94a3b8;
     }
     .btn-modal-submit {
       background: #0f172a;
@@ -1290,6 +1372,7 @@ interface FotoLocal {
       border-radius: 6px;
       cursor: pointer;
       box-shadow: 0 2px 6px rgba(15, 23, 42, 0.2);
+      transition: all 0.2s ease;
     }
     .btn-modal-submit:hover {
       background: #1e293b;
@@ -1297,6 +1380,24 @@ interface FotoLocal {
     .btn-modal-submit:disabled {
       opacity: 0.4;
       cursor: not-allowed;
+    }
+
+    @media (max-width: 960px) {
+      .modal-dialog {
+        height: auto;
+        max-height: 94vh;
+      }
+      .modal-two-cols {
+        grid-template-columns: 1fr;
+      }
+      .modal-footer-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+      }
+      .footer-buttons {
+        justify-content: flex-end;
+      }
     }
 
     /* Confirm Dialog */
