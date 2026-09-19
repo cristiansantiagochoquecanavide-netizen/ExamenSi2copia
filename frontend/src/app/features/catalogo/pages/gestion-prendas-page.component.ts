@@ -210,7 +210,7 @@ interface FotoLocal {
               <!-- Cantidad de Fotos -->
               <td>
                 <span class="photos-count-badge">
-                  📷 {{ p.multimedia.length }} {{ p.multimedia.length === 1 ? 'foto' : 'fotos' }}
+                  {{ p.multimedia.length }} {{ p.multimedia.length === 1 ? 'foto' : 'fotos' }}
                 </span>
               </td>
 
