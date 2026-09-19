@@ -183,7 +183,7 @@ interface FotoLocal {
 
               <!-- Precio Base -->
               <td>
-                <span class="prenda-price">&dollar;{{ p.precio_base | number:'1.2-2' }}</span>
+                <span class="prenda-price">Bs. {{ p.precio_base | number:'1.2-2' }}</span>
               </td>
 
               <!-- Tallas y Colores Variantes -->
@@ -362,7 +362,7 @@ interface FotoLocal {
                       </div>
 
                       <div class="form-field">
-                        <label>Precio Base ($ USD) *</label>
+                        <label>Precio Base (Bs.) *</label>
                         <input
                           type="number"
                           step="0.01"

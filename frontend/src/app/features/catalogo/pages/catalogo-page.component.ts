@@ -271,7 +271,7 @@ import { OutfitSugerido } from '../../ia-asistente/models/ia-asistente.models';
                   <!-- Card Footer: Precio e Hipervínculo/Botón de Acción -->
                   <div class="card-footer">
                     <div class="price-container">
-                      <span class="currency">$</span>
+                      <span class="currency">Bs.</span>
                       <span class="price-value">{{ prenda.precio_base | number:'1.2-2' }}</span>
                     </div>
 
@@ -354,7 +354,7 @@ import { OutfitSugerido } from '../../ia-asistente/models/ia-asistente.models';
 
                   <div class="modal-price-box">
                     <span class="modal-price-label">PRECIO BASE:</span>
-                    <span class="modal-price-value"><span class="currency">$</span>{{ prenda.precio_base | number:'1.2-2' }}</span>
+                    <span class="modal-price-value"><span class="currency">Bs.</span> {{ prenda.precio_base | number:'1.2-2' }}</span>
                   </div>
 
                   <!-- Modelos 3D y AR vinculados -->
@@ -810,7 +810,7 @@ import { OutfitSugerido } from '../../ia-asistente/models/ia-asistente.models';
 
               <div class="form-row-3">
                 <div class="form-group">
-                  <label>Precio Base ($ USD) *</label>
+                  <label>Precio Base (Bs.) *</label>
                   <input type="number" step="0.01" [(ngModel)]="nuevaPrenda.precio_base" name="precio_base" required />
                 </div>
                 <div class="form-group">
