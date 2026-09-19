@@ -150,6 +150,7 @@ interface FotoLocal {
               <th>PRENDA / SKU</th>
               <th>CATEGORÍA & SECTOR</th>
               <th>PRECIO</th>
+              <th>STOCK</th>
               <th>TALLAS & COLORES</th>
               <th>FOTOS</th>
               <th>ESTADO</th>
@@ -184,6 +185,16 @@ interface FotoLocal {
               <!-- Precio Base -->
               <td>
                 <span class="prenda-price">Bs. {{ p.precio_base | number:'1.2-2' }}</span>
+              </td>
+
+              <!-- Stock Total -->
+              <td>
+                <div class="stock-summary-cell">
+                  <span class="stock-pill" [class.in-stock]="(p.stock_total || 0) > 0" [class.out-of-stock]="(p.stock_total || 0) <= 0">
+                    <span class="stock-dot">&bull;</span>
+                    {{ (p.stock_total || 0) > 0 ? (p.stock_total + ' uds') : 'Agotado' }}
+                  </span>
+                </div>
               </td>
 
               <!-- Tallas y Colores Variantes -->
@@ -347,7 +358,7 @@ interface FotoLocal {
                   <fieldset class="form-section-box">
                     <legend class="section-legend">DATOS COMERCIALES</legend>
 
-                    <div class="form-grid-2">
+                    <div class="form-grid-3">
                       <div class="form-field">
                         <label>SKU Identificador *</label>
                         <input
@@ -358,7 +369,7 @@ interface FotoLocal {
                           required
                           class="form-ctrl"
                         />
-                        <small class="field-hint">Código único de inventario</small>
+                        <small class="field-hint">Código único</small>
                       </div>
 
                       <div class="form-field">
@@ -372,6 +383,21 @@ interface FotoLocal {
                           required
                           class="form-ctrl"
                         />
+                        <small class="field-hint">Moneda nacional</small>
+                      </div>
+
+                      <div class="form-field">
+                        <label>Stock Inicial (Uds) *</label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="1"
+                          [(ngModel)]="formData.stock_inicial"
+                          name="stock_inicial"
+                          required
+                          class="form-ctrl"
+                        />
+                        <small class="field-hint">Por variante en tienda</small>
                       </div>
                     </div>
 
@@ -821,6 +847,35 @@ interface FotoLocal {
       font-weight: 800;
       color: #0f172a;
       font-size: 0.95rem;
+    }
+
+    .stock-summary-cell {
+      display: flex;
+      align-items: center;
+    }
+    .stock-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.65rem;
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .stock-pill.in-stock {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+    .stock-pill.out-of-stock {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+    .stock-dot {
+      font-size: 1.1rem;
+      line-height: 0;
     }
 
     .variants-summary {
@@ -1571,7 +1626,8 @@ export class GestionPrendasPageComponent implements OnInit {
     descripcion: '',
     precio_base: 180,
     categoria_id: 1,
-    temporada_id: 1
+    temporada_id: 1,
+    stock_inicial: 25
   };
   fotosSubidas = signal<FotoLocal[]>([]);
   selectedTallasIds = signal<number[]>([]);
@@ -1656,7 +1712,8 @@ export class GestionPrendasPageComponent implements OnInit {
       descripcion: '',
       precio_base: 250,
       categoria_id: this.categorias()[0]?.id || 1,
-      temporada_id: this.temporadas()[0]?.id || 1
+      temporada_id: this.temporadas()[0]?.id || 1,
+      stock_inicial: 25
     };
     this.fotosSubidas.set([]);
     // Default select standard sizes and first color
@@ -1675,7 +1732,8 @@ export class GestionPrendasPageComponent implements OnInit {
       descripcion: prenda.descripcion,
       precio_base: Number(prenda.precio_base),
       categoria_id: prenda.categoria_id,
-      temporada_id: prenda.temporada_id
+      temporada_id: prenda.temporada_id,
+      stock_inicial: prenda.stock_total !== undefined ? prenda.stock_total : 25
     };
 
     // Load existing photos
@@ -1860,6 +1918,7 @@ export class GestionPrendasPageComponent implements OnInit {
         precio_base: Number(this.formData.precio_base),
         categoria_id: Number(this.formData.categoria_id),
         temporada_id: Number(this.formData.temporada_id),
+        stock_inicial: Number(this.formData.stock_inicial || 0),
         tallas_ids: this.selectedTallasIds(),
         colores_ids: this.selectedColoresIds(),
         multimedia: multimediaPayload
@@ -1886,6 +1945,7 @@ export class GestionPrendasPageComponent implements OnInit {
         precio_base: Number(this.formData.precio_base),
         categoria_id: Number(this.formData.categoria_id),
         temporada_id: Number(this.formData.temporada_id),
+        stock_inicial: Number(this.formData.stock_inicial || 0),
         tallas_ids: this.selectedTallasIds(),
         colores_ids: this.selectedColoresIds(),
         multimedia: multimediaPayload

@@ -118,6 +118,7 @@ class PrendaCreate(BaseModel):
     precio_base: Decimal = Field(..., ge=0)
     categoria_id: int
     temporada_id: int
+    stock_inicial: Optional[int] = Field(50, ge=0)
     variantes: List[PrendaVarianteInput] = []
     multimedia: List[PrendaMultimediaCreate] = []
     tallas_ids: Optional[List[int]] = None
@@ -130,6 +131,7 @@ class PrendaUpdate(BaseModel):
     precio_base: Optional[Decimal] = Field(None, ge=0)
     categoria_id: Optional[int] = None
     temporada_id: Optional[int] = None
+    stock_inicial: Optional[int] = Field(None, ge=0)
     activo: Optional[bool] = None
     multimedia: Optional[List[PrendaMultimediaCreate]] = None
     tallas_ids: Optional[List[int]] = None
@@ -171,6 +173,7 @@ class PrendaResponse(BaseSchema):
     variantes: List[PrendaVarianteResponse] = []
     rating_promedio: Optional[float] = 0.0
     total_resenas: Optional[int] = 0
+    stock_total: Optional[int] = 0
 
 class AjusteInventarioRequest(BaseModel):
     variante_id: int

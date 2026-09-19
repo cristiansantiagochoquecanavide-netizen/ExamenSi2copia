@@ -89,6 +89,14 @@ class Prenda(Base):
     def total_resenas(self) -> int:
         return sum(1 for c in (self.calificaciones or []) if getattr(c, "activo", True))
 
+    @property
+    def stock_total(self) -> int:
+        total = 0
+        for var in (self.variantes or []):
+            for stk in (getattr(var, "stock_items", []) or []):
+                total += getattr(stk, "cantidad_disponible", 0)
+        return total
+
 
 class PrendaMultimedia(Base):
     __tablename__ = "prenda_multimedia"
@@ -121,7 +129,7 @@ class PrendaVariante(Base):
     prenda: Mapped["Prenda"] = relationship("Prenda", back_populates="variantes")
     talla: Mapped["Talla"] = relationship("Talla", lazy="selectin")
     color: Mapped["Color"] = relationship("Color", lazy="selectin")
-    stock_items: Mapped[List["InventarioStock"]] = relationship("InventarioStock", back_populates="variante")
+    stock_items: Mapped[List["InventarioStock"]] = relationship("InventarioStock", back_populates="variante", lazy="selectin")
 
 
 class InventarioStock(Base):

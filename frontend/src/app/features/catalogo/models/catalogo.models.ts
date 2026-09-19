@@ -113,6 +113,7 @@ export interface PrendaCreate {
   precio_base: number;
   categoria_id: number;
   temporada_id: number;
+  stock_inicial?: number;
   variantes?: PrendaVarianteInput[];
   multimedia?: PrendaMultimediaCreate[];
   tallas_ids?: number[];
@@ -126,6 +127,7 @@ export interface PrendaUpdate {
   precio_base?: number;
   categoria_id?: number;
   temporada_id?: number;
+  stock_inicial?: number;
   activo?: boolean;
   multimedia?: PrendaMultimediaCreate[];
   tallas_ids?: number[];
@@ -148,6 +150,7 @@ export interface Prenda {
   variantes: PrendaVariante[];
   rating_promedio?: number;
   total_resenas?: number;
+  stock_total?: number;
 }
 
 // ----------------- CU18: CALIFICACIONES Y RESEÑAS -----------------

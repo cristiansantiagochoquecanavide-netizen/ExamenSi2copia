@@ -265,6 +265,7 @@ class PrendaService:
             selectinload(Prenda.multimedia),
             selectinload(Prenda.variantes).selectinload(PrendaVariante.talla),
             selectinload(Prenda.variantes).selectinload(PrendaVariante.color),
+            selectinload(Prenda.variantes).selectinload(PrendaVariante.stock_items),
             selectinload(Prenda.calificaciones)
         )
         filters = []
@@ -337,6 +338,7 @@ class PrendaService:
 
         # Crear variantes explicitas (o combinaciones de tallas y colores)
         variantes_creadas = set()
+        nuevas_variantes: List[PrendaVariante] = []
         for var_in in data.variantes:
             talla = await db.get(Talla, var_in.talla_id)
             color = await db.get(Color, var_in.color_id)
@@ -349,6 +351,7 @@ class PrendaService:
                 codigo_barras=var_in.codigo_barras
             )
             db.add(variante)
+            nuevas_variantes.append(variante)
             variantes_creadas.add((var_in.talla_id, var_in.color_id))
 
         if data.tallas_ids and data.colores_ids:
@@ -358,12 +361,14 @@ class PrendaService:
                         talla = await db.get(Talla, t_id)
                         color = await db.get(Color, c_id)
                         sku_var = f"{prenda.sku}-{talla.codigo if talla else t_id}-{color.nombre[:3].upper() if color else c_id}"
-                        db.add(PrendaVariante(
+                        v_nueva = PrendaVariante(
                             prenda_id=prenda.id,
                             talla_id=t_id,
                             color_id=c_id,
                             sku_variante=sku_var
-                        ))
+                        )
+                        db.add(v_nueva)
+                        nuevas_variantes.append(v_nueva)
                         variantes_creadas.add((t_id, c_id))
 
         # Crear multimedia asociada si se envio en la misma llamada
@@ -377,14 +382,49 @@ class PrendaService:
                     es_portada=m_in.es_portada if m_in.es_portada else (i == 0)
                 ))
 
+        await db.flush()
+
+        # Inicializar inventario de stock por variante en sucursales
+        cant_stock = data.stock_inicial if data.stock_inicial is not None else 25
+        if cant_stock >= 0 and nuevas_variantes:
+            suc_res = await db.execute(select(Sucursal).where(Sucursal.activo == True))
+            sucursales_activas = list(suc_res.scalars().all())
+            if not sucursales_activas:
+                suc_fallback = await db.get(Sucursal, 1)
+                if suc_fallback:
+                    sucursales_activas = [suc_fallback]
+
+            for v in nuevas_variantes:
+                for suc in sucursales_activas:
+                    stk = InventarioStock(
+                        variante_id=v.id,
+                        sucursal_id=suc.id,
+                        cantidad_disponible=cant_stock,
+                        cantidad_reservada=0,
+                        stock_minimo=5
+                    )
+                    db.add(stk)
+                    await db.flush()
+                    if cant_stock > 0:
+                        mov = MovimientoInventario(
+                            stock_id=stk.id,
+                            tipo_movimiento="INGRESO_INICIAL",
+                            cantidad=cant_stock,
+                            cantidad_anterior=0,
+                            cantidad_nueva=cant_stock,
+                            motivo=f"Stock inicial al registrar prenda {prenda.nombre} (SKU: {prenda.sku})",
+                            usuario_id=admin.id if admin else None
+                        )
+                        db.add(mov)
+
         await db.commit()
         await db.refresh(prenda)
 
         await AuditoriaService.registrar_evento(
             db, accion="REGISTRAR_PRENDA", modulo="catalogo",
-            detalle=f"Registro de nueva prenda {prenda.nombre} (SKU: {prenda.sku})",
+            detalle=f"Registro de nueva prenda {prenda.nombre} (SKU: {prenda.sku}) con stock inicial de {cant_stock} uds/variante",
             usuario_id=admin.id if admin else None, ip_address=ip,
-            valores_nuevos={"sku": prenda.sku, "precio": float(prenda.precio_base)}
+            valores_nuevos={"sku": prenda.sku, "precio": float(prenda.precio_base), "stock_inicial": cant_stock}
         )
         return await PrendaService.obtener_por_id(db, prenda.id)
 
@@ -422,6 +462,7 @@ class PrendaService:
             prenda.activo = data.activo
 
         # Agregar variantes si se especifican nuevas tallas/colores
+        nuevas_vars_update: List[PrendaVariante] = []
         if data.tallas_ids and data.colores_ids:
             existentes = {(v.talla_id, v.color_id) for v in (prenda.variantes or [])}
             for t_id in data.tallas_ids:
@@ -430,12 +471,68 @@ class PrendaService:
                         talla = await db.get(Talla, t_id)
                         color = await db.get(Color, c_id)
                         sku_var = f"{prenda.sku}-{talla.codigo if talla else t_id}-{color.nombre[:3].upper() if color else c_id}"
-                        db.add(PrendaVariante(
+                        nv = PrendaVariante(
                             prenda_id=prenda.id,
                             talla_id=t_id,
                             color_id=c_id,
                             sku_variante=sku_var
-                        ))
+                        )
+                        db.add(nv)
+                        nuevas_vars_update.append(nv)
+
+        if nuevas_vars_update:
+            await db.flush()
+            init_stk = data.stock_inicial if data.stock_inicial is not None else 25
+            suc_res = await db.execute(select(Sucursal).where(Sucursal.activo == True))
+            sucursales_activas = list(suc_res.scalars().all())
+            for nv in nuevas_vars_update:
+                for suc in sucursales_activas:
+                    stk = InventarioStock(
+                        variante_id=nv.id,
+                        sucursal_id=suc.id,
+                        cantidad_disponible=init_stk,
+                        cantidad_reservada=0,
+                        stock_minimo=5
+                    )
+                    db.add(stk)
+
+        # Actualizar stock si fue especificado explícitamente en el update
+        if data.stock_inicial is not None:
+            suc_res = await db.execute(select(Sucursal).where(Sucursal.activo == True))
+            sucursales_activas = list(suc_res.scalars().all())
+            for v in (prenda.variantes or []):
+                for suc in sucursales_activas:
+                    stk_res = await db.execute(
+                        select(InventarioStock).where(
+                            and_(InventarioStock.variante_id == v.id, InventarioStock.sucursal_id == suc.id)
+                        )
+                    )
+                    stk = stk_res.scalar_one_or_none()
+                    if not stk:
+                        stk = InventarioStock(
+                            variante_id=v.id,
+                            sucursal_id=suc.id,
+                            cantidad_disponible=data.stock_inicial,
+                            cantidad_reservada=0,
+                            stock_minimo=5
+                        )
+                        db.add(stk)
+                        await db.flush()
+                    else:
+                        ant = stk.cantidad_disponible
+                        diff = data.stock_inicial - ant
+                        stk.cantidad_disponible = data.stock_inicial
+                        if diff != 0:
+                            mov = MovimientoInventario(
+                                stock_id=stk.id,
+                                tipo_movimiento="AJUSTE_POSITIVO" if diff > 0 else "AJUSTE_NEGATIVO",
+                                cantidad=abs(diff),
+                                cantidad_anterior=ant,
+                                cantidad_nueva=data.stock_inicial,
+                                motivo=f"Ajuste de stock desde edición de prenda {prenda.nombre}",
+                                usuario_id=admin.id if admin else None
+                            )
+                            db.add(mov)
 
         # Agregar multimedia si se envio en el update
         if data.multimedia is not None:

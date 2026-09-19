@@ -271,8 +271,13 @@ import { OutfitSugerido } from '../../ia-asistente/models/ia-asistente.models';
                   <!-- Card Footer: Precio e Hipervínculo/Botón de Acción -->
                   <div class="card-footer">
                     <div class="price-container">
-                      <span class="currency">Bs.</span>
-                      <span class="price-value">{{ prenda.precio_base | number:'1.2-2' }}</span>
+                      <div class="price-row-wrap">
+                        <span class="currency">Bs.</span>
+                        <span class="price-value">{{ prenda.precio_base | number:'1.2-2' }}</span>
+                      </div>
+                      <span class="card-stock-pill" [class.in-stock]="(prenda.stock_total || 0) > 0" [class.out-of-stock]="(prenda.stock_total || 0) <= 0">
+                        {{ (prenda.stock_total || 0) > 0 ? (prenda.stock_total + ' en stock') : 'Agotado' }}
+                      </span>
                     </div>
 
                     <button type="button" class="btn-card-action" (click)="openDetail(prenda)">
@@ -353,8 +358,16 @@ import { OutfitSugerido } from '../../ia-asistente/models/ia-asistente.models';
                   <p class="modal-desc">{{ prenda.descripcion }}</p>
 
                   <div class="modal-price-box">
-                    <span class="modal-price-label">PRECIO BASE:</span>
-                    <span class="modal-price-value"><span class="currency">Bs.</span> {{ prenda.precio_base | number:'1.2-2' }}</span>
+                    <div class="price-col">
+                      <span class="modal-price-label">PRECIO BASE:</span>
+                      <span class="modal-price-value"><span class="currency">Bs.</span> {{ prenda.precio_base | number:'1.2-2' }}</span>
+                    </div>
+                    <div class="modal-stock-info">
+                      <span class="modal-price-label">STOCK TOTAL:</span>
+                      <span class="modal-stock-badge" [class.in-stock]="(prenda.stock_total || 0) > 0" [class.out-of-stock]="(prenda.stock_total || 0) <= 0">
+                        {{ (prenda.stock_total || 0) > 0 ? (prenda.stock_total + ' unidades disponibles') : 'Sin stock' }}
+                      </span>
+                    </div>
                   </div>
 
                   <!-- Modelos 3D y AR vinculados -->
@@ -1621,9 +1634,36 @@ import { OutfitSugerido } from '../../ia-asistente/models/ia-asistente.models';
 
     .price-container {
       display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .price-row-wrap {
+      display: flex;
       align-items: baseline;
       gap: 0.35rem;
-      font-family: 'Inter', sans-serif;
+    }
+
+    .card-stock-pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      padding: 0.12rem 0.5rem;
+      border-radius: 9999px;
+      width: fit-content;
+    }
+
+    .card-stock-pill.in-stock {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+
+    .card-stock-pill.out-of-stock {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
     }
 
     .price-original {
@@ -2570,11 +2610,22 @@ import { OutfitSugerido } from '../../ia-asistente/models/ia-asistente.models';
       margin-bottom: 1.5rem;
     }
 
+    .price-col,
+    .modal-stock-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .modal-stock-info {
+      align-items: flex-end;
+    }
+
     .modal-price-label {
-      font-size: 0.75rem;
-      letter-spacing: 0.15em;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
       color: #6b7280;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
     }
 
@@ -2582,6 +2633,25 @@ import { OutfitSugerido } from '../../ia-asistente/models/ia-asistente.models';
       font-size: 1.4rem;
       font-weight: 800;
       color: #000000;
+    }
+
+    .modal-stock-badge {
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+    }
+
+    .modal-stock-badge.in-stock {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+
+    .modal-stock-badge.out-of-stock {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
     }
 
     .ar-section {
