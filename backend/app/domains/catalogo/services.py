@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import List, Optional
 from fastapi import HTTPException, status
-from sqlalchemy import select, and_, or_, desc
+from sqlalchemy import select, and_, or_, desc, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -534,27 +534,64 @@ class PrendaService:
                             )
                             db.add(mov)
 
-        # Agregar multimedia si se envio en el update
+        # Actualizar multimedia si se envio en el update
         if data.multimedia is not None:
-            # Reemplazar o agregar fotos
+            # Eliminar imagenes previas del tipo especificado para reemplazarlas
+            tipos_a_reemplazar = {m.tipo for m in data.multimedia} or {"IMAGEN"}
+            await db.execute(
+                delete(PrendaMultimedia).where(
+                    and_(
+                        PrendaMultimedia.prenda_id == prenda.id,
+                        PrendaMultimedia.tipo.in_(tipos_a_reemplazar)
+                    )
+                )
+            )
+
+            # Asegurar que exactamente una imagen sea portada si hay imagenes
+            portada_asignada = False
             for m_in in data.multimedia:
+                es_port = bool(m_in.es_portada)
+                if es_port and not portada_asignada:
+                    portada_asignada = True
+                elif es_port and portada_asignada:
+                    es_port = False
+
                 db.add(PrendaMultimedia(
                     prenda_id=prenda.id,
                     tipo=m_in.tipo,
                     url=m_in.url,
                     formato=m_in.formato.lower(),
-                    es_portada=m_in.es_portada
+                    es_portada=es_port
                 ))
+            await db.flush()
 
+            # Si ninguna vino marcada como portada pero hay imagenes, marcar la primera
+            if not portada_asignada and data.multimedia:
+                first_media_res = await db.execute(
+                    select(PrendaMultimedia).where(
+                        and_(
+                            PrendaMultimedia.prenda_id == prenda.id,
+                            PrendaMultimedia.tipo == "IMAGEN"
+                        )
+                    ).limit(1)
+                )
+                first_media = first_media_res.scalar_one_or_none()
+                if first_media:
+                    first_media.es_portada = True
+                    await db.flush()
+
+        target_prenda_id = prenda.id
         await db.commit()
-        await db.refresh(prenda)
+        db.expire_all()
+
+        prenda_actualizada = await PrendaService.obtener_por_id(db, target_prenda_id)
 
         await AuditoriaService.registrar_evento(
             db, accion="ACTUALIZAR_PRENDA", modulo="catalogo",
-            detalle=f"Actualizacion de prenda {prenda.nombre} (SKU: {prenda.sku})",
+            detalle=f"Actualizacion de prenda {prenda_actualizada.nombre} (SKU: {prenda_actualizada.sku})",
             usuario_id=admin.id if admin else None, ip_address=ip
         )
-        return await PrendaService.obtener_por_id(db, prenda.id)
+        return prenda_actualizada
 
     @staticmethod
     async def eliminar(
