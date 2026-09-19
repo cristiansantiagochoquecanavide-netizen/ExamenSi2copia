@@ -207,6 +207,7 @@ MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 
 @router.post("/upload-imagen", response_model=UploadImagenResponse, summary="Subir Foto de Prenda (CU6)")
 async def subir_imagen_prenda(
+    request: Request,
     file: UploadFile = File(...),
     current_user: Usuario = Depends(require_permissions("catalogo:write"))
 ):
@@ -234,7 +235,12 @@ async def subir_imagen_prenda(
     with open(file_path, "wb") as f:
         f.write(content)
 
-    url = f"/static/uploads/prendas/{filename}"
+    base = "http://localhost:8000"
+    if request and request.base_url:
+        b = str(request.base_url).rstrip('/')
+        if "backend:8000" not in b:
+            base = b
+    url = f"{base}/static/uploads/prendas/{filename}"
     return UploadImagenResponse(
         url=url,
         formato=ext,

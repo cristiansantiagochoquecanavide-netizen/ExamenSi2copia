@@ -3369,11 +3369,19 @@ export class CatalogoPageComponent implements OnInit {
     });
   }
 
+  resolveImageUrl(url?: string): string {
+    if (!url) return 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&q=80';
+    if (url.startsWith('blob:') || url.startsWith('data:')) return url;
+    if (url.startsWith('/static/')) return `http://localhost:8000${url}`;
+    if (url.includes('backend:8000')) return url.replace('backend:8000', 'localhost:8000');
+    return url;
+  }
+
   getPortadaUrl(prenda: Prenda): string {
     const portada = prenda.multimedia?.find(m => m.es_portada && m.tipo === 'IMAGEN');
-    if (portada) return portada.url;
+    if (portada) return this.resolveImageUrl(portada.url);
     const primeraImg = prenda.multimedia?.find(m => m.tipo === 'IMAGEN');
-    if (primeraImg) return primeraImg.url;
+    if (primeraImg) return this.resolveImageUrl(primeraImg.url);
     return 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&q=80';
   }
 

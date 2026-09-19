@@ -41,6 +41,13 @@ app.add_middleware(
 
 # Servir archivos estaticos (imagenes subidas del catalogo)
 import os
+import mimetypes
+mimetypes.add_type("image/webp", ".webp")
+mimetypes.add_type("image/avif", ".avif")
+mimetypes.add_type("image/jpeg", ".jpg")
+mimetypes.add_type("image/jpeg", ".jpeg")
+mimetypes.add_type("image/png", ".png")
+
 from fastapi.staticfiles import StaticFiles
 static_dir = os.path.join(os.path.dirname(__file__), "static")
 uploads_prendas_dir = os.path.join(static_dir, "uploads", "prendas")

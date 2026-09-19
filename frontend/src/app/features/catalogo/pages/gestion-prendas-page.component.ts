@@ -306,7 +306,7 @@ interface FotoLocal {
                         *ngFor="let f of fotosSubidas(); let i = index"
                         class="photo-card"
                         [class.is-cover]="f.es_portada">
-                        <img [src]="f.url" alt="Foto prenda {{ i + 1 }}" class="photo-card-img" />
+                        <img [src]="resolveImageUrl(f.url)" alt="Foto prenda {{ i + 1 }}" class="photo-card-img" />
 
                         <!-- Cover Badge -->
                         <div class="cover-indicator" *ngIf="f.es_portada">
@@ -491,8 +491,8 @@ interface FotoLocal {
                 <button
                   type="submit"
                   class="btn-modal-submit"
-                  [disabled]="isSaving() || fotosSubidas().length === 0 || !formData.sku || !formData.nombre">
-                  {{ isSaving() ? 'Guardando...' : (isEditing() ? 'Actualizar Prenda' : 'Guardar Prenda') }}
+                  [disabled]="isSaving() || isUploadingImage() || fotosSubidas().length === 0 || !formData.sku || !formData.nombre">
+                  {{ isSaving() ? 'Guardando...' : (isUploadingImage() ? 'Subiendo fotos...' : (isEditing() ? 'Actualizar Prenda' : 'Guardar Prenda')) }}
                 </button>
               </div>
             </footer>
@@ -1682,7 +1682,7 @@ export class GestionPrendasPageComponent implements OnInit {
     const fotos: FotoLocal[] = (prenda.multimedia || [])
       .filter(m => m.tipo === 'IMAGEN')
       .map(m => ({
-        url: m.url,
+        url: this.resolveImageUrl(m.url),
         formato: m.formato,
         es_portada: m.es_portada,
         id_multimedia: m.id
@@ -1760,23 +1760,35 @@ export class GestionPrendasPageComponent implements OnInit {
         continue;
       }
 
+      // 1. Vista previa inmediata con ObjectURL
+      const previewUrl = URL.createObjectURL(file);
+      const tempItem: FotoLocal = {
+        url: previewUrl,
+        formato: ext,
+        es_portada: this.fotosSubidas().length === 0,
+        nombre_archivo: file.name
+      };
+      this.fotosSubidas.update(prev => [...prev, tempItem]);
+
+      // 2. Subida al backend
       this.isUploadingImage.set(true);
       this.catalogoService.uploadImagen(file).subscribe({
         next: (res) => {
           this.isUploadingImage.set(false);
-          const current = [...this.fotosSubidas()];
-          const esPrimera = current.length === 0;
-          current.push({
-            url: res.url,
-            formato: res.formato,
-            es_portada: esPrimera,
-            nombre_archivo: res.nombre_original
-          });
-          this.fotosSubidas.set(current);
+          const resolvedUrl = this.resolveImageUrl(res.url);
+          this.fotosSubidas.update(prev =>
+            prev.map(f => f.url === previewUrl ? {
+              ...f,
+              url: resolvedUrl,
+              formato: res.formato,
+              nombre_archivo: res.nombre_original
+            } : f)
+          );
         },
         error: (err) => {
           this.isUploadingImage.set(false);
           this.uploadError.set('Error al subir imagen: ' + (err.error?.detail || err.message));
+          this.fotosSubidas.update(prev => prev.filter(f => f.url !== previewUrl));
         }
       });
     }
@@ -1919,11 +1931,19 @@ export class GestionPrendasPageComponent implements OnInit {
   }
 
   // Helpers
+  resolveImageUrl(url?: string): string {
+    if (!url) return 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&q=80';
+    if (url.startsWith('blob:') || url.startsWith('data:')) return url;
+    if (url.startsWith('/static/')) return `http://localhost:8000${url}`;
+    if (url.includes('backend:8000')) return url.replace('backend:8000', 'localhost:8000');
+    return url;
+  }
+
   getPortadaUrl(prenda: Prenda): string {
     const portada = prenda.multimedia?.find(m => m.es_portada && m.tipo === 'IMAGEN');
-    if (portada) return portada.url;
+    if (portada) return this.resolveImageUrl(portada.url);
     const primeraImg = prenda.multimedia?.find(m => m.tipo === 'IMAGEN');
-    if (primeraImg) return primeraImg.url;
+    if (primeraImg) return this.resolveImageUrl(primeraImg.url);
     return 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&q=80';
   }
 
