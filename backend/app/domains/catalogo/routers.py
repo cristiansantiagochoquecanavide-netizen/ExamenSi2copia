@@ -1,5 +1,7 @@
+import os
+import uuid
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, Request, status, UploadFile, File, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -11,7 +13,7 @@ from app.domains.catalogo.schemas import (
     ColorCreate, ColorUpdate, ColorResponse,
     TemporadaCreate, TemporadaUpdate, TemporadaResponse,
     PrendaCreate, PrendaUpdate, PrendaResponse,
-    PrendaMultimediaCreate, PrendaMultimediaResponse,
+    PrendaMultimediaCreate, PrendaMultimediaResponse, UploadImagenResponse,
     AjusteInventarioRequest, InventarioStockResponse, MensajeCatalogoResponse,
     CalificacionCreate, CalificacionUpdate, CalificacionResponse, ListadoCalificacionesResponse
 )
@@ -195,6 +197,84 @@ async def crear_prenda(
 @router.get("/prendas/{prenda_id}", response_model=PrendaResponse, summary="Detalle de Prenda (CU6)")
 async def obtener_prenda(prenda_id: int, db: AsyncSession = Depends(get_db)):
     return await PrendaService.obtener_por_id(db, prenda_id)
+
+UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "static", "uploads", "prendas")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".avif"}
+ALLOWED_MIME_TYPES = {"image/jpeg", "image/png", "image/webp", "image/avif"}
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
+
+@router.post("/upload-imagen", response_model=UploadImagenResponse, summary="Subir Foto de Prenda (CU6)")
+async def subir_imagen_prenda(
+    file: UploadFile = File(...),
+    current_user: Usuario = Depends(require_permissions("catalogo:write"))
+):
+    ext = os.path.splitext(file.filename or "")[1].lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Formato no permitido ({ext}). Se admiten solo: JPG, JPEG, PNG, WEBP, AVIF"
+        )
+    if file.content_type and file.content_type.lower() not in ALLOWED_MIME_TYPES and file.content_type != "application/octet-stream":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Tipo de contenido no valido ({file.content_type}). Debe ser una imagen valida."
+        )
+
+    content = await file.read()
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La imagen excede el limite de 10 MB permitidos."
+        )
+
+    filename = f"prenda_{uuid.uuid4().hex[:12]}{ext}"
+    file_path = os.path.join(UPLOAD_DIR, filename)
+    with open(file_path, "wb") as f:
+        f.write(content)
+
+    url = f"/static/uploads/prendas/{filename}"
+    return UploadImagenResponse(
+        url=url,
+        formato=ext,
+        nombre_original=file.filename or filename,
+        tamano_bytes=len(content)
+    )
+
+@router.put("/prendas/{prenda_id}", response_model=PrendaResponse, summary="Actualizar Prenda (CU6)")
+async def actualizar_prenda(
+    prenda_id: int,
+    data: PrendaUpdate,
+    request: Request,
+    current_user: Usuario = Depends(require_permissions("catalogo:write")),
+    db: AsyncSession = Depends(get_db)
+):
+    ip = request.client.host if request.client else None
+    return await PrendaService.actualizar(db, prenda_id, data, current_user, ip)
+
+@router.delete("/prendas/{prenda_id}", response_model=MensajeCatalogoResponse, summary="Eliminar Prenda (CU6)")
+async def eliminar_prenda(
+    prenda_id: int,
+    request: Request,
+    current_user: Usuario = Depends(require_permissions("catalogo:write")),
+    db: AsyncSession = Depends(get_db)
+):
+    ip = request.client.host if request.client else None
+    await PrendaService.eliminar(db, prenda_id, current_user, ip)
+    return MensajeCatalogoResponse(mensaje="Prenda eliminada exitosamente")
+
+@router.delete("/prendas/{prenda_id}/multimedia/{multimedia_id}", response_model=MensajeCatalogoResponse, summary="Eliminar Multimedia de Prenda (CU6)")
+async def eliminar_multimedia_prenda(
+    prenda_id: int,
+    multimedia_id: int,
+    request: Request,
+    current_user: Usuario = Depends(require_permissions("catalogo:write")),
+    db: AsyncSession = Depends(get_db)
+):
+    ip = request.client.host if request.client else None
+    await PrendaService.eliminar_multimedia(db, prenda_id, multimedia_id, current_user, ip)
+    return MensajeCatalogoResponse(mensaje="Foto multimedia eliminada exitosamente")
 
 @router.post("/prendas/{prenda_id}/multimedia", response_model=PrendaMultimediaResponse, summary="Vincular Modelo 3D / Multimedia AR (CU6)")
 async def vincular_multimedia_prenda(

@@ -99,6 +99,18 @@ class PrendaVarianteInput(BaseModel):
     sku_variante: Optional[str] = None
     codigo_barras: Optional[str] = None
 
+class PrendaMultimediaCreate(BaseModel):
+    tipo: str = Field(..., pattern="^(IMAGEN|MODELO_3D_GLB|MODELO_3D_USDZ)$")
+    url: str = Field(..., max_length=500)
+    formato: str = Field(..., pattern=r"^\.(glb|usdz|jpg|jpeg|png|webp|avif)$")
+    es_portada: bool = False
+
+class UploadImagenResponse(BaseModel):
+    url: str
+    formato: str
+    nombre_original: str
+    tamano_bytes: int
+
 class PrendaCreate(BaseModel):
     sku: str = Field(..., max_length=50)
     nombre: str = Field(..., max_length=150)
@@ -107,20 +119,21 @@ class PrendaCreate(BaseModel):
     categoria_id: int
     temporada_id: int
     variantes: List[PrendaVarianteInput] = []
+    multimedia: List[PrendaMultimediaCreate] = []
+    tallas_ids: Optional[List[int]] = None
+    colores_ids: Optional[List[int]] = None
 
 class PrendaUpdate(BaseModel):
+    sku: Optional[str] = Field(None, max_length=50)
     nombre: Optional[str] = Field(None, max_length=150)
     descripcion: Optional[str] = None
     precio_base: Optional[Decimal] = Field(None, ge=0)
     categoria_id: Optional[int] = None
     temporada_id: Optional[int] = None
     activo: Optional[bool] = None
-
-class PrendaMultimediaCreate(BaseModel):
-    tipo: str = Field(..., pattern="^(IMAGEN|MODELO_3D_GLB|MODELO_3D_USDZ)$")
-    url: str = Field(..., max_length=500)
-    formato: str = Field(..., pattern=r"^\.(glb|usdz|jpg|jpeg|png|webp)$")
-    es_portada: bool = False
+    multimedia: Optional[List[PrendaMultimediaCreate]] = None
+    tallas_ids: Optional[List[int]] = None
+    colores_ids: Optional[List[int]] = None
 
 class PrendaMultimediaResponse(BaseSchema):
     id: int

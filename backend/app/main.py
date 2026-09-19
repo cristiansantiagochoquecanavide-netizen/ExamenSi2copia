@@ -39,6 +39,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Servir archivos estaticos (imagenes subidas del catalogo)
+import os
+from fastapi.staticfiles import StaticFiles
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+uploads_prendas_dir = os.path.join(static_dir, "uploads", "prendas")
+os.makedirs(uploads_prendas_dir, exist_ok=True)
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
 # Registro centralizado de enrutadores por dominio de negocio
 app.include_router(usuarios_router, prefix=settings.API_V1_STR)
 app.include_router(catalogo_router, prefix=settings.API_V1_STR)

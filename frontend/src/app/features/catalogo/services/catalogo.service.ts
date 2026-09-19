@@ -5,6 +5,8 @@ import { Observable } from 'rxjs';
 import {
   Prenda,
   PrendaCreate,
+  PrendaUpdate,
+  UploadImagenResponse,
   PrendaMultimedia,
   PrendaMultimediaCreate,
   Categoria,
@@ -143,6 +145,24 @@ export class CatalogoService {
 
   createPrenda(data: PrendaCreate): Observable<Prenda> {
     return this.http.post<Prenda>(`${this.baseUrl}/prendas`, data);
+  }
+
+  updatePrenda(id: number, data: PrendaUpdate): Observable<Prenda> {
+    return this.http.put<Prenda>(`${this.baseUrl}/prendas/${id}`, data);
+  }
+
+  deletePrenda(id: number): Observable<{ mensaje: string; exito: boolean }> {
+    return this.http.delete<{ mensaje: string; exito: boolean }>(`${this.baseUrl}/prendas/${id}`);
+  }
+
+  uploadImagen(file: File): Observable<UploadImagenResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<UploadImagenResponse>(`${this.baseUrl}/upload-imagen`, formData);
+  }
+
+  deleteMultimedia(prendaId: number, multimediaId: number): Observable<{ mensaje: string; exito: boolean }> {
+    return this.http.delete<{ mensaje: string; exito: boolean }>(`${this.baseUrl}/prendas/${prendaId}/multimedia/${multimediaId}`);
   }
 
   vincularMultimedia(prendaId: number, data: PrendaMultimediaCreate): Observable<PrendaMultimedia> {

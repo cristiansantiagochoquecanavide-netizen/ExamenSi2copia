@@ -99,6 +99,13 @@ export interface PrendaVariante {
   prenda?: Prenda;
 }
 
+export interface UploadImagenResponse {
+  url: string;
+  formato: string;
+  nombre_original: string;
+  tamano_bytes: number;
+}
+
 export interface PrendaCreate {
   sku: string;
   nombre: string;
@@ -107,6 +114,22 @@ export interface PrendaCreate {
   categoria_id: number;
   temporada_id: number;
   variantes?: PrendaVarianteInput[];
+  multimedia?: PrendaMultimediaCreate[];
+  tallas_ids?: number[];
+  colores_ids?: number[];
+}
+
+export interface PrendaUpdate {
+  sku?: string;
+  nombre?: string;
+  descripcion?: string;
+  precio_base?: number;
+  categoria_id?: number;
+  temporada_id?: number;
+  activo?: boolean;
+  multimedia?: PrendaMultimediaCreate[];
+  tallas_ids?: number[];
+  colores_ids?: number[];
 }
 
 export interface Prenda {

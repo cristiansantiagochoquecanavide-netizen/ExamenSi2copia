@@ -149,8 +149,11 @@ import { OutfitSugerido } from '../../ia-asistente/models/ia-asistente.models';
           <span class="status-label">CATÁLOGO CON AR &bull; SINCRONIZADO</span>
         </div>
         <div class="action-buttons-group">
-          <button type="button" class="btn-action-gold" (click)="openCreatePrendaModal()">
-            + REGISTRAR PRENDA
+          <button type="button" class="btn-action-gold" (click)="router.navigate(['/catalogo/gestion'])">
+            ⚙ GESTIONAR PRENDAS
+          </button>
+          <button type="button" class="btn-action-outline" (click)="router.navigate(['/catalogo/gestion'])">
+            + AÑADIR PRENDA
           </button>
           <button type="button" class="btn-action-outline" (click)="openAjusteModal()">
             AJUSTAR STOCK SUCURSAL
@@ -195,8 +198,11 @@ import { OutfitSugerido } from '../../ia-asistente/models/ia-asistente.models';
       @if (!isLoading() && !errorMessage()) {
         @if (filteredPrendas().length === 0) {
           <div class="empty-state">
-            <h3 class="empty-title">NO SE ENCONTRARON PRENDAS</h3>
-            <p class="empty-text">No existen prendas activas con el filtro seleccionado.</p>
+            <h3 class="empty-title">CATÁLOGO LISTO PARA NUEVAS PRENDAS</h3>
+            <p class="empty-text">No hay prendas registradas con el filtro actual. Podés añadir prendas con fotos, categorías y variantes.</p>
+            <button type="button" class="btn-action-gold" style="margin-top: 1.5rem;" (click)="router.navigate(['/catalogo/gestion'])">
+              + Ir al Gestor y Añadir Prenda
+            </button>
           </div>
         } @else {
           <div class="products-grid">

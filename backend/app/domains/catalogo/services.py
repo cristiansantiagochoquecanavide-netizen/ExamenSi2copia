@@ -335,7 +335,8 @@ class PrendaService:
         db.add(prenda)
         await db.flush()
 
-        # Crear variantes (talla + color)
+        # Crear variantes explicitas (o combinaciones de tallas y colores)
+        variantes_creadas = set()
         for var_in in data.variantes:
             talla = await db.get(Talla, var_in.talla_id)
             color = await db.get(Color, var_in.color_id)
@@ -348,6 +349,33 @@ class PrendaService:
                 codigo_barras=var_in.codigo_barras
             )
             db.add(variante)
+            variantes_creadas.add((var_in.talla_id, var_in.color_id))
+
+        if data.tallas_ids and data.colores_ids:
+            for t_id in data.tallas_ids:
+                for c_id in data.colores_ids:
+                    if (t_id, c_id) not in variantes_creadas:
+                        talla = await db.get(Talla, t_id)
+                        color = await db.get(Color, c_id)
+                        sku_var = f"{prenda.sku}-{talla.codigo if talla else t_id}-{color.nombre[:3].upper() if color else c_id}"
+                        db.add(PrendaVariante(
+                            prenda_id=prenda.id,
+                            talla_id=t_id,
+                            color_id=c_id,
+                            sku_variante=sku_var
+                        ))
+                        variantes_creadas.add((t_id, c_id))
+
+        # Crear multimedia asociada si se envio en la misma llamada
+        if data.multimedia:
+            for i, m_in in enumerate(data.multimedia):
+                db.add(PrendaMultimedia(
+                    prenda_id=prenda.id,
+                    tipo=m_in.tipo,
+                    url=m_in.url,
+                    formato=m_in.formato.lower(),
+                    es_portada=m_in.es_portada if m_in.es_portada else (i == 0)
+                ))
 
         await db.commit()
         await db.refresh(prenda)
@@ -359,6 +387,116 @@ class PrendaService:
             valores_nuevos={"sku": prenda.sku, "precio": float(prenda.precio_base)}
         )
         return await PrendaService.obtener_por_id(db, prenda.id)
+
+    @staticmethod
+    async def actualizar(
+        db: AsyncSession,
+        prenda_id: int,
+        data: PrendaUpdate,
+        admin: Optional[Usuario] = None,
+        ip: Optional[str] = None
+    ) -> Prenda:
+        prenda = await PrendaService.obtener_por_id(db, prenda_id)
+
+        if data.sku and data.sku.upper() != prenda.sku:
+            dupl = await db.execute(select(Prenda).where(Prenda.sku == data.sku.upper(), Prenda.id != prenda_id))
+            if dupl.scalar_one_or_none():
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"El SKU '{data.sku}' ya pertenece a otra prenda.")
+            prenda.sku = data.sku.upper()
+
+        if data.nombre is not None:
+            prenda.nombre = data.nombre
+        if data.descripcion is not None:
+            prenda.descripcion = data.descripcion
+        if data.precio_base is not None:
+            prenda.precio_base = float(data.precio_base)
+        if data.categoria_id is not None:
+            cat = await db.get(Categoria, data.categoria_id)
+            if not cat: raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Categoria no existe")
+            prenda.categoria_id = data.categoria_id
+        if data.temporada_id is not None:
+            temp = await db.get(Temporada, data.temporada_id)
+            if not temp: raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Temporada no existe")
+            prenda.temporada_id = data.temporada_id
+        if data.activo is not None:
+            prenda.activo = data.activo
+
+        # Agregar variantes si se especifican nuevas tallas/colores
+        if data.tallas_ids and data.colores_ids:
+            existentes = {(v.talla_id, v.color_id) for v in (prenda.variantes or [])}
+            for t_id in data.tallas_ids:
+                for c_id in data.colores_ids:
+                    if (t_id, c_id) not in existentes:
+                        talla = await db.get(Talla, t_id)
+                        color = await db.get(Color, c_id)
+                        sku_var = f"{prenda.sku}-{talla.codigo if talla else t_id}-{color.nombre[:3].upper() if color else c_id}"
+                        db.add(PrendaVariante(
+                            prenda_id=prenda.id,
+                            talla_id=t_id,
+                            color_id=c_id,
+                            sku_variante=sku_var
+                        ))
+
+        # Agregar multimedia si se envio en el update
+        if data.multimedia is not None:
+            # Reemplazar o agregar fotos
+            for m_in in data.multimedia:
+                db.add(PrendaMultimedia(
+                    prenda_id=prenda.id,
+                    tipo=m_in.tipo,
+                    url=m_in.url,
+                    formato=m_in.formato.lower(),
+                    es_portada=m_in.es_portada
+                ))
+
+        await db.commit()
+        await db.refresh(prenda)
+
+        await AuditoriaService.registrar_evento(
+            db, accion="ACTUALIZAR_PRENDA", modulo="catalogo",
+            detalle=f"Actualizacion de prenda {prenda.nombre} (SKU: {prenda.sku})",
+            usuario_id=admin.id if admin else None, ip_address=ip
+        )
+        return await PrendaService.obtener_por_id(db, prenda.id)
+
+    @staticmethod
+    async def eliminar(
+        db: AsyncSession,
+        prenda_id: int,
+        admin: Optional[Usuario] = None,
+        ip: Optional[str] = None
+    ) -> bool:
+        prenda = await PrendaService.obtener_por_id(db, prenda_id)
+        sku = prenda.sku
+        nombre = prenda.nombre
+        await db.delete(prenda)
+        await db.commit()
+
+        await AuditoriaService.registrar_evento(
+            db, accion="ELIMINAR_PRENDA", modulo="catalogo",
+            detalle=f"Eliminacion de prenda {nombre} (SKU: {sku})",
+            usuario_id=admin.id if admin else None, ip_address=ip
+        )
+        return True
+
+    @staticmethod
+    async def eliminar_multimedia(
+        db: AsyncSession,
+        prenda_id: int,
+        multimedia_id: int,
+        admin: Optional[Usuario] = None,
+        ip: Optional[str] = None
+    ) -> bool:
+        res = await db.execute(select(PrendaMultimedia).where(
+            PrendaMultimedia.id == multimedia_id,
+            PrendaMultimedia.prenda_id == prenda_id
+        ))
+        media = res.scalar_one_or_none()
+        if not media:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Multimedia no encontrado")
+        await db.delete(media)
+        await db.commit()
+        return True
 
     @staticmethod
     async def vincular_multimedia(
@@ -379,10 +517,10 @@ class PrendaService:
                     detail="Formato de archivo 3D incompatible: El sistema solo admite .glb o .usdz para Realidad Aumentada (E2)"
                 )
         else:
-            if extension not in [".jpg", ".jpeg", ".png", ".webp"]:
+            if extension not in [".jpg", ".jpeg", ".png", ".webp", ".avif"]:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Formato de imagen incompatible: Se admite solo .jpg, .jpeg, .png, .webp (E2)"
+                    detail="Formato de imagen incompatible: Se admite solo .jpg, .jpeg, .png, .webp, .avif (E2)"
                 )
 
         media = PrendaMultimedia(
