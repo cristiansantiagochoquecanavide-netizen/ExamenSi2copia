@@ -127,7 +127,7 @@ import { OutfitSugerido } from '../../ia-asistente/models/ia-asistente.models';
               type="button" 
               *ngFor="let cat of categoriasDelSector()" 
               class="subcat-chip" 
-              [class.active]="selectedCategoriaId() === cat.id"
+              [class.active]="isCatActive(cat)"
               (click)="seleccionarCategoria(cat.id)">
               {{ cat.nombre }}
             </button>
@@ -1032,13 +1032,22 @@ import { OutfitSugerido } from '../../ia-asistente/models/ia-asistente.models';
       margin-bottom: 2rem;
     }
 
-    /* CONTROLES DEL CATÁLOGO: 2 FILAS FIEL AL MOCKUP APROBADO */
+    /* CONTROLES DEL CATÁLOGO: 2 FILAS FIEL AL MOCKUP APROBADO (STICKY TOOLBAR) */
     .catalog-filters-container {
-      margin-top: 1.5rem;
-      margin-bottom: 2.75rem;
+      position: sticky;
+      top: 76px;
+      z-index: 900;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(8px);
+      padding: 0.85rem 0 1rem 0;
+      margin-top: 0.5rem;
+      margin-bottom: 2.25rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.06);
       display: flex;
       flex-direction: column;
-      gap: 1.25rem; /* DISTANCIA VERTICAL CLARA: FILA 1 Y FILA 2 NUNCA CHOCAN */
+      gap: 1rem;
+      transition: all 0.2s ease;
     }
 
     /* FILA 1: SECTORES A LA IZQUIERDA + BUSCADOR A LA DERECHA */
@@ -3294,7 +3303,15 @@ export class CatalogoPageComponent implements OnInit {
   categoriasDelSector = computed(() => {
     const sector = this.selectedSector();
     const cats = this.categorias();
-    if (sector === 'TODAS') return cats;
+    if (sector === 'TODAS') {
+      const seen = new Set<string>();
+      return cats.filter(c => {
+        const key = c.nombre.trim().toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
     return cats.filter(c => c.sector === sector || c.sector === 'UNISEX');
   });
 
@@ -3311,7 +3328,15 @@ export class CatalogoPageComponent implements OnInit {
 
     // 2. Filtrar por Categoría específica
     if (catId !== 'ALL') {
-      list = list.filter(p => p.categoria_id === catId);
+      const selectedCat = this.categorias().find(c => c.id === catId);
+      if (selectedCat && sector === 'TODAS') {
+        const sameNameIds = this.categorias()
+          .filter(c => c.nombre.trim().toLowerCase() === selectedCat.nombre.trim().toLowerCase())
+          .map(c => c.id);
+        list = list.filter(p => sameNameIds.includes(p.categoria_id));
+      } else {
+        list = list.filter(p => p.categoria_id === catId);
+      }
     }
 
     // 3. Filtrar por búsqueda activa
@@ -3326,6 +3351,14 @@ export class CatalogoPageComponent implements OnInit {
 
     return list;
   });
+
+  isCatActive(cat: Categoria): boolean {
+    const activeId = this.selectedCategoriaId();
+    if (activeId === 'ALL') return false;
+    if (activeId === cat.id) return true;
+    const selectedCat = this.categorias().find(c => c.id === activeId);
+    return !!(selectedCat && selectedCat.nombre.trim().toLowerCase() === cat.nombre.trim().toLowerCase());
+  }
 
   seleccionarSector(sector: 'TODAS' | 'MUJERES' | 'HOMBRES' | 'UNISEX'): void {
     this.selectedSector.set(sector);
