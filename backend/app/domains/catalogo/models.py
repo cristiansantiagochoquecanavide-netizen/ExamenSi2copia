@@ -9,11 +9,14 @@ from app.core.database import Base
 # ----------------- CU5: CATEGORIAS, TALLAS, COLORES, TEMPORADAS -----------------
 class Categoria(Base):
     __tablename__ = "categorias"
+    __table_args__ = (
+        UniqueConstraint("nombre", "sector", name="uq_categorias_nombre_sector"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    nombre: Mapped[str] = mapped_column(String(100), unique=True, index=True, nullable=False)
+    nombre: Mapped[str] = mapped_column(String(100), index=True, nullable=False)
     descripcion: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    sector: Mapped[str] = mapped_column(String(50), default="UNISEX", nullable=False)  # MUJERES, HOMBRES, NINOS, UNISEX
+    sector: Mapped[str] = mapped_column(String(50), default="UNISEX", nullable=False)  # MUJERES, HOMBRES, UNISEX
     activo: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 

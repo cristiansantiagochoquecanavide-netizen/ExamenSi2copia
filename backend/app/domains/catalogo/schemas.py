@@ -10,13 +10,13 @@ class BaseSchema(BaseModel):
 class CategoriaCreate(BaseModel):
     nombre: str = Field(..., max_length=100)
     descripcion: Optional[str] = Field(None, max_length=255)
-    sector: str = Field("UNISEX", pattern="^(MUJERES|HOMBRES|NINOS|UNISEX)$")
+    sector: str = Field("UNISEX", pattern="^(MUJERES|HOMBRES|UNISEX)$")
     activo: bool = True
 
 class CategoriaUpdate(BaseModel):
     nombre: Optional[str] = Field(None, max_length=100)
     descripcion: Optional[str] = Field(None, max_length=255)
-    sector: Optional[str] = Field(None, pattern="^(MUJERES|HOMBRES|NINOS|UNISEX)$")
+    sector: Optional[str] = Field(None, pattern="^(MUJERES|HOMBRES|UNISEX)$")
     activo: Optional[bool] = None
 
 class CategoriaResponse(BaseSchema):

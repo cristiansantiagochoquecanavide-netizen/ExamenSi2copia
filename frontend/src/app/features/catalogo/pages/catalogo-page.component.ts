@@ -79,13 +79,6 @@ import { OutfitSugerido } from '../../ia-asistente/models/ia-asistente.models';
             <button 
               type="button" 
               class="sector-pill" 
-              [class.active]="selectedSector() === 'NINOS'"
-              (click)="seleccionarSector('NINOS')">
-              NI&Ntilde;OS
-            </button>
-            <button 
-              type="button" 
-              class="sector-pill" 
               [class.active]="selectedSector() === 'UNISEX'"
               (click)="seleccionarSector('UNISEX')">
               UNISEX
@@ -3102,7 +3095,7 @@ export class CatalogoPageComponent implements OnInit {
   feedbackMsg = signal<string | null>(null);
   feedbackIsError = signal<boolean>(false);
 
-  selectedSector = signal<'TODAS' | 'MUJERES' | 'HOMBRES' | 'NINOS' | 'UNISEX'>('TODAS');
+  selectedSector = signal<'TODAS' | 'MUJERES' | 'HOMBRES' | 'UNISEX'>('TODAS');
   selectedCategoriaId = signal<number | 'ALL'>('ALL');
   searchQuery = '';
   searchTermActive = signal<string>('');
@@ -3178,7 +3171,7 @@ export class CatalogoPageComponent implements OnInit {
     return list;
   });
 
-  seleccionarSector(sector: 'TODAS' | 'MUJERES' | 'HOMBRES' | 'NINOS' | 'UNISEX'): void {
+  seleccionarSector(sector: 'TODAS' | 'MUJERES' | 'HOMBRES' | 'UNISEX'): void {
     this.selectedSector.set(sector);
     this.selectedCategoriaId.set('ALL');
   }
@@ -3396,7 +3389,6 @@ export class CatalogoPageComponent implements OnInit {
     const s = prenda.categoria?.sector;
     if (!s || s === 'MUJERES') return 'MUJER';
     if (s === 'HOMBRES') return 'HOMBRE';
-    if (s === 'NINOS') return 'NIÑOS';
     return s;
   }
 

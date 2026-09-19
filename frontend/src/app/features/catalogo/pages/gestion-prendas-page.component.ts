@@ -100,13 +100,6 @@ interface FotoLocal {
           <button
             type="button"
             class="chip-btn"
-            [class.active]="selectedSector() === 'NINOS'"
-            (click)="selectedSector.set('NINOS')">
-            NIÑOS
-          </button>
-          <button
-            type="button"
-            class="chip-btn"
             [class.active]="selectedSector() === 'UNISEX'"
             (click)="selectedSector.set('UNISEX')">
             UNISEX
@@ -117,9 +110,15 @@ interface FotoLocal {
         <div class="category-select-wrap">
           <select [(ngModel)]="selectedCategoriaId" class="category-dropdown">
             <option value="ALL">Todas las categorías</option>
-            <option *ngFor="let cat of categorias()" [value]="cat.id">
-              {{ cat.nombre }} ({{ cat.sector }})
-            </option>
+            <optgroup label="MUJERES">
+              <option *ngFor="let cat of categoriasMujer()" [value]="cat.id">{{ cat.nombre }}</option>
+            </optgroup>
+            <optgroup label="HOMBRES">
+              <option *ngFor="let cat of categoriasHombre()" [value]="cat.id">{{ cat.nombre }}</option>
+            </optgroup>
+            <optgroup label="UNISEX">
+              <option *ngFor="let cat of categoriasUnisex()" [value]="cat.id">{{ cat.nombre }}</option>
+            </optgroup>
           </select>
         </div>
       </section>
@@ -404,9 +403,21 @@ interface FotoLocal {
                       <div class="form-field">
                         <label>Categoría *</label>
                         <select [(ngModel)]="formData.categoria_id" name="categoria_id" required class="form-ctrl">
-                          <option *ngFor="let cat of categorias()" [value]="cat.id">
-                            {{ cat.nombre }} ({{ cat.sector }})
-                          </option>
+                          <optgroup label="MUJERES">
+                            <option *ngFor="let cat of categoriasMujer()" [value]="cat.id">
+                              {{ cat.nombre }}
+                            </option>
+                          </optgroup>
+                          <optgroup label="HOMBRES">
+                            <option *ngFor="let cat of categoriasHombre()" [value]="cat.id">
+                              {{ cat.nombre }}
+                            </option>
+                          </optgroup>
+                          <optgroup label="UNISEX">
+                            <option *ngFor="let cat of categoriasUnisex()" [value]="cat.id">
+                              {{ cat.nombre }}
+                            </option>
+                          </optgroup>
                         </select>
                       </div>
 
@@ -1489,6 +1500,10 @@ export class GestionPrendasPageComponent implements OnInit {
   tallas = signal<Talla[]>([]);
   colores = signal<Color[]>([]);
 
+  categoriasMujer = computed(() => this.categorias().filter(c => c.sector === 'MUJERES'));
+  categoriasHombre = computed(() => this.categorias().filter(c => c.sector === 'HOMBRES'));
+  categoriasUnisex = computed(() => this.categorias().filter(c => c.sector === 'UNISEX'));
+
   isLoading = signal<boolean>(false);
   isSaving = signal<boolean>(false);
   isDeleting = signal<boolean>(false);
@@ -1501,7 +1516,7 @@ export class GestionPrendasPageComponent implements OnInit {
 
   // Filters
   searchQuery = '';
-  selectedSector = signal<'TODAS' | 'MUJERES' | 'HOMBRES' | 'NINOS' | 'UNISEX'>('TODAS');
+  selectedSector = signal<'TODAS' | 'MUJERES' | 'HOMBRES' | 'UNISEX'>('TODAS');
   selectedCategoriaId: number | 'ALL' = 'ALL';
 
   // Modals

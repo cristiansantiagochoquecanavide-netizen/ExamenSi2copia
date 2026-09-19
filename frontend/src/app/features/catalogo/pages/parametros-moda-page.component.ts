@@ -322,7 +322,6 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
                   <option value="UNISEX">UNISEX</option>
                   <option value="MUJERES">MUJERES</option>
                   <option value="HOMBRES">HOMBRES</option>
-                  <option value="NINOS">NIÑOS</option>
                 </select>
               </div>
               <div class="form-group">

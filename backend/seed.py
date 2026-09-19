@@ -333,17 +333,32 @@ async def run_seed():
         # 5. PARAMETROS DE MODA (CU5)
         print("--> 5. Creando Parametros de Moda (Categorias, Tallas, Colores, Temporada)...")
         # Categorias
-        cat_trench = (await session.execute(select(Categoria).where(Categoria.nombre == "Abrigos & Trench"))).scalar_one_or_none()
-        if not cat_trench:
-            cat_trench = Categoria(nombre="Abrigos & Trench", descripcion="Prendas exteriores y abrigos de alta costura", sector="UNISEX")
-            session.add(cat_trench)
-            await session.flush()
-
-        cat_pant = (await session.execute(select(Categoria).where(Categoria.nombre == "Pantalones & Sastreria"))).scalar_one_or_none()
-        if not cat_pant:
-            cat_pant = Categoria(nombre="Pantalones & Sastreria", descripcion="Pantalones sastreros y siluetas modernas", sector="UNISEX")
-            session.add(cat_pant)
-            await session.flush()
+        categorias_base = [
+            # MUJERES
+            ("Blusas", "Blusas y tops para dama", "MUJERES"),
+            ("Vestidos", "Vestidos de corte editorial y gala", "MUJERES"),
+            ("Pantalones", "Pantalones y sastrería femenina", "MUJERES"),
+            ("Poleras", "Poleras y remeras de diseño para mujer", "MUJERES"),
+            # HOMBRES
+            ("Poleras", "Poleras y remeras masculinas de alta costura", "HOMBRES"),
+            ("Pantalones", "Pantalones y sastrería masculina", "HOMBRES"),
+            ("Shores", "Shores y bermudas de verano para hombre", "HOMBRES"),
+            ("Camisas", "Camisas de lino y algodón egipcio para hombre", "HOMBRES"),
+            # UNISEX
+            ("Camisas", "Camisas de corte fluido unisex", "UNISEX"),
+            ("Abrigos", "Abrigos, trenchs y sobretodos unisex", "UNISEX"),
+            ("Chaquetas", "Chaquetas arquitectónicas y blazers unisex", "UNISEX"),
+        ]
+        cats_map = {}
+        for nom, desc, sec in categorias_base:
+            c = (await session.execute(
+                select(Categoria).where(Categoria.nombre == nom, Categoria.sector == sec)
+            )).scalar_one_or_none()
+            if not c:
+                c = Categoria(nombre=nom, descripcion=desc, sector=sec)
+                session.add(c)
+                await session.flush()
+            cats_map[(nom, sec)] = c
 
         # Tallas
         tallas_dict = {}
@@ -382,103 +397,8 @@ async def run_seed():
             session.add(temp_ss)
             await session.flush()
 
-        # 6. PRENDAS, MULTIMEDIA AR Y VARIANTES (CU6)
-        print("--> 6. Creando Prendas con Modelos 3D AR y Variantes...")
-        # Prenda 1: Trench
-        p1 = (await session.execute(select(Prenda).where(Prenda.sku == "NOIR-TRN-001"))).scalar_one_or_none()
-        if not p1:
-            p1 = Prenda(
-                sku="NOIR-TRN-001",
-                nombre="The Midnight Silk Trench",
-                descripcion="Trench coat confeccionado en seda italiana pesada con corte arquitectonico y acabado negro mate.",
-                precio_base=890.00,
-                categoria_id=cat_trench.id,
-                temporada_id=temp_ss.id,
-                activo=True
-            )
-            session.add(p1)
-            await session.flush()
-
-            # Multimedia
-            session.add(PrendaMultimedia(
-                prenda_id=p1.id, tipo="IMAGEN",
-                url="https://images.unsplash.com/photo-1539533018447-63fcce667883?auto=format&fit=crop&w=800&q=80",
-                formato=".jpg", es_portada=True
-            ))
-            session.add(PrendaMultimedia(
-                prenda_id=p1.id, tipo="MODELO_3D_GLB",
-                url="https://storage.fashionstore.com/ar/models/midnight_silk_trench.glb",
-                formato=".glb", es_portada=False
-            ))
-            session.add(PrendaMultimedia(
-                prenda_id=p1.id, tipo="MODELO_3D_USDZ",
-                url="https://storage.fashionstore.com/ar/models/midnight_silk_trench.usdz",
-                formato=".usdz", es_portada=False
-            ))
-
-            # Variantes
-            for t_cod in ["S", "M", "L"]:
-                session.add(PrendaVariante(
-                    prenda_id=p1.id,
-                    talla_id=tallas_dict[t_cod].id,
-                    color_id=colores_dict["Midnight Black"].id,
-                    sku_variante=f"NOIR-TRN-001-{t_cod}-BLK"
-                ))
-            session.add(PrendaVariante(
-                prenda_id=p1.id,
-                talla_id=tallas_dict["M"].id,
-                color_id=colores_dict["Silk White"].id,
-                sku_variante="NOIR-TRN-001-M-WHT"
-            ))
-            await session.flush()
-
-        # Prenda 2: Pantalon
-        p2 = (await session.execute(select(Prenda).where(Prenda.sku == "NOIR-PNT-002"))).scalar_one_or_none()
-        if not p2:
-            p2 = Prenda(
-                sku="NOIR-PNT-002",
-                nombre="Atelier Tailored Pant",
-                descripcion="Pantalon sastrero de lana fria con tiro alto, pinzas frontales pronunciadas y caida recta minimalista.",
-                precio_base=450.00,
-                categoria_id=cat_pant.id,
-                temporada_id=temp_ss.id,
-                activo=True
-            )
-            session.add(p2)
-            await session.flush()
-
-            # Multimedia
-            session.add(PrendaMultimedia(
-                prenda_id=p2.id, tipo="IMAGEN",
-                url="https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=800&q=80",
-                formato=".jpg", es_portada=True
-            ))
-            session.add(PrendaMultimedia(
-                prenda_id=p2.id, tipo="MODELO_3D_GLB",
-                url="https://storage.fashionstore.com/ar/models/atelier_tailored_pant.glb",
-                formato=".glb", es_portada=False
-            ))
-            session.add(PrendaMultimedia(
-                prenda_id=p2.id, tipo="MODELO_3D_USDZ",
-                url="https://storage.fashionstore.com/ar/models/atelier_tailored_pant.usdz",
-                formato=".usdz", es_portada=False
-            ))
-
-            # Variantes
-            for t_cod in ["S", "M", "L"]:
-                session.add(PrendaVariante(
-                    prenda_id=p2.id,
-                    talla_id=tallas_dict[t_cod].id,
-                    color_id=colores_dict["Midnight Black"].id,
-                    sku_variante=f"NOIR-PNT-002-{t_cod}-BLK"
-                ))
-            session.add(PrendaVariante(
-                prenda_id=p2.id,
-                talla_id=tallas_dict["M"].id,
-                color_id=colores_dict["Editorial Gold"].id,
-                sku_variante="NOIR-PNT-002-M-GLD"
-            ))
-            await session.flush()
+        # 6. PRENDAS (Catálogo vacío para carga manual del usuario)
+        print("--> 6. Catálogo de prendas listo para carga manual.")
 
         # 7. INVENTARIO INICIAL (50 unidades por variante en cada sucursal)
         print("--> 7. Asignando Inventario Inicial (50 unidades por sucursal)...")

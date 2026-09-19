@@ -2,7 +2,7 @@ export interface Categoria {
   id: number;
   nombre: string;
   descripcion?: string;
-  sector: 'MUJERES' | 'HOMBRES' | 'NINOS' | 'UNISEX';
+  sector: 'MUJERES' | 'HOMBRES' | 'UNISEX';
   activo: boolean;
   created_at?: string;
 }

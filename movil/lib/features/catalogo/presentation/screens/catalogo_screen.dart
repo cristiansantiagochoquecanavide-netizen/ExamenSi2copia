@@ -21,7 +21,7 @@ class _CatalogoScreenState extends State<CatalogoScreen> {
   String? _errorMessage;
 
   String _selectedSector = 'TODAS';
-  final List<String> _sectores = ['TODAS', 'MUJERES', 'HOMBRES', 'NINOS', 'UNISEX'];
+  final List<String> _sectores = ['TODAS', 'MUJERES', 'HOMBRES', 'UNISEX'];
 
   @override
   void initState() {
@@ -79,8 +79,6 @@ class _CatalogoScreenState extends State<CatalogoScreen> {
         return 'MUJER';
       case 'HOMBRES':
         return 'HOMBRE';
-      case 'NINOS':
-        return 'NIÑOS';
       case 'UNISEX':
         return 'UNISEX';
       default:

@@ -240,7 +240,7 @@ import { AuthService } from '../../../core/services/auth.service';
               <div class="quiz-group">
                 <label class="group-label">1. Silueta / Colección Principal</label>
                 <div class="options-pills">
-                  @for (sec of ['MUJER', 'HOMBRE', 'UNISEX', 'NINOS']; track sec) {
+                  @for (sec of ['MUJER', 'HOMBRE', 'UNISEX']; track sec) {
                     <button
                       type="button"
                       class="quiz-pill"
