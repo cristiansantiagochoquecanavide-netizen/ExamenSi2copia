@@ -436,6 +436,7 @@ class PrendaService:
         admin: Optional[Usuario] = None,
         ip: Optional[str] = None
     ) -> Prenda:
+        admin_id = admin.id if admin else None
         prenda = await PrendaService.obtener_por_id(db, prenda_id)
 
         if data.sku and data.sku.upper() != prenda.sku:
@@ -581,15 +582,15 @@ class PrendaService:
                     await db.flush()
 
         target_prenda_id = prenda.id
+        db.expire(prenda)
         await db.commit()
-        db.expire_all()
 
         prenda_actualizada = await PrendaService.obtener_por_id(db, target_prenda_id)
 
         await AuditoriaService.registrar_evento(
             db, accion="ACTUALIZAR_PRENDA", modulo="catalogo",
             detalle=f"Actualizacion de prenda {prenda_actualizada.nombre} (SKU: {prenda_actualizada.sku})",
-            usuario_id=admin.id if admin else None, ip_address=ip
+            usuario_id=admin_id, ip_address=ip
         )
         return prenda_actualizada
 
