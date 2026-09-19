@@ -878,9 +878,9 @@ import { CartService } from '../../ventas/services/cart.service';
                         </div>
                         <div class="look-panel-pricing">
                           <span class="look-pricing-label">Precio Look Completo</span>
-                          <strong class="look-pricing-val">\${{ outfit.precio_total | number:'1.2-2' }}</strong>
+                          <strong class="look-pricing-val"><span class="currency">Bs.</span> {{ outfit.precio_total | number:'1.2-2' }}</strong>
                           @if (outfit.ahorro_estimado > 0) {
-                            <span class="look-saving-chip">Ahorro: -\${{ outfit.ahorro_estimado | number:'1.2-2' }}</span>
+                            <span class="look-saving-chip">Ahorro: -Bs. {{ outfit.ahorro_estimado | number:'1.2-2' }}</span>
                           }
                         </div>
                       </div>
@@ -896,7 +896,7 @@ import { CartService } from '../../ventas/services/cart.service';
                               <strong class="look-item-name">{{ item.nombre }}</strong>
                               <span class="look-item-cat">{{ item.categoria_nombre }} &bull; {{ item.sector }}</span>
                               <p class="look-item-why">“{{ item.motivo_recomendacion }}”</p>
-                              <span class="look-item-price">\${{ item.precio_base | number:'1.2-2' }} USD</span>
+                              <span class="look-item-price"><span class="currency">Bs.</span> {{ item.precio_base | number:'1.2-2' }}</span>
                             </div>
                             @if (item.id !== prenda.id) {
                               <button type="button" class="btn-switch-item" (click)="seleccionarPrendaPorId(item.id)">

@@ -124,10 +124,10 @@ import {
               <div class="detail-group">
                 <span class="lbl">Total Liquidado:</span>
                 <span class="val font-bold gold-text font-lg">
-                  <span class="currency">$</span>{{ pedidoConfirmado.total | number:'1.2-2' }} USD
+                  <span class="currency">Bs.</span> {{ pedidoConfirmado.total | number:'1.2-2' }}
                 </span>
                 <span class="val text-muted">
-                  (Subtotal: <span class="currency">$</span>{{ pedidoConfirmado.subtotal | number:'1.2-2' }} + Envío: <span class="currency">$</span>{{ pedidoConfirmado.costo_envio | number:'1.2-2' }})
+                  (Subtotal: <span class="currency">Bs.</span> {{ pedidoConfirmado.subtotal | number:'1.2-2' }} + Envío: <span class="currency">Bs.</span> {{ pedidoConfirmado.costo_envio | number:'1.2-2' }})
                 </span>
               </div>
             </div>
@@ -150,8 +150,8 @@ import {
                     <td>{{ item.variante?.prenda?.nombre || 'Prenda Atelier' }}</td>
                     <td>{{ item.variante?.talla?.codigo || 'Talla' }} &bull; {{ item.variante?.color?.nombre || 'Color' }}</td>
                     <td class="text-right">{{ item.cantidad }}</td>
-                    <td class="text-right"><span class="currency">$</span>{{ item.precio_unitario | number:'1.2-2' }}</td>
-                    <td class="text-right font-bold"><span class="currency">$</span>{{ item.subtotal | number:'1.2-2' }}</td>
+                    <td class="text-right"><span class="currency">Bs.</span> {{ item.precio_unitario | number:'1.2-2' }}</td>
+                    <td class="text-right font-bold"><span class="currency">Bs.</span> {{ item.subtotal | number:'1.2-2' }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -195,7 +195,7 @@ import {
                     <div *ngFor="let p of prendasCatalogo.slice(0, 4)" class="quick-item-card">
                       <div class="quick-info">
                         <strong>{{ p.nombre }}</strong>
-                        <span class="quick-price"><span class="currency">$</span>{{ p.precio_base | number:'1.2-2' }} USD</span>
+                        <span class="quick-price"><span class="currency">Bs.</span> {{ p.precio_base | number:'1.2-2' }}</span>
                       </div>
                       <button
                         type="button"
@@ -237,7 +237,7 @@ import {
                         </div>
                       </td>
                       <td class="text-right">
-                        <span class="currency">$</span>{{ item.precio_unitario | number:'1.2-2' }}
+                        <span class="currency">Bs.</span> {{ item.precio_unitario | number:'1.2-2' }}
                       </td>
                       <td class="text-center">
                         <div class="quantity-control">
@@ -247,7 +247,7 @@ import {
                         </div>
                       </td>
                       <td class="text-right font-bold gold-text">
-                        <span class="currency">$</span>{{ (item.precio_unitario * item.cantidad) | number:'1.2-2' }}
+                        <span class="currency">Bs.</span> {{ (item.precio_unitario * item.cantidad) | number:'1.2-2' }}
                       </td>
                       <td class="text-center">
                         <button type="button" class="btn-delete-item" (click)="eliminarItem(item)" title="Quitar">
@@ -273,7 +273,7 @@ import {
                 <strong>¡Felicidades! Su compra califica para Envío Courier Express GRATUITO.</strong>
               </div>
               <div *ngIf="subtotal < 150" class="free-shipping-progress">
-                <span>Agregue <strong class="gold-text"><span class="currency">$</span>{{ (150 - subtotal) | number:'1.2-2' }} USD</strong> adicionales para obtener <strong>Envío Courier GRATIS</strong>.</span>
+                <span>Agregue <strong class="gold-text"><span class="currency">Bs.</span> {{ (150 - subtotal) | number:'1.2-2' }}</strong> adicionales para obtener <strong>Envío Courier GRATIS</strong>.</span>
               </div>
             </div>
           </div>
@@ -519,21 +519,21 @@ import {
             <div class="panel-box checkout-summary-box">
               <div class="summary-line">
                 <span>Subtotal Prendas:</span>
-                <span><span class="currency">$</span>{{ subtotal | number:'1.2-2' }} USD</span>
+                <span><span class="currency">Bs.</span> {{ subtotal | number:'1.2-2' }}</span>
               </div>
               <div *ngIf="descuentoCupon > 0" class="summary-line discount-line">
                 <span class="gold-text">Descuento Cupón ({{ cuponAplicado?.codigo }}):</span>
-                <span class="gold-text font-bold">- <span class="currency">$</span>{{ descuentoCupon | number:'1.2-2' }} USD</span>
+                <span class="gold-text font-bold">- <span class="currency">Bs.</span> {{ descuentoCupon | number:'1.2-2' }}</span>
               </div>
               <div class="summary-line">
                 <span>Logística / Envío:</span>
                 <span [class.gold-text]="costoCalculadoEnvio === 0">
-                  {{ costoCalculadoEnvio === 0 ? 'GRATIS ($0.00)' : ('$' + (costoCalculadoEnvio | number:'1.2-2') + ' USD') }}
+                  {{ costoCalculadoEnvio === 0 ? 'GRATIS (Bs. 0.00)' : ('Bs. ' + (costoCalculadoEnvio | number:'1.2-2')) }}
                 </span>
               </div>
               <div class="summary-line total-line">
                 <span>Total a Pagar:</span>
-                <span class="grand-total"><span class="currency">$</span>{{ totalFinal | number:'1.2-2' }} USD</span>
+                <span class="grand-total"><span class="currency">Bs.</span> {{ totalFinal | number:'1.2-2' }}</span>
               </div>
 
               <button
@@ -542,7 +542,7 @@ import {
                 [disabled]="isSubmitting || cartItems.length === 0"
                 (click)="procesarCheckout()">
                 <span *ngIf="!isSubmitting">
-                  CONFIRMAR PEDIDO &bull; <span class="currency">$</span>{{ totalFinal | number:'1.2-2' }} USD
+                  CONFIRMAR PEDIDO &bull; <span class="currency">Bs.</span> {{ totalFinal | number:'1.2-2' }}
                 </span>
                 <span *ngIf="isSubmitting">
                   <span class="spinner-dot"></span> Procesando con Pasarela...

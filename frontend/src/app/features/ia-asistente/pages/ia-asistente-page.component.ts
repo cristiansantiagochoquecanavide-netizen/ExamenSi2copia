@@ -190,8 +190,8 @@ import { AuthService } from '../../../core/services/auth.service';
                   <!-- Precio y Acciones -->
                   <div class="card-footer">
                     <div class="price-wrap">
-                      <span class="currency">USD</span>
-                      <span class="amount">\${{ prenda.precio_base | number:'1.2-2' }}</span>
+                      <span class="currency">Bs.</span>
+                      <span class="amount">{{ prenda.precio_base | number:'1.2-2' }}</span>
                     </div>
 
                     <div class="actions-wrap">
@@ -312,9 +312,9 @@ import { AuthService } from '../../../core/services/auth.service';
 
               <!-- Paso 5: Presupuesto Máximo -->
               <div class="quiz-group">
-                <label class="group-label">5. Rango de Presupuesto Estimado por Prenda (USD)</label>
+                <label class="group-label">5. Rango de Presupuesto Estimado por Prenda (Bs.)</label>
                 <div class="budget-input-wrap">
-                  <span class="budget-symbol">$</span>
+                  <span class="budget-symbol">Bs.</span>
                   <input
                     type="number"
                     min="50"
@@ -375,7 +375,7 @@ import { AuthService } from '../../../core/services/auth.service';
                         <p class="item-motivo">{{ item.motivo_recomendacion }}</p>
                       </div>
                       <div class="item-price-col">
-                        <span class="item-val">\${{ item.precio_base | number:'1.2-2' }}</span>
+                        <span class="item-val">Bs. {{ item.precio_base | number:'1.2-2' }}</span>
                       </div>
                     </div>
                   }
@@ -384,10 +384,10 @@ import { AuthService } from '../../../core/services/auth.service';
                 <div class="look-total-bar">
                   <div>
                     <span class="look-total-label">Total Conjunto Completo:</span>
-                    <strong class="look-total-amount">\${{ outfitModalData()!.precio_total | number:'1.2-2' }} USD</strong>
+                    <strong class="look-total-amount">Bs. {{ outfitModalData()!.precio_total | number:'1.2-2' }}</strong>
                   </div>
                   @if (outfitModalData()!.ahorro_estimado > 0) {
-                    <span class="saving-badge">Ahorro por Look: -\${{ outfitModalData()!.ahorro_estimado | number:'1.2-2' }}</span>
+                    <span class="saving-badge">Ahorro por Look: -Bs. {{ outfitModalData()!.ahorro_estimado | number:'1.2-2' }}</span>
                   }
                 </div>
               }
