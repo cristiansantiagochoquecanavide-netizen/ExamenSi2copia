@@ -181,20 +181,24 @@ class PrendaModel {
     if (u.startsWith('blob:') || u.startsWith('data:')) {
       return u;
     }
+    const prodHost = 'https://fashionstore-backend-48fs.onrender.com';
     if (u.startsWith('/static/')) {
-      return 'http://10.0.2.2:8000$u';
+      return '$prodHost$u';
     }
     if (u.startsWith('static/')) {
-      return 'http://10.0.2.2:8000/$u';
+      return '$prodHost/$u';
     }
     if (u.contains('localhost:8000')) {
-      return u.replaceAll('localhost:8000', '10.0.2.2:8000');
+      return u.replaceAll('http://localhost:8000', prodHost);
+    }
+    if (u.contains('10.0.2.2:8000')) {
+      return u.replaceAll('http://10.0.2.2:8000', prodHost);
     }
     if (u.contains('127.0.0.1:8000')) {
-      return u.replaceAll('127.0.0.1:8000', '10.0.2.2:8000');
+      return u.replaceAll('http://127.0.0.1:8000', prodHost);
     }
     if (u.contains('backend:8000')) {
-      return u.replaceAll('backend:8000', '10.0.2.2:8000');
+      return u.replaceAll('http://backend:8000', prodHost);
     }
     return u;
   }

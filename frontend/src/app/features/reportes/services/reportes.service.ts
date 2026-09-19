@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { DashboardReporteResponse, AnalisisVozResponse, ConsultaVozRequest } from '../models/reportes.models';
 
 @Injectable({
@@ -8,7 +9,7 @@ import { DashboardReporteResponse, AnalisisVozResponse, ConsultaVozRequest } fro
 })
 export class ReportesService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8000/api/v1/reportes';
+  private apiUrl = `${environment.apiUrl}/reportes`;
 
   private recognition: any = null;
   private synth: SpeechSynthesis | null = typeof window !== 'undefined' ? window.speechSynthesis : null;

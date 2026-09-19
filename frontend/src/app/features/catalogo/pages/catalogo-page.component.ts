@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CatalogoService } from '../services/catalogo.service';
+import { environment } from '../../../environments/environment';
 import { InventarioService } from '../../inventario/services/inventario.service';
 import { AuthService } from '../../../core/services/auth.service';
 import {
@@ -3972,8 +3973,11 @@ export class CatalogoPageComponent implements OnInit {
   resolveImageUrl(url?: string): string {
     if (!url) return 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&q=80';
     if (url.startsWith('blob:') || url.startsWith('data:')) return url;
-    if (url.startsWith('/static/')) return `http://localhost:8000${url}`;
-    if (url.includes('backend:8000')) return url.replace('backend:8000', 'localhost:8000');
+    const backendOrigin = (environment.apiUrl || '').replace(/\/api\/v1\/?$/, '');
+    if (url.startsWith('/static/')) return `${backendOrigin}${url}`;
+    if (url.startsWith('static/')) return `${backendOrigin}/${url}`;
+    if (url.includes('backend:8000')) return url.replace(/http:\/\/[^/]+/, backendOrigin);
+    if (url.includes('localhost:8000')) return url.replace('http://localhost:8000', backendOrigin);
     return url;
   }
 
