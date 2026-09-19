@@ -431,7 +431,7 @@ a.btn + button {
 }
 
 /* Formularios, Inputs y Selects */
-input[type="text"]:not(.search-input-mockup),
+input[type="text"]:not(.search-input-mockup):not(.search-input),
 input[type="number"],
 input[type="email"],
 input[type="password"],

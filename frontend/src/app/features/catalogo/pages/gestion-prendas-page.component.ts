@@ -667,19 +667,21 @@ interface FotoLocal {
       height: 16px;
       color: #94a3b8;
       pointer-events: none;
+      z-index: 3;
     }
     .search-input {
       width: 100%;
-      padding: 0.75rem 2.5rem 0.75rem 2.75rem;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      font-size: 0.9rem;
+      padding: 0.75rem 2.5rem 0.75rem 2.75rem !important;
+      border: 1px solid #cbd5e1 !important;
+      border-radius: 8px !important;
+      font-size: 0.9rem !important;
+      background-color: #ffffff !important;
       outline: none;
       box-sizing: border-box;
       transition: border-color 0.2s ease;
     }
     .search-input:focus {
-      border-color: #0f172a;
+      border-color: #0f172a !important;
       box-shadow: 0 0 0 1px #0f172a;
     }
     .btn-clear-search {
