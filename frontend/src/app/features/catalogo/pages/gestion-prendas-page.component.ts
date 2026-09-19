@@ -1025,9 +1025,9 @@ interface FotoLocal {
     .modal-dialog {
       background: #ffffff;
       border-radius: 14px;
-      width: 96vw;
-      max-width: 1220px;
-      max-height: 94vh;
+      width: 900px;
+      max-width: 95vw;
+      max-height: 92vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -1090,14 +1090,15 @@ interface FotoLocal {
       min-height: 0;
       overflow-y: auto;
       overflow-x: hidden;
-      padding: 1rem 1.5rem;
+      padding: 1rem 1.25rem;
     }
 
     .modal-two-cols {
       display: grid;
-      grid-template-columns: 310px 1fr;
+      grid-template-columns: 280px 556px;
       gap: 1.25rem;
       align-items: start;
+      justify-content: center;
     }
 
     .col-photos,
