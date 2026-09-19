@@ -373,9 +373,19 @@ async def run_seed():
         # Colores
         colores_dict = {}
         for c_nom, hex_c, rgb_c in [
-            ("Midnight Black", "#131313", "rgb(19, 19, 19)"),
-            ("Editorial Gold", "#D4AF37", "rgb(212, 175, 55)"),
-            ("Silk White", "#FFFFFF", "rgb(255, 255, 255)")
+            ("Negro", "#1A1A1A", "rgb(26, 26, 26)"),
+            ("Blanco", "#FFFFFF", "rgb(255, 255, 255)"),
+            ("Beige Arena", "#D8C3A5", "rgb(216, 195, 165)"),
+            ("Camel", "#C1844D", "rgb(193, 132, 77)"),
+            ("Verde Oliva", "#556B2F", "rgb(85, 107, 47)"),
+            ("Verde Salvia", "#9CAF88", "rgb(156, 175, 136)"),
+            ("Azul Marino", "#1B2A4A", "rgb(27, 42, 74)"),
+            ("Azul Rey", "#1E56A0", "rgb(30, 86, 160)"),
+            ("Azul Acero", "#5B7C99", "rgb(91, 124, 153)"),
+            ("Gris Claro", "#C8CDD0", "rgb(200, 205, 208)"),
+            ("Rosa Palo", "#E8B4B8", "rgb(232, 180, 184)"),
+            ("Vino Borgoña", "#6B1D2F", "rgb(107, 29, 47)"),
+            ("Terracota", "#8B4513", "rgb(139, 69, 19)")
         ]:
             c = (await session.execute(select(Color).where(Color.nombre == c_nom))).scalar_one_or_none()
             if not c:
