@@ -943,21 +943,21 @@ interface FotoLocal {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 1.5rem;
+      padding: 4.5rem 1.5rem 2.5rem;
     }
 
     .modal-dialog {
       background: #ffffff;
       border-radius: 14px;
       width: 100%;
-      max-width: 1080px;
-      height: 88vh;
-      max-height: 88vh;
+      max-width: 1060px;
+      max-height: 80vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
       border: 1px solid #cbd5e1;
+      margin: auto;
     }
 
     .modal-header {
