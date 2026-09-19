@@ -401,7 +401,7 @@ interface FotoLocal {
                       </div>
                     </div>
 
-                    <div class="form-field" style="margin-top: 0.85rem;">
+                    <div class="form-field" style="margin-top: 0.55rem;">
                       <label>Nombre Comercial de la Prenda *</label>
                       <input
                         type="text"
@@ -413,7 +413,7 @@ interface FotoLocal {
                       />
                     </div>
 
-                    <div class="form-field" style="margin-top: 0.85rem;">
+                    <div class="form-field" style="margin-top: 0.55rem;">
                       <label>Descripción Editorial *</label>
                       <textarea
                         [(ngModel)]="formData.descripcion"
@@ -425,7 +425,7 @@ interface FotoLocal {
                       ></textarea>
                     </div>
 
-                    <div class="form-grid-2" style="margin-top: 0.85rem;">
+                    <div class="form-grid-2" style="margin-top: 0.55rem;">
                       <div class="form-field">
                         <label>Categoría *</label>
                         <select [(ngModel)]="formData.categoria_id" name="categoria_id" required class="form-ctrl">
@@ -459,7 +459,7 @@ interface FotoLocal {
                   </fieldset>
 
                   <!-- SECCIÓN 3: VARIANTES DE MODA (TALLAS Y COLORES) -->
-                  <fieldset class="form-section-box" style="margin-top: 1rem;">
+                  <fieldset class="form-section-box" style="margin-top: 0.65rem;">
                     <legend class="section-legend">VARIANTES DISPONIBLES (TALLAS & COLORES)</legend>
                     <p class="section-desc">Seleccioná las tallas y colores que tendrá la prenda.</p>
 
@@ -479,7 +479,7 @@ interface FotoLocal {
                     </div>
 
                     <!-- Chips de Colores -->
-                    <div class="chips-group-section" style="margin-top: 0.85rem;">
+                    <div class="chips-group-section" style="margin-top: 0.65rem;">
                       <div class="color-header-row">
                         <label class="chips-label">COLORES DISPONIBLES:</label>
                         <span class="color-palette-legend">Tono Claro &larr; &bull; &rarr; Tono Fuerte</span>
@@ -1015,15 +1015,15 @@ interface FotoLocal {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 4.5rem 1.5rem 2.5rem;
+      padding: 1.25rem 1rem;
     }
 
     .modal-dialog {
       background: #ffffff;
       border-radius: 14px;
-      width: 100%;
-      max-width: 1060px;
-      max-height: 80vh;
+      width: 96vw;
+      max-width: 1220px;
+      max-height: 94vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -1036,23 +1036,23 @@ interface FotoLocal {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1.25rem 2rem;
+      padding: 0.85rem 1.5rem;
       border-bottom: 1px solid #f1f5f9;
       background: #ffffff;
       flex-shrink: 0;
       z-index: 10;
     }
     .modal-badge {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       font-weight: 800;
       letter-spacing: 0.12em;
       color: #d97706;
       text-transform: uppercase;
       display: block;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.15rem;
     }
     .modal-title {
-      font-size: 1.35rem;
+      font-size: 1.25rem;
       font-weight: 800;
       color: #0f172a;
       margin: 0;
@@ -1086,13 +1086,13 @@ interface FotoLocal {
       min-height: 0;
       overflow-y: auto;
       overflow-x: hidden;
-      padding: 1.5rem 2rem;
+      padding: 1rem 1.5rem;
     }
 
     .modal-two-cols {
       display: grid;
-      grid-template-columns: 360px 1fr;
-      gap: 1.5rem;
+      grid-template-columns: 310px 1fr;
+      gap: 1.25rem;
       align-items: start;
     }
 
@@ -1100,17 +1100,17 @@ interface FotoLocal {
     .col-data {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 0.75rem;
     }
 
     .form-section-box {
       border: 1px solid #e2e8f0;
       border-radius: 8px;
-      padding: 1.15rem 1.25rem 1.25rem;
+      padding: 0.75rem 1rem 0.85rem;
       background: #fafafa;
     }
     .section-legend {
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 800;
       letter-spacing: 0.08em;
       color: #0f172a;
@@ -1120,16 +1120,16 @@ interface FotoLocal {
       align-items: center;
     }
     .legend-hint {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 500;
       color: #64748b;
       letter-spacing: normal;
     }
     .section-desc {
-      font-size: 0.78rem;
+      font-size: 0.74rem;
       color: #64748b;
-      margin: 0 0 0.75rem 0;
-      line-height: 1.4;
+      margin: 0 0 0.5rem 0;
+      line-height: 1.35;
     }
 
     /* Dropzone */
@@ -1289,34 +1289,39 @@ interface FotoLocal {
     .form-grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1rem;
+      gap: 0.75rem;
     }
     .form-grid-3 {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 1rem;
+      grid-template-columns: 1.15fr 1fr 1fr;
+      gap: 0.75rem;
     }
     .form-field {
       display: flex;
       flex-direction: column;
-      gap: 0.35rem;
+      gap: 0.25rem;
+      min-width: 0;
     }
     .form-field label {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 800;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
       color: #475569;
       text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .form-ctrl {
-      padding: 0.75rem 0.9rem;
+      padding: 0.52rem 0.75rem;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       color: #0f172a;
       background: #ffffff;
       outline: none;
       box-sizing: border-box;
+      width: 100%;
     }
     .form-ctrl:focus {
       border-color: #0f172a;
@@ -1324,28 +1329,35 @@ interface FotoLocal {
     }
     .textarea-ctrl {
       resize: vertical;
-      min-height: 80px;
+      min-height: 48px;
+      height: 48px;
+      padding: 0.45rem 0.75rem;
+      font-size: 0.85rem;
+      line-height: 1.35;
     }
     .field-hint {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       color: #94a3b8;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     /* Chips Selector */
     .chips-group-section {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.35rem;
     }
     .chips-label {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 800;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.05em;
       color: #64748b;
     }
     .interactive-chips {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.4rem;
       flex-wrap: wrap;
     }
     .selectable-chip {
@@ -1353,14 +1365,15 @@ interface FotoLocal {
       border: 1px solid #cbd5e1;
       color: #334155;
       font-weight: 700;
-      font-size: 0.78rem;
-      padding: 0.5rem 0.85rem;
+      font-size: 0.75rem;
+      padding: 0.38rem 0.75rem;
       border-radius: 6px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 0.45rem;
+      gap: 0.4rem;
       transition: all 0.2s ease;
+      box-sizing: border-box;
     }
     .selectable-chip:hover {
       background: #f8fafc;
@@ -1382,7 +1395,7 @@ interface FotoLocal {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.35rem;
     }
     .color-palette-legend {
       font-size: 0.68rem;
@@ -1393,22 +1406,44 @@ interface FotoLocal {
     .color-chips-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0.4rem;
-      max-height: 250px;
+      gap: 0.35rem;
+      max-height: 220px;
       overflow-y: auto;
       padding-right: 0.35rem;
     }
+    .color-chips-grid::-webkit-scrollbar,
+    .modal-scroll-body::-webkit-scrollbar {
+      width: 6px;
+    }
+    .color-chips-grid::-webkit-scrollbar-track,
+    .modal-scroll-body::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 4px;
+    }
+    .color-chips-grid::-webkit-scrollbar-thumb,
+    .modal-scroll-body::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .color-chips-grid::-webkit-scrollbar-thumb:hover,
+    .modal-scroll-body::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
     .selectable-chip.color-chip {
-      padding: 0.42rem 0.55rem;
+      padding: 0.35rem 0.55rem;
       font-size: 0.73rem;
       justify-content: flex-start;
       width: 100%;
       box-sizing: border-box;
+      gap: 0.4rem;
+      min-width: 0;
     }
     .color-chip-text {
+      white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: nowrap;
+      font-weight: 600;
+      letter-spacing: -0.01em;
     }
 
     /* Modal Footer */
@@ -1417,7 +1452,7 @@ interface FotoLocal {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1rem 2rem;
+      padding: 0.85rem 1.5rem;
       background: #f8fafc;
       border-top: 1px solid #e2e8f0;
       gap: 1rem;
