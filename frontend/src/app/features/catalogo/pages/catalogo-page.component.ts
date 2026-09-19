@@ -14,6 +14,7 @@ import {
   Temporada,
   Talla,
   Color,
+  PrendaVariante,
   AjusteInventarioRequest,
   Calificacion,
   CalificacionCreate,
@@ -23,6 +24,7 @@ import {
 import { Sucursal } from '../../inventario/models/inventario.models';
 import { IaAsistenteService } from '../../ia-asistente/services/ia-asistente.service';
 import { OutfitSugerido } from '../../ia-asistente/models/ia-asistente.models';
+import { CartService } from '../../ventas/services/cart.service';
 
 
 @Component({
@@ -417,25 +419,120 @@ import { OutfitSugerido } from '../../ia-asistente/models/ia-asistente.models';
                     </div>
                   </div>
 
-                  <!-- Variantes de Talla y Color -->
-                  <div class="variants-section">
-                    <h4 class="section-subtitle">VARIANTES DISPONIBLES EN STOCK:</h4>
-                    <div class="variants-table-mini">
-                      @for (v of prenda.variantes; track v.id) {
-                        <div class="variant-pill">
-                          <span class="v-talla">Talla: {{ v.talla?.codigo || 'N/A' }}</span>
-                          <span class="v-color" [style.color]="v.color?.codigo_hex || '#fff'">
-                            &bull; {{ v.color?.nombre || 'Color' }}
+                  <!-- SELECTOR DE COMPRA E-COMMERCE -->
+                  <div class="purchase-section">
+
+                    <!-- 1. SELECTOR DE COLORES (si tiene colores) -->
+                    @if (getModalColores().length > 0) {
+                      <div class="option-group">
+                        <div class="option-header">
+                          <span class="option-title">COLOR:</span>
+                          <span class="option-selected-label">
+                            {{ getSelectedVariante()?.color?.nombre || 'Elegir color' }}
                           </span>
-                          <span class="v-sku">SKU: {{ v.sku_variante }}</span>
+                        </div>
+                        <div class="color-options-row">
+                          @for (c of getModalColores(); track c.id) {
+                            <button 
+                              type="button" 
+                              class="color-choice-btn"
+                              [class.active]="selectedColorId() === c.id"
+                              (click)="seleccionarColor(c.id)">
+                              <span class="color-swatch" [style.background-color]="c.codigo_hex || '#000000'"></span>
+                              <span class="color-name">{{ c.nombre }}</span>
+                              @if (selectedColorId() === c.id) {
+                                <span class="check-icon">&#10003;</span>
+                              }
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    }
+
+                    <!-- 2. SELECTOR DE TALLAS -->
+                    @if (getModalTallas().length > 0) {
+                      <div class="option-group">
+                        <div class="option-header">
+                          <span class="option-title">TALLA:</span>
+                          <span class="option-selected-label">
+                            {{ getSelectedVariante()?.talla?.codigo || 'Elegir talla' }}
+                          </span>
+                        </div>
+                        <div class="size-options-row">
+                          @for (t of getModalTallas(); track t.id) {
+                            <button 
+                              type="button" 
+                              class="size-choice-btn"
+                              [class.active]="selectedTallaId() === t.id"
+                              [class.unavailable]="!isTallaAvailable(t.id)"
+                              (click)="seleccionarTalla(t.id)"
+                              [title]="isTallaAvailable(t.id) ? ('Talla ' + t.codigo) : ('Talla ' + t.codigo + ' no disponible en este color')">
+                              {{ t.codigo }}
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    }
+
+                    <!-- 3. CANTIDAD Y SKU -->
+                    <div class="quantity-sku-row">
+                      <div class="qty-selector-wrap">
+                        <span class="qty-label">CANTIDAD:</span>
+                        <div class="qty-counter">
+                          <button type="button" class="btn-counter" (click)="decrementarCantidad()" [disabled]="modalCantidad() <= 1">&minus;</button>
+                          <span class="qty-value">{{ modalCantidad() }}</span>
+                          <button type="button" class="btn-counter" (click)="incrementarCantidad()" [disabled]="modalCantidad() >= 10">&plus;</button>
+                        </div>
+                      </div>
+
+                      @if (getSelectedVariante(); as v) {
+                        <div class="selected-variant-sku">
+                          <span class="sku-label">SKU VARIANTE:</span>
+                          <span class="sku-code">{{ v.sku_variante }}</span>
                         </div>
                       }
                     </div>
-                  </div>
 
-                  <div class="modal-actions">
-                    <button type="button" class="btn-reserve-lead" (click)="closeDetail()">
-                      CERRAR FICHA TÉCNICA
+                    <!-- 4. MENSAJE DE ÉXITO AL AGREGAR -->
+                    @if (cartAddedFeedback()) {
+                      <div class="cart-success-banner">
+                        <div class="banner-left">
+                          <span class="check-circle">&#10003;</span>
+                          <span><strong>¡Añadido a tu bolsa!</strong> ({{ modalCantidad() }} {{ modalCantidad() === 1 ? 'unidad' : 'unidades' }})</span>
+                        </div>
+                        <button type="button" class="btn-go-cart-link" (click)="closeDetail(); router.navigate(['/ventas/checkout'])">
+                          Ir a la Bolsa &rarr;
+                        </button>
+                      </div>
+                    }
+
+                    <!-- 5. BOTONES DE ACCIÓN -->
+                    <div class="cart-actions-row">
+                      <button 
+                        type="button" 
+                        class="btn-add-cart"
+                        [disabled]="(prenda.stock_total || 0) <= 0 || !getSelectedVariante()"
+                        (click)="agregarAlCarrito(false)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+                          <path d="M3 6h18"/>
+                          <path d="M16 10a4 4 0 0 1-8 0"/>
+                        </svg>
+                        <span>{{ (prenda.stock_total || 0) > 0 ? 'AÑADIR AL CARRITO' : 'AGOTADO' }}</span>
+                      </button>
+
+                      @if ((prenda.stock_total || 0) > 0 && getSelectedVariante()) {
+                        <button 
+                          type="button" 
+                          class="btn-buy-now"
+                          (click)="agregarAlCarrito(true)">
+                          COMPRAR AHORA
+                        </button>
+                      }
+                    </div>
+
+                    <button type="button" class="btn-close-minimal" (click)="closeDetail()">
+                      Seguir explorando prendas
                     </button>
                   </div>
                 </div>
@@ -2814,46 +2911,337 @@ import { OutfitSugerido } from '../../ia-asistente/models/ia-asistente.models';
       margin: 0 0 0.75rem 0;
     }
 
-    .variants-table-mini {
+    /* E-Commerce Purchase Section in Modal */
+    .purchase-section {
+      margin-top: 1rem;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      padding-top: 1.25rem;
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
-      margin-bottom: 1.5rem;
+      gap: 1.25rem;
     }
 
-    .variant-pill {
+    .option-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .option-header {
       display: flex;
       justify-content: space-between;
-      padding: 0.5rem 0.85rem;
-      background: #f9fafb;
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      font-size: 0.8rem;
-      color: #111111;
+      align-items: center;
     }
 
-    .v-sku {
-      color: #6b7280;
-      font-family: monospace;
-      font-size: 0.75rem;
-    }
-
-    .btn-reserve-lead {
-      width: 100%;
-      background: #000000;
-      color: #ffffff;
-      border: 1px solid #000000;
-      padding: 0.9rem 1.5rem;
-      font-size: 0.78rem;
-      letter-spacing: 0.2em;
-      font-weight: 700;
-      cursor: pointer;
-      border-radius: 9999px;
-      transition: background 0.2s ease, box-shadow 0.2s ease;
+    .option-title {
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      color: #111827;
       text-transform: uppercase;
     }
 
-    .btn-reserve-lead:hover {
-      background: #262626;
+    .option-selected-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    .color-options-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .color-choice-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 0.85rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      background: #ffffff;
+      color: #1f2937;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+
+    .color-choice-btn:hover {
+      border-color: #0f172a;
+      background: #f8fafc;
+    }
+
+    .color-choice-btn.active {
+      border-color: #0f172a;
+      background: #0f172a;
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .color-swatch {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      flex-shrink: 0;
+    }
+
+    .color-choice-btn.active .color-swatch {
+      border: 1.5px solid #ffffff;
+    }
+
+    .check-icon {
+      font-size: 0.85rem;
+      margin-left: 0.15rem;
+    }
+
+    .size-options-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .size-choice-btn {
+      min-width: 42px;
+      height: 38px;
+      padding: 0 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      background: #ffffff;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #0f172a;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .size-choice-btn:hover:not(.unavailable) {
+      border-color: #0f172a;
+      background: #f8fafc;
+    }
+
+    .size-choice-btn.active {
+      background: #0f172a;
+      border-color: #0f172a;
+      color: #ffffff;
+    }
+
+    .size-choice-btn.unavailable {
+      opacity: 0.35;
+      text-decoration: line-through;
+      cursor: not-allowed;
+      border-style: dashed;
+    }
+
+    .quantity-sku-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: #f8fafc;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      border-radius: 6px;
+    }
+
+    .qty-selector-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .qty-label {
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      color: #64748b;
+      text-transform: uppercase;
+    }
+
+    .qty-counter {
+      display: flex;
+      align-items: center;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      background: #ffffff;
+      overflow: hidden;
+    }
+
+    .btn-counter {
+      width: 32px;
+      height: 30px;
+      border: none;
+      background: transparent;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #334155;
+    }
+
+    .btn-counter:hover:not(:disabled) {
+      background: #f1f5f9;
+    }
+
+    .btn-counter:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .qty-value {
+      min-width: 28px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #0f172a;
+    }
+
+    .selected-variant-sku {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.15rem;
+    }
+
+    .sku-label {
+      font-size: 0.65rem;
+      color: #94a3b8;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .sku-code {
+      font-size: 0.75rem;
+      font-family: monospace;
+      color: #334155;
+      font-weight: 700;
+    }
+
+    .cart-success-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      border-radius: 6px;
+      color: #15803d;
+      font-size: 0.82rem;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    .banner-left {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .check-circle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #16a34a;
+      color: #ffffff;
+      font-size: 0.75rem;
+      font-weight: 800;
+    }
+
+    .btn-go-cart-link {
+      background: transparent;
+      border: none;
+      color: #15803d;
+      font-weight: 800;
+      font-size: 0.82rem;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .cart-actions-row {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn-add-cart {
+      flex: 1.2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      background: #0f172a;
+      color: #ffffff;
+      border: 1px solid #0f172a;
+      padding: 0.95rem 1.25rem;
+      border-radius: 6px;
+      font-weight: 800;
+      font-size: 0.82rem;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-add-cart:hover:not(:disabled) {
+      background: #1e293b;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-add-cart:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      background: #94a3b8;
+      border-color: #94a3b8;
+    }
+
+    .btn-buy-now {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #d97706;
+      color: #ffffff;
+      border: 1px solid #d97706;
+      padding: 0.95rem 1.25rem;
+      border-radius: 6px;
+      font-weight: 800;
+      font-size: 0.82rem;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(217, 119, 6, 0.2);
+    }
+
+    .btn-buy-now:hover {
+      background: #b45309;
+      border-color: #b45309;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(180, 83, 9, 0.3);
+    }
+
+    .btn-close-minimal {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: #64748b;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.4rem;
+      cursor: pointer;
+      text-decoration: underline;
+      text-align: center;
+    }
+
+    .btn-close-minimal:hover {
+      color: #0f172a;
     }
 
     /* Form rows */
@@ -3222,6 +3610,13 @@ export class CatalogoPageComponent implements OnInit {
   private readonly iaService = inject(IaAsistenteService);
   readonly authService = inject(AuthService);
   readonly router = inject(Router);
+  readonly cartService = inject(CartService);
+
+  // E-Commerce Purchase State in Modal
+  selectedColorId = signal<number | null>(null);
+  selectedTallaId = signal<number | null>(null);
+  modalCantidad = signal<number>(1);
+  cartAddedFeedback = signal<boolean>(false);
 
   prendas = signal<Prenda[]>([]);
   categorias = signal<Categoria[]>([]);
@@ -3689,11 +4084,160 @@ export class CatalogoPageComponent implements OnInit {
     this.currentDetailImageIndex.set(0);
     this.activeModalTab.set(initialTab);
     this.showReviewForm.set(false);
+    this.modalCantidad.set(1);
+    this.cartAddedFeedback.set(false);
+
+    if (prenda.variantes && prenda.variantes.length > 0) {
+      const primerVar = prenda.variantes[0];
+      this.selectedColorId.set(primerVar.color_id);
+      this.selectedTallaId.set(primerVar.talla_id);
+    } else {
+      this.selectedColorId.set(null);
+      this.selectedTallaId.set(null);
+    }
+
     this.loadCalificaciones(prenda.id);
   }
 
   closeDetail(): void {
     this.selectedPrenda.set(null);
+    this.cartAddedFeedback.set(false);
+  }
+
+  // --- E-Commerce & Carrito Methods (CU15) ---
+  getModalColores(): Color[] {
+    const p = this.selectedPrenda();
+    if (!p || !p.variantes) return [];
+    const map = new Map<number, Color>();
+    for (const v of p.variantes) {
+      if (v.color && !map.has(v.color.id)) {
+        map.set(v.color.id, v.color);
+      }
+    }
+    return Array.from(map.values());
+  }
+
+  getModalTallas(): Talla[] {
+    const p = this.selectedPrenda();
+    if (!p || !p.variantes) return [];
+    const map = new Map<number, Talla>();
+    for (const v of p.variantes) {
+      if (v.talla && !map.has(v.talla.id)) {
+        map.set(v.talla.id, v.talla);
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => (a.orden || 0) - (b.orden || 0));
+  }
+
+  isTallaAvailable(tallaId: number): boolean {
+    const p = this.selectedPrenda();
+    if (!p || !p.variantes) return false;
+    const colorId = this.selectedColorId();
+    if (colorId) {
+      return p.variantes.some(v => v.talla_id === tallaId && v.color_id === colorId && v.activo);
+    }
+    return p.variantes.some(v => v.talla_id === tallaId && v.activo);
+  }
+
+  getSelectedVariante(): PrendaVariante | null {
+    const p = this.selectedPrenda();
+    if (!p || !p.variantes || p.variantes.length === 0) return null;
+    const cId = this.selectedColorId();
+    const tId = this.selectedTallaId();
+    if (cId && tId) {
+      const match = p.variantes.find(v => v.color_id === cId && v.talla_id === tId);
+      if (match) return match;
+    }
+    if (tId) {
+      const match = p.variantes.find(v => v.talla_id === tId);
+      if (match) return match;
+    }
+    if (cId) {
+      const match = p.variantes.find(v => v.color_id === cId);
+      if (match) return match;
+    }
+    return p.variantes[0];
+  }
+
+  seleccionarColor(colorId: number): void {
+    this.selectedColorId.set(colorId);
+    this.cartAddedFeedback.set(false);
+    const p = this.selectedPrenda();
+    if (p && p.variantes) {
+      const tId = this.selectedTallaId();
+      const comboExists = p.variantes.some(v => v.color_id === colorId && v.talla_id === tId);
+      if (!comboExists) {
+        const firstWithColor = p.variantes.find(v => v.color_id === colorId);
+        if (firstWithColor) {
+          this.selectedTallaId.set(firstWithColor.talla_id);
+        }
+      }
+    }
+  }
+
+  seleccionarTalla(tallaId: number): void {
+    this.selectedTallaId.set(tallaId);
+    this.cartAddedFeedback.set(false);
+    const p = this.selectedPrenda();
+    if (p && p.variantes) {
+      const cId = this.selectedColorId();
+      const comboExists = p.variantes.some(v => v.talla_id === tallaId && v.color_id === cId);
+      if (!comboExists) {
+        const firstWithTalla = p.variantes.find(v => v.talla_id === tallaId);
+        if (firstWithTalla) {
+          this.selectedColorId.set(firstWithTalla.color_id);
+        }
+      }
+    }
+  }
+
+  incrementarCantidad(): void {
+    if (this.modalCantidad() < 10) {
+      this.modalCantidad.update(c => c + 1);
+    }
+  }
+
+  decrementarCantidad(): void {
+    if (this.modalCantidad() > 1) {
+      this.modalCantidad.update(c => c - 1);
+    }
+  }
+
+  agregarAlCarrito(irAlCheckout: boolean = false): void {
+    const prenda = this.selectedPrenda();
+    if (!prenda) return;
+
+    const variante = this.getSelectedVariante();
+    if (!variante) {
+      this.showFeedback('Por favor seleccione una variante de la prenda.', true);
+      return;
+    }
+
+    const cantidad = this.modalCantidad();
+
+    this.cartService.addItem({
+      variante_id: variante.id,
+      prenda_id: prenda.id,
+      prenda_nombre: prenda.nombre,
+      prenda_sku: prenda.sku,
+      variante_sku: variante.sku_variante || prenda.sku,
+      talla: variante.talla?.codigo || 'N/A',
+      color: variante.color?.nombre || 'Estándar',
+      color_hex: variante.color?.codigo_hex,
+      precio_unitario: Number(prenda.precio_base),
+      imagen_url: this.getPortadaUrl(prenda)
+    }, cantidad);
+
+    this.cartAddedFeedback.set(true);
+
+    if (irAlCheckout) {
+      this.closeDetail();
+      this.router.navigate(['/ventas/checkout']);
+    } else {
+      setTimeout(() => {
+        this.cartAddedFeedback.set(false);
+      }, 4000);
+    }
   }
 
   loadCalificaciones(prendaId: number): void {
