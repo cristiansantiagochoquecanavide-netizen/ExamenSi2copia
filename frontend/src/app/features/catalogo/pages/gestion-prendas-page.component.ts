@@ -208,7 +208,7 @@ interface FotoLocal {
               </td>
 
               <!-- Cantidad de Fotos -->
-              <td>
+              <td style="white-space: nowrap;">
                 <span class="photos-count-badge">
                   {{ p.multimedia.length }} {{ p.multimedia.length === 1 ? 'foto' : 'fotos' }}
                 </span>
@@ -914,7 +914,10 @@ interface FotoLocal {
       padding: 0.35rem 0.65rem;
       border-radius: 6px;
       border: 1px solid #e2e8f0;
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
     }
 
     .status-badge {
