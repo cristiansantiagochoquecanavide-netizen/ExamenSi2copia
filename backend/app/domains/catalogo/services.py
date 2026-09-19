@@ -142,7 +142,7 @@ class ParametrosModaService:
         query = select(Color)
         if activo_solo:
             query = query.where(Color.activo == True)
-        result = await db.execute(query.order_by(Color.nombre))
+        result = await db.execute(query.order_by(Color.id))
         return list(result.scalars().all())
 
     @staticmethod

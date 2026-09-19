@@ -373,19 +373,57 @@ async def run_seed():
         # Colores
         colores_dict = {}
         for c_nom, hex_c, rgb_c in [
-            ("Negro", "#1A1A1A", "rgb(26, 26, 26)"),
-            ("Blanco", "#FFFFFF", "rgb(255, 255, 255)"),
-            ("Beige Arena", "#D8C3A5", "rgb(216, 195, 165)"),
-            ("Camel", "#C1844D", "rgb(193, 132, 77)"),
-            ("Verde Oliva", "#556B2F", "rgb(85, 107, 47)"),
-            ("Verde Salvia", "#9CAF88", "rgb(156, 175, 136)"),
-            ("Azul Marino", "#1B2A4A", "rgb(27, 42, 74)"),
-            ("Azul Rey", "#1E56A0", "rgb(30, 86, 160)"),
-            ("Azul Acero", "#5B7C99", "rgb(91, 124, 153)"),
-            ("Gris Claro", "#C8CDD0", "rgb(200, 205, 208)"),
-            ("Rosa Palo", "#E8B4B8", "rgb(232, 180, 184)"),
-            ("Vino Borgoña", "#6B1D2F", "rgb(107, 29, 47)"),
-            ("Terracota", "#8B4513", "rgb(139, 69, 19)")
+            ("Azul Claro", "#64B5F6", "rgb(100, 181, 246)"),
+            ("Azul", "#1976D2", "rgb(25, 118, 210)"),
+            ("Azul Oscuro", "#0D47A1", "rgb(13, 71, 161)"),
+
+            ("Rojo Claro", "#EF5350", "rgb(239, 83, 80)"),
+            ("Rojo", "#D32F2F", "rgb(211, 47, 47)"),
+            ("Rojo Oscuro", "#8B0000", "rgb(139, 0, 0)"),
+
+            ("Amarillo Claro", "#FFF59D", "rgb(255, 245, 157)"),
+            ("Amarillo", "#FDD835", "rgb(253, 216, 53)"),
+            ("Amarillo Oscuro", "#F57F17", "rgb(245, 127, 23)"),
+
+            ("Verde Claro", "#81C784", "rgb(129, 199, 132)"),
+            ("Verde", "#2E7D32", "rgb(46, 125, 50)"),
+            ("Verde Oscuro", "#1B5E20", "rgb(27, 94, 32)"),
+
+            ("Naranja Claro", "#FFB74D", "rgb(255, 183, 77)"),
+            ("Naranja", "#F57C00", "rgb(245, 124, 0)"),
+            ("Naranja Oscuro", "#E65100", "rgb(230, 81, 0)"),
+
+            ("Morado Claro", "#BA68C8", "rgb(186, 104, 200)"),
+            ("Morado", "#7B1FA2", "rgb(123, 31, 162)"),
+            ("Morado Oscuro", "#4A148C", "rgb(74, 20, 140)"),
+
+            ("Celeste Claro", "#B3E5FC", "rgb(179, 229, 252)"),
+            ("Celeste", "#29B6F6", "rgb(41, 182, 246)"),
+            ("Celeste Oscuro", "#0288D1", "rgb(2, 136, 209)"),
+
+            ("Rosa Claro", "#F8BBD0", "rgb(248, 187, 208)"),
+            ("Rosa", "#EC407A", "rgb(236, 64, 122)"),
+            ("Rosa Oscuro", "#C2185B", "rgb(194, 24, 91)"),
+
+            ("Verde Lima Claro", "#DCE775", "rgb(220, 231, 117)"),
+            ("Verde Lima", "#AFB42B", "rgb(175, 180, 43)"),
+            ("Verde Lima Oscuro", "#827717", "rgb(130, 119, 23)"),
+
+            ("Marrón Claro", "#A1887F", "rgb(161, 136, 127)"),
+            ("Marrón", "#6D4C41", "rgb(109, 76, 65)"),
+            ("Marrón Oscuro", "#3E2723", "rgb(62, 39, 35)"),
+
+            ("Gris Claro", "#E0E0E0", "rgb(224, 224, 224)"),
+            ("Gris", "#9E9E9E", "rgb(158, 158, 158)"),
+            ("Gris Oscuro", "#424242", "rgb(66, 66, 66)"),
+
+            ("Negro Claro", "#374151", "rgb(55, 65, 81)"),
+            ("Negro", "#18181B", "rgb(24, 24, 27)"),
+            ("Negro Oscuro", "#000000", "rgb(0, 0, 0)"),
+
+            ("Blanco Claro", "#FFFFFF", "rgb(255, 255, 255)"),
+            ("Blanco", "#F8FAFC", "rgb(248, 250, 252)"),
+            ("Blanco Oscuro", "#E2E8F0", "rgb(226, 232, 240)")
         ]:
             c = (await session.execute(select(Color).where(Color.nombre == c_nom))).scalar_one_or_none()
             if not c:

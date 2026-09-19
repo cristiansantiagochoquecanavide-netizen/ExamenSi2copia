@@ -454,16 +454,20 @@ interface FotoLocal {
 
                     <!-- Chips de Colores -->
                     <div class="chips-group-section" style="margin-top: 0.85rem;">
-                      <label class="chips-label">COLORES DISPONIBLES:</label>
-                      <div class="interactive-chips">
+                      <div class="color-header-row">
+                        <label class="chips-label">COLORES DISPONIBLES:</label>
+                        <span class="color-palette-legend">Tono Claro &larr; &bull; &rarr; Tono Fuerte</span>
+                      </div>
+                      <div class="color-chips-grid">
                         <button
                           *ngFor="let c of colores()"
                           type="button"
                           class="selectable-chip color-chip"
                           [class.selected]="selectedColoresIds().includes(c.id)"
-                          (click)="toggleColor(c.id)">
+                          (click)="toggleColor(c.id)"
+                          [title]="c.nombre">
                           <span class="color-dot" [style.background-color]="c.codigo_hex || '#333'"></span>
-                          {{ c.nombre }}
+                          <span class="color-chip-text">{{ c.nombre }}</span>
                         </button>
                       </div>
                     </div>
@@ -1315,6 +1319,39 @@ interface FotoLocal {
       height: 12px;
       border-radius: 50%;
       border: 1px solid rgba(0, 0, 0, 0.2);
+      flex-shrink: 0;
+    }
+    .color-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.4rem;
+    }
+    .color-palette-legend {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #64748b;
+      letter-spacing: 0.04em;
+    }
+    .color-chips-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.4rem;
+      max-height: 250px;
+      overflow-y: auto;
+      padding-right: 0.35rem;
+    }
+    .selectable-chip.color-chip {
+      padding: 0.42rem 0.55rem;
+      font-size: 0.73rem;
+      justify-content: flex-start;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .color-chip-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     /* Modal Footer */
