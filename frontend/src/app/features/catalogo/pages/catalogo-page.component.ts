@@ -825,7 +825,7 @@ import { OutfitSugerido } from '../../ia-asistente/models/ia-asistente.models';
                   <label>Temporada *</label>
                   <select [(ngModel)]="nuevaPrenda.temporada_id" name="temporada_id" required>
                     @for (temp of temporadas(); track temp.id) {
-                      <option [value]="temp.id">{{ temp.nombre }} ({{ temp.codigo }})</option>
+                      <option [value]="temp.id">{{ temp.nombre }}{{ temp.codigo && temp.codigo !== 'CASUAL' && temp.codigo !== 'SIN-TEMP' ? ' (' + temp.codigo + ')' : '' }}</option>
                     }
                   </select>
                 </div>

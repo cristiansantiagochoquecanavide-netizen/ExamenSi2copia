@@ -425,7 +425,7 @@ interface FotoLocal {
                         <label>Temporada Comercial *</label>
                         <select [(ngModel)]="formData.temporada_id" name="temporada_id" required class="form-ctrl">
                           <option *ngFor="let temp of temporadas()" [value]="temp.id">
-                            {{ temp.nombre }} ({{ temp.codigo }})
+                            {{ temp.nombre }}{{ temp.codigo && temp.codigo !== 'CASUAL' && temp.codigo !== 'SIN-TEMP' ? ' (' + temp.codigo + ')' : '' }}
                           </option>
                         </select>
                       </div>

@@ -384,18 +384,24 @@ async def run_seed():
                 await session.flush()
             colores_dict[c_nom] = c
 
-        # Temporada
-        temp_ss = (await session.execute(select(Temporada).where(Temporada.codigo == "SS-2026"))).scalar_one_or_none()
-        if not temp_ss:
-            temp_ss = Temporada(
-                nombre="Primavera-Verano 2026",
-                codigo="SS-2026",
-                fecha_inicio=date(2026, 9, 1),
-                fecha_fin=date(2027, 2, 28),
-                activo=True
-            )
-            session.add(temp_ss)
-            await session.flush()
+        # Temporadas comerciales y atemporales
+        temporadas_seed = [
+            {"nombre": "Primavera-Verano 2026", "codigo": "SS-2026", "fecha_inicio": date(2026, 9, 1), "fecha_fin": date(2027, 2, 28)},
+            {"nombre": "Casual", "codigo": "CASUAL", "fecha_inicio": None, "fecha_fin": None},
+            {"nombre": "Sin Temporada", "codigo": "SIN-TEMP", "fecha_inicio": None, "fecha_fin": None}
+        ]
+        for t_seed in temporadas_seed:
+            t_obj = (await session.execute(select(Temporada).where(Temporada.codigo == t_seed["codigo"]))).scalar_one_or_none()
+            if not t_obj:
+                t_obj = Temporada(
+                    nombre=t_seed["nombre"],
+                    codigo=t_seed["codigo"],
+                    fecha_inicio=t_seed["fecha_inicio"],
+                    fecha_fin=t_seed["fecha_fin"],
+                    activo=True
+                )
+                session.add(t_obj)
+                await session.flush()
 
         # 6. PRENDAS (Catálogo vacío para carga manual del usuario)
         print("--> 6. Catálogo de prendas listo para carga manual.")
