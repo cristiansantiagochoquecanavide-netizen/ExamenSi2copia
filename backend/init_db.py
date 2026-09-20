@@ -6,6 +6,8 @@ import app.domains.inventario.models
 import app.domains.catalogo.models
 import app.domains.ventas.models
 import app.domains.reservas.models
+import app.domains.ia_asistente.models
+import app.domains.notificaciones.models
 
 async def init_tables():
     print("==> Conectando a PostgreSQL...")

@@ -15,7 +15,20 @@ from app.domains.reportes.routers import router as reportes_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Eventos de inicio (startup): conexiones a base de datos, pool, etc.
+    # Asegurar que todas las tablas de todos los dominios existan al iniciar la aplicación
+    from app.core.database import Base, engine
+    import app.domains.usuarios.models
+    import app.domains.inventario.models
+    import app.domains.catalogo.models
+    import app.domains.ventas.models
+    import app.domains.reservas.models
+    import app.domains.ia_asistente.models
+    import app.domains.notificaciones.models
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+    except Exception as e_init:
+        print(f"Nota inicializando tablas en lifespan: {e_init}")
     yield
     # Eventos de cierre (shutdown): cerrar conexiones, liberar recursos.
 

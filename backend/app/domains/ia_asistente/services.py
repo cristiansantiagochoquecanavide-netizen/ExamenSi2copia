@@ -586,7 +586,7 @@ class ChatbotConciergeService:
     async def buscar_prendas_rag(self, entidades: Dict[str, Any], limit: int = 3) -> List[Prenda]:
         query = (
             select(Prenda)
-            .join(Prenda.categoria)
+            .join(Categoria, Prenda.categoria_id == Categoria.id)
             .options(
                 selectinload(Prenda.categoria),
                 selectinload(Prenda.multimedia),
@@ -660,7 +660,7 @@ class ChatbotConciergeService:
             prendas = list(res_fb.scalars().all())
 
         # Ordenar por rating_promedio en memoria y tomar 'limit'
-        prendas.sort(key=lambda p: (p.rating_promedio or 0.0, float(p.precio_base)), reverse=True)
+        prendas.sort(key=lambda p: (p.rating_promedio or 0.0, float(p.precio_base or 0)), reverse=True)
         return prendas[:limit]
 
     async def consultar_stock_sucursal_rag(self, sucursal_nombre: Optional[str] = None) -> str:
@@ -840,13 +840,20 @@ class ChatbotConciergeService:
             ]
 
         # Actualizar título si es el inicio
-        if len(sesion.mensajes) <= 1:
-            if entidades.get("ocasion"):
-                sesion.titulo = f"Búsqueda: {entidades['ocasion'].capitalize()}"
-            elif entidades.get("prenda_tipo"):
-                sesion.titulo = f"Consulta: {entidades['prenda_tipo'].capitalize()}"
-            else:
-                sesion.titulo = texto[:40] + ("..." if len(texto) > 40 else "")
+        try:
+            res_count = await self.db.execute(
+                select(func.count(MensajeChatIA.id)).where(MensajeChatIA.sesion_id == sesion.id)
+            )
+            total_msgs = res_count.scalar() or 0
+            if total_msgs <= 2:
+                if entidades.get("ocasion"):
+                    sesion.titulo = f"Búsqueda: {entidades['ocasion'].capitalize()}"
+                elif entidades.get("prenda_tipo"):
+                    sesion.titulo = f"Consulta: {entidades['prenda_tipo'].capitalize()}"
+                else:
+                    sesion.titulo = texto[:40] + ("..." if len(texto) > 40 else "")
+        except Exception:
+            pass
 
         sesion.updated_at = datetime.now(timezone.utc)
 
@@ -868,6 +875,7 @@ class ChatbotConciergeService:
         cards = [self.to_chat_card(p) for p in prendas_adjuntas]
         return MensajeChatResponse(
             id=msg_bot.id,
+            session_uuid=sesion.session_uuid,
             remitente=msg_bot.remitente,
             texto=msg_bot.texto,
             intencion_detectada=msg_bot.intencion_detectada,

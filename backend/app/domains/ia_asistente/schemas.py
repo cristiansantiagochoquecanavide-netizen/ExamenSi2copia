@@ -107,6 +107,7 @@ class MensajeChatCreate(BaseModel):
 
 class MensajeChatResponse(BaseIaasistenteSchema):
     id: int
+    session_uuid: Optional[str] = None
     remitente: str
     texto: str
     intencion_detectada: Optional[str] = None

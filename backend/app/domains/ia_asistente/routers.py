@@ -153,11 +153,19 @@ async def enviar_mensaje_chat(
 ):
     service = ChatbotConciergeService(db)
     usuario_id = usuario.id if usuario else None
-    return await service.procesar_mensaje(
-        texto=payload.texto,
-        session_uuid=payload.session_uuid,
-        usuario_id=usuario_id
-    )
+    try:
+        return await service.procesar_mensaje(
+            texto=payload.texto,
+            session_uuid=payload.session_uuid,
+            usuario_id=usuario_id
+        )
+    except Exception as e_chat:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error en Atelier Concierge: {str(e_chat)}"
+        )
 
 
 @router.get(
