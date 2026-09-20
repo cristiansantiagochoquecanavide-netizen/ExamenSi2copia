@@ -84,4 +84,46 @@ class VentasRepository {
       return [];
     }
   }
+
+  Future<Map<String, dynamic>> crearPromocion({
+    required String codigo,
+    required String nombre,
+    String? descripcion,
+    required double valorDescuento,
+    String tipoDescuento = 'PORCENTAJE',
+  }) async {
+    try {
+      final options = await _getAuthOptions();
+      final now = DateTime.now();
+      final payload = {
+        'codigo': codigo.trim().toUpperCase(),
+        'nombre': nombre.trim(),
+        'descripcion': descripcion ?? 'Promoción exclusiva FashionStore',
+        'tipo_descuento': tipoDescuento,
+        'valor_descuento': valorDescuento,
+        'monto_minimo_compra': 0,
+        'limite_por_cliente': 1,
+        'fecha_inicio': now.toIso8601String(),
+        'fecha_fin': now.add(const Duration(days: 30)).toIso8601String(),
+        'activo': true,
+      };
+
+      final response = await _apiClient.dio.post(
+        '/ventas/promociones',
+        data: payload,
+        options: options,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return response.data as Map<String, dynamic>;
+      }
+      throw Exception('Error al crear promoción (${response.statusCode})');
+    } on DioException catch (e) {
+      if (e.response?.data != null && e.response!.data is Map) {
+        final d = e.response!.data as Map;
+        if (d.containsKey('detail')) throw Exception(d['detail']);
+      }
+      throw Exception('Error al crear promoción: ${e.message}');
+    }
+  }
 }

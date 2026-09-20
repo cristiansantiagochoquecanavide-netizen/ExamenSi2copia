@@ -9,6 +9,15 @@ import {
   DispositivoSuscripcion
 } from '../models/notificaciones.models';
 
+export interface PushToastData {
+  titulo: string;
+  mensaje: string;
+  accionLabel?: string;
+  urlDestino?: string;
+  onAccion?: () => void;
+  tipo?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -21,12 +30,18 @@ export class NotificacionesService {
   readonly isLoading = signal<boolean>(false);
   readonly isOpen = signal<boolean>(false);
   readonly activePromoToast = signal<Notificacion | null>(null);
+  readonly activePushToast = signal<PushToastData | null>(null);
 
   private promoTimer: any = null;
+  private pushTimer: any = null;
+  private pollingInterval: any = null;
+  private promoVistasIds = new Set<number>();
+  private inicializado = false;
 
   constructor() {
+    this.recuperarPromosVistas();
     this.cargarResumen();
-    this.verificarPromoActiva();
+    this.iniciarPollingEnVivo();
   }
 
   toggleOpen(): void {
@@ -112,13 +127,33 @@ export class NotificacionesService {
         this.unreadCount.update(c => c + 1);
         if (nueva.tipo === 'PROMOCION') {
           this.mostrarPromoToast(nueva);
+        } else if (nueva.tipo === 'ESTADO_PEDIDO') {
+          this.mostrarPushToast({
+            titulo: 'Compra Realizada con éxito',
+            mensaje: nueva.mensaje || 'Tu compra ha sido confirmada.',
+            accionLabel: 'Ver bolsa o carrito de compras',
+            urlDestino: '/ventas/checkout',
+            tipo: nueva.tipo
+          });
+        } else if (nueva.tipo === 'RESERVA_PROBADOR') {
+          this.mostrarPushToast({
+            titulo: 'Reserva realizada con éxito',
+            mensaje: nueva.mensaje || 'Tu cita en el probador está agendada.',
+            accionLabel: 'Ver mis reservas',
+            urlDestino: '/reservas',
+            tipo: nueva.tipo
+          });
         }
       })
     );
   }
 
+  // --- GESTIÓN DE TOAST DE PROMOCIONES ---
   mostrarPromoToast(notif: Notificacion): void {
     this.activePromoToast.set(notif);
+    this.promoVistasIds.add(notif.id);
+    this.guardarPromosVistas();
+
     if (this.promoTimer) {
       clearTimeout(this.promoTimer);
     }
@@ -135,23 +170,95 @@ export class NotificacionesService {
     this.activePromoToast.set(null);
   }
 
-  verificarPromoActiva(): void {
-    const yaMostrada = sessionStorage.getItem('atelier_promo_toast_seen');
-    if (yaMostrada) return;
+  // --- GESTIÓN DE TOAST PUSH TRANSACCIONAL (COMPRA, RESERVA, ETC.) ---
+  mostrarPushToast(toast: PushToastData): void {
+    this.activePushToast.set(toast);
+    if (this.pushTimer) {
+      clearTimeout(this.pushTimer);
+    }
+    // Auto-cierre suave tras 8.5 segundos
+    this.pushTimer = setTimeout(() => {
+      this.cerrarPushToast();
+    }, 8500);
+  }
 
+  cerrarPushToast(): void {
+    if (this.pushTimer) {
+      clearTimeout(this.pushTimer);
+    }
+    this.activePushToast.set(null);
+  }
+
+  // --- POLLING EN VIVO: DETECCIÓN DE NUEVOS CUPONES Y ALERTAS A LOS ~9s ---
+  private iniciarPollingEnVivo(): void {
+    // Primer escaneo tras 1.5s de arranque
+    setTimeout(() => {
+      this.verificarAlertasYPromociones();
+    }, 1500);
+
+    // Polling recurrente cada 9 segundos para garantizar la regla de los 10s
+    this.pollingInterval = setInterval(() => {
+      this.verificarAlertasYPromociones();
+    }, 9000);
+  }
+
+  private verificarAlertasYPromociones(): void {
     this.http.get<Notificacion[]>(`${this.baseUrl}`, {
-      params: new HttpParams().set('tipo', 'PROMOCION').set('solo_no_leidas', 'true').set('limit', '1')
+      params: new HttpParams().set('tipo', 'PROMOCION').set('limit', '5')
     }).subscribe({
-      next: (items) => {
-        if (items && items.length > 0) {
-          setTimeout(() => {
-            this.mostrarPromoToast(items[0]);
-            sessionStorage.setItem('atelier_promo_toast_seen', 'true');
-          }, 1800);
+      next: (promos) => {
+        if (!promos || promos.length === 0) {
+          this.inicializado = true;
+          return;
+        }
+
+        if (!this.inicializado) {
+          // Primera carga: si la última promo vigente no fue vista en esta sesión, mostrarla
+          const ultima = promos[0];
+          if (!this.promoVistasIds.has(ultima.id) && !ultima.leida) {
+            this.mostrarPromoToast(ultima);
+          } else {
+            promos.forEach(p => this.promoVistasIds.add(p.id));
+            this.guardarPromosVistas();
+          }
+          this.inicializado = true;
+        } else {
+          // Polling posterior: si apareció un nuevo cupón creado por admin que no teníamos registrado
+          for (const p of promos) {
+            if (!this.promoVistasIds.has(p.id)) {
+              this.mostrarPromoToast(p);
+              this.unreadCount.update(c => c + 1);
+              this.notifications.update(list => [p, ...list]);
+              break; // Mostrar la más reciente
+            }
+          }
         }
       },
       error: () => {}
     });
+
+    // Actualizar badge de no leídas en silencio
+    this.cargarResumen();
+  }
+
+  private recuperarPromosVistas(): void {
+    try {
+      const raw = sessionStorage.getItem('atelier_promos_vistas');
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) {
+          this.promoVistasIds = new Set(arr);
+        }
+      }
+    } catch {
+      this.promoVistasIds = new Set<number>();
+    }
+  }
+
+  private guardarPromosVistas(): void {
+    try {
+      sessionStorage.setItem('atelier_promos_vistas', JSON.stringify(Array.from(this.promoVistasIds)));
+    } catch {}
   }
 
   private actualizarConteoNoLeidas(): void {

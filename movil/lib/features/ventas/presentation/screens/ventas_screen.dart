@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../shared/widgets/atelier_scaffold.dart';
 import '../../../../shared/widgets/qr_code_painter.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/app_notification.dart';
 import '../../../../shared/services/cart_service.dart';
 import '../../../usuarios/data/repositories/auth_repository.dart';
 import '../../../usuarios/domain/models/usuario_model.dart';
@@ -774,6 +775,12 @@ class _CheckoutModalState extends State<_CheckoutModal> {
           _createdVenta = result;
           _step = _CheckoutStep.success;
         });
+
+        AppNotification.showSuccess(
+          'Tu pedido #${result.codigoVenta} fue procesado correctamente.',
+          title: 'Compra Realizada con éxito',
+          actionLabel: 'VER BOLSA O CARRITO',
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -866,6 +873,12 @@ class _CheckoutModalState extends State<_CheckoutModal> {
           _createdVenta = result;
           _step = _CheckoutStep.success;
         });
+
+        AppNotification.showSuccess(
+          'Tu pedido #${result.codigoVenta} fue procesado correctamente.',
+          title: 'Compra Realizada con éxito',
+          actionLabel: 'VER BOLSA O CARRITO',
+        );
       }
     } catch (e) {
       if (mounted) {

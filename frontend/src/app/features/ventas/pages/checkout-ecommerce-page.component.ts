@@ -7,6 +7,7 @@ import { VentasService } from '../services/ventas.service';
 import { InventarioService } from '../../inventario/services/inventario.service';
 import { CatalogoService } from '../../catalogo/services/catalogo.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { NotificacionesService } from '../../notificaciones/services/notificaciones.service';
 import { Sucursal } from '../../inventario/models/inventario.models';
 import { Prenda } from '../../catalogo/models/catalogo.models';
 import {
@@ -2315,6 +2316,7 @@ export class CheckoutEcommercePageComponent implements OnInit {
   private readonly inventarioService = inject(InventarioService);
   private readonly catalogoService = inject(CatalogoService);
   readonly authService = inject(AuthService);
+  private readonly notifService = inject(NotificacionesService);
 
   activeTab: 'checkout' | 'pedidos' = 'checkout';
   cartItems: CartItem[] = [];
@@ -2718,6 +2720,19 @@ export class CheckoutEcommercePageComponent implements OnInit {
         if (this.pasarelaSeleccionada === 'PAYPAL_EXPRESS') pasarelaNombre = 'PayPal Express';
 
         this.mensajeExito = `¡Tu compra ha sido exitosa! Pedido #${res.codigo_venta} confirmado con ${pasarelaNombre}. Tracking logístico: ${res.envio?.codigo_seguimiento || 'Generado'}.`;
+
+        // Disparar Notificación Push solicitada (CU15 / CU21)
+        this.notifService.mostrarPushToast({
+          titulo: 'Compra Realizada con éxito',
+          mensaje: `Tu pedido #${res.codigo_venta} por Bs. ${res.total} fue procesado correctamente.`,
+          accionLabel: 'Ver bolsa o carrito de compras',
+          urlDestino: '/ventas/checkout',
+          onAccion: () => {
+            this.activeTab = 'checkout';
+          },
+          tipo: 'ESTADO_PEDIDO'
+        });
+        this.notifService.cargarResumen();
       },
       error: (err) => {
         this.isSubmitting = false;

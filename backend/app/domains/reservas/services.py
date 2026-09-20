@@ -221,6 +221,31 @@ class ReservasService:
 
         await db.commit()
 
+        # Emitir Notificación Push / Alerta de Reserva Exitosa
+        try:
+            from app.domains.notificaciones.models import Notificacion
+            notif_rsv = Notificacion(
+                usuario_id=cliente_id,
+                titulo="Reserva realizada con éxito",
+                mensaje=f"Tu cita en {sucursal.nombre} está confirmada para el {data.fecha_reserva} a las {data.hora_estimada} (Pase: {codigo_rsv}).",
+                tipo="RESERVA_PROBADOR",
+                canal="IN_APP",
+                prioridad="ALTA",
+                leida=False,
+                data_extra={
+                    "reserva_id": reserva.id,
+                    "codigo_reserva": codigo_rsv,
+                    "sucursal": sucursal.nombre,
+                    "accion_label": "Ver mis reservas",
+                    "url_destino": "/reservas"
+                },
+                created_at=ahora
+            )
+            db.add(notif_rsv)
+            await db.commit()
+        except Exception:
+            pass
+
         # Registro en Bitácora de Auditoría
         await AuditoriaService.registrar_evento(
             db,

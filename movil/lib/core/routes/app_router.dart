@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/catalogo/domain/models/catalogo_models.dart';
 import '../../features/catalogo/presentation/screens/catalogo_screen.dart';
@@ -10,7 +11,10 @@ import '../../features/ia_asistente/presentation/screens/ia_asistente_screen.dar
 import '../../features/notificaciones/presentation/screens/notificaciones_screen.dart';
 import '../../features/reportes/presentation/screens/reportes_screen.dart';
 
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+
 final GoRouter appRouter = GoRouter(
+  navigatorKey: rootNavigatorKey,
   initialLocation: '/catalogo',
   routes: [
     GoRoute(

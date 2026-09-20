@@ -1343,6 +1343,32 @@ class VentasService:
 
         await db.commit()
 
+        # Emitir Notificación Push / Alerta de Compra Realizada
+        try:
+            from app.domains.notificaciones.models import Notificacion
+            notif_compra = Notificacion(
+                usuario_id=cliente_id,
+                titulo="Compra Realizada con éxito",
+                mensaje=f"Tu pedido #{codigo_venta} por Bs. {total_a_liquidar:.2f} fue procesado correctamente. ¡Gracias por tu compra!",
+                tipo="ESTADO_PEDIDO",
+                canal="IN_APP",
+                prioridad="ALTA",
+                leida=False,
+                data_extra={
+                    "venta_id": venta.id,
+                    "codigo_venta": codigo_venta,
+                    "tracking": tracking_code,
+                    "accion_label": "Ver bolsa o carrito de compras",
+                    "url_destino": "/ventas/checkout",
+                    "total": str(total_a_liquidar)
+                },
+                created_at=datetime.now(timezone.utc)
+            )
+            db.add(notif_compra)
+            await db.commit()
+        except Exception:
+            pass
+
         # 9. Auditoría
         await AuditoriaService.registrar_evento(
             db,

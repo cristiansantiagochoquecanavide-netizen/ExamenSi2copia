@@ -10,6 +10,7 @@ import { Reserva, ReservaCreate, DetalleReservaCreate } from '../models/reservas
 import { Sucursal, Ciudad } from '../../inventario/models/inventario.models';
 import { Prenda, PrendaVariante, InventarioStock } from '../../catalogo/models/catalogo.models';
 import { environment } from '../../../environments/environment';
+import { NotificacionesService } from '../../notificaciones/services/notificaciones.service';
 
 interface PrendaEnReserva {
   prenda: Prenda;
@@ -1200,6 +1201,7 @@ export class ReservasPageComponent implements OnInit {
   private readonly inventarioService = inject(InventarioService);
   private readonly catalogoService = inject(CatalogoService);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly notifService = inject(NotificacionesService);
 
   activeTab: 'agendar' | 'mis-reservas' = 'agendar';
 
@@ -1437,6 +1439,19 @@ export class ReservasPageComponent implements OnInit {
         this.prendasApartadas = [];
         this.actualizarStockSucursal();
         this.abrirPaseProbador(reserva);
+
+        // Disparar Notificación Push solicitada (CU13 / CU21)
+        this.notifService.mostrarPushToast({
+          titulo: 'Reserva realizada con éxito',
+          mensaje: `Tu cita en ${this.sucursalActual?.nombre || 'Boutique'} ha sido confirmada. Pase #${reserva.codigo_reserva}.`,
+          accionLabel: 'Ver mis reservas',
+          urlDestino: '/reservas',
+          onAccion: () => {
+            this.cambiarAMisReservas();
+          },
+          tipo: 'RESERVA_PROBADOR'
+        });
+        this.notifService.cargarResumen();
       },
       error: (err) => {
         this.guardandoReserva = false;

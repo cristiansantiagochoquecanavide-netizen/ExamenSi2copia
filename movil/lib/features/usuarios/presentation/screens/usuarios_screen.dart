@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../shared/widgets/atelier_scaffold.dart';
+import '../../../../shared/widgets/whatsapp_notification_banner.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/app_notification.dart';
+import '../../../ventas/data/repositories/ventas_repository.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../domain/models/usuario_model.dart';
 
@@ -473,6 +476,24 @@ class _UsuariosScreenState extends State<UsuariosScreen> {
         const SizedBox(height: 24),
 
         // Navigation & Actions
+        if (user.isAdmin) ...[
+          ElevatedButton.icon(
+            onPressed: () => _mostrarDialogoCrearCupon(context),
+            icon: const Icon(Icons.local_offer, color: Color(0xFF25D366)),
+            label: const Text(
+              'CREAR CUPÓN DE DESCUENTO',
+              style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1.2),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF131313),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+              side: const BorderSide(color: Color(0xFF25D366)),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
         if (user.isAdmin || user.isEncargado) ...[
           ElevatedButton.icon(
             onPressed: () => context.go('/reportes'),
@@ -625,6 +646,179 @@ class _UsuariosScreenState extends State<UsuariosScreen> {
             ),
           ),
       ],
+    );
+  }
+
+  Future<void> _mostrarDialogoCrearCupon(BuildContext context) async {
+    final nombreCtrl = TextEditingController(text: 'Promoción Exclusiva');
+    final codigoCtrl = TextEditingController(text: 'ATELIER${(DateTime.now().minute * 7) % 90 + 10}');
+    final descuentoCtrl = TextEditingController(text: '20');
+    bool isSubmitting = false;
+    String? modalError;
+
+    await showDialog(
+      context: context,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+          backgroundColor: Colors.white,
+          titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          actionsPadding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+          title: Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF25D366),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.local_offer, color: Colors.white, size: 18),
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  'NUEVO CUPÓN DE DESCUENTO',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 1.1),
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Creá un cupón promocional en vivo. Se emitirá una notificación emergente automática estilo WhatsApp.',
+                  style: TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
+                ),
+                const SizedBox(height: 16),
+                if (modalError != null) ...[
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    color: const Color(0xFFFEF2F2),
+                    child: Text(modalError!, style: const TextStyle(color: Colors.red, fontSize: 12)),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                const Text(
+                  'NOMBRE DE LA PROMOCIÓN',
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black87),
+                ),
+                const SizedBox(height: 4),
+                TextField(
+                  controller: nombreCtrl,
+                  decoration: const InputDecoration(
+                    hintText: 'Ej: Gala Noche 20% OFF',
+                    isDense: true,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'CÓDIGO DE CUPÓN',
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black87),
+                ),
+                const SizedBox(height: 4),
+                TextField(
+                  controller: codigoCtrl,
+                  textCapitalization: TextCapitalization.characters,
+                  decoration: const InputDecoration(
+                    hintText: 'Ej: GALA20',
+                    isDense: true,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'PORCENTAJE DE DESCUENTO (%)',
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black87),
+                ),
+                const SizedBox(height: 4),
+                TextField(
+                  controller: descuentoCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    hintText: 'Ej: 20',
+                    isDense: true,
+                    suffixText: '%',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: isSubmitting ? null : () => Navigator.of(dialogCtx).pop(),
+              child: const Text('CANCELAR', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF131313),
+                foregroundColor: Colors.white,
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+              ),
+              onPressed: isSubmitting
+                  ? null
+                  : () async {
+                      final nombre = nombreCtrl.text.trim();
+                      final codigo = codigoCtrl.text.trim().toUpperCase();
+                      final desc = double.tryParse(descuentoCtrl.text.trim()) ?? 0;
+
+                      if (nombre.isEmpty || codigo.isEmpty || desc <= 0) {
+                        setDialogState(() {
+                          modalError = 'Por favor completá todos los campos con datos válidos.';
+                        });
+                        return;
+                      }
+
+                      setDialogState(() {
+                        isSubmitting = true;
+                        modalError = null;
+                      });
+
+                      try {
+                        final repo = VentasRepository();
+                        await repo.crearPromocion(
+                          codigo: codigo,
+                          nombre: nombre,
+                          valorDescuento: desc,
+                          tipoDescuento: 'PORCENTAJE',
+                        );
+
+                        if (dialogCtx.mounted) {
+                          Navigator.of(dialogCtx).pop();
+                        }
+
+                        AppNotification.showSuccess('¡Cupón $codigo creado exitosamente!');
+
+                        // Disparar inmediatamente el banner emergente estilo WhatsApp
+                        WhatsAppNotificationBanner.show(
+                          cupon: codigo,
+                          titulo: 'FASHION STORE • CUPÓN CREADO',
+                          mensaje: '¡No te pierdas el cupón: $codigo!',
+                          descuento: 'Aprovechá un ${desc.toStringAsFixed(0)}% de descuento en tus compras.',
+                          onUsar: () {
+                            context.go('/ventas');
+                          },
+                        );
+                      } catch (e) {
+                        setDialogState(() {
+                          isSubmitting = false;
+                          modalError = e.toString().replaceAll('Exception: ', '');
+                        });
+                      }
+                    },
+              child: isSubmitting
+                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  : const Text('CREAR & NOTIFICAR', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

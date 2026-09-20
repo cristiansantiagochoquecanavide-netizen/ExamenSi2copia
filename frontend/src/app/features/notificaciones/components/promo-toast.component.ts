@@ -1,16 +1,64 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { NotificacionesService } from '../services/notificaciones.service';
+import { NotificacionesService, PushToastData } from '../services/notificaciones.service';
 
 @Component({
   selector: 'app-promo-toast',
   standalone: true,
   imports: [CommonModule],
   template: `
-    @if (notifService.activePromoToast(); as promo) {
-      <div class="promo-toast-overlay" (click)="onToastClick(promo)">
-        <div class="promo-toast-card" (click)="$event.stopPropagation()">
+    <!-- 1. TOAST DE NOTIFICACIÓN PUSH TRANSACCIONAL (COMPRA, RESERVA, ALERTAS) -->
+    @if (notifService.activePushToast(); as push) {
+      <div class="promo-toast-overlay" (click)="ejecutarAccionPush(push)">
+        <div class="promo-toast-card push-card" (click)="$event.stopPropagation()">
+          <!-- Barra superior de auto-cierre -->
+          <div class="toast-progress-bar push-bar"></div>
+
+          <!-- Botón Cerrar Rápido -->
+          <button
+            type="button"
+            class="btn-toast-close"
+            (click)="notifService.cerrarPushToast()"
+            title="Cerrar notificación"
+            aria-label="Cerrar notificación"
+          >
+            &times;
+          </button>
+
+          <!-- Cabecera de Tipo -->
+          <div class="toast-header-row">
+            <span class="toast-tag-badge push-badge">
+              <span class="tag-sparkle">{{ getPushIcon(push) }}</span>
+              {{ getPushBadgeText(push) }}
+            </span>
+            <span class="toast-live-pill">&bull; EN VIVO</span>
+          </div>
+
+          <!-- Título y Mensaje -->
+          <h4 class="toast-title">{{ push.titulo }}</h4>
+          <p class="toast-desc">{{ push.mensaje }}</p>
+
+          <!-- Botón de Acción Directo Debajo del Mensaje -->
+          <div class="toast-actions-row">
+            <button
+              type="button"
+              class="btn-toast-cta push-cta"
+              (click)="ejecutarAccionPush(push)"
+            >
+              <span>{{ push.accionLabel || 'Ver detalles' }}</span>
+              <span class="cta-arrow">&rarr;</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- 2. TOAST DE PROMOCIÓN / CUPÓN EN VIVO (CREADO POR ADMIN) -->
+    @if (!notifService.activePushToast()) {
+      @if (notifService.activePromoToast(); as promo) {
+        <div class="promo-toast-overlay" (click)="onToastClick(promo)">
+          <div class="promo-toast-card" (click)="$event.stopPropagation()">
           <!-- Barra superior de tiempo de auto-cierre -->
           <div class="toast-progress-bar"></div>
 
@@ -75,6 +123,7 @@ import { NotificacionesService } from '../services/notificaciones.service';
         </div>
       </div>
     }
+  }
   `,
   styles: [`
     .promo-toast-overlay {
@@ -109,15 +158,25 @@ import { NotificacionesService } from '../services/notificaciones.service';
       overflow: hidden;
     }
 
+    .promo-toast-card.push-card {
+      border-color: #10b981;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4), 0 4px 14px rgba(16, 185, 129, 0.25);
+    }
+
     /* Barra de progreso de tiempo */
     .toast-progress-bar {
       position: absolute;
       top: 0;
       left: 0;
-      height: 3px;
+      height: 3.5px;
       background: #c5a880;
       width: 100%;
       animation: progressShrink 8s linear forwards;
+    }
+
+    .toast-progress-bar.push-bar {
+      background: #10b981;
+      animation: progressShrink 8.5s linear forwards;
     }
 
     @keyframes progressShrink {
@@ -164,6 +223,12 @@ import { NotificacionesService } from '../services/notificaciones.service';
       border-radius: 6px;
     }
 
+    .toast-tag-badge.push-badge {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: #10b981;
+      color: #10b981;
+    }
+
     .toast-discount-pill {
       background: #c5a880;
       color: #000000;
@@ -172,6 +237,13 @@ import { NotificacionesService } from '../services/notificaciones.service';
       padding: 2px 8px;
       border-radius: 6px;
       letter-spacing: 0.5px;
+    }
+
+    .toast-live-pill {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #10b981;
     }
 
     .toast-title {
@@ -270,11 +342,22 @@ import { NotificacionesService } from '../services/notificaciones.service';
       transition: all 0.2s ease;
     }
 
+    .btn-toast-cta.push-cta {
+      background: #10b981;
+      color: #ffffff;
+    }
+
     .btn-toast-cta:hover {
       background: #ffffff;
       color: #000000;
       transform: translateY(-1px);
       box-shadow: 0 4px 14px rgba(197, 168, 128, 0.4);
+    }
+
+    .btn-toast-cta.push-cta:hover {
+      background: #34d399;
+      color: #000000;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
     }
 
     .cta-arrow {
@@ -293,6 +376,31 @@ export class PromoToastComponent {
 
   copiado = signal<boolean>(false);
 
+  // --- MÉTODOS PARA TOAST PUSH TRANSACCIONAL ---
+  getPushIcon(push: PushToastData): string {
+    if (push.tipo === 'ESTADO_PEDIDO') return '🛍️';
+    if (push.tipo === 'RESERVA_PROBADOR') return '🕒';
+    return '🔔';
+  }
+
+  getPushBadgeText(push: PushToastData): string {
+    if (push.tipo === 'ESTADO_PEDIDO') return 'COMPRA CONFIRMADA';
+    if (push.tipo === 'RESERVA_PROBADOR') return 'RESERVA CONFIRMADA';
+    return 'NOTIFICACIÓN PUSH';
+  }
+
+  ejecutarAccionPush(push: PushToastData): void {
+    this.notifService.cerrarPushToast();
+    if (push.onAccion) {
+      push.onAccion();
+      return;
+    }
+    if (push.urlDestino) {
+      this.router.navigateByUrl(push.urlDestino);
+    }
+  }
+
+  // --- MÉTODOS PARA TOAST DE PROMOCIÓN ---
   getCupon(promo: any): string | null {
     if (!promo?.data_extra) return null;
     return promo.data_extra['cupon'] || promo.data_extra['codigo_cupon'] || null;
@@ -303,7 +411,7 @@ export class PromoToastComponent {
     const val = promo.data_extra['descuento'] || promo.data_extra['valor_descuento'];
     const tipo = promo.data_extra['tipo_descuento'];
     if (!val) return null;
-    return tipo === 'MONTO_FIJO' ? `\$${val} OFF` : `${val}% OFF`;
+    return tipo === 'MONTO_FIJO' ? `$${val} OFF` : `${val}% OFF`;
   }
 
   copiarCupon(cupon: string, event: MouseEvent): void {

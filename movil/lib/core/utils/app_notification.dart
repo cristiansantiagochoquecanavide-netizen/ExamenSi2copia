@@ -7,9 +7,10 @@ final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey = GlobalKey<Sca
 class AppNotification {
   static void showSuccess(
     String message, {
+    String? title,
     String? actionLabel,
     VoidCallback? onAction,
-    Duration duration = const Duration(seconds: 3),
+    Duration duration = const Duration(seconds: 4),
   }) {
     final state = rootScaffoldMessengerKey.currentState;
     if (state == null) return;
@@ -22,9 +23,31 @@ class AppNotification {
         backgroundColor: Colors.black,
         behavior: SnackBarBehavior.floating,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-        content: Text(
-          message,
-          style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (title != null) ...[
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.3,
+                ),
+              ),
+              const SizedBox(height: 3),
+            ],
+            Text(
+              message,
+              style: TextStyle(
+                color: title != null ? Colors.white70 : Colors.white,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ],
         ),
         action: actionLabel != null
             ? SnackBarAction(

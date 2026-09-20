@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../shared/widgets/atelier_scaffold.dart';
+import '../../../../shared/widgets/whatsapp_notification_banner.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/app_notification.dart';
 import '../../domain/models/notificacion_model.dart';
@@ -99,6 +100,35 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
       });
       AppNotification.showSuccess('Alerta en vivo recibida: ${nueva.titulo}');
     }
+  }
+
+  Future<void> _simularAlertaCupon5s() async {
+    AppNotification.showSuccess('Simulación programada: En 5 segundos recibirás el cupón...');
+    
+    await Future.delayed(const Duration(seconds: 5));
+    if (!mounted) return;
+
+    final nueva = await _repository.emitirAlertaTest('PROMOCION');
+    if (nueva != null && mounted) {
+      setState(() {
+        _notificaciones.insert(0, nueva);
+      });
+    }
+
+    final codigoCupon = nueva?.dataExtra?['cupon']?.toString() ??
+        nueva?.dataExtra?['codigo_cupon']?.toString() ??
+        'ATELIER20';
+
+    // Notificación emergente estilo WhatsApp (Heads-up banner)
+    WhatsAppNotificationBanner.show(
+      cupon: codigoCupon,
+      titulo: nueva?.titulo.isNotEmpty == true ? nueva!.titulo : 'FASHION STORE • PROMOCIÓN',
+      mensaje: '¡No te pierdas el cupón: $codigoCupon!',
+      descuento: nueva?.mensaje ?? 'Aprovechá un 20% de descuento en tu próxima compra online.',
+      onUsar: () {
+        context.go('/ventas');
+      },
+    );
   }
 
   @override
@@ -210,12 +240,18 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
                             const SizedBox(height: 16),
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black,
+                                backgroundColor: _selectedFilter == 'PROMOCION' ? const Color(0xFF047857) : Colors.black,
                                 foregroundColor: Colors.white,
                                 shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
                               ),
-                              onPressed: () => _simularAlerta('RECOMENDACION_IA'),
-                              child: const Text('Simular Alerta de IA (CU19)'),
+                              onPressed: _selectedFilter == 'PROMOCION'
+                                  ? _simularAlertaCupon5s
+                                  : () => _simularAlerta(_selectedFilter == 'TODAS' || _selectedFilter == 'NO_LEIDAS' ? 'RECOMENDACION_IA' : _selectedFilter),
+                              child: Text(
+                                _selectedFilter == 'PROMOCION'
+                                    ? '🏷️ Simular Cupón en Promos (5s)'
+                                    : 'Simular Alerta de IA (CU19)',
+                              ),
                             ),
                           ],
                         ),
@@ -345,43 +381,53 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
               color: Color(0xFFF9FAFB),
               border: Border(top: BorderSide(color: Color(0xFFE5E7EB))),
             ),
-            child: Row(
-              children: [
-                const Text('Simular:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: OutlinedButton(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  const Text('Simular:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                  const SizedBox(width: 8),
+                  OutlinedButton(
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       side: const BorderSide(color: Color(0xFFD1D5DB)),
                     ),
                     onPressed: () => _simularAlerta('RECOMENDACION_IA'),
                     child: const Text('✨ IA (CU19)', style: TextStyle(fontSize: 11, color: Colors.black)),
                   ),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: OutlinedButton(
+                  const SizedBox(width: 6),
+                  OutlinedButton(
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      backgroundColor: const Color(0xFFECFDF5),
+                      side: const BorderSide(color: Color(0xFF10B981)),
+                    ),
+                    onPressed: _simularAlertaCupon5s,
+                    child: const Text(
+                      '🏷️ Promo (5s)',
+                      style: TextStyle(fontSize: 11, color: Color(0xFF047857), fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       side: const BorderSide(color: Color(0xFFD1D5DB)),
                     ),
                     onPressed: () => _simularAlerta('RESERVA_PROBADOR'),
                     child: const Text('🕒 Cita', style: TextStyle(fontSize: 11, color: Colors.black)),
                   ),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: OutlinedButton(
+                  const SizedBox(width: 6),
+                  OutlinedButton(
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       side: const BorderSide(color: Color(0xFFD1D5DB)),
                     ),
                     onPressed: () => _simularAlerta('ESTADO_PEDIDO'),
                     child: const Text('🛍️ Pedido', style: TextStyle(fontSize: 11, color: Colors.black)),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],

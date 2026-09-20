@@ -441,6 +441,15 @@ class _ReservasScreenState extends State<ReservasScreen> with SingleTickerProvid
         _tabController.animateTo(1);
 
         _showSuccessModal(reserva);
+
+        AppNotification.showSuccess(
+          'Tu cita en ${_selectedSucursal?.nombre ?? "Boutique"} ha sido agendada con éxito (Pase #${reserva.codigoReserva}).',
+          title: 'Reserva realizada con éxito',
+          actionLabel: 'VER MIS CITAS',
+          onAction: () {
+            _tabController.animateTo(1);
+          },
+        );
       }
     } catch (e) {
       if (mounted) {
