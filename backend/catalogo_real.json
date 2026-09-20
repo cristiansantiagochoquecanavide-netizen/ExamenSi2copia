@@ -1,0 +1,850 @@
+[
+  {
+    "id": 10,
+    "sku": "NOIR-6647",
+    "nombre": "CAMISA DE HILO CLÁSICA",
+    "descripcion": "Bonita Camisa para verano, suelta, fresca y de 100% algodón",
+    "precio_base": "250.00",
+    "categoria_id": 8,
+    "categoria_nombre": "Camisas",
+    "categoria_sector": "HOMBRES",
+    "temporada_id": 2,
+    "activo": true,
+    "multimedia": [
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_2bf017481720.webp",
+        "formato": ".webp",
+        "es_portada": false
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_7302a3a8b5ef.webp",
+        "formato": ".webp",
+        "es_portada": false
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_3f171b9d6855.webp",
+        "formato": ".webp",
+        "es_portada": true
+      }
+    ],
+    "variantes": [
+      {
+        "talla_id": 2,
+        "color_id": 11,
+        "sku_variante": "NOIR-6647-M-VER",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 3,
+        "color_id": 11,
+        "sku_variante": "NOIR-6647-L-VER",
+        "codigo_barras": null
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "sku": "NOIR-2353",
+    "nombre": "CHAQUETA CARGO OVERSIZED",
+    "descripcion": "",
+    "precio_base": "300.00",
+    "categoria_id": 8,
+    "categoria_nombre": "Camisas",
+    "categoria_sector": "HOMBRES",
+    "temporada_id": 2,
+    "activo": true,
+    "multimedia": [
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_a93d8a0766bb.webp",
+        "formato": ".webp",
+        "es_portada": false
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_d4c5db037d1d.webp",
+        "formato": ".webp",
+        "es_portada": true
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_077aea5c6f3e.webp",
+        "formato": ".webp",
+        "es_portada": false
+      }
+    ],
+    "variantes": [
+      {
+        "talla_id": 1,
+        "color_id": 28,
+        "sku_variante": "NOIR-2353-S-MAR",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 2,
+        "color_id": 28,
+        "sku_variante": "NOIR-2353-M-MAR",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 3,
+        "color_id": 28,
+        "sku_variante": "NOIR-2353-L-MAR",
+        "codigo_barras": null
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "sku": "NOIR-1272",
+    "nombre": "POLERA CLÁSICA MANGA CORTA",
+    "descripcion": "",
+    "precio_base": "250.00",
+    "categoria_id": 5,
+    "categoria_nombre": "Poleras",
+    "categoria_sector": "HOMBRES",
+    "temporada_id": 2,
+    "activo": true,
+    "multimedia": [
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_c0d4cb6a0865.webp",
+        "formato": ".webp",
+        "es_portada": false
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_70b1f2d6f527.webp",
+        "formato": ".webp",
+        "es_portada": true
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_0081d6ab4dd9.webp",
+        "formato": ".webp",
+        "es_portada": false
+      }
+    ],
+    "variantes": [
+      {
+        "talla_id": 2,
+        "color_id": 4,
+        "sku_variante": "NOIR-1272-M-ROJ",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 3,
+        "color_id": 4,
+        "sku_variante": "NOIR-1272-L-ROJ",
+        "codigo_barras": null
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "sku": "NOIR-5867",
+    "nombre": "SHORT CLÁSICO CON DETALLE DE BORDE LINEAL EN MEDIO",
+    "descripcion": "",
+    "precio_base": "200.00",
+    "categoria_id": 7,
+    "categoria_nombre": "Shores",
+    "categoria_sector": "HOMBRES",
+    "temporada_id": 2,
+    "activo": true,
+    "multimedia": [
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_a07a2bf4f161.webp",
+        "formato": ".webp",
+        "es_portada": true
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_95a9ccfcfc3f.webp",
+        "formato": ".webp",
+        "es_portada": false
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_691ccb96d159.webp",
+        "formato": ".webp",
+        "es_portada": false
+      }
+    ],
+    "variantes": [
+      {
+        "talla_id": 2,
+        "color_id": 13,
+        "sku_variante": "NOIR-5867-M-NAR",
+        "codigo_barras": null
+      }
+    ]
+  },
+  {
+    "id": 14,
+    "sku": "NOIR-1157",
+    "nombre": "CHAQUETA CLÁSICA CON FRISA Y BOLSILLOS CARGO",
+    "descripcion": "",
+    "precio_base": "350.00",
+    "categoria_id": 8,
+    "categoria_nombre": "Camisas",
+    "categoria_sector": "HOMBRES",
+    "temporada_id": 2,
+    "activo": true,
+    "multimedia": [
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_8ec5ea0b9283.webp",
+        "formato": ".webp",
+        "es_portada": true
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_575d647e6713.webp",
+        "formato": ".webp",
+        "es_portada": false
+      }
+    ],
+    "variantes": [
+      {
+        "talla_id": 1,
+        "color_id": 10,
+        "sku_variante": "NOIR-1157-S-VER",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 2,
+        "color_id": 10,
+        "sku_variante": "NOIR-1157-M-VER",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 3,
+        "color_id": 10,
+        "sku_variante": "NOIR-1157-L-VER",
+        "codigo_barras": null
+      }
+    ]
+  },
+  {
+    "id": 15,
+    "sku": "NOIR-7304",
+    "nombre": "PANTALON BUZO JOGGER CON FRISADO",
+    "descripcion": "",
+    "precio_base": "150.00",
+    "categoria_id": 6,
+    "categoria_nombre": "Pantalones",
+    "categoria_sector": "HOMBRES",
+    "temporada_id": 2,
+    "activo": true,
+    "multimedia": [
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_b60b44f05d3f.webp",
+        "formato": ".webp",
+        "es_portada": false
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_fdffad0adcae.webp",
+        "formato": ".webp",
+        "es_portada": true
+      }
+    ],
+    "variantes": [
+      {
+        "talla_id": 1,
+        "color_id": 38,
+        "sku_variante": "NOIR-7304-S-BLA",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 2,
+        "color_id": 38,
+        "sku_variante": "NOIR-7304-M-BLA",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 3,
+        "color_id": 38,
+        "sku_variante": "NOIR-7304-L-BLA",
+        "codigo_barras": null
+      }
+    ]
+  },
+  {
+    "id": 16,
+    "sku": "NOIR-6726",
+    "nombre": "POLERA ESPANDEX CON TEXTURA ACANALADA",
+    "descripcion": "",
+    "precio_base": "200.00",
+    "categoria_id": 5,
+    "categoria_nombre": "Poleras",
+    "categoria_sector": "HOMBRES",
+    "temporada_id": 2,
+    "activo": true,
+    "multimedia": [
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_fe8718ee9592.webp",
+        "formato": ".webp",
+        "es_portada": true
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_67e7d93056cf.webp",
+        "formato": ".webp",
+        "es_portada": false
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_d60d800b7be6.webp",
+        "formato": ".webp",
+        "es_portada": false
+      }
+    ],
+    "variantes": [
+      {
+        "talla_id": 2,
+        "color_id": 35,
+        "sku_variante": "NOIR-6726-M-NEG",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 3,
+        "color_id": 35,
+        "sku_variante": "NOIR-6726-L-NEG",
+        "codigo_barras": null
+      }
+    ]
+  },
+  {
+    "id": 17,
+    "sku": "NOIR-4792",
+    "nombre": "PANTALON BUZO JOGGER",
+    "descripcion": "",
+    "precio_base": "200.00",
+    "categoria_id": 3,
+    "categoria_nombre": "Pantalones",
+    "categoria_sector": "MUJERES",
+    "temporada_id": 2,
+    "activo": true,
+    "multimedia": [
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_3a01e14b3384.webp",
+        "formato": ".webp",
+        "es_portada": false
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_55d365cf510c.webp",
+        "formato": ".webp",
+        "es_portada": false
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_e9c78368c845.webp",
+        "formato": ".webp",
+        "es_portada": true
+      }
+    ],
+    "variantes": [
+      {
+        "talla_id": 1,
+        "color_id": 11,
+        "sku_variante": "NOIR-4792-S-VER",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 2,
+        "color_id": 11,
+        "sku_variante": "NOIR-4792-M-VER",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 3,
+        "color_id": 11,
+        "sku_variante": "NOIR-4792-L-VER",
+        "codigo_barras": null
+      }
+    ]
+  },
+  {
+    "id": 18,
+    "sku": "NOIR-3722",
+    "nombre": "PANTALON WIDE LEG DE ALGODÓN CON BOLSILLOS CARGO",
+    "descripcion": "",
+    "precio_base": "250.00",
+    "categoria_id": 3,
+    "categoria_nombre": "Pantalones",
+    "categoria_sector": "MUJERES",
+    "temporada_id": 2,
+    "activo": true,
+    "multimedia": [
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_02bf90233fa1.webp",
+        "formato": ".webp",
+        "es_portada": true
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_e130866225af.webp",
+        "formato": ".webp",
+        "es_portada": false
+      }
+    ],
+    "variantes": [
+      {
+        "talla_id": 1,
+        "color_id": 32,
+        "sku_variante": "NOIR-3722-S-GRI",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 2,
+        "color_id": 32,
+        "sku_variante": "NOIR-3722-M-GRI",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 3,
+        "color_id": 32,
+        "sku_variante": "NOIR-3722-L-GRI",
+        "codigo_barras": null
+      }
+    ]
+  },
+  {
+    "id": 19,
+    "sku": "NOIR-6204",
+    "nombre": "BLUSA ACANALADA CON MANGA ABULLONADA",
+    "descripcion": "",
+    "precio_base": "250.00",
+    "categoria_id": 4,
+    "categoria_nombre": "Poleras",
+    "categoria_sector": "MUJERES",
+    "temporada_id": 2,
+    "activo": true,
+    "multimedia": [
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_6f5237e1770e.webp",
+        "formato": ".webp",
+        "es_portada": false
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_8706b2dd23d0.webp",
+        "formato": ".webp",
+        "es_portada": true
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_f8f71b7567d3.webp",
+        "formato": ".webp",
+        "es_portada": false
+      }
+    ],
+    "variantes": [
+      {
+        "talla_id": 1,
+        "color_id": 38,
+        "sku_variante": "NOIR-6204-S-BLA",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 2,
+        "color_id": 38,
+        "sku_variante": "NOIR-6204-M-BLA",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 3,
+        "color_id": 38,
+        "sku_variante": "NOIR-6204-L-BLA",
+        "codigo_barras": null
+      }
+    ]
+  },
+  {
+    "id": 20,
+    "sku": "NOIR-2926",
+    "nombre": "BLUSA DE GASA CON DETALLES DE VOLADOS",
+    "descripcion": "",
+    "precio_base": "250.00",
+    "categoria_id": 1,
+    "categoria_nombre": "Blusas",
+    "categoria_sector": "MUJERES",
+    "temporada_id": 2,
+    "activo": true,
+    "multimedia": [
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_2f179d97aeae.webp",
+        "formato": ".webp",
+        "es_portada": true
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_8a5764bb0773.webp",
+        "formato": ".webp",
+        "es_portada": false
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_6ce01be00dcc.webp",
+        "formato": ".webp",
+        "es_portada": false
+      }
+    ],
+    "variantes": [
+      {
+        "talla_id": 1,
+        "color_id": 22,
+        "sku_variante": "NOIR-2926-S-ROS",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 2,
+        "color_id": 22,
+        "sku_variante": "NOIR-2926-M-ROS",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 3,
+        "color_id": 22,
+        "sku_variante": "NOIR-2926-L-ROS",
+        "codigo_barras": null
+      }
+    ]
+  },
+  {
+    "id": 21,
+    "sku": "NOIR-9315",
+    "nombre": "VESTIDO MIDI ACAMPANADO",
+    "descripcion": "",
+    "precio_base": "200.00",
+    "categoria_id": 2,
+    "categoria_nombre": "Vestidos",
+    "categoria_sector": "MUJERES",
+    "temporada_id": 2,
+    "activo": true,
+    "multimedia": [
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_6d9170973746.webp",
+        "formato": ".webp",
+        "es_portada": true
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_157f081f037f.webp",
+        "formato": ".webp",
+        "es_portada": false
+      }
+    ],
+    "variantes": [
+      {
+        "talla_id": 1,
+        "color_id": 35,
+        "sku_variante": "NOIR-9315-S-NEG",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 2,
+        "color_id": 35,
+        "sku_variante": "NOIR-9315-M-NEG",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 3,
+        "color_id": 35,
+        "sku_variante": "NOIR-9315-L-NEG",
+        "codigo_barras": null
+      }
+    ]
+  },
+  {
+    "id": 22,
+    "sku": "NOIR-2241",
+    "nombre": "BLUSA CON DETALLE DE VOLADO EN LA MANGA",
+    "descripcion": "",
+    "precio_base": "200.00",
+    "categoria_id": 1,
+    "categoria_nombre": "Blusas",
+    "categoria_sector": "MUJERES",
+    "temporada_id": 2,
+    "activo": true,
+    "multimedia": [
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_2f95260d923a.webp",
+        "formato": ".webp",
+        "es_portada": true
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_f959cdb22f0d.webp",
+        "formato": ".webp",
+        "es_portada": false
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_dbc8ee18596b.webp",
+        "formato": ".webp",
+        "es_portada": false
+      }
+    ],
+    "variantes": [
+      {
+        "talla_id": 1,
+        "color_id": 38,
+        "sku_variante": "NOIR-2241-S-BLA",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 2,
+        "color_id": 38,
+        "sku_variante": "NOIR-2241-M-BLA",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 3,
+        "color_id": 38,
+        "sku_variante": "NOIR-2241-L-BLA",
+        "codigo_barras": null
+      }
+    ]
+  },
+  {
+    "id": 23,
+    "sku": "NOIR-2998",
+    "nombre": "CAMISA KILLA DRILL BLUERAY",
+    "descripcion": "",
+    "precio_base": "300.00",
+    "categoria_id": 9,
+    "categoria_nombre": "Camisas",
+    "categoria_sector": "UNISEX",
+    "temporada_id": 2,
+    "activo": true,
+    "multimedia": [
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_f88a107bcd27.jpg",
+        "formato": ".jpg",
+        "es_portada": true
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_b9f02da67b4d.jpg",
+        "formato": ".jpg",
+        "es_portada": false
+      }
+    ],
+    "variantes": [
+      {
+        "talla_id": 1,
+        "color_id": 2,
+        "sku_variante": "NOIR-2998-S-AZU",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 2,
+        "color_id": 2,
+        "sku_variante": "NOIR-2998-M-AZU",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 3,
+        "color_id": 2,
+        "sku_variante": "NOIR-2998-L-AZU",
+        "codigo_barras": null
+      }
+    ]
+  },
+  {
+    "id": 24,
+    "sku": "NOIR-6560",
+    "nombre": "CAMISA KILLA DRILL",
+    "descripcion": "",
+    "precio_base": "350.00",
+    "categoria_id": 9,
+    "categoria_nombre": "Camisas",
+    "categoria_sector": "UNISEX",
+    "temporada_id": 2,
+    "activo": true,
+    "multimedia": [
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_456badfa13c5.jpg",
+        "formato": ".jpg",
+        "es_portada": true
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_f8fd65eb4137.jpg",
+        "formato": ".jpg",
+        "es_portada": false
+      }
+    ],
+    "variantes": [
+      {
+        "talla_id": 1,
+        "color_id": 28,
+        "sku_variante": "NOIR-6560-S-MAR",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 2,
+        "color_id": 28,
+        "sku_variante": "NOIR-6560-M-MAR",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 3,
+        "color_id": 28,
+        "sku_variante": "NOIR-6560-L-MAR",
+        "codigo_barras": null
+      }
+    ]
+  },
+  {
+    "id": 37,
+    "sku": "NOIR-3524",
+    "nombre": "VESTIDO DE LANA MIDI CON ABERTURAS EN LOS COSTADOS Y MANGAS ABULLONADAS",
+    "descripcion": "Bonito vestido para eventos de gala",
+    "precio_base": "250.00",
+    "categoria_id": 2,
+    "categoria_nombre": "Vestidos",
+    "categoria_sector": "MUJERES",
+    "temporada_id": 2,
+    "activo": true,
+    "multimedia": [
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_f231bea9add1.webp",
+        "formato": ".webp",
+        "es_portada": true
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_3de7ddbe04da.webp",
+        "formato": ".webp",
+        "es_portada": false
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_c29474abcab1.webp",
+        "formato": ".webp",
+        "es_portada": false
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_64e187e3ce60.webp",
+        "formato": ".webp",
+        "es_portada": false
+      }
+    ],
+    "variantes": [
+      {
+        "talla_id": 2,
+        "color_id": 28,
+        "sku_variante": "NOIR-3524-M-MAR",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 2,
+        "color_id": 35,
+        "sku_variante": "NOIR-3524-M-NEG",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 3,
+        "color_id": 28,
+        "sku_variante": "NOIR-3524-L-MAR",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 3,
+        "color_id": 35,
+        "sku_variante": "NOIR-3524-L-NEG",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 1,
+        "color_id": 28,
+        "sku_variante": "NOIR-3524-S-MAR",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 1,
+        "color_id": 35,
+        "sku_variante": "NOIR-3524-S-NEG",
+        "codigo_barras": null
+      }
+    ]
+  },
+  {
+    "id": 38,
+    "sku": "NOIR-9318",
+    "nombre": "VESTIDO CORTO CON MANGAS ACAMPANADAS",
+    "descripcion": "Bonito vestido para cenas casuales",
+    "precio_base": "250.00",
+    "categoria_id": 2,
+    "categoria_nombre": "Vestidos",
+    "categoria_sector": "MUJERES",
+    "temporada_id": 2,
+    "activo": true,
+    "multimedia": [
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_02d07ba31a5f.webp",
+        "formato": ".webp",
+        "es_portada": true
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_eb6cc3695051.webp",
+        "formato": ".webp",
+        "es_portada": false
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_1b82d79f80ba.webp",
+        "formato": ".webp",
+        "es_portada": false
+      },
+      {
+        "tipo": "IMAGEN",
+        "url": "http://localhost:8000/static/uploads/prendas/prenda_47fa2aa89cc5.webp",
+        "formato": ".webp",
+        "es_portada": false
+      }
+    ],
+    "variantes": [
+      {
+        "talla_id": 1,
+        "color_id": 35,
+        "sku_variante": "NOIR-9318-S-NEG",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 2,
+        "color_id": 35,
+        "sku_variante": "NOIR-9318-M-NEG",
+        "codigo_barras": null
+      },
+      {
+        "talla_id": 3,
+        "color_id": 35,
+        "sku_variante": "NOIR-9318-L-NEG",
+        "codigo_barras": null
+      }
+    ]
+  }
+]

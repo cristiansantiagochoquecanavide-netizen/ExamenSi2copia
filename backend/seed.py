@@ -1,4 +1,6 @@
 import asyncio
+import os
+import json
 from datetime import datetime, date, timezone
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -453,187 +455,107 @@ async def run_seed():
                 session.add(t_obj)
                 await session.flush()
 
-        # 6. PRENDAS (Catálogo inicial de prendas con fotos de alta resolución)
-        print("--> 6. Poblando catalogo de prendas iniciales...")
-        temp_ss = (await session.execute(select(Temporada).where(Temporada.codigo == "SS-2026"))).scalar_one_or_none()
-        if not temp_ss:
-            temp_ss = (await session.execute(select(Temporada))).scalars().first()
+        # 6. PRENDAS (Catálogo real extraído de la base de datos de desarrollo)
+        print("--> 6. Poblando catalogo de prendas reales desde catalogo_real.json...")
+        json_path = os.path.join(os.path.dirname(__file__), "catalogo_real.json")
+        if os.path.exists(json_path):
+            with open(json_path, "r", encoding="utf-8") as f:
+                prendas_seed_data = json.load(f)
 
-        prendas_seed_data = [
-            {
-                "sku": "NOIR-TRN-001",
-                "nombre": "Gabardina Icónica Noir",
-                "descripcion": "Gabardina estructurada de corte contemporáneo con cinturón y solapa ancha. Confeccionada con tejido hidrófugo italiano de alta resistencia.",
-                "precio_base": 680.00,
-                "cat": ("Chaquetas", "UNISEX"),
-                "imagen": "/static/uploads/prendas/prenda_70b1f2d6f527.webp",
-                "tallas": ["S", "M", "L", "XL"],
-                "colores": ["Negro", "Gris"]
-            },
-            {
-                "sku": "NOIR-PNT-002",
-                "nombre": "Pantalón de Pinzas Alta Costura",
-                "descripcion": "Pantalón sastrero de tiro alto con pinzas frontales y caída estilizada. Confeccionado en lana fría transpirable para confort durante todo el día.",
-                "precio_base": 340.00,
-                "cat": ("Pantalones", "UNISEX"),
-                "imagen": "/static/uploads/prendas/prenda_08febba66417.webp",
-                "tallas": ["S", "M", "L", "XL"],
-                "colores": ["Negro", "Azul"]
-            },
-            {
-                "sku": "NOIR-DRS-003",
-                "nombre": "Vestido de Noche Atelier Noir",
-                "descripcion": "Vestido midi de silueta geométrica y escote sutil. Crepé de seda de alta densidad con forro interior suave de máxima elegancia.",
-                "precio_base": 450.00,
-                "cat": ("Vestidos", "MUJERES"),
-                "imagen": "/static/uploads/prendas/prenda_8706b2dd23d0.webp",
-                "tallas": ["S", "M", "L"],
-                "colores": ["Negro", "Rojo"]
-            },
-            {
-                "sku": "NOIR-BLZ-004",
-                "nombre": "Blazer Estructurado Bespoke",
-                "descripcion": "Blazer entallado con hombreras estructuradas y botones metálicos grabados. Forro jacquard satinado y solapa clásica.",
-                "precio_base": 520.00,
-                "cat": ("Chaquetas", "UNISEX"),
-                "imagen": "/static/uploads/prendas/prenda_3f171b9d6855.webp",
-                "tallas": ["S", "M", "L", "XL"],
-                "colores": ["Negro", "Azul Oscuro"]
-            },
-            {
-                "sku": "NOIR-KID-005",
-                "nombre": "Camisa de Popelina Premium",
-                "descripcion": "Camisa de corte relajado con cuello tradicional y puños ajustables. 100% algodón peinado de fibra larga.",
-                "precio_base": 280.00,
-                "cat": ("Camisas", "UNISEX"),
-                "imagen": "/static/uploads/prendas/prenda_0081d6ab4dd9.webp",
-                "tallas": ["S", "M", "L", "XL"],
-                "colores": ["Blanco", "Celeste"]
-            },
-            {
-                "sku": "NOIR-TRJ-006",
-                "nombre": "Traje Ejecutivo Bespoke Noir",
-                "descripcion": "Traje sastrero de dos piezas en lana merino Super 120s. Corte moderno con solapas de pico para eventos de alta distinción.",
-                "precio_base": 850.00,
-                "cat": ("Trajes", "HOMBRES"),
-                "imagen": "/static/uploads/prendas/prenda_2f179d97aeae.webp",
-                "tallas": ["M", "L", "XL"],
-                "colores": ["Negro", "Azul Oscuro"]
-            },
-            {
-                "sku": "NOIR-DRS-007",
-                "nombre": "Vestido Coctel Plisado",
-                "descripcion": "Vestido fluido de tirantes con detalles plisados artesanales y caída asimétrica refinada.",
-                "precio_base": 390.00,
-                "cat": ("Vestidos", "MUJERES"),
-                "imagen": "/static/uploads/prendas/prenda_157f081f037f.webp",
-                "tallas": ["S", "M", "L"],
-                "colores": ["Rosa", "Negro"]
-            },
-            {
-                "sku": "NOIR-BLS-008",
-                "nombre": "Blusa de Seda Crepé Editorial",
-                "descripcion": "Blusa drapeada de corte fluido en satén de seda pura con escote barco sutil.",
-                "precio_base": 320.00,
-                "cat": ("Blusas", "MUJERES"),
-                "imagen": "/static/uploads/prendas/prenda_456badfa13c5.jpg",
-                "tallas": ["S", "M", "L"],
-                "colores": ["Blanco", "Negro"]
-            },
-            {
-                "sku": "NOIR-POL-009",
-                "nombre": "Polera de Algodón Pima Signature",
-                "descripcion": "Polera de corte regular con cuello en canalé fino y tacto sedoso en algodón pima peruano.",
-                "precio_base": 190.00,
-                "cat": ("Poleras", "HOMBRES"),
-                "imagen": "/static/uploads/prendas/prenda_67e7d93056cf.webp",
-                "tallas": ["S", "M", "L", "XL"],
-                "colores": ["Negro", "Blanco"]
-            },
-            {
-                "sku": "NOIR-PNT-010",
-                "nombre": "Pantalón Cigarette Sartorial",
-                "descripcion": "Pantalón tobillero entallado de tiro medio con bolsillos laterales discretos.",
-                "precio_base": 360.00,
-                "cat": ("Pantalones", "MUJERES"),
-                "imagen": "/static/uploads/prendas/prenda_e130866225af.webp",
-                "tallas": ["S", "M", "L"],
-                "colores": ["Negro", "Gris"]
-            },
-            {
-                "sku": "NOIR-CAM-011",
-                "nombre": "Camisa Lino Italiano Pureza",
-                "descripcion": "Camisa de lino 100% transpirable con botones de nácar natural y cuello suave desestructurado.",
-                "precio_base": 310.00,
-                "cat": ("Camisas", "HOMBRES"),
-                "imagen": "/static/uploads/prendas/prenda_c0d4cb6a0865.webp",
-                "tallas": ["M", "L", "XL"],
-                "colores": ["Blanco", "Celeste"]
-            }
-        ]
+            # Limpiar prendas mockup anteriores si existen
+            skus_antiguos = [
+                "NOIR-TRN-001", "NOIR-PNT-002", "NOIR-DRS-003", "NOIR-BLZ-004",
+                "NOIR-KID-005", "NOIR-TRJ-006", "NOIR-DRS-007", "NOIR-BLS-008",
+                "NOIR-POL-009", "NOIR-PNT-010", "NOIR-CAM-011"
+            ]
+            for sku_ant in skus_antiguos:
+                p_ant = (await session.execute(select(Prenda).where(Prenda.sku == sku_ant))).scalar_one_or_none()
+                if p_ant:
+                    await session.delete(p_ant)
+            await session.flush()
 
-        for p_data in prendas_seed_data:
-            p_exist = (await session.execute(select(Prenda).where(Prenda.sku == p_data["sku"]))).scalar_one_or_none()
-            cat_obj = cats_map.get(p_data["cat"])
-            if not cat_obj:
-                nom_c, sec_c = p_data["cat"]
-                cat_obj = (await session.execute(
-                    select(Categoria).where(Categoria.nombre == nom_c)
-                )).scalars().first()
-            if not cat_obj:
-                continue
-            if not p_exist:
-                p_exist = Prenda(
-                    sku=p_data["sku"],
-                    nombre=p_data["nombre"],
-                    descripcion=p_data["descripcion"],
-                    precio_base=p_data["precio_base"],
-                    categoria_id=cat_obj.id,
-                    temporada_id=temp_ss.id,
-                    activo=True
-                )
-                session.add(p_exist)
-                await session.flush()
-                print(f"  + Prenda creada: {p_exist.nombre} ({p_exist.sku})")
+            temp_default = (await session.execute(select(Temporada))).scalars().first()
 
-                # Multimedia Portada
-                media = PrendaMultimedia(
-                    prenda_id=p_exist.id,
-                    tipo="IMAGEN",
-                    url=p_data["imagen"],
-                    formato=".webp",
-                    es_portada=True
-                )
-                session.add(media)
-                await session.flush()
+            for p_data in prendas_seed_data:
+                p_exist = (await session.execute(select(Prenda).where(Prenda.sku == p_data["sku"]))).scalar_one_or_none()
 
-                # Variantes
-                for t_cod in p_data["tallas"]:
-                    t_obj = tallas_dict.get(t_cod)
-                    if not t_obj:
-                        continue
-                    for c_nom in p_data["colores"]:
-                        c_obj = colores_dict.get(c_nom)
-                        if not c_obj:
+                # Resolver categoría
+                cat_nombre = p_data.get("categoria_nombre")
+                cat_sector = p_data.get("categoria_sector")
+                cat_obj = None
+                if cat_nombre and cat_sector:
+                    cat_obj = (await session.execute(
+                        select(Categoria).where(Categoria.nombre == cat_nombre, Categoria.sector == cat_sector)
+                    )).scalar_one_or_none()
+                if not cat_obj and cat_nombre:
+                    cat_obj = (await session.execute(
+                        select(Categoria).where(Categoria.nombre == cat_nombre)
+                    )).scalars().first()
+                if not cat_obj:
+                    cat_id = p_data.get("categoria_id")
+                    if cat_id:
+                        cat_obj = await session.get(Categoria, cat_id)
+                if not cat_obj:
+                    cat_obj = (await session.execute(select(Categoria))).scalars().first()
+
+                # Resolver temporada
+                temp_obj = temp_default
+
+                if not p_exist and cat_obj:
+                    p_exist = Prenda(
+                        sku=p_data["sku"],
+                        nombre=p_data["nombre"],
+                        descripcion=p_data.get("descripcion") or "",
+                        precio_base=float(p_data["precio_base"]),
+                        categoria_id=cat_obj.id,
+                        temporada_id=temp_obj.id if temp_obj else 1,
+                        activo=p_data.get("activo", True)
+                    )
+                    session.add(p_exist)
+                    await session.flush()
+                    print(f"  + Prenda real cargada: {p_exist.nombre} ({p_exist.sku})")
+
+                    # Multimedia
+                    for m_data in p_data.get("multimedia", []):
+                        url_m = m_data.get("url", "")
+                        if "localhost:8000" in url_m:
+                            url_m = url_m.replace("http://localhost:8000", "")
+                        if not url_m.startswith("/"):
+                            url_m = "/" + url_m
+                        media = PrendaMultimedia(
+                            prenda_id=p_exist.id,
+                            tipo=m_data.get("tipo", "IMAGEN"),
+                            url=url_m,
+                            formato=m_data.get("formato", ".webp"),
+                            es_portada=m_data.get("es_portada", False)
+                        )
+                        session.add(media)
+                    await session.flush()
+
+                    # Variantes
+                    for v_data in p_data.get("variantes", []):
+                        t_id = v_data.get("talla_id")
+                        c_id = v_data.get("color_id")
+                        sku_v = v_data.get("sku_variante")
+                        if not t_id or not c_id or not sku_v:
                             continue
-                        sku_v = f"{p_exist.sku}-{t_cod}-{c_nom[:3].upper()}"
                         var_obj = (await session.execute(
                             select(PrendaVariante).where(
                                 PrendaVariante.prenda_id == p_exist.id,
-                                PrendaVariante.talla_id == t_obj.id,
-                                PrendaVariante.color_id == c_obj.id
+                                PrendaVariante.talla_id == t_id,
+                                PrendaVariante.color_id == c_id
                             )
                         )).scalar_one_or_none()
                         if not var_obj:
                             var_obj = PrendaVariante(
                                 prenda_id=p_exist.id,
-                                talla_id=t_obj.id,
-                                color_id=c_obj.id,
+                                talla_id=t_id,
+                                color_id=c_id,
                                 sku_variante=sku_v,
                                 activo=True
                             )
                             session.add(var_obj)
-                            await session.flush()
+                    await session.flush()
 
         # 7. INVENTARIO INICIAL (50 unidades por variante en cada sucursal)
         print("--> 7. Asignando Inventario Inicial (50 unidades por sucursal)...")
