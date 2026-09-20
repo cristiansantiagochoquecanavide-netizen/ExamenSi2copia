@@ -2,7 +2,7 @@ import asyncio
 import os
 import json
 from datetime import datetime, date, timezone
-from sqlalchemy import select, func
+from sqlalchemy import select, func, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import async_session_factory, engine
@@ -462,17 +462,12 @@ async def run_seed():
             with open(json_path, "r", encoding="utf-8") as f:
                 prendas_seed_data = json.load(f)
 
-            # Limpiar prendas mockup anteriores si existen
-            skus_antiguos = [
-                "NOIR-TRN-001", "NOIR-PNT-002", "NOIR-DRS-003", "NOIR-BLZ-004",
-                "NOIR-KID-005", "NOIR-TRJ-006", "NOIR-DRS-007", "NOIR-BLS-008",
-                "NOIR-POL-009", "NOIR-PNT-010", "NOIR-CAM-011"
-            ]
-            for sku_ant in skus_antiguos:
-                p_ant = (await session.execute(select(Prenda).where(Prenda.sku == sku_ant))).scalar_one_or_none()
-                if p_ant:
-                    await session.delete(p_ant)
-            await session.flush()
+            # Limpiar prendas mockup anteriores y sus dependencias si la base aun no tiene el catalogo real
+            prenda_real_test = (await session.execute(select(Prenda).where(Prenda.sku == "NOIR-6647"))).scalar_one_or_none()
+            if not prenda_real_test:
+                print("  - Sincronizando base de datos con catalogo real. Truncando prendas mockup y dependencias previas...")
+                await session.execute(text("TRUNCATE TABLE prendas, ventas, reservas CASCADE;"))
+                await session.flush()
 
             temp_default = (await session.execute(select(Temporada))).scalars().first()
 
@@ -539,6 +534,17 @@ async def run_seed():
                         sku_v = v_data.get("sku_variante")
                         if not t_id or not c_id or not sku_v:
                             continue
+
+                        # Validar que talla y color existan en la BD
+                        t_obj = await session.get(Talla, t_id)
+                        c_obj = await session.get(Color, c_id)
+                        if not t_obj:
+                            t_fallback = (await session.execute(select(Talla))).scalars().first()
+                            t_id = t_fallback.id if t_fallback else 1
+                        if not c_obj:
+                            c_fallback = (await session.execute(select(Color))).scalars().first()
+                            c_id = c_fallback.id if c_fallback else 1
+
                         var_obj = (await session.execute(
                             select(PrendaVariante).where(
                                 PrendaVariante.prenda_id == p_exist.id,
