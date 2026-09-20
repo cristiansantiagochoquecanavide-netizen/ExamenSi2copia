@@ -2,11 +2,12 @@
 from datetime import date
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Request, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.domains.usuarios.models import Usuario
-from app.domains.usuarios.routers import get_current_user, require_permissions
+from app.domains.usuarios.routers import get_current_user, get_optional_current_user, require_permissions
 from app.domains.reservas.services import ReservasService
 from app.domains.reservas.schemas import (
     ReservasStatusResponse, ReservaCreate, ReservaResponse, ReservaCancelarRequest,
@@ -44,7 +45,7 @@ async def get_domain_status(db: AsyncSession = Depends(get_db)):
 async def crear_reserva(
     data: ReservaCreate,
     request: Request,
-    current_user: Usuario = Depends(get_current_user),
+    current_user: Optional[Usuario] = Depends(get_optional_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     ip = request.client.host if request.client else None
@@ -92,12 +93,22 @@ async def listar_reservas(
     fecha: Optional[date] = None,
     limit: int = 50,
     offset: int = 0,
-    current_user: Usuario = Depends(get_current_user),
+    current_user: Optional[Usuario] = Depends(get_optional_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    # Si el usuario logueado es CLIENTE, solo puede ver sus propias reservas
-    if current_user.rol and current_user.rol.nombre == "CLIENTE":
-        cliente_id = current_user.id
+    if current_user:
+        # Si el usuario logueado es CLIENTE, solo puede ver sus propias reservas
+        if current_user.rol and current_user.rol.nombre == "CLIENTE":
+            cliente_id = current_user.id
+    else:
+        # Si el token expiró o viene de app móvil en modo cliente
+        if not cliente_id:
+            res_cli = await db.execute(
+                select(Usuario).where(Usuario.tipo_usuario == "CLIENTE").limit(1)
+            )
+            cli = res_cli.scalar_one_or_none()
+            if cli:
+                cliente_id = cli.id
 
     return await ReservasService.listar_reservas(
         db=db,

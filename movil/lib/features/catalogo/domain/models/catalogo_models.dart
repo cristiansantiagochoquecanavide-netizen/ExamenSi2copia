@@ -1,3 +1,5 @@
+import '../../../../core/constants/app_constants.dart';
+
 class CategoriaModel {
   final int id;
   final String nombre;
@@ -181,24 +183,28 @@ class PrendaModel {
     if (u.startsWith('blob:') || u.startsWith('data:')) {
       return u;
     }
-    const prodHost = 'https://fashionstore-backend-48fs.onrender.com';
+    final uri = Uri.tryParse(AppConstants.apiBaseUrl);
+    final currentHost = (uri != null && uri.hasAuthority)
+        ? '${uri.scheme}://${uri.authority}'
+        : 'http://10.0.2.2:8000';
+
     if (u.startsWith('/static/')) {
-      return '$prodHost$u';
+      return '$currentHost$u';
     }
     if (u.startsWith('static/')) {
-      return '$prodHost/$u';
+      return '$currentHost/$u';
     }
     if (u.contains('localhost:8000')) {
-      return u.replaceAll('http://localhost:8000', prodHost);
+      return u.replaceAll('http://localhost:8000', currentHost);
     }
     if (u.contains('10.0.2.2:8000')) {
-      return u.replaceAll('http://10.0.2.2:8000', prodHost);
+      return u.replaceAll('http://10.0.2.2:8000', currentHost);
     }
     if (u.contains('127.0.0.1:8000')) {
-      return u.replaceAll('http://127.0.0.1:8000', prodHost);
+      return u.replaceAll('http://127.0.0.1:8000', currentHost);
     }
     if (u.contains('backend:8000')) {
-      return u.replaceAll('http://backend:8000', prodHost);
+      return u.replaceAll('http://backend:8000', currentHost);
     }
     return u;
   }
@@ -227,12 +233,41 @@ class PrendaModel {
     return resolveImageUrl(url);
   }
 
+  List<String> get imagenesUrls {
+    final imgs = <String>[];
+    if (multimedia.isNotEmpty) {
+      // 1. Portadas primero
+      final portadas = multimedia.where((m) => m.esPortada && m.tipo == 'IMAGEN').toList();
+      for (final p in portadas) {
+        final u = p.urlResuelta;
+        if (u.isNotEmpty && !imgs.contains(u)) {
+          imgs.add(u);
+        }
+      }
+
+      // 2. Otras imágenes
+      final otras = multimedia.where((m) => m.tipo == 'IMAGEN' && !m.esPortada).toList();
+      for (final o in otras) {
+        final u = o.urlResuelta;
+        if (u.isNotEmpty && !imgs.contains(u)) {
+          imgs.add(u);
+        }
+      }
+    }
+    if (imgs.isEmpty) {
+      imgs.add(portadaUrl);
+    }
+    return imgs;
+  }
+
+  int get totalImagenes => imagenesUrls.length;
+
   bool get tieneModelo3D {
     return multimedia.any((m) => m.tipo.startsWith('MODELO_3D'));
   }
 
   String get precioFormatted {
-    return '\$${precioBase.toStringAsFixed(2)}';
+    return 'Bs. ${precioBase.toStringAsFixed(2)}';
   }
 
   factory PrendaModel.fromJson(Map<String, dynamic> json) {

@@ -267,7 +267,7 @@ class _CatalogoScreenState extends State<CatalogoScreen> {
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       final prenda = _prendas[index];
-                      return _buildProductCard(context, prenda);
+                      return _CatalogoProductCard(prenda: prenda);
                     },
                     childCount: _prendas.length,
                   ),
@@ -278,8 +278,39 @@ class _CatalogoScreenState extends State<CatalogoScreen> {
       ),
     );
   }
+}
 
-  Widget _buildProductCard(BuildContext context, PrendaModel prenda) {
+class _CatalogoProductCard extends StatefulWidget {
+  final PrendaModel prenda;
+
+  const _CatalogoProductCard({required this.prenda});
+
+  @override
+  State<_CatalogoProductCard> createState() => _CatalogoProductCardState();
+}
+
+class _CatalogoProductCardState extends State<_CatalogoProductCard> {
+  late final PageController _pageController;
+  int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final prenda = widget.prenda;
+    final images = prenda.imagenesUrls;
+    final total = images.length;
+
     return InkWell(
       onTap: () => PrendaDetailModal.show(context, prenda),
       child: Container(
@@ -290,26 +321,36 @@ class _CatalogoScreenState extends State<CatalogoScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image with Badges
+            // Image Slider / Stack with Badges
             Expanded(
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.network(
-                    prenda.portadaUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      color: const Color(0xFFF3F4F6),
-                      child: const Center(
-                        child: Icon(Icons.checkroom, size: 40, color: AppTheme.mutedColor),
-                      ),
-                    ),
+                  PageView.builder(
+                    controller: _pageController,
+                    itemCount: total,
+                    onPageChanged: (idx) {
+                      setState(() => _currentIndex = idx);
+                    },
+                    itemBuilder: (context, idx) {
+                      return Image.network(
+                        images[idx],
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          color: const Color(0xFFF3F4F6),
+                          child: const Center(
+                            child: Icon(Icons.checkroom, size: 40, color: AppTheme.mutedColor),
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                  // AR Badge if applicable
+
+                  // AR Badge if applicable (top-left)
                   if (prenda.tieneModelo3D)
                     Positioned(
                       top: 6,
-                      right: 6,
+                      left: 6,
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                         color: Colors.black.withAlpha(220),
@@ -330,6 +371,36 @@ class _CatalogoScreenState extends State<CatalogoScreen> {
                         ),
                       ),
                     ),
+
+                  // Number of images badge (top-right) e.g. "1/3" or "3 fotos"
+                  if (total > 1)
+                    Positioned(
+                      top: 6,
+                      right: 6,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.72),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.photo_library_outlined, size: 10, color: Colors.white),
+                            const SizedBox(width: 3),
+                            Text(
+                              '${_currentIndex + 1}/$total',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
                   // Sector tag bottom left
                   Positioned(
                     bottom: 6,
@@ -348,6 +419,31 @@ class _CatalogoScreenState extends State<CatalogoScreen> {
                       ),
                     ),
                   ),
+
+                  // Dots pagination indicator bottom right if multiple images
+                  if (total > 1)
+                    Positioned(
+                      bottom: 8,
+                      right: 8,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: List.generate(total, (i) {
+                          final active = i == _currentIndex;
+                          return Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                            width: active ? 10 : 4,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: active ? Colors.white : Colors.white.withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(2),
+                              boxShadow: const [
+                                BoxShadow(color: Colors.black26, blurRadius: 1),
+                              ],
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
                 ],
               ),
             ),

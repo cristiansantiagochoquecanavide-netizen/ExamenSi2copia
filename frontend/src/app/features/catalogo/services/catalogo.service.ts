@@ -21,7 +21,8 @@ import {
   InventarioStock,
   Calificacion,
   CalificacionCreate,
-  ListadoCalificacionesResponse
+  ListadoCalificacionesResponse,
+  Sucursal
 } from '../models/catalogo.models';
 
 
@@ -31,6 +32,13 @@ import {
 export class CatalogoService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/catalogo`;
+
+  // --- Sucursales de Inventario ---
+  getSucursales(activoSolo: boolean = true): Observable<Sucursal[]> {
+    return this.http.get<Sucursal[]>(`${environment.apiUrl}/inventario/sucursales`, {
+      params: { activo_solo: activoSolo }
+    });
+  }
 
   // ==========================================
   // CU5: PARÁMETROS DE MODA (CATEGORÍAS, TALLAS, COLORES, TEMPORADAS)

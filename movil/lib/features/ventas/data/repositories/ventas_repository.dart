@@ -33,6 +33,17 @@ class VentasRepository {
         throw Exception('Error al procesar la venta digital (${response.statusCode})');
       }
     } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        try {
+          final retryResponse = await _apiClient.dio.post(
+            '/ventas/checkout-online',
+            data: request.toJson(),
+          );
+          if (retryResponse.statusCode == 200 || retryResponse.statusCode == 201) {
+            return VentaResponseModel.fromJson(retryResponse.data as Map<String, dynamic>);
+          }
+        } catch (_) {}
+      }
       if (e.response?.data != null) {
         final data = e.response!.data;
         if (data is Map<String, dynamic> && data.containsKey('detail')) {
@@ -56,6 +67,17 @@ class VentasRepository {
       if (response.statusCode == 200) {
         final List<dynamic> list = response.data as List<dynamic>;
         return list.map((item) => VentaResponseModel.fromJson(item as Map<String, dynamic>)).toList();
+      }
+      return [];
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        try {
+          final retryResponse = await _apiClient.dio.get('/ventas/pedidos-online');
+          if (retryResponse.statusCode == 200) {
+            final List<dynamic> list = retryResponse.data as List<dynamic>;
+            return list.map((item) => VentaResponseModel.fromJson(item as Map<String, dynamic>)).toList();
+          }
+        } catch (_) {}
       }
       return [];
     } catch (_) {

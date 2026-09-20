@@ -150,7 +150,7 @@ class _ReportesScreenState extends State<ReportesScreen> {
         'intencion_detectada': 'DIAGNOSTICO_GERENCIAL',
         'pregunta': query,
         'diagnostico_cuantitativo':
-            'Las ventas acumuladas en el período ascienden a \$148,245.00 USD con un ticket promedio de \$320.00 USD.',
+            'Las ventas acumuladas en el período ascienden a Bs. 148,245.00 con un ticket promedio de Bs. 320.00.',
         'interpretacion_negocio':
             'La convergencia omnicanal y las reservas de probadores VIP han elevado la tasa de conversión al 9.9%.',
         'recomendaciones_estrategicas': [
@@ -555,7 +555,7 @@ class _ReportesScreenState extends State<ReportesScreen> {
             Expanded(
               child: _buildKPICard(
                 title: 'TOTAL REVENUE',
-                value: '\$${rev.toStringAsFixed(0)}',
+                value: 'Bs. ${rev.toStringAsFixed(0)}',
                 subtitle: '+$revChange% vs anterior',
                 borderColor: const Color(0xFFE9C349),
                 icon: Icons.trending_up,
@@ -592,7 +592,7 @@ class _ReportesScreenState extends State<ReportesScreen> {
             Expanded(
               child: _buildKPICard(
                 title: 'AVG ORDER VALUE',
-                value: '\$${aov.toStringAsFixed(0)}',
+                value: 'Bs. ${aov.toStringAsFixed(0)}',
                 subtitle: 'Promedio global',
                 borderColor: Colors.black,
                 icon: Icons.payments_outlined,
@@ -797,7 +797,7 @@ class _ReportesScreenState extends State<ReportesScreen> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        '\$${monto.toStringAsFixed(2)}',
+                        'Bs. ${monto.toStringAsFixed(2)}',
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                       ),
                       Container(

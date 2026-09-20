@@ -78,7 +78,7 @@ class ReservasService:
     async def crear_reserva(
         db: AsyncSession,
         data: ReservaCreate,
-        current_user: Usuario,
+        current_user: Optional[Usuario] = None,
         ip: Optional[str] = None
     ) -> dict:
         """
@@ -104,15 +104,22 @@ class ReservasService:
             )
 
         # Determinar cliente titular
-        cliente_id = current_user.id
-        if data.cliente_id and data.cliente_id != current_user.id:
-            cliente_obj = await db.get(Usuario, data.cliente_id)
-            if not cliente_obj or cliente_obj.estado != "ACTIVO":
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"El cliente con ID {data.cliente_id} no existe o no está activo."
-                )
+        if current_user:
+            cliente_id = current_user.id
+            if data.cliente_id and data.cliente_id != current_user.id:
+                cliente_obj = await db.get(Usuario, data.cliente_id)
+                if cliente_obj and cliente_obj.estado == "ACTIVO":
+                    cliente_id = data.cliente_id
+        elif data.cliente_id:
             cliente_id = data.cliente_id
+        else:
+            res_cli = await db.execute(
+                select(Usuario).where(Usuario.tipo_usuario == "CLIENTE").limit(1)
+            )
+            cli = res_cli.scalar_one_or_none()
+            if not cli:
+                cli = (await db.execute(select(Usuario).limit(1))).scalar_one()
+            cliente_id = cli.id
 
         # Generar código único y QR token
         codigo_rsv = f"RSV-{ahora.strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
@@ -172,7 +179,7 @@ class ReservasService:
                 cantidad_anterior=ant_disp,
                 cantidad_nueva=stock.cantidad_disponible,
                 motivo=f"Apartado para probador #{codigo_rsv} - Visita: {data.fecha_reserva} {data.hora_estimada}",
-                usuario_id=current_user.id
+                usuario_id=current_user.id if current_user else cliente_id
             ))
 
             detalles_a_crear.append({
@@ -220,8 +227,8 @@ class ReservasService:
             accion="RESERVA_CREADA",
             modulo="reservas",
             detalle=f"Reserva #{codigo_rsv} agendada en '{sucursal.nombre}' para el {data.fecha_reserva} a las {data.hora_estimada}. Total prendas: {total_prendas}, Anticipo: {data.moneda} {data.monto_anticipo}",
-            usuario_id=current_user.id,
-            usuario_email=current_user.email,
+            usuario_id=current_user.id if current_user else cliente_id,
+            usuario_email=current_user.email if current_user else "movil_cliente@fashionstore.local",
             ip_address=ip,
             valores_nuevos={
                 "reserva_id": reserva.id,

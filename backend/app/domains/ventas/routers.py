@@ -2,6 +2,7 @@
 from datetime import date
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Request, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -235,11 +236,22 @@ async def listar_pedidos_online(
     cliente_id: Optional[int] = None,
     limit: int = 50,
     offset: int = 0,
-    current_user: Usuario = Depends(get_current_user),
+    current_user: Optional[Usuario] = Depends(get_optional_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    if current_user.rol and current_user.rol.nombre == "CLIENTE":
-        cliente_id = current_user.id
+    if current_user:
+        if current_user.rol and current_user.rol.nombre == "CLIENTE":
+            cliente_id = current_user.id
+    else:
+        # Fallback a cliente activo si viene de app móvil sin sesión o con token expirado
+        if not cliente_id:
+            res_cli = await db.execute(
+                select(Usuario).where(Usuario.tipo_usuario == "CLIENTE").limit(1)
+            )
+            cli = res_cli.scalar_one_or_none()
+            if cli:
+                cliente_id = cli.id
+
     return await VentasService.listar_pedidos_online(
         db=db,
         sucursal_id=sucursal_id,

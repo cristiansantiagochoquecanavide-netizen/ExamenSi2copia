@@ -61,7 +61,7 @@ class ReservaCreateRequest {
     required this.fechaReserva,
     required this.horaEstimada,
     this.montoAnticipo = 10.0,
-    this.moneda = 'USD',
+    this.moneda = 'BOB',
     this.observaciones,
     required this.detalles,
   });
@@ -157,7 +157,7 @@ class ReservaModel {
       horaEstimada: json['hora_estimada'] as String? ?? '',
       estado: json['estado'] as String? ?? 'CONFIRMADA',
       montoAnticipo: (json['monto_anticipo'] is num) ? (json['monto_anticipo'] as num).toDouble() : 0.0,
-      moneda: json['moneda'] as String? ?? 'USD',
+      moneda: json['moneda'] as String? ?? 'BOB',
       observaciones: json['observaciones'] as String?,
       qrToken: json['qr_token'] as String?,
       qrSvg: json['qr_svg'] as String?,

@@ -111,6 +111,12 @@ class UploadImagenResponse(BaseModel):
     nombre_original: str
     tamano_bytes: int
 
+class StockDistribucionItem(BaseModel):
+    talla_id: int
+    color_id: int
+    sucursal_id: int
+    cantidad: int = Field(0, ge=0)
+
 class PrendaCreate(BaseModel):
     sku: str = Field(..., max_length=50)
     nombre: str = Field(..., max_length=150)
@@ -119,6 +125,7 @@ class PrendaCreate(BaseModel):
     categoria_id: int
     temporada_id: int
     stock_inicial: Optional[int] = Field(50, ge=0)
+    stock_distribucion: Optional[List[StockDistribucionItem]] = None
     activo: bool = True
     variantes: List[PrendaVarianteInput] = []
     multimedia: List[PrendaMultimediaCreate] = []
@@ -133,6 +140,7 @@ class PrendaUpdate(BaseModel):
     categoria_id: Optional[int] = None
     temporada_id: Optional[int] = None
     stock_inicial: Optional[int] = Field(None, ge=0)
+    stock_distribucion: Optional[List[StockDistribucionItem]] = None
     activo: Optional[bool] = None
     multimedia: Optional[List[PrendaMultimediaCreate]] = None
     tallas_ids: Optional[List[int]] = None
@@ -154,6 +162,15 @@ class PrendaSimpleResponse(BaseSchema):
     precio_base: Decimal
     activo: bool
 
+class InventarioStockResponse(BaseSchema):
+    id: int
+    variante_id: int
+    sucursal_id: int
+    cantidad_disponible: int
+    cantidad_reservada: int
+    stock_minimo: int
+    updated_at: datetime
+
 class PrendaVarianteResponse(BaseSchema):
     id: int
     prenda_id: int
@@ -165,6 +182,7 @@ class PrendaVarianteResponse(BaseSchema):
     talla: Optional[TallaResponse] = None
     color: Optional[ColorResponse] = None
     prenda: Optional[PrendaSimpleResponse] = None
+    stock_items: List[InventarioStockResponse] = []
 
 class PrendaResponse(BaseSchema):
     id: int
@@ -190,16 +208,6 @@ class AjusteInventarioRequest(BaseModel):
     tipo_movimiento: str = Field(..., pattern="^(INGRESO_INICIAL|AJUSTE_POSITIVO|AJUSTE_NEGATIVO|VENTA|RESERVA_APARTADA|DEVOLUCION)$")
     cantidad: int = Field(..., gt=0)
     motivo: str = Field(..., max_length=255)
-
-class InventarioStockResponse(BaseSchema):
-    id: int
-    variante_id: int
-    sucursal_id: int
-    cantidad_disponible: int
-    cantidad_reservada: int
-    stock_minimo: int
-    updated_at: datetime
-    variante: Optional[PrendaVarianteResponse] = None
 
 class MensajeCatalogoResponse(BaseModel):
     mensaje: str

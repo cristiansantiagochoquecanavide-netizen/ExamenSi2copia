@@ -27,10 +27,13 @@ class PrendaDetailModal extends StatefulWidget {
 class _PrendaDetailModalState extends State<PrendaDetailModal> {
   TallaModel? _selectedTalla;
   ColorModel? _selectedColor;
+  late final PageController _imagePageController;
+  int _currentImageIndex = 0;
 
   @override
   void initState() {
     super.initState();
+    _imagePageController = PageController();
     if (widget.prenda.variantes.isNotEmpty) {
       _selectedTalla = widget.prenda.variantes.first.talla;
       _selectedColor = widget.prenda.variantes.first.color;
@@ -38,8 +41,16 @@ class _PrendaDetailModalState extends State<PrendaDetailModal> {
   }
 
   @override
+  void dispose() {
+    _imagePageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final prenda = widget.prenda;
+    final images = prenda.imagenesUrls;
+    final totalImages = images.length;
     final availableTallas = prenda.variantes
         .map((v) => v.talla)
         .where((t) => t != null)
@@ -84,49 +95,199 @@ class _PrendaDetailModalState extends State<PrendaDetailModal> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Prenda Image with AR Badge
-                  Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.zero,
-                        child: AspectRatio(
+                  // Galería de Imágenes Interactiva (Estilo Web Atelier)
+                  Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8FAFC),
+                      border: Border.all(color: const Color(0xFFE5E7EB)),
+                    ),
+                    child: Stack(
+                      children: [
+                        AspectRatio(
                           aspectRatio: 1.0,
-                          child: Image.network(
-                            prenda.portadaUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              color: const Color(0xFFF3F4F6),
-                              child: const Icon(Icons.checkroom, size: 64, color: AppTheme.mutedColor),
-                            ),
-                          ),
-                        ),
-                      ),
-                      if (prenda.tieneModelo3D)
-                        Positioned(
-                          top: 12,
-                          left: 12,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            color: Colors.black,
-                            child: const Row(
-                              children: [
-                                Icon(Icons.view_in_ar, size: 14, color: Colors.white),
-                                SizedBox(width: 4),
-                                Text(
-                                  '3D / AR LISTO',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 1.0,
+                          child: PageView.builder(
+                            controller: _imagePageController,
+                            itemCount: totalImages,
+                            onPageChanged: (idx) {
+                              setState(() => _currentImageIndex = idx);
+                            },
+                            itemBuilder: (context, idx) {
+                              return InteractiveViewer(
+                                minScale: 1.0,
+                                maxScale: 2.5,
+                                child: Image.network(
+                                  images[idx],
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    color: const Color(0xFFF3F4F6),
+                                    child: const Center(
+                                      child: Icon(Icons.checkroom, size: 64, color: AppTheme.mutedColor),
+                                    ),
                                   ),
                                 ),
-                              ],
-                            ),
+                              );
+                            },
                           ),
                         ),
-                    ],
+
+                        // Flecha anterior (si hay más de 1 imagen)
+                        if (totalImages > 1)
+                          Positioned(
+                            left: 8,
+                            top: 0,
+                            bottom: 0,
+                            child: Center(
+                              child: InkWell(
+                                onTap: () {
+                                  final prevIdx = (_currentImageIndex - 1 + totalImages) % totalImages;
+                                  _imagePageController.animateToPage(
+                                    prevIdx,
+                                    duration: const Duration(milliseconds: 250),
+                                    curve: Curves.easeInOut,
+                                  );
+                                },
+                                child: Container(
+                                  width: 34,
+                                  height: 34,
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withValues(alpha: 0.65),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.chevron_left, color: Colors.white, size: 22),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                        // Flecha siguiente (si hay más de 1 imagen)
+                        if (totalImages > 1)
+                          Positioned(
+                            right: 8,
+                            top: 0,
+                            bottom: 0,
+                            child: Center(
+                              child: InkWell(
+                                onTap: () {
+                                  final nextIdx = (_currentImageIndex + 1) % totalImages;
+                                  _imagePageController.animateToPage(
+                                    nextIdx,
+                                    duration: const Duration(milliseconds: 250),
+                                    curve: Curves.easeInOut,
+                                  );
+                                },
+                                child: Container(
+                                  width: 34,
+                                  height: 34,
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withValues(alpha: 0.65),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.chevron_right, color: Colors.white, size: 22),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                        // Badge AR 3D
+                        if (prenda.tieneModelo3D)
+                          Positioned(
+                            top: 12,
+                            left: 12,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              color: Colors.black,
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.view_in_ar, size: 14, color: Colors.white),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    '3D / AR LISTO',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 1.0,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                        // Píldora Contadora de Fotos (igual a .gallery-counter-pill de la web)
+                        if (totalImages > 1)
+                          Positioned(
+                            bottom: 12,
+                            right: 12,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF0F172A).withValues(alpha: 0.8),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.photo_library_outlined, size: 12, color: Colors.white),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    '${_currentImageIndex + 1} / $totalImages',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
+
+                  // Tira de Miniaturas Clickeables (igual a .gallery-thumbs-row de la web)
+                  if (totalImages > 1) ...[
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      height: 60,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: totalImages,
+                        separatorBuilder: (_, __) => const SizedBox(width: 8),
+                        itemBuilder: (context, idx) {
+                          final isSelected = idx == _currentImageIndex;
+                          return InkWell(
+                            onTap: () {
+                              _imagePageController.animateToPage(
+                                idx,
+                                duration: const Duration(milliseconds: 250),
+                                curve: Curves.easeInOut,
+                              );
+                            },
+                            child: Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: isSelected ? Colors.black : const Color(0xFFE2E8F0),
+                                  width: isSelected ? 2.5 : 1.0,
+                                ),
+                                color: const Color(0xFFF8FAFC),
+                              ),
+                              child: Image.network(
+                                images[idx],
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 20, color: AppTheme.mutedColor),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 18),
 
                   // Header Tags

@@ -13,7 +13,9 @@ import {
   Categoria,
   Temporada,
   Talla,
-  Color
+  Color,
+  Sucursal,
+  StockDistribucionItem
 } from '../models/catalogo.models';
 
 interface FotoLocal {
@@ -393,17 +395,12 @@ interface FotoLocal {
                       </div>
 
                       <div class="form-field field-stock">
-                        <label>Stock Inicial (Uds) *</label>
-                        <input
-                          type="number"
-                          min="0"
-                          step="1"
-                          [(ngModel)]="formData.stock_inicial"
-                          name="stock_inicial"
-                          required
-                          class="form-ctrl"
-                        />
-                        <small class="field-hint">Por variante en tienda</small>
+                        <label>Stock Total (Uds)</label>
+                        <div class="stock-total-display">
+                          <span class="stock-total-number">{{ totalStockCalculado() }}</span>
+                          <span class="stock-total-unit">uds</span>
+                        </div>
+                        <small class="field-hint">Auto-calculado por sucursal</small>
                       </div>
 
                       <!-- Fila 2: Nombre Comercial que termina exactamente en el borde derecho de Stock Inicial -->
@@ -523,6 +520,67 @@ interface FotoLocal {
                           <span class="color-dot" [style.background-color]="c.codigo_hex || '#333'"></span>
                           <span class="color-chip-text">{{ c.nombre }}</span>
                         </button>
+                      </div>
+                    </div>
+
+                    <!-- MINI-GRILLA DE STOCK POR VARIANTE Y SUCURSAL -->
+                    <div class="stock-matrix-section" *ngIf="stockFilas().length > 0 && sucursales().length > 0">
+                      <div class="stock-matrix-header">
+                        <div class="stock-matrix-title-wrap">
+                          <span class="matrix-tag">DISTRIBUCIÓN REAL</span>
+                          <label class="chips-label">STOCK POR VARIANTE Y SUCURSAL:</label>
+                        </div>
+                        <span class="stock-matrix-sub">Ingresá las unidades físicas disponibles en cada tienda</span>
+                      </div>
+
+                      <div class="stock-matrix-table-wrap">
+                        <table class="stock-matrix-table">
+                          <thead>
+                            <tr>
+                              <th>Talla / Variante</th>
+                              <th *ngFor="let suc of sucursales()" class="col-sucursal">
+                                {{ suc.nombre }}
+                              </th>
+                              <th class="col-subtotal">Subtotal</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr *ngFor="let row of stockFilas()">
+                              <td class="cell-variante">
+                                <span class="row-talla">{{ row.tallaDesc }}</span>
+                                <span class="row-color" *ngIf="selectedColoresIds().length > 1">
+                                  <span class="color-dot-mini" [style.background-color]="row.colorHex"></span>
+                                  {{ row.colorNombre }}
+                                </span>
+                              </td>
+                              <td *ngFor="let suc of sucursales()" class="cell-input">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="1"
+                                  [value]="getStockQty(row.tallaId, row.colorId, suc.id)"
+                                  (input)="setStockQty(row.tallaId, row.colorId, suc.id, $event)"
+                                  class="matrix-stock-input"
+                                  placeholder="0"
+                                />
+                              </td>
+                              <td class="cell-subtotal">
+                                <span class="subtotal-badge">{{ getSubtotalFila(row.tallaId, row.colorId) }} uds</span>
+                              </td>
+                            </tr>
+                          </tbody>
+                          <tfoot>
+                            <tr class="stock-matrix-total-row">
+                              <td><strong>Total Inventario</strong></td>
+                              <td *ngFor="let suc of sucursales()" class="cell-total-suc">
+                                <strong>{{ getTotalSucursal(suc.id) }} uds</strong>
+                              </td>
+                              <td class="cell-grand-total">
+                                <span class="grand-total-badge">{{ totalStockCalculado() }} uds</span>
+                              </td>
+                            </tr>
+                          </tfoot>
+                        </table>
                       </div>
                     </div>
                   </fieldset>
@@ -1068,19 +1126,19 @@ interface FotoLocal {
       inset: 0;
       background: rgba(15, 23, 42, 0.65);
       backdrop-filter: blur(4px);
-      z-index: 999;
+      z-index: 2000;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 1.25rem 1rem;
+      padding: 3.5rem 1.5rem 2rem;
     }
 
     .modal-dialog {
       background: #ffffff;
       border-radius: 14px;
-      width: 900px;
+      width: 960px;
       max-width: 95vw;
-      max-height: 92vh;
+      max-height: 86vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -1668,6 +1726,188 @@ interface FotoLocal {
       letter-spacing: -0.01em;
     }
 
+    /* Stock Total Display in Basic Info */
+    .stock-total-display {
+      display: flex;
+      align-items: baseline;
+      gap: 0.35rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 0.45rem 0.75rem;
+      min-height: 38px;
+      box-sizing: border-box;
+    }
+    .stock-total-number {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .stock-total-unit {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+    }
+
+    /* Stock Matrix Section */
+    .stock-matrix-section {
+      margin-top: 0.85rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 0.75rem 0.9rem;
+    }
+    .stock-matrix-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.6rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .stock-matrix-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .matrix-tag {
+      background: #0f172a;
+      color: #ffffff;
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      padding: 0.18rem 0.45rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .stock-matrix-sub {
+      font-size: 0.68rem;
+      color: #64748b;
+      font-style: italic;
+    }
+    .stock-matrix-table-wrap {
+      overflow-x: auto;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+    }
+    .stock-matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+    .stock-matrix-table th {
+      background: #f1f5f9;
+      color: #475569;
+      font-weight: 700;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.55rem 0.75rem;
+      border-bottom: 1px solid #cbd5e1;
+      text-align: left;
+    }
+    .stock-matrix-table th.col-sucursal {
+      text-align: center;
+      min-width: 130px;
+    }
+    .stock-matrix-table th.col-subtotal {
+      text-align: right;
+      min-width: 90px;
+    }
+    .stock-matrix-table td {
+      padding: 0.45rem 0.75rem;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+    .cell-variante {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+    .row-talla {
+      font-weight: 700;
+    }
+    .row-color {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.72rem;
+      color: #64748b;
+      background: #f1f5f9;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+    }
+    .color-dot-mini {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .cell-input {
+      text-align: center;
+    }
+    .matrix-stock-input {
+      width: 70px;
+      padding: 0.35rem 0.5rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 5px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-align: center;
+      color: #0f172a;
+      transition: all 0.15s ease;
+      background: #fcfdfe;
+    }
+    .matrix-stock-input:focus {
+      outline: none;
+      border-color: #0f172a;
+      background: #ffffff;
+      box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.15);
+    }
+    .cell-subtotal {
+      text-align: right;
+    }
+    .subtotal-badge {
+      background: #f1f5f9;
+      color: #334155;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .stock-matrix-total-row {
+      background: #f8fafc;
+      font-weight: 700;
+      border-top: 2px solid #cbd5e1;
+    }
+    .stock-matrix-total-row td {
+      border-bottom: none;
+      padding: 0.6rem 0.75rem;
+    }
+    .cell-total-suc {
+      text-align: center;
+      color: #0f172a;
+      font-size: 0.82rem;
+    }
+    .cell-grand-total {
+      text-align: right;
+    }
+    .grand-total-badge {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+      font-size: 0.85rem;
+      font-weight: 800;
+      padding: 0.25rem 0.65rem;
+      border-radius: 5px;
+      display: inline-block;
+    }
+
     /* Modal Footer */
     .modal-footer-actions {
       flex-shrink: 0;
@@ -1890,6 +2130,72 @@ export class GestionPrendasPageComponent implements OnInit {
   fotosSubidas = signal<FotoLocal[]>([]);
   selectedTallasIds = signal<number[]>([]);
   selectedColoresIds = signal<number[]>([]);
+  sucursales = signal<Sucursal[]>([]);
+  stockMatrix = signal<Record<string, number>>({});
+
+  stockFilas = computed(() => {
+    const tallasMap = new Map(this.tallas().map(t => [t.id, t]));
+    const coloresMap = new Map(this.colores().map(c => [c.id, c]));
+    const rows: { tallaId: number; tallaDesc: string; colorId: number; colorNombre: string; colorHex: string }[] = [];
+
+    for (const tId of this.selectedTallasIds()) {
+      const t = tallasMap.get(tId);
+      for (const cId of this.selectedColoresIds()) {
+        const c = coloresMap.get(cId);
+        rows.push({
+          tallaId: tId,
+          tallaDesc: t ? `${t.codigo} (${t.descripcion || ''})` : `Talla #${tId}`,
+          colorId: cId,
+          colorNombre: c?.nombre || `Color #${cId}`,
+          colorHex: c?.codigo_hex || '#333'
+        });
+      }
+    }
+    return rows;
+  });
+
+  totalStockCalculado = computed(() => {
+    const matrix = this.stockMatrix();
+    let sum = 0;
+    for (const row of this.stockFilas()) {
+      for (const suc of this.sucursales()) {
+        const key = `${row.tallaId}_${row.colorId}_${suc.id}`;
+        sum += Number(matrix[key] || 0);
+      }
+    }
+    return sum;
+  });
+
+  getStockQty(tallaId: number, colorId: number, sucursalId: number): number {
+    const key = `${tallaId}_${colorId}_${sucursalId}`;
+    return this.stockMatrix()[key] ?? 0;
+  }
+
+  setStockQty(tallaId: number, colorId: number, sucursalId: number, event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const val = Math.max(0, parseInt(target.value, 10) || 0);
+    const key = `${tallaId}_${colorId}_${sucursalId}`;
+    this.stockMatrix.update(prev => ({
+      ...prev,
+      [key]: val
+    }));
+  }
+
+  getSubtotalFila(tallaId: number, colorId: number): number {
+    const matrix = this.stockMatrix();
+    return this.sucursales().reduce((sum, suc) => {
+      const key = `${tallaId}_${colorId}_${suc.id}`;
+      return sum + Number(matrix[key] || 0);
+    }, 0);
+  }
+
+  getTotalSucursal(sucursalId: number): number {
+    const matrix = this.stockMatrix();
+    return this.stockFilas().reduce((sum, row) => {
+      const key = `${row.tallaId}_${row.colorId}_${sucursalId}`;
+      return sum + Number(matrix[key] || 0);
+    }, 0);
+  }
 
   prendasFiltradas = computed(() => {
     let list = this.prendas();
@@ -1959,6 +2265,10 @@ export class GestionPrendasPageComponent implements OnInit {
     this.catalogoService.getColores().subscribe({
       next: (c) => this.colores.set(c)
     });
+
+    this.catalogoService.getSucursales().subscribe({
+      next: (sucs) => this.sucursales.set(sucs)
+    });
   }
 
   abrirModalCrear(): void {
@@ -1971,13 +2281,14 @@ export class GestionPrendasPageComponent implements OnInit {
       precio_base: 250,
       categoria_id: this.categorias()[0]?.id || 1,
       temporada_id: this.temporadas()[0]?.id || 1,
-      stock_inicial: 25,
+      stock_inicial: 0,
       activo: true
     };
     this.fotosSubidas.set([]);
     // Default select standard sizes and first color
     this.selectedTallasIds.set(this.tallas().slice(0, 3).map(t => t.id));
     this.selectedColoresIds.set(this.colores().slice(0, 1).map(c => c.id));
+    this.stockMatrix.set({});
     this.uploadError.set(null);
     this.showFormModal.set(true);
   }
@@ -1992,7 +2303,7 @@ export class GestionPrendasPageComponent implements OnInit {
       precio_base: Number(prenda.precio_base),
       categoria_id: prenda.categoria_id,
       temporada_id: prenda.temporada_id,
-      stock_inicial: prenda.stock_total !== undefined ? prenda.stock_total : 25,
+      stock_inicial: prenda.stock_total !== undefined ? prenda.stock_total : 0,
       activo: prenda.activo ?? true
     };
 
@@ -2016,6 +2327,15 @@ export class GestionPrendasPageComponent implements OnInit {
     const coloresIds = Array.from(new Set(prenda.variantes.map(v => v.color_id)));
     this.selectedTallasIds.set(tallasIds);
     this.selectedColoresIds.set(coloresIds);
+
+    // Populate stock matrix from existing variants and stock items
+    const matrix: Record<string, number> = {};
+    for (const v of (prenda.variantes || [])) {
+      for (const stk of (v.stock_items || [])) {
+        matrix[`${v.talla_id}_${v.color_id}_${stk.sucursal_id}`] = stk.cantidad_disponible;
+      }
+    }
+    this.stockMatrix.set(matrix);
 
     this.uploadError.set(null);
     this.showFormModal.set(true);
@@ -2162,6 +2482,19 @@ export class GestionPrendasPageComponent implements OnInit {
 
     this.isSaving.set(true);
 
+    const stockDistribucion: StockDistribucionItem[] = [];
+    for (const row of this.stockFilas()) {
+      for (const suc of this.sucursales()) {
+        const key = `${row.tallaId}_${row.colorId}_${suc.id}`;
+        stockDistribucion.push({
+          talla_id: row.tallaId,
+          color_id: row.colorId,
+          sucursal_id: suc.id,
+          cantidad: Number(this.stockMatrix()[key]) || 0
+        });
+      }
+    }
+
     const multimediaPayload: PrendaMultimediaCreate[] = this.fotosSubidas().map(f => ({
       tipo: 'IMAGEN',
       url: f.url,
@@ -2178,7 +2511,8 @@ export class GestionPrendasPageComponent implements OnInit {
         precio_base: Number(this.formData.precio_base),
         categoria_id: Number(this.formData.categoria_id),
         temporada_id: Number(this.formData.temporada_id),
-        stock_inicial: Number(this.formData.stock_inicial || 0),
+        stock_inicial: this.totalStockCalculado(),
+        stock_distribucion: stockDistribucion,
         activo: this.formData.activo,
         tallas_ids: this.selectedTallasIds(),
         colores_ids: this.selectedColoresIds(),
@@ -2206,7 +2540,8 @@ export class GestionPrendasPageComponent implements OnInit {
         precio_base: Number(this.formData.precio_base),
         categoria_id: Number(this.formData.categoria_id),
         temporada_id: Number(this.formData.temporada_id),
-        stock_inicial: Number(this.formData.stock_inicial || 0),
+        stock_inicial: this.totalStockCalculado(),
+        stock_distribucion: stockDistribucion,
         activo: this.formData.activo,
         tallas_ids: this.selectedTallasIds(),
         colores_ids: this.selectedColoresIds(),

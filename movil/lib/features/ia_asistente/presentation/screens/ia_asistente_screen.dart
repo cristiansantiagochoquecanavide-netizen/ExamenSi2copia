@@ -50,15 +50,15 @@ class _IaAsistenteScreenState extends State<IaAsistenteScreen> {
 
   Future<void> _initData() async {
     _mensajes = _iaRepository.getInitialMessages();
-    final status = await _iaRepository.fetchStatus();
-    final catalogo = await _catalogoRepository.getPrendas();
+    try {
+      final status = await _iaRepository.fetchStatus();
+      if (mounted) setState(() => _status = status);
+    } catch (_) {}
 
-    if (mounted) {
-      setState(() {
-        _status = status;
-        _catalogo = catalogo;
-      });
-    }
+    try {
+      final catalogo = await _catalogoRepository.getPrendas();
+      if (mounted) setState(() => _catalogo = catalogo);
+    } catch (_) {}
   }
 
   void _scrollToBottom() {
@@ -91,6 +91,12 @@ class _IaAsistenteScreenState extends State<IaAsistenteScreen> {
       _isLoading = true;
     });
     _scrollToBottom();
+
+    if (_catalogo.isEmpty) {
+      try {
+        _catalogo = await _catalogoRepository.getPrendas();
+      } catch (_) {}
+    }
 
     try {
       final respuesta = await _iaRepository.consultarStylist(
@@ -318,7 +324,7 @@ class _IaAsistenteScreenState extends State<IaAsistenteScreen> {
                 if (msg.prendasRecomendadas != null && msg.prendasRecomendadas!.isNotEmpty) ...[
                   const SizedBox(height: 10),
                   SizedBox(
-                    height: 190,
+                    height: 215,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: msg.prendasRecomendadas!.length,

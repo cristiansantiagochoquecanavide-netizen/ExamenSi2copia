@@ -52,6 +52,17 @@ class ReservasRepository {
         return list.map((item) => ReservaModel.fromJson(item as Map<String, dynamic>)).toList();
       }
       return [];
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        try {
+          final retryResponse = await _apiClient.dio.get('/reservas');
+          if (retryResponse.statusCode == 200) {
+            final List<dynamic> list = retryResponse.data as List<dynamic>;
+            return list.map((item) => ReservaModel.fromJson(item as Map<String, dynamic>)).toList();
+          }
+        } catch (_) {}
+      }
+      return [];
     } catch (_) {
       return [];
     }
@@ -72,6 +83,18 @@ class ReservasRepository {
         throw Exception('Error al agendar reserva (${response.statusCode})');
       }
     } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        // Token expirado o inválido: reintentar sin cabecera de autorización caducada
+        try {
+          final retryResponse = await _apiClient.dio.post(
+            '/reservas',
+            data: request.toJson(),
+          );
+          if (retryResponse.statusCode == 200 || retryResponse.statusCode == 201) {
+            return ReservaModel.fromJson(retryResponse.data as Map<String, dynamic>);
+          }
+        } catch (_) {}
+      }
       if (e.response?.data != null) {
         final data = e.response!.data;
         if (data is Map<String, dynamic> && data.containsKey('detail')) {

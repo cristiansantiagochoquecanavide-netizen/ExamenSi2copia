@@ -86,6 +86,21 @@ export interface PrendaVarianteInput {
   codigo_barras?: string;
 }
 
+export interface Sucursal {
+  id: number;
+  nombre: string;
+  direccion?: string;
+  telefono?: string;
+  activo?: boolean;
+}
+
+export interface StockDistribucionItem {
+  talla_id: number;
+  color_id: number;
+  sucursal_id: number;
+  cantidad: number;
+}
+
 export interface PrendaVariante {
   id: number;
   prenda_id: number;
@@ -97,6 +112,7 @@ export interface PrendaVariante {
   talla?: Talla;
   color?: Color;
   prenda?: Prenda;
+  stock_items?: InventarioStock[];
 }
 
 export interface UploadImagenResponse {
@@ -114,6 +130,7 @@ export interface PrendaCreate {
   categoria_id: number;
   temporada_id: number;
   stock_inicial?: number;
+  stock_distribucion?: StockDistribucionItem[];
   activo?: boolean;
   variantes?: PrendaVarianteInput[];
   multimedia?: PrendaMultimediaCreate[];
@@ -129,6 +146,7 @@ export interface PrendaUpdate {
   categoria_id?: number;
   temporada_id?: number;
   stock_inicial?: number;
+  stock_distribucion?: StockDistribucionItem[];
   activo?: boolean;
   multimedia?: PrendaMultimediaCreate[];
   tallas_ids?: number[];

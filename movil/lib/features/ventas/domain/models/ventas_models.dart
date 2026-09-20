@@ -79,7 +79,7 @@ class PagoOnlineInput {
     required this.metodoPago,
     this.pasarela,
     this.monto,
-    this.moneda = 'USD',
+    this.moneda = 'BOB',
     this.clienteEmail,
     this.datosTarjeta,
   });

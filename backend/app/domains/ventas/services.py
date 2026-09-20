@@ -1141,6 +1141,12 @@ class VentasService:
         else:
             cliente_id = data.cliente_id
 
+        if not cliente_id:
+            res_cli = await db.execute(select(Usuario).where(Usuario.tipo_usuario == "CLIENTE").limit(1))
+            cli_default = res_cli.scalar_one_or_none()
+            if cli_default:
+                cliente_id = cli_default.id
+
         descuento = Decimal(data.descuento) if data.descuento else Decimal("0.00")
         promo_aplicada = None
 

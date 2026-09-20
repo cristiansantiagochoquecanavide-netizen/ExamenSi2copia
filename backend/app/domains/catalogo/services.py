@@ -386,8 +386,8 @@ class PrendaService:
         await db.flush()
 
         # Inicializar inventario de stock por variante en sucursales
-        cant_stock = data.stock_inicial if data.stock_inicial is not None else 25
-        if cant_stock >= 0 and nuevas_variantes:
+        total_stock = 0
+        if nuevas_variantes:
             suc_res = await db.execute(select(Sucursal).where(Sucursal.activo == True))
             sucursales_activas = list(suc_res.scalars().all())
             if not sucursales_activas:
@@ -395,37 +395,75 @@ class PrendaService:
                 if suc_fallback:
                     sucursales_activas = [suc_fallback]
 
-            for v in nuevas_variantes:
-                for suc in sucursales_activas:
-                    stk = InventarioStock(
-                        variante_id=v.id,
-                        sucursal_id=suc.id,
-                        cantidad_disponible=cant_stock,
-                        cantidad_reservada=0,
-                        stock_minimo=5
-                    )
-                    db.add(stk)
-                    await db.flush()
-                    if cant_stock > 0:
-                        mov = MovimientoInventario(
-                            stock_id=stk.id,
-                            tipo_movimiento="INGRESO_INICIAL",
-                            cantidad=cant_stock,
-                            cantidad_anterior=0,
-                            cantidad_nueva=cant_stock,
-                            motivo=f"Stock inicial al registrar prenda {prenda.nombre} (SKU: {prenda.sku})",
-                            usuario_id=admin.id if admin else None
+            if data.stock_distribucion is not None:
+                dist_map = {
+                    (item.talla_id, item.color_id, item.sucursal_id): item.cantidad
+                    for item in data.stock_distribucion
+                }
+                for v in nuevas_variantes:
+                    for suc in sucursales_activas:
+                        cant_stock = dist_map.get((v.talla_id, v.color_id, suc.id), 0)
+                        total_stock += cant_stock
+                        stk = InventarioStock(
+                            variante_id=v.id,
+                            sucursal_id=suc.id,
+                            cantidad_disponible=cant_stock,
+                            cantidad_reservada=0,
+                            stock_minimo=5
                         )
-                        db.add(mov)
+                        db.add(stk)
+                        await db.flush()
+                        if cant_stock > 0:
+                            mov = MovimientoInventario(
+                                stock_id=stk.id,
+                                tipo_movimiento="INGRESO_INICIAL",
+                                cantidad=cant_stock,
+                                cantidad_anterior=0,
+                                cantidad_nueva=cant_stock,
+                                motivo=f"Stock inicial al registrar prenda {prenda.nombre} (SKU: {prenda.sku})",
+                                usuario_id=admin.id if admin else None
+                            )
+                            db.add(mov)
+            else:
+                # Distribuir equitativamente el total de stock ingresado entre todas las variantes y sucursales
+                total_stock = data.stock_inicial if data.stock_inicial is not None else 25
+                if total_stock >= 0:
+                    combinaciones = [(v, suc) for v in nuevas_variantes for suc in sucursales_activas]
+                    total_comb = len(combinaciones)
+                    base_qty = (total_stock // total_comb) if total_comb > 0 else 0
+                    resto = (total_stock % total_comb) if total_comb > 0 else 0
+
+                    for idx, (v, suc) in enumerate(combinaciones):
+                        cant_stock = base_qty + (1 if idx < resto else 0)
+                        stk = InventarioStock(
+                            variante_id=v.id,
+                            sucursal_id=suc.id,
+                            cantidad_disponible=cant_stock,
+                            cantidad_reservada=0,
+                            stock_minimo=5
+                        )
+                        db.add(stk)
+                        await db.flush()
+                        if cant_stock > 0:
+                            mov = MovimientoInventario(
+                                stock_id=stk.id,
+                                tipo_movimiento="INGRESO_INICIAL",
+                                cantidad=cant_stock,
+                                cantidad_anterior=0,
+                                cantidad_nueva=cant_stock,
+                                motivo=f"Stock inicial al registrar prenda {prenda.nombre} (SKU: {prenda.sku})",
+                                usuario_id=admin.id if admin else None
+                            )
+                            db.add(mov)
 
         await db.commit()
         await db.refresh(prenda)
 
         await AuditoriaService.registrar_evento(
             db, accion="REGISTRAR_PRENDA", modulo="catalogo",
-            detalle=f"Registro de nueva prenda {prenda.nombre} (SKU: {prenda.sku}) con stock inicial de {cant_stock} uds/variante",
+            detalle=f"Registro de nueva prenda {prenda.nombre} (SKU: {prenda.sku}) con stock total de {total_stock} uds",
             usuario_id=admin.id if admin else None, ip_address=ip,
-            valores_nuevos={"sku": prenda.sku, "precio": float(prenda.precio_base), "stock_inicial": cant_stock}
+            valores_nuevos={"sku": prenda.sku, "precio": float(prenda.precio_base), "stock_inicial": total_stock}
         )
         return await PrendaService.obtener_por_id(db, prenda.id)
 
@@ -499,11 +537,16 @@ class PrendaService:
                     db.add(stk)
 
         # Actualizar stock si fue especificado explícitamente en el update
-        if data.stock_inicial is not None:
+        if data.stock_distribucion is not None:
             suc_res = await db.execute(select(Sucursal).where(Sucursal.activo == True))
             sucursales_activas = list(suc_res.scalars().all())
+            dist_map = {
+                (item.talla_id, item.color_id, item.sucursal_id): item.cantidad
+                for item in data.stock_distribucion
+            }
             for v in (prenda.variantes or []):
                 for suc in sucursales_activas:
+                    target_cant = dist_map.get((v.talla_id, v.color_id, suc.id), 0)
                     stk_res = await db.execute(
                         select(InventarioStock).where(
                             and_(InventarioStock.variante_id == v.id, InventarioStock.sucursal_id == suc.id)
@@ -514,27 +557,80 @@ class PrendaService:
                         stk = InventarioStock(
                             variante_id=v.id,
                             sucursal_id=suc.id,
-                            cantidad_disponible=data.stock_inicial,
+                            cantidad_disponible=target_cant,
                             cantidad_reservada=0,
                             stock_minimo=5
                         )
                         db.add(stk)
                         await db.flush()
+                        if target_cant > 0:
+                            mov = MovimientoInventario(
+                                stock_id=stk.id,
+                                tipo_movimiento="INGRESO_INICIAL",
+                                cantidad=target_cant,
+                                cantidad_anterior=0,
+                                cantidad_nueva=target_cant,
+                                motivo=f"Stock inicial de variante al editar prenda {prenda.nombre}",
+                                usuario_id=admin.id if admin else None
+                            )
+                            db.add(mov)
                     else:
                         ant = stk.cantidad_disponible
-                        diff = data.stock_inicial - ant
-                        stk.cantidad_disponible = data.stock_inicial
+                        diff = target_cant - ant
+                        stk.cantidad_disponible = target_cant
                         if diff != 0:
                             mov = MovimientoInventario(
                                 stock_id=stk.id,
                                 tipo_movimiento="AJUSTE_POSITIVO" if diff > 0 else "AJUSTE_NEGATIVO",
                                 cantidad=abs(diff),
                                 cantidad_anterior=ant,
-                                cantidad_nueva=data.stock_inicial,
+                                cantidad_nueva=target_cant,
                                 motivo=f"Ajuste de stock desde edición de prenda {prenda.nombre}",
                                 usuario_id=admin.id if admin else None
                             )
                             db.add(mov)
+        elif data.stock_inicial is not None:
+            total_stock = data.stock_inicial
+            suc_res = await db.execute(select(Sucursal).where(Sucursal.activo == True))
+            sucursales_activas = list(suc_res.scalars().all())
+            combinaciones = [(v, suc) for v in (prenda.variantes or []) for suc in sucursales_activas]
+            total_comb = len(combinaciones)
+            base_qty = (total_stock // total_comb) if total_comb > 0 else 0
+            resto = (total_stock % total_comb) if total_comb > 0 else 0
+
+            for idx, (v, suc) in enumerate(combinaciones):
+                target_cant = base_qty + (1 if idx < resto else 0)
+                stk_res = await db.execute(
+                    select(InventarioStock).where(
+                        and_(InventarioStock.variante_id == v.id, InventarioStock.sucursal_id == suc.id)
+                    )
+                )
+                stk = stk_res.scalar_one_or_none()
+                if not stk:
+                    stk = InventarioStock(
+                        variante_id=v.id,
+                        sucursal_id=suc.id,
+                        cantidad_disponible=target_cant,
+                        cantidad_reservada=0,
+                        stock_minimo=5
+                    )
+                    db.add(stk)
+                    await db.flush()
+                else:
+                    ant = stk.cantidad_disponible
+                    diff = target_cant - ant
+                    stk.cantidad_disponible = target_cant
+                    if diff != 0:
+                        mov = MovimientoInventario(
+                            stock_id=stk.id,
+                            tipo_movimiento="AJUSTE_POSITIVO" if diff > 0 else "AJUSTE_NEGATIVO",
+                            cantidad=abs(diff),
+                            cantidad_anterior=ant,
+                            cantidad_nueva=target_cant,
+                            motivo=f"Ajuste de stock desde edición de prenda {prenda.nombre}",
+                            usuario_id=admin.id if admin else None
+                        )
+                        db.add(mov)
 
         # Actualizar multimedia si se envio en el update
         if data.multimedia is not None:
@@ -607,15 +703,53 @@ class PrendaService:
         nombre = prenda.nombre
         admin_id = admin.id if admin else None
 
-        await db.delete(prenda)
-        await db.commit()
+        try:
+            # Obtener IDs de todas las variantes de la prenda
+            var_ids = [v.id for v in (prenda.variantes or [])]
 
-        await AuditoriaService.registrar_evento(
-            db, accion="ELIMINAR_PRENDA", modulo="catalogo",
-            detalle=f"Eliminacion de prenda {nombre} (SKU: {sku})",
-            usuario_id=admin_id, ip_address=ip
-        )
-        return True
+            if var_ids:
+                from app.domains.ventas.models import DetalleVenta, DetalleDevolucion
+                from app.domains.reservas.models import DetalleReserva
+                from app.domains.inventario.models import DetalleRecepcionMercaderia, DetalleTransferenciaStock
+
+                # 1. Limpiar registros dependientes que bloquean la eliminación de variantes
+                await db.execute(delete(DetalleVenta).where(DetalleVenta.variante_id.in_(var_ids)))
+                await db.execute(delete(DetalleDevolucion).where(
+                    or_(
+                        DetalleDevolucion.variante_devuelta_id.in_(var_ids),
+                        DetalleDevolucion.variante_cambio_id.in_(var_ids)
+                    )
+                ))
+                await db.execute(delete(DetalleReserva).where(DetalleReserva.variante_id.in_(var_ids)))
+                await db.execute(delete(DetalleRecepcionMercaderia).where(DetalleRecepcionMercaderia.variante_id.in_(var_ids)))
+                await db.execute(delete(DetalleTransferenciaStock).where(DetalleTransferenciaStock.variante_id.in_(var_ids)))
+
+            # 2. Proceder a la eliminación de la prenda (sus multimedia, variantes y stocks se eliminan en cascada)
+            await db.delete(prenda)
+            await db.commit()
+
+            await AuditoriaService.registrar_evento(
+                db, accion="ELIMINAR_PRENDA", modulo="catalogo",
+                detalle=f"Eliminacion física de prenda {nombre} (SKU: {sku})",
+                usuario_id=admin_id, ip_address=ip
+            )
+            return True
+
+        except Exception as e:
+            await db.rollback()
+            # En caso de cualquier bloqueo de integridad residual, aplicar baja lógica inmediata
+            prenda_fallback = await PrendaService.obtener_por_id(db, prenda_id)
+            prenda_fallback.activo = False
+            for v in (prenda_fallback.variantes or []):
+                v.activo = False
+            await db.commit()
+
+            await AuditoriaService.registrar_evento(
+                db, accion="DESACTIVAR_PRENDA", modulo="catalogo",
+                detalle=f"Prenda {nombre} (SKU: {sku}) dada de baja lógica por integridad referencial: {str(e)}",
+                usuario_id=admin_id, ip_address=ip
+            )
+            return True
 
     @staticmethod
     async def eliminar_multimedia(

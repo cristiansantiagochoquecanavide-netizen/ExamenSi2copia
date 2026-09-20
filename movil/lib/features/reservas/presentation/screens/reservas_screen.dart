@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/widgets/atelier_scaffold.dart';
+import '../../../../shared/widgets/qr_code_painter.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/app_notification.dart';
 import '../../../catalogo/data/repositories/catalogo_repository.dart';
@@ -31,10 +32,21 @@ class _ReservasScreenState extends State<ReservasScreen> with SingleTickerProvid
   bool _isLoadingReservas = false;
   String _metodoPago = 'QR_SIMPLE';
 
+  final TextEditingController _tarjetaNumeroCtrl = TextEditingController(text: '4532 0000 0000 1234');
+  final TextEditingController _tarjetaTitularCtrl = TextEditingController(text: 'CLIENTE FASHION');
+  final TextEditingController _tarjetaExpCtrl = TextEditingController(text: '12/28');
+  final TextEditingController _tarjetaCvcCtrl = TextEditingController(text: '123');
+
+  bool _isVerifyingPago = false;
+  late String _tempQrRef;
+  late String _tempQrCode;
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tempQrRef = 'QR-${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}';
+    _tempQrCode = 'LIBELULA-BO|REC:$_tempQrRef|MONTO:10.00|ANTICIPO:PROBADOR';
     _loadInitialData();
     _loadMisReservas();
   }
@@ -42,6 +54,10 @@ class _ReservasScreenState extends State<ReservasScreen> with SingleTickerProvid
   @override
   void dispose() {
     _tabController.dispose();
+    _tarjetaNumeroCtrl.dispose();
+    _tarjetaTitularCtrl.dispose();
+    _tarjetaExpCtrl.dispose();
+    _tarjetaCvcCtrl.dispose();
     super.dispose();
   }
 
@@ -91,9 +107,21 @@ class _ReservasScreenState extends State<ReservasScreen> with SingleTickerProvid
 
         return StatefulBuilder(
           builder: (context, setModalState) {
+            bool checkSector(String? prendaSector, String selected) {
+              if (selected == 'TODAS') return true;
+              if (prendaSector == null) return false;
+              final ps = prendaSector.toUpperCase().trim();
+              final sel = selected.toUpperCase().trim();
+              if (ps == sel) return true;
+              if ((sel == 'MUJER' || sel == 'MUJERES') && (ps == 'MUJER' || ps == 'MUJERES')) return true;
+              if ((sel == 'HOMBRE' || sel == 'HOMBRES') && (ps == 'HOMBRE' || ps == 'HOMBRES')) return true;
+              if (sel == 'UNISEX' && ps == 'UNISEX') return true;
+              return false;
+            }
+
             // Filtrar prendas por sector y búsqueda
             final filtered = allPrendas.where((p) {
-              final matchesSector = selectedSector == 'TODAS' || (p.categoria?.sector == selectedSector);
+              final matchesSector = checkSector(p.categoria?.sector, selectedSector);
               final matchesSearch = searchQuery.isEmpty ||
                   p.nombre.toLowerCase().contains(searchQuery.toLowerCase()) ||
                   p.descripcion.toLowerCase().contains(searchQuery.toLowerCase());
@@ -151,7 +179,7 @@ class _ReservasScreenState extends State<ReservasScreen> with SingleTickerProvid
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
-                      children: ['TODAS', 'MUJER', 'HOMBRE', 'NIÑOS', 'UNISEX'].map((sector) {
+                      children: ['TODAS', 'MUJER', 'HOMBRE', 'UNISEX'].map((sector) {
                         final isSel = selectedSector == sector;
                         return Padding(
                           padding: const EdgeInsets.only(right: 6),
@@ -339,7 +367,7 @@ class _ReservasScreenState extends State<ReservasScreen> with SingleTickerProvid
     );
   }
 
-  Future<void> _submitReserva() async {
+  Future<void> _handleConfirmarReserva() async {
     if (_selectedSucursal == null) {
       AppNotification.showSuccess('Por favor seleccioná una sucursal.');
       return;
@@ -350,6 +378,29 @@ class _ReservasScreenState extends State<ReservasScreen> with SingleTickerProvid
       return;
     }
 
+    if (_metodoPago == 'TARJETA') {
+      if (_tarjetaNumeroCtrl.text.trim().isEmpty ||
+          _tarjetaTitularCtrl.text.trim().isEmpty ||
+          _tarjetaExpCtrl.text.trim().isEmpty ||
+          _tarjetaCvcCtrl.text.trim().isEmpty) {
+        AppNotification.showSuccess('Por favor completá los datos de tu tarjeta.');
+        return;
+      }
+    }
+
+    setState(() => _isVerifyingPago = true);
+
+    // Simular verificación de pago durante 3 segundos tal como se solicitó
+    await Future.delayed(const Duration(seconds: 3));
+
+    if (!mounted) return;
+
+    AppNotification.showSuccess('Pago Exitoso');
+
+    await _submitReserva();
+  }
+
+  Future<void> _submitReserva() async {
     setState(() => _isLoading = true);
 
     try {
@@ -366,8 +417,8 @@ class _ReservasScreenState extends State<ReservasScreen> with SingleTickerProvid
         fechaReserva: formattedDate,
         horaEstimada: _selectedTime,
         montoAnticipo: 10.0,
-        moneda: 'USD',
-        observaciones: 'Reserva generada desde FashionStore Mobile',
+        moneda: 'BOB',
+        observaciones: 'Reserva generada desde FashionStore Mobile ($_metodoPago)',
         detalles: detalles,
       );
 
@@ -377,6 +428,13 @@ class _ReservasScreenState extends State<ReservasScreen> with SingleTickerProvid
         setState(() {
           _selectedPrendas.clear();
           _isLoading = false;
+          _isVerifyingPago = false;
+          _tarjetaNumeroCtrl.text = '4532 0000 0000 1234';
+          _tarjetaTitularCtrl.text = 'CLIENTE FASHION';
+          _tarjetaExpCtrl.text = '12/28';
+          _tarjetaCvcCtrl.text = '123';
+          _tempQrRef = 'QR-${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}';
+          _tempQrCode = 'LIBELULA-BO|REC:$_tempQrRef|MONTO:10.00|ANTICIPO:PROBADOR';
         });
 
         _loadMisReservas();
@@ -386,7 +444,10 @@ class _ReservasScreenState extends State<ReservasScreen> with SingleTickerProvid
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() {
+          _isLoading = false;
+          _isVerifyingPago = false;
+        });
         AppNotification.showSuccess('Error: ${e.toString().replaceAll('Exception: ', '')}');
       }
     }
@@ -427,7 +488,7 @@ class _ReservasScreenState extends State<ReservasScreen> with SingleTickerProvid
                   const SizedBox(height: 6),
                   _buildDetailRow('Fecha y Turno:', '${reserva.fechaReserva} a las ${reserva.horaEstimada}'),
                   const SizedBox(height: 6),
-                  _buildDetailRow('Anticipo Abonado:', '\$${reserva.montoAnticipo.toStringAsFixed(2)} USD (Garantía)'),
+                  _buildDetailRow('Anticipo Abonado:', 'Bs. ${reserva.montoAnticipo.toStringAsFixed(2)} (Garantía)'),
                 ],
               ),
             ),
@@ -698,7 +759,7 @@ class _ReservasScreenState extends State<ReservasScreen> with SingleTickerProvid
                 const Text('4. PAGO MANDATORIO DE ANTICIPO', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.0)),
                 const SizedBox(height: 4),
                 const Text(
-                  'Garantía de probador: \$10.00 USD (Se descuenta del total si decidís comprar en sucursal).',
+                  'Garantía de probador: Bs. 10.00 (Se descuenta del total si decidís comprar en sucursal).',
                   style: TextStyle(fontSize: 12, color: AppTheme.mutedColor),
                 ),
                 const SizedBox(height: 12),
@@ -741,6 +802,176 @@ class _ReservasScreenState extends State<ReservasScreen> with SingleTickerProvid
                     ),
                   ],
                 ),
+                const SizedBox(height: 16),
+
+                // Vista según método de pago
+                if (_metodoPago == 'QR_SIMPLE') ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: const Color(0xFFE5E7EB)),
+                    ),
+                    child: Column(
+                      children: [
+                        const Text(
+                          'MONTO A ABONAR: Bs. 10.00',
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900, letterSpacing: 0.5),
+                        ),
+                        const SizedBox(height: 2),
+                        const Text(
+                          'Moneda Nacional (BOB) • QR Simple Interbancario',
+                          style: TextStyle(fontSize: 11, color: AppTheme.mutedColor),
+                        ),
+                        const SizedBox(height: 14),
+                        Container(
+                          width: 190,
+                          height: 190,
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(color: const Color(0xFFE5E7EB)),
+                          ),
+                          child: CustomPaint(
+                            size: const Size(174, 174),
+                            painter: AtelierQRCodePainter(
+                              data: _tempQrCode,
+                              primaryColor: Colors.black,
+                              backgroundColor: Colors.white,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          color: const Color(0xFFF3F4F6),
+                          child: Text(
+                            _tempQrRef,
+                            style: const TextStyle(fontFamily: 'monospace', fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.8),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(10),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFF9FAFB),
+                          ),
+                          child: const Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('INSTRUCCIONES:', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 0.8)),
+                              SizedBox(height: 4),
+                              Text('1. Abrí tu app bancaria (BNB, BCP, Banco Unión, GanaMóvil, etc.).', style: TextStyle(fontSize: 11, color: Color(0xFF4B5563))),
+                              SizedBox(height: 2),
+                              Text('2. Escaneá este código QR Simple.', style: TextStyle(fontSize: 11, color: Color(0xFF4B5563))),
+                              SizedBox(height: 2),
+                              Text('3. Pulsá "CONFIRMAR RESERVA" abajo.', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.black)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ] else ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: const Color(0xFFE5E7EB)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('NÚMERO DE TARJETA', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+                        const SizedBox(height: 6),
+                        TextField(
+                          controller: _tarjetaNumeroCtrl,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            hintText: '4532 0000 0000 1234',
+                            prefixIcon: Icon(Icons.credit_card, size: 18),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text('TITULAR DE LA TARJETA', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+                        const SizedBox(height: 6),
+                        TextField(
+                          controller: _tarjetaTitularCtrl,
+                          textCapitalization: TextCapitalization.characters,
+                          decoration: const InputDecoration(
+                            hintText: 'CLIENTE FASHION',
+                            prefixIcon: Icon(Icons.person_outline, size: 18),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('VENCIMIENTO', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+                                  const SizedBox(height: 6),
+                                  TextField(
+                                    controller: _tarjetaExpCtrl,
+                                    keyboardType: TextInputType.datetime,
+                                    decoration: const InputDecoration(
+                                      hintText: '12/28',
+                                      prefixIcon: Icon(Icons.calendar_month, size: 18),
+                                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('CVC / CVV', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+                                  const SizedBox(height: 6),
+                                  TextField(
+                                    controller: _tarjetaCvcCtrl,
+                                    keyboardType: TextInputType.number,
+                                    obscureText: true,
+                                    decoration: const InputDecoration(
+                                      hintText: '123',
+                                      prefixIcon: Icon(Icons.lock_outline, size: 18),
+                                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        const Row(
+                          children: [
+                            Icon(Icons.shield_outlined, size: 14, color: Color(0xFF047857)),
+                            SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                'Abono de garantía de Bs. 10.00 procesado con cifrado SSL.',
+                                style: TextStyle(fontSize: 10, color: AppTheme.mutedColor),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -748,16 +979,38 @@ class _ReservasScreenState extends State<ReservasScreen> with SingleTickerProvid
 
           // Submit Button
           ElevatedButton(
-            onPressed: _isLoading ? null : _submitReserva,
+            onPressed: (_isLoading || _isVerifyingPago) ? null : _handleConfirmarReserva,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black,
-              foregroundColor: Colors.white,
+              backgroundColor: _metodoPago == 'QR_SIMPLE' ? const Color(0xFFD4AF37) : Colors.black,
+              foregroundColor: _metodoPago == 'QR_SIMPLE' ? Colors.black : Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
             ),
-            child: _isLoading
-                ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                : const Text('CONFIRMAR RESERVA Y ABONAR (\$10.00 USD)', style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1.0)),
+            child: (_isLoading || _isVerifyingPago)
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(
+                          color: _metodoPago == 'QR_SIMPLE' ? Colors.black : Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        _isVerifyingPago ? 'VERIFICANDO PAGO CON EL BANCO...' : 'PROCESANDO RESERVA...',
+                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, letterSpacing: 0.8),
+                      ),
+                    ],
+                  )
+                : Text(
+                    _metodoPago == 'QR_SIMPLE'
+                        ? 'CONFIRMAR RESERVA'
+                        : 'CONFIRMAR RESERVA Y ABONAR (Bs. 10.00)',
+                    style: const TextStyle(fontWeight: FontWeight.w800, letterSpacing: 1.0, fontSize: 12),
+                  ),
           ),
         ],
       ),
@@ -770,23 +1023,42 @@ class _ReservasScreenState extends State<ReservasScreen> with SingleTickerProvid
     }
 
     if (_misReservas.isEmpty) {
-      return Center(
-        child: Padding(
+      return RefreshIndicator(
+        onRefresh: _loadMisReservas,
+        color: Colors.black,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(32.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.event_seat_outlined, size: 64, color: Color(0xFFD1D5DB)),
-              const SizedBox(height: 16),
-              Text('No tenés citas programadas', style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 8),
-              const Text(
-                'Agendá tu turno para probarte prendas exclusivas en tienda física.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: AppTheme.mutedColor, fontSize: 13),
+          children: [
+            SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+            const Icon(Icons.event_seat_outlined, size: 64, color: Color(0xFFD1D5DB)),
+            const SizedBox(height: 16),
+            Text(
+              'No tenés citas programadas',
+              style: Theme.of(context).textTheme.titleMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Agendá tu turno para probarte prendas exclusivas en tienda física.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppTheme.mutedColor, fontSize: 13),
+            ),
+            const SizedBox(height: 20),
+            Center(
+              child: OutlinedButton.icon(
+                onPressed: _loadMisReservas,
+                icon: const Icon(Icons.refresh, size: 16),
+                label: const Text('ACTUALIZAR CITAS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.black,
+                  side: const BorderSide(color: Colors.black),
+                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       );
     }

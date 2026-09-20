@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../shared/widgets/atelier_scaffold.dart';
+import '../../../../shared/widgets/qr_code_painter.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/services/cart_service.dart';
 import '../../../usuarios/data/repositories/auth_repository.dart';
@@ -307,7 +308,7 @@ class _VentasScreenState extends State<VentasScreen> with SingleTickerProviderSt
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            '\$${item.subtotal.toStringAsFixed(2)}',
+                            'Bs. ${item.subtotal.toStringAsFixed(2)}',
                             style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
                           ),
                         ],
@@ -445,11 +446,11 @@ class _VentasScreenState extends State<VentasScreen> with SingleTickerProviderSt
             ),
             child: Column(
               children: [
-                _buildSummaryRow('Subtotal', '\$${_cartService.subtotal.toStringAsFixed(2)}'),
+                _buildSummaryRow('Subtotal', 'Bs. ${_cartService.subtotal.toStringAsFixed(2)}'),
                 const SizedBox(height: 8),
                 _buildSummaryRow('Envío', _tipoEntrega == 'DOMICILIO' ? 'Cortesía (Alta Costura)' : 'Gratis en Tienda', isHighlight: true),
                 const Divider(height: 20, color: Color(0xFFE5E7EB)),
-                _buildSummaryRow('Total', '\$${_cartService.total.toStringAsFixed(2)}', isTotal: true),
+                _buildSummaryRow('Total', 'Bs. ${_cartService.total.toStringAsFixed(2)}', isTotal: true),
               ],
             ),
           ),
@@ -477,23 +478,42 @@ class _VentasScreenState extends State<VentasScreen> with SingleTickerProviderSt
     }
 
     if (_misPedidos.isEmpty) {
-      return Center(
-        child: Padding(
+      return RefreshIndicator(
+        onRefresh: _loadPedidos,
+        color: Colors.black,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(32.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.receipt_long_outlined, size: 64, color: Color(0xFFD1D5DB)),
-              const SizedBox(height: 16),
-              Text('No tenés pedidos registrados', style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 8),
-              const Text(
-                'Tus compras digitales e historial de órdenes aparecerán aquí.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: AppTheme.mutedColor, fontSize: 13),
+          children: [
+            SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+            const Icon(Icons.receipt_long_outlined, size: 64, color: Color(0xFFD1D5DB)),
+            const SizedBox(height: 16),
+            Text(
+              'No tenés pedidos registrados',
+              style: Theme.of(context).textTheme.titleMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Tus compras digitales e historial de órdenes aparecerán aquí.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppTheme.mutedColor, fontSize: 13),
+            ),
+            const SizedBox(height: 20),
+            Center(
+              child: OutlinedButton.icon(
+                onPressed: _loadPedidos,
+                icon: const Icon(Icons.refresh, size: 16),
+                label: const Text('ACTUALIZAR PEDIDOS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.black,
+                  side: const BorderSide(color: Colors.black),
+                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       );
     }
@@ -557,7 +577,7 @@ class _VentasScreenState extends State<VentasScreen> with SingleTickerProviderSt
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('Total:', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
-                    Text('\$${pedido.total.toStringAsFixed(2)}', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+                    Text('Bs. ${pedido.total.toStringAsFixed(2)}', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
                   ],
                 ),
               ],
@@ -738,7 +758,7 @@ class _CheckoutModalState extends State<_CheckoutModal> {
           metodoPago: 'QR_SIMPLE',
           pasarela: 'LIBELULA_BOLIVIA',
           monto: widget.cartService.total,
-          moneda: 'USD',
+          moneda: 'BOB',
           clienteEmail: _emailCtrl.text.trim(),
         ),
       );
@@ -824,7 +844,7 @@ class _CheckoutModalState extends State<_CheckoutModal> {
           metodoPago: 'TARJETA',
           pasarela: 'STRIPE_INTL',
           monto: widget.cartService.total,
-          moneda: 'USD',
+          moneda: 'BOB',
           clienteEmail: _emailCtrl.text.trim(),
           datosTarjeta: DatosTarjetaInput(
             numero: rawCardNumber,
@@ -1104,7 +1124,7 @@ class _CheckoutModalState extends State<_CheckoutModal> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('TOTAL A PAGAR:', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
-                Text('\$${widget.cartService.total.toStringAsFixed(2)} USD', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+                Text('Bs. ${widget.cartService.total.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
               ],
             ),
           ),
@@ -1137,8 +1157,7 @@ class _CheckoutModalState extends State<_CheckoutModal> {
   // PASO 2: Visualización de Código QR & Botón "VERIFICAR PAGO"
   // -------------------------------------------------------------
   Widget _buildQRDisplayStep() {
-    final totalUsd = widget.cartService.total;
-    final totalBob = totalUsd * 6.96; // Conversión estimada a Bs
+    final totalBob = widget.cartService.total;
 
     return SingleChildScrollView(
       key: const ValueKey('qr_step'),
@@ -1215,12 +1234,12 @@ class _CheckoutModalState extends State<_CheckoutModal> {
               children: [
                 // Monto
                 Text(
-                  '\$${totalUsd.toStringAsFixed(2)} USD',
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.black),
+                  'Bs. ${totalBob.toStringAsFixed(2)}',
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.black),
                 ),
-                Text(
-                  'Equivalente: Bs. ${totalBob.toStringAsFixed(2)} BOB',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.mutedColor),
+                const Text(
+                  'Moneda Nacional (BOB)',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.mutedColor),
                 ),
                 const SizedBox(height: 16),
 
@@ -1236,7 +1255,7 @@ class _CheckoutModalState extends State<_CheckoutModal> {
                   child: CustomPaint(
                     size: const Size(190, 190),
                     painter: _QRCodePainter(
-                      data: 'LIBELULA-BO|REC:$_codigoRecaudacion|MONTO:$totalUsd|CLI:${_emailCtrl.text}',
+                      data: 'LIBELULA-BO|REC:$_codigoRecaudacion|MONTO:$totalBob|CLI:${_emailCtrl.text}',
                       primaryColor: Colors.black,
                       backgroundColor: Colors.white,
                     ),
@@ -1394,7 +1413,7 @@ class _CheckoutModalState extends State<_CheckoutModal> {
                 const SizedBox(height: 6),
                 _buildReceiptRow('Código de Envío:', tracking, isHighlight: true),
                 const Divider(height: 16, color: Color(0xFFE5E7EB)),
-                _buildReceiptRow('Total Pagado:', '\$${total.toStringAsFixed(2)} USD', isTotal: true),
+                _buildReceiptRow('Total Pagado:', 'Bs. ${total.toStringAsFixed(2)}', isTotal: true),
               ],
             ),
           ),
@@ -1448,115 +1467,6 @@ class _CheckoutModalState extends State<_CheckoutModal> {
   }
 }
 
-/// Painter personalizado que renderiza un código QR estilizado con estética Atelier
-class _QRCodePainter extends CustomPainter {
-  final String data;
-  final Color primaryColor;
-  final Color backgroundColor;
+/// Painter personalizado reutilizado desde AtelierQRCodePainter
+typedef _QRCodePainter = AtelierQRCodePainter;
 
-  _QRCodePainter({
-    required this.data,
-    this.primaryColor = Colors.black,
-    this.backgroundColor = Colors.white,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final bgPaint = Paint()..color = backgroundColor;
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), bgPaint);
-
-    final modulePaint = Paint()..color = primaryColor;
-    const int matrixSize = 25;
-    final double moduleSize = size.width / matrixSize;
-
-    void drawModule(int r, int c) {
-      canvas.drawRect(
-        Rect.fromLTWH(c * moduleSize, r * moduleSize, moduleSize, moduleSize),
-        modulePaint,
-      );
-    }
-
-    void drawFinderPattern(int startRow, int startCol) {
-      for (int r = 0; r < 7; r++) {
-        for (int c = 0; c < 7; c++) {
-          if (r == 0 || r == 6 || c == 0 || c == 6 || (r >= 2 && r <= 4 && c >= 2 && c <= 4)) {
-            drawModule(startRow + r, startCol + c);
-          }
-        }
-      }
-    }
-
-    // Dibujar 3 Finder Patterns (esquinas)
-    drawFinderPattern(0, 0);
-    drawFinderPattern(0, matrixSize - 7);
-    drawFinderPattern(matrixSize - 7, 0);
-
-    // Dibujar Timing Patterns
-    for (int i = 8; i < matrixSize - 8; i++) {
-      if (i % 2 == 0) {
-        drawModule(6, i);
-        drawModule(i, 6);
-      }
-    }
-
-    // Dibujar Alignment Pattern en esquina inferior derecha
-    const alignRow = matrixSize - 9;
-    const alignCol = matrixSize - 9;
-    for (int r = 0; r < 5; r++) {
-      for (int c = 0; c < 5; c++) {
-        if (r == 0 || r == 4 || c == 0 || c == 4 || (r == 2 && c == 2)) {
-          drawModule(alignRow + r, alignCol + c);
-        }
-      }
-    }
-
-    // Matriz de datos pseudo-determinística a partir del hash de la transacción
-    int hash = 0;
-    for (int i = 0; i < data.length; i++) {
-      hash = (hash * 31 + data.codeUnitAt(i)) & 0x7FFFFFFF;
-    }
-
-    for (int r = 0; r < matrixSize; r++) {
-      for (int c = 0; c < matrixSize; c++) {
-        // Omitir zonas de finder patterns
-        if ((r < 8 && c < 8) || (r < 8 && c >= matrixSize - 8) || (r >= matrixSize - 8 && c < 8)) {
-          continue;
-        }
-        // Omitir timing
-        if (r == 6 || c == 6) continue;
-        // Omitir alignment
-        if (r >= alignRow && r < alignRow + 5 && c >= alignCol && c < alignCol + 5) continue;
-        // Omitir zona central de logo
-        if (r >= 10 && r <= 14 && c >= 10 && c <= 14) continue;
-
-        final val = ((r * 13 + c * 37 + hash) ^ (r * c + 7)) % 100;
-        if (val < 52) {
-          drawModule(r, c);
-        }
-      }
-    }
-
-    // Emblema central dorado
-    final centerRect = Rect.fromCenter(
-      center: Offset(size.width / 2, size.height / 2),
-      width: moduleSize * 5.2,
-      height: moduleSize * 5.2,
-    );
-    canvas.drawRRect(RRect.fromRectAndRadius(centerRect, const Radius.circular(4)), Paint()..color = Colors.white);
-    canvas.drawRRect(RRect.fromRectAndRadius(centerRect, const Radius.circular(4)), Paint()..color = const Color(0xFFD4AF37)..style = PaintingStyle.stroke..strokeWidth = 1.5);
-
-    final emblemPath = Path();
-    final cx = size.width / 2;
-    final cy = size.height / 2;
-    final halfW = moduleSize * 1.5;
-    emblemPath.moveTo(cx, cy - halfW);
-    emblemPath.lineTo(cx + halfW, cy);
-    emblemPath.lineTo(cx, cy + halfW);
-    emblemPath.lineTo(cx - halfW, cy);
-    emblemPath.close();
-    canvas.drawPath(emblemPath, Paint()..color = const Color(0xFFD4AF37));
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
