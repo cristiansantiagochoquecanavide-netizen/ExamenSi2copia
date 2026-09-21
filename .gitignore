@@ -4,6 +4,7 @@ node_modules/
 .npm
 .angular/
 dist/
+!frontend/dist/fashionstore-frontend/browser/**
 tmp/
 out-tsc/
 
