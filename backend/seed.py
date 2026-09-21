@@ -22,6 +22,13 @@ async def run_seed():
     print("=========================================================")
 
     async with async_session_factory() as session:
+        # Verificación rápida: si el catálogo real ya está cargado en PostgreSQL, omitir seed para arranque ultrarrápido (<0.1s)
+        if not os.getenv("FORCE_SEED"):
+            prenda_existente = (await session.execute(select(Prenda).where(Prenda.sku == "NOIR-6647"))).scalar_one_or_none()
+            if prenda_existente:
+                print("--> [SEED] Base de datos ya sembrada previamente (Prenda real NOIR-6647 detectada). Omitiendo seed para arranque instantáneo.")
+                return
+
         # 1. PERMISOS RBAC
         print("--> 1. Creando catalogo de Permisos...")
         permisos_data = [

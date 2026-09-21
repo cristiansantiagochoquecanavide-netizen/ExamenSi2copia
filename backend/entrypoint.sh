@@ -26,4 +26,4 @@ echo "==> [Docker Entrypoint] 2. Ejecutando Seed Inicial de datos (Ciclo 1)..."
 python seed.py
 
 echo "==> [Docker Entrypoint] 3. Iniciando servidor FastAPI con Uvicorn..."
-exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+exec uvicorn app.main:app --host 0.0.0.0 --port 8000
