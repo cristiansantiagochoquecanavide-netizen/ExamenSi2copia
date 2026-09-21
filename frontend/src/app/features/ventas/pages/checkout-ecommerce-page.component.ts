@@ -2308,6 +2308,72 @@ import {
     .discount-line {
       color: #166534 !important;
     }
+
+    /* =========================================================
+       RESPONSIVIDAD MÓVIL Y TABLET (CHECKOUT E-COMMERCE)
+       ========================================================= */
+    @media (max-width: 992px) {
+      .atelier-checkout-container {
+        padding: 1.5rem 1rem;
+      }
+      .header-titles h1 {
+        font-size: 1.9rem;
+      }
+      .checkout-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .atelier-checkout-container {
+        padding: 1rem 0.5rem;
+      }
+      .checkout-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+      }
+      .header-titles h1 {
+        font-size: 1.65rem;
+      }
+      .header-titles .description {
+        font-size: 0.85rem;
+      }
+      .tabs-switcher {
+        width: 100%;
+        display: flex;
+      }
+      .tab-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 0.6rem 0.5rem;
+        font-size: 0.8rem;
+      }
+      .panel-box {
+        padding: 1rem 0.85rem;
+      }
+      .cart-item-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+      }
+      .cart-item-thumb {
+        width: 70px;
+        height: 90px;
+      }
+      .cart-item-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .payment-gateways-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .form-row-2 {
+        grid-template-columns: 1fr !important;
+      }
+    }
   `]
 })
 export class CheckoutEcommercePageComponent implements OnInit {

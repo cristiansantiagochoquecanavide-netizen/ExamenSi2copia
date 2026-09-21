@@ -3618,6 +3618,140 @@ import { CartService } from '../../ventas/services/cart.service';
       animation: spin 0.8s linear infinite;
       margin-bottom: 0.75rem;
     }
+
+    /* =========================================================
+       RESPONSIVIDAD MÓVIL Y TABLET (CATÁLOGO)
+       ========================================================= */
+    @media (max-width: 992px) {
+      .catalogo-container {
+        padding: 1.5rem 1.25rem 3rem 1.25rem;
+      }
+      .editorial-hero {
+        padding-bottom: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+      .hero-title {
+        font-size: 2.1rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .catalogo-container {
+        padding: 1rem 0.5rem 3rem 0.5rem;
+      }
+      .hero-title {
+        font-size: 1.75rem;
+      }
+      .hero-description {
+        font-size: 0.88rem;
+        margin-bottom: 1.25rem;
+      }
+      .hero-ia-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 0.85rem 1rem;
+      }
+
+      /* Barra de Filtros en Celular */
+      .catalog-filters-container {
+        top: 56px;
+        padding: 0.65rem 0 0.75rem 0;
+        margin-bottom: 1.5rem;
+      }
+      .row-sectors-and-search {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+      }
+      .sector-pills-group {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 4px;
+        -webkit-overflow-scrolling: touch;
+      }
+      .sector-pill {
+        flex-shrink: 0;
+        padding: 0.45rem 1.1rem;
+        font-size: 0.76rem;
+      }
+      .row-subcats {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .subcat-chips-group {
+        flex-wrap: nowrap;
+        padding-bottom: 4px;
+      }
+      .subcat-chip {
+        flex-shrink: 0;
+        padding: 0.4rem 0.9rem;
+        font-size: 0.75rem;
+      }
+      .search-inline-wrap {
+        width: 100%;
+        margin-left: 0;
+      }
+      .input-search-mockup {
+        flex: 1;
+        width: auto !important;
+        font-size: 0.85rem;
+      }
+
+      /* Grilla de 2 Columnas Elegante en Móvil (Estándar Atelier / Zara) */
+      .products-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.75rem !important;
+      }
+
+      .product-card {
+        border-radius: 4px;
+      }
+
+      .product-info {
+        padding: 0.65rem 0.65rem 0.85rem 0.65rem !important;
+      }
+
+      .product-name {
+        font-size: 0.85rem !important;
+        line-height: 1.25 !important;
+        margin-bottom: 0.35rem !important;
+      }
+
+      .product-price {
+        font-size: 0.95rem !important;
+      }
+
+      .badge-sector-card {
+        font-size: 0.58rem !important;
+        padding: 0.18rem 0.45rem !important;
+      }
+
+      /* Status Strip en Celular */
+      .status-strip {
+        padding: 0.75rem 1rem;
+        margin-bottom: 1.5rem;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .action-buttons-group {
+        width: 100%;
+        justify-content: flex-start;
+      }
+      .btn-action-gold, .btn-action-outline {
+        flex: 1;
+        text-align: center;
+        padding: 0.6rem 0.8rem;
+        font-size: 0.7rem;
+      }
+
+      /* Modal de Prenda Adaptativo */
+      .modal-product-detail {
+        grid-template-columns: 1fr !important;
+        max-height: 90vh !important;
+        overflow-y: auto !important;
+      }
+    }
   `]
 })
 export class CatalogoPageComponent implements OnInit {

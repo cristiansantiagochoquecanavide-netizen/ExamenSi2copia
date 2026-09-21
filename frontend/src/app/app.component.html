@@ -1,7 +1,20 @@
 <div class="app-layout">
   <header class="navbar">
     <div class="brand-zone">
-      <a routerLink="/catalogo" class="logo-link" title="FashionStore Haute Couture">
+      <!-- Botón Menú Hamburguesa para Móvil y Tablet (<= 992px) -->
+      <button
+        type="button"
+        class="btn-hamburger"
+        [class.is-active]="isMobileMenuOpen()"
+        (click)="toggleMobileMenu()"
+        aria-label="Abrir menú de navegación"
+        title="Menú de navegación">
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+      </button>
+
+      <a routerLink="/catalogo" class="logo-link" (click)="closeMobileMenu()" title="FashionStore Haute Couture">
         <!-- Isotipo Fiel a la Etiqueta Textil Stitch: Diamante Brillante Tallado con Bisel Oro -->
         <svg class="brand-icon-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
           <!-- Borde exterior dorado biselado de alta costura -->
@@ -30,38 +43,49 @@
       </a>
     </div>
 
-    <nav class="nav-links">
+    <!-- Backdrop oscuro para móvil -->
+    @if (isMobileMenuOpen()) {
+      <div class="mobile-backdrop" (click)="closeMobileMenu()"></div>
+    }
+
+    <nav class="nav-links" [class.mobile-open]="isMobileMenuOpen()">
+      <!-- Cabecera exclusiva del menú móvil -->
+      <div class="mobile-nav-header">
+        <span class="mobile-nav-title">MENÚ PRINCIPAL</span>
+        <button type="button" class="btn-close-mobile-nav" (click)="closeMobileMenu()" aria-label="Cerrar menú">&times;</button>
+      </div>
+
       <!-- 1. VISTA EXCLUSIVA PARA CLIENTE / VISITANTE -->
       @if (authService.isCliente()) {
-        <a routerLink="/catalogo" class="client-nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+        <a routerLink="/catalogo" class="client-nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()">
           <span>✦</span> Colección &amp; Catálogo
         </a>
-        <a routerLink="/ia-asistente" class="client-nav-link" routerLinkActive="active">
+        <a routerLink="/ia-asistente" class="client-nav-link" routerLinkActive="active" (click)="closeMobileMenu()">
           <span>✨</span> Atelier Stylist (IA)
         </a>
-        <a routerLink="/reservas" class="client-nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+        <a routerLink="/reservas" class="client-nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()">
           <span>🏛️</span> Reservar Probador
         </a>
-        <a routerLink="/ventas/checkout" class="client-nav-link" routerLinkActive="active">
+        <a routerLink="/ventas/checkout" class="client-nav-link" routerLinkActive="active" (click)="closeMobileMenu()">
           <span>🛍️</span> Mi Bolsa &amp; Pedidos
         </a>
       }
 
       <!-- 2. VISTA PARA CAJERO -->
       @else if (authService.isCajero()) {
-        <a routerLink="/ventas" class="client-nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+        <a routerLink="/ventas" class="client-nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()">
           <span>💳</span> Punto de Venta POS
         </a>
-        <a routerLink="/catalogo" class="client-nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+        <a routerLink="/catalogo" class="client-nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()">
           <span>👗</span> Catálogo
         </a>
-        <a routerLink="/ventas/checkout" class="client-nav-link" routerLinkActive="active">
+        <a routerLink="/ventas/checkout" class="client-nav-link" routerLinkActive="active" (click)="closeMobileMenu()">
           <span>🛍️</span> E-Commerce
         </a>
-        <a routerLink="/ventas/devoluciones" class="client-nav-link" routerLinkActive="active">
+        <a routerLink="/ventas/devoluciones" class="client-nav-link" routerLinkActive="active" (click)="closeMobileMenu()">
           <span>🔄</span> Devoluciones &amp; Cambios
         </a>
-        <a routerLink="/ventas/pagos" class="client-nav-link" routerLinkActive="active">
+        <a routerLink="/ventas/pagos" class="client-nav-link" routerLinkActive="active" (click)="closeMobileMenu()">
           <span>📱</span> Pasarela de Pagos
         </a>
       }
@@ -70,19 +94,19 @@
       @else {
         <!-- MÓDULO 1.5.1: SEGURIDAD & USUARIOS (Sólo Administrador) -->
         @if (authService.isAdmin()) {
-          <div class="nav-dropdown" [class.active-module]="isModuleActive('/usuarios')">
-            <button type="button" class="dropdown-trigger">
+          <div class="nav-dropdown" [class.active-module]="isModuleActive('/usuarios')" [class.mobile-expanded]="openMobileDropdown() === 'usuarios'">
+            <button type="button" class="dropdown-trigger" (click)="toggleMobileDropdown('usuarios')">
               <span>Seguridad &amp; Usuarios</span>
               <span class="dropdown-chevron">&#9662;</span>
             </button>
             <div class="dropdown-menu">
-              <a routerLink="/usuarios/gestion" routerLinkActive="active">
+              <a routerLink="/usuarios/gestion" routerLinkActive="active" (click)="closeMobileMenu()">
                 <span class="menu-icon">&bull;</span> Personal &amp; Clientes
               </a>
-              <a routerLink="/usuarios/roles" routerLinkActive="active">
+              <a routerLink="/usuarios/roles" routerLinkActive="active" (click)="closeMobileMenu()">
                 <span class="menu-icon">&bull;</span> Roles &amp; Permisos / RBAC
               </a>
-              <a routerLink="/usuarios/auditoria" routerLinkActive="active">
+              <a routerLink="/usuarios/auditoria" routerLinkActive="active" (click)="closeMobileMenu()">
                 <span class="menu-icon">&bull;</span> Bitácora de Auditoría
               </a>
             </div>
@@ -90,98 +114,101 @@
         }
 
         <!-- MÓDULO 1.5.2: CATÁLOGO DE MODA -->
-        <div class="nav-dropdown" [class.active-module]="isCatalogoActive()">
-          <button type="button" class="dropdown-trigger">
+        <div class="nav-dropdown" [class.active-module]="isCatalogoActive()" [class.mobile-expanded]="openMobileDropdown() === 'catalogo'">
+          <button type="button" class="dropdown-trigger" (click)="toggleMobileDropdown('catalogo')">
             <span>Catálogo de Moda</span>
             <span class="dropdown-chevron">&#9662;</span>
           </button>
           <div class="dropdown-menu">
-            <a routerLink="/catalogo" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+            <a routerLink="/catalogo" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()">
               <span class="menu-icon">&bull;</span> Catálogo &amp; Vestidor AR
             </a>
-            <a routerLink="/catalogo/gestion" routerLinkActive="active">
+            <a routerLink="/catalogo/gestion" routerLinkActive="active" (click)="closeMobileMenu()">
               <span class="menu-icon">&bull;</span> Gestión de Prendas
             </a>
-            <a routerLink="/catalogo/parametros" routerLinkActive="active">
+            <a routerLink="/catalogo/parametros" routerLinkActive="active" (click)="closeMobileMenu()">
               <span class="menu-icon">&bull;</span> Parámetros de Moda
             </a>
           </div>
         </div>
 
         <!-- MÓDULO 1.5.3: INVENTARIO & SUCURSALES -->
-        <div class="nav-dropdown" [class.active-module]="isInventarioActive()">
-          <button type="button" class="dropdown-trigger">
+        <div class="nav-dropdown" [class.active-module]="isInventarioActive()" [class.mobile-expanded]="openMobileDropdown() === 'inventario'">
+          <button type="button" class="dropdown-trigger" (click)="toggleMobileDropdown('inventario')">
             <span>Inventario &amp; Sucursales</span>
             <span class="dropdown-chevron">&#9662;</span>
           </button>
           <div class="dropdown-menu">
-            <a routerLink="/inventario" [queryParams]="{tab: 'STOCK'}" routerLinkActive="active" [routerLinkActiveOptions]="{ matrixParams: 'ignored', queryParams: 'exact', paths: 'exact', fragment: 'ignored' }">
+            <a routerLink="/inventario" [queryParams]="{tab: 'STOCK'}" routerLinkActive="active" [routerLinkActiveOptions]="{ matrixParams: 'ignored', queryParams: 'exact', paths: 'exact', fragment: 'ignored' }" (click)="closeMobileMenu()">
               <span class="menu-icon">&bull;</span> Matriz de Stock por Tienda
             </a>
-            <a routerLink="/inventario" [queryParams]="{tab: 'SUCURSALES'}" routerLinkActive="active" [routerLinkActiveOptions]="{ matrixParams: 'ignored', queryParams: 'exact', paths: 'exact', fragment: 'ignored' }">
+            <a routerLink="/inventario" [queryParams]="{tab: 'MOVIMIENTOS'}" routerLinkActive="active" [routerLinkActiveOptions]="{ matrixParams: 'ignored', queryParams: 'exact', paths: 'exact', fragment: 'ignored' }" (click)="closeMobileMenu()">
+              <span class="menu-icon">&bull;</span> Kardex de Movimientos
+            </a>
+            <a routerLink="/inventario" [queryParams]="{tab: 'TRANSFERENCIAS'}" routerLinkActive="active" [routerLinkActiveOptions]="{ matrixParams: 'ignored', queryParams: 'exact', paths: 'exact', fragment: 'ignored' }" (click)="closeMobileMenu()">
+              <span class="menu-icon">&bull;</span> Transferencias entre Tiendas
+            </a>
+            <a routerLink="/inventario" [queryParams]="{tab: 'COMPRAS'}" routerLinkActive="active" [routerLinkActiveOptions]="{ matrixParams: 'ignored', queryParams: 'exact', paths: 'exact', fragment: 'ignored' }" (click)="closeMobileMenu()">
+              <span class="menu-icon">&bull;</span> Abastecimiento / Compras
+            </a>
+            <a routerLink="/inventario" [queryParams]="{tab: 'SUCURSALES'}" routerLinkActive="active" [routerLinkActiveOptions]="{ matrixParams: 'ignored', queryParams: 'exact', paths: 'exact', fragment: 'ignored' }" (click)="closeMobileMenu()">
               <span class="menu-icon">&bull;</span> Sucursales &amp; Ciudades
             </a>
-            <a routerLink="/inventario/recepcion" routerLinkActive="active">
-              <span class="menu-icon">&bull;</span> Proveedores &amp; Lotes
+          </div>
+        </div>
+
+        <!-- MÓDULO 1.5.4: VENTAS & E-COMMERCE -->
+        <div class="nav-dropdown" [class.active-module]="isModuleActive('/ventas')" [class.mobile-expanded]="openMobileDropdown() === 'ventas'">
+          <button type="button" class="dropdown-trigger" (click)="toggleMobileDropdown('ventas')">
+            <span>Ventas &amp; Pagos</span>
+            <span class="dropdown-chevron">&#9662;</span>
+          </button>
+          <div class="dropdown-menu">
+            <a routerLink="/ventas" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()">
+              <span class="menu-icon">&bull;</span> Punto de Venta POS Físico
             </a>
-            <a routerLink="/inventario/transferencias" routerLinkActive="active">
-              <span class="menu-icon">&bull;</span> Transferencias de Stock
+            <a routerLink="/ventas/checkout" routerLinkActive="active" (click)="closeMobileMenu()">
+              <span class="menu-icon">&bull;</span> E-Commerce &amp; Despachos
+            </a>
+            <a routerLink="/ventas/devoluciones" routerLinkActive="active" (click)="closeMobileMenu()">
+              <span class="menu-icon">&bull;</span> Devoluciones &amp; Reembolsos
+            </a>
+            <a routerLink="/ventas/pagos" routerLinkActive="active" (click)="closeMobileMenu()">
+              <span class="menu-icon">&bull;</span> Monitoreo Pasarelas de Pago
+            </a>
+            <a routerLink="/ventas/promociones" routerLinkActive="active" (click)="closeMobileMenu()">
+              <span class="menu-icon">&bull;</span> Cupones &amp; Descuentos
             </a>
           </div>
         </div>
 
-        <!-- MÓDULO 1.5.4: RESERVAS & PROBADOR -->
-        <div class="nav-dropdown" [class.active-module]="isModuleActive('/reservas')">
-          <button type="button" class="dropdown-trigger">
-            <span>Reservas &amp; Probador</span>
+        <!-- MÓDULO 1.5.5: RESERVAS & CITAS -->
+        <div class="nav-dropdown" [class.active-module]="isModuleActive('/reservas')" [class.mobile-expanded]="openMobileDropdown() === 'reservas'">
+          <button type="button" class="dropdown-trigger" (click)="toggleMobileDropdown('reservas')">
+            <span>Probador &amp; Citas</span>
             <span class="dropdown-chevron">&#9662;</span>
           </button>
           <div class="dropdown-menu">
-            <a routerLink="/reservas" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-              <span class="menu-icon">&bull;</span> Agendar Probador Físico
+            <a routerLink="/reservas" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()">
+              <span class="menu-icon">&bull;</span> Agendar Visita a Probador
             </a>
-            <a routerLink="/reservas/gestion" routerLinkActive="active">
-              <span class="menu-icon">&bull;</span> Gestión en Tienda / Probadores
-            </a>
-          </div>
-        </div>
-
-        <!-- MÓDULO 1.5.5: VENTAS & POS -->
-        <div class="nav-dropdown" [class.active-module]="isModuleActive('/ventas')">
-          <button type="button" class="dropdown-trigger">
-            <span>Ventas &amp; POS</span>
-            <span class="dropdown-chevron">&#9662;</span>
-          </button>
-          <div class="dropdown-menu">
-            <a routerLink="/ventas" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-              <span class="menu-icon">&bull;</span> Punto de Venta POS
-            </a>
-            <a routerLink="/ventas/checkout" routerLinkActive="active">
-              <span class="menu-icon">&bull;</span> E-Commerce &amp; Carrito
-            </a>
-            <a routerLink="/ventas/promociones" routerLinkActive="active">
-              <span class="menu-icon">&bull;</span> Promociones &amp; Cupones
-            </a>
-            <a routerLink="/ventas/devoluciones" routerLinkActive="active">
-              <span class="menu-icon">&bull;</span> Devoluciones &amp; Cambios
-            </a>
-            <a routerLink="/ventas/pagos" routerLinkActive="active">
-              <span class="menu-icon">&bull;</span> Pasarela de Pagos
+            <a routerLink="/reservas/gestion" routerLinkActive="active" (click)="closeMobileMenu()">
+              <span class="menu-icon">&bull;</span> Control de Citas &amp; Pases QR
             </a>
           </div>
         </div>
 
         <!-- MÓDULO 1.5.6: DASHBOARD & IA -->
-        <div class="nav-dropdown" [class.active-module]="isModuleActive('/dashboard') || isModuleActive('/ia-asistente')">
-          <button type="button" class="dropdown-trigger" (click)="router.navigate(['/dashboard'])">
+        <div class="nav-dropdown" [class.active-module]="isModuleActive('/dashboard') || isModuleActive('/ia-asistente')" [class.mobile-expanded]="openMobileDropdown() === 'dashboard'">
+          <button type="button" class="dropdown-trigger" (click)="toggleMobileDropdown('dashboard')">
             <span>Dashboard &amp; IA</span>
             <span class="dropdown-chevron">&#9662;</span>
           </button>
           <div class="dropdown-menu">
-            <a routerLink="/dashboard" routerLinkActive="active">
+            <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()">
               <span class="menu-icon">&bull;</span> Dashboard Ejecutivo &amp; KPIs
             </a>
-            <a routerLink="/ia-asistente" routerLinkActive="active">
+            <a routerLink="/ia-asistente" routerLinkActive="active" (click)="closeMobileMenu()">
               <span class="menu-icon">&bull;</span> Atelier Stylist (IA)
             </a>
           </div>
@@ -193,7 +220,7 @@
       <!-- CU21: Centro de Notificaciones & Alertas -->
       <app-notification-bell />
 
-      <a routerLink="/ventas/checkout" class="nav-cart-btn" title="Bolsa de Compras E-Commerce">
+      <a routerLink="/ventas/checkout" class="nav-cart-btn" (click)="closeMobileMenu()" title="Bolsa de Compras E-Commerce">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="cart-svg">
           <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
           <path d="M3 6h18"/>
@@ -208,7 +235,7 @@
           <button type="button" class="btn-logout" (click)="logout()">Salir</button>
         </div>
       } @else {
-        <a routerLink="/login" class="btn-login-nav">
+        <a routerLink="/login" class="btn-login-nav" (click)="closeMobileMenu()">
           <span class="login-dot">&bull;</span> Iniciar Sesión
         </a>
       }

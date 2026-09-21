@@ -4,6 +4,7 @@ import '../../../../shared/widgets/atelier_scaffold.dart';
 import '../../../../shared/widgets/whatsapp_notification_banner.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/app_notification.dart';
+import '../../../../core/routes/app_router.dart';
 import '../../domain/models/notificacion_model.dart';
 import '../../data/repositories/notificaciones_repository.dart';
 
@@ -120,15 +121,18 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
         'ATELIER20';
 
     // Notificación emergente estilo WhatsApp (Heads-up banner)
-    WhatsAppNotificationBanner.show(
-      cupon: codigoCupon,
-      titulo: nueva?.titulo.isNotEmpty == true ? nueva!.titulo : 'FASHION STORE • PROMOCIÓN',
-      mensaje: '¡No te pierdas el cupón: $codigoCupon!',
-      descuento: nueva?.mensaje ?? 'Aprovechá un 20% de descuento en tu próxima compra online.',
-      onUsar: () {
-        context.go('/ventas');
-      },
-    );
+    // addPostFrameCallback garantiza que el overlay esté montado (crítico en release builds)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      WhatsAppNotificationBanner.show(
+        cupon: codigoCupon,
+        titulo: nueva?.titulo.isNotEmpty == true ? nueva!.titulo : 'FASHION STORE • PROMOCIÓN',
+        mensaje: '¡No te pierdas el cupón: $codigoCupon!',
+        descuento: nueva?.mensaje ?? 'Aprovechá un 20% de descuento en tu próxima compra online.',
+        onUsar: () {
+          appRouter.go('/ventas');
+        },
+      );
+    });
   }
 
   @override

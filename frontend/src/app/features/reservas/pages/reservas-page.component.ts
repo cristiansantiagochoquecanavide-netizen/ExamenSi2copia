@@ -1194,6 +1194,62 @@ interface PrendaEnReserva {
         width: 100%;
       }
     }
+
+    /* =========================================================
+       RESPONSIVIDAD MÓVIL Y TABLET (RESERVAS)
+       ========================================================= */
+    @media (max-width: 992px) {
+      .atelier-reservas-container {
+        padding: 1.5rem 1rem;
+      }
+      .reservas-header .header-titles h1 {
+        font-size: 1.85rem;
+      }
+      .booking-stepper-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .atelier-reservas-container {
+        padding: 1rem 0.5rem;
+      }
+      .reservas-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+      }
+      .reservas-header .header-titles h1 {
+        font-size: 1.6rem;
+      }
+      .reservas-header .description {
+        font-size: 0.85rem;
+      }
+      .tabs-switcher {
+        width: 100%;
+        display: flex;
+      }
+      .tab-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 0.6rem 0.5rem;
+        font-size: 0.8rem;
+      }
+      .panel-step-card {
+        padding: 1.15rem 0.85rem;
+      }
+      .sucursales-cards-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .date-time-picker-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .prendas-grid-selection {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.75rem !important;
+      }
+    }
   `]
 })
 export class ReservasPageComponent implements OnInit {

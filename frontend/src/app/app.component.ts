@@ -1,6 +1,7 @@
-import { Component, inject } from '@angular/core';
-import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, inject, signal } from '@angular/core';
+import { Router, RouterOutlet, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { filter } from 'rxjs';
 import { AuthService } from './core/services/auth.service';
 import { CartService } from './features/ventas/services/cart.service';
 import { ChatbotWidgetComponent } from './features/ia-asistente/components/chatbot-widget.component';
@@ -20,6 +21,30 @@ export class AppComponent {
   readonly cartService = inject(CartService);
   readonly router = inject(Router);
 
+  readonly isMobileMenuOpen = signal<boolean>(false);
+  readonly openMobileDropdown = signal<string | null>(null);
+
+  constructor() {
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.closeMobileMenu();
+    });
+  }
+
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen.update(v => !v);
+  }
+
+  closeMobileMenu(): void {
+    this.isMobileMenuOpen.set(false);
+    this.openMobileDropdown.set(null);
+  }
+
+  toggleMobileDropdown(name: string): void {
+    this.openMobileDropdown.update(curr => curr === name ? null : name);
+  }
+
   isModuleActive(prefix: string): boolean {
     return this.router.url.startsWith(prefix);
   }
@@ -33,6 +58,7 @@ export class AppComponent {
   }
 
   logout(): void {
+    this.closeMobileMenu();
     this.authService.logout();
   }
 }
