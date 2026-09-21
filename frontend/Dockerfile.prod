@@ -1,5 +1,4 @@
 # Serve pre-built Angular dist with Nginx
-# Dynamically detects if build context is root or frontend/ directory
 FROM nginx:alpine
 
 # Remove default nginx config
@@ -8,15 +7,8 @@ RUN rm /etc/nginx/conf.d/default.conf
 # Copy custom nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy build context and resolve dist location automatically
-COPY . /tmp/build/
-RUN if [ -d "/tmp/build/dist/fashionstore-frontend/browser" ]; then \
-        cp -r /tmp/build/dist/fashionstore-frontend/browser/* /usr/share/nginx/html/ ; \
-    elif [ -d "/tmp/build/frontend/dist/fashionstore-frontend/browser" ]; then \
-        cp -r /tmp/build/frontend/dist/fashionstore-frontend/browser/* /usr/share/nginx/html/ ; \
-    else \
-        echo "Error: dist directory not found in build context!" && exit 1 ; \
-    fi && rm -rf /tmp/build
+# Copy pre-built Angular app
+COPY dist/fashionstore-frontend/browser /usr/share/nginx/html
 
 EXPOSE 80
 
