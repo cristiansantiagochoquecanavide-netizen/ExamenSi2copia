@@ -3745,11 +3745,45 @@ import { CartService } from '../../ventas/services/cart.service';
         font-size: 0.7rem;
       }
 
-      /* Modal de Prenda Adaptativo */
-      .modal-product-detail {
+      /* Modal de Prenda Adaptativo en Celular */
+      .modal-container {
+        width: 95% !important;
+        max-width: 95% !important;
+        margin: 0.5rem auto !important;
+      }
+
+      .modal-body {
         grid-template-columns: 1fr !important;
-        max-height: 90vh !important;
-        overflow-y: auto !important;
+        padding: 1.25rem 1rem !important;
+        gap: 1.25rem !important;
+      }
+
+      .gallery-slider-container {
+        height: 320px !important;
+      }
+
+      .modal-tabs-bar {
+        padding: 0 0.75rem !important;
+        overflow-x: auto !important;
+      }
+
+      .modal-tab-btn {
+        padding: 0.75rem 0.4rem !important;
+        font-size: 0.68rem !important;
+        white-space: nowrap !important;
+      }
+
+      .reviews-stats-card {
+        grid-template-columns: 1fr !important;
+        gap: 1.25rem !important;
+        padding: 1rem !important;
+      }
+
+      .stats-col-score {
+        border-right: none !important;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+        padding-right: 0 !important;
+        padding-bottom: 1rem !important;
       }
     }
   `]

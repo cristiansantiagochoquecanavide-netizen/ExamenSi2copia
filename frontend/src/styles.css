@@ -723,21 +723,23 @@ html, body, .app-layout, app-root {
   margin-bottom: 1rem;
 }
 
-/* Modales y Diálogos Adaptativos */
-.modal-overlay {
-  padding: 12px !important;
-}
-
-.modal-card,
-.modal-container,
-.modal-content,
-.dialog-card {
-  max-width: calc(100vw - 24px) !important;
-  box-sizing: border-box !important;
-}
-
-/* Formularios y Grillas Adaptativas */
+/* Formularios, Grillas y Modales Adaptativos (Solo Móviles y Tablets) */
 @media (max-width: 768px) {
+  /* Modales y Diálogos Adaptativos en Móviles */
+  .modal-overlay,
+  .modal-backdrop {
+    padding: 12px !important;
+  }
+
+  .modal-card,
+  .modal-container,
+  .modal-content,
+  .dialog-card {
+    max-width: calc(100vw - 24px) !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
   .form-row,
   .form-grid,
   .grid-2-cols,
