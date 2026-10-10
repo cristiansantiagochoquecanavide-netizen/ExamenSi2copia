@@ -48,19 +48,38 @@ async def procesar_consulta_voz(
 
 @router.get(
     "/exportar",
-    summary="Exportar reporte ejecutivo en formato CSV para descarga"
+    summary="Exportar reporte ejecutivo en formato Excel (.xlsx), PDF (.pdf) o CSV"
 )
 async def exportar_reporte(
+    formato: str = Query("excel", pattern="^(excel|pdf|csv)$", description="Formato de exportación: excel, pdf o csv"),
+    rango: str = Query("30D", description="Rango de fechas: 24H, 7D, 30D, MES_ESPECIFICO"),
+    mes: Optional[int] = Query(None, ge=1, le=12, description="Mes a auditar"),
+    anio: Optional[int] = Query(None, ge=2020, le=2030, description="Año a auditar"),
+    sucursal_id: Optional[int] = Query(None, description="Filtrar por ID de sucursal"),
     db: AsyncSession = Depends(get_db)
 ):
-    """Genera y descarga un archivo CSV con el reporte consolidado de operaciones y ventas."""
+    """Genera y descarga un informe ejecutivo consolidado en formato Excel, PDF o CSV."""
     service = ReportesService(db)
-    contenido_csv = await service.exportar_reporte_csv()
+    mes_str = f"_{anio}_{mes:02d}" if mes and anio else f"_{rango}"
+
+    if formato == "excel":
+        content = await service.exportar_reporte_excel(rango=rango, mes=mes, anio=anio, sucursal_id=sucursal_id)
+        media_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        filename = f"Informe_Ejecutivo_FashionStore{mes_str}.xlsx"
+    elif formato == "pdf":
+        content = await service.exportar_reporte_pdf(rango=rango, mes=mes, anio=anio, sucursal_id=sucursal_id)
+        media_type = "application/pdf"
+        filename = f"Informe_Ejecutivo_FashionStore{mes_str}.pdf"
+    else:
+        content = await service.exportar_reporte_csv(rango=rango, mes=mes, anio=anio, sucursal_id=sucursal_id)
+        media_type = "text/csv; charset=utf-8"
+        filename = f"Informe_Ejecutivo_FashionStore{mes_str}.csv"
 
     return Response(
-        content=contenido_csv,
-        media_type="text/csv",
+        content=content,
+        media_type=media_type,
         headers={
-            "Content-Disposition": "attachment; filename=informe_ejecutivo_fashionstore.csv"
+            "Content-Disposition": f'attachment; filename="{filename}"'
         }
     )
+

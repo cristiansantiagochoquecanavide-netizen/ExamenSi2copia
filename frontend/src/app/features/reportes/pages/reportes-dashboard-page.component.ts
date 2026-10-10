@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -69,20 +69,53 @@ import {
               </select>
             </div>
 
-            <!-- Botón Exportar CSV -->
-            <button
-              type="button"
-              class="btn-harbor-export"
-              (click)="exportarReporte()"
-              [disabled]="exporting()"
-              title="Exportar informe en formato CSV">
-              <svg class="export-mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                <polyline points="7 10 12 15 17 10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                <line x1="12" y1="15" x2="12" y2="3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-              <span>{{ exporting() ? 'Exportando...' : 'Exportar' }}</span>
-            </button>
+            <!-- Menú Desplegable Exportar (Excel / PDF / CSV) -->
+            <div class="export-dropdown-wrapper">
+              <button
+                type="button"
+                class="btn-harbor-export"
+                (click)="toggleExportDropdown()"
+                [disabled]="exporting()"
+                title="Exportar informe ejecutivo en Excel o PDF">
+                <svg class="export-mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  <polyline points="7 10 12 15 17 10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  <line x1="12" y1="15" x2="12" y2="3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <span>{{ exporting() ? 'Generando...' : 'Exportar' }}</span>
+                <svg class="chevron-mini" [class.open]="exportDropdownOpen()" viewBox="0 0 24 24" fill="none" stroke="currentColor" width="13" height="13">
+                  <polyline points="6 9 12 15 18 9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+
+              @if (exportDropdownOpen()) {
+                <div class="export-menu-dropdown" (click)="$event.stopPropagation()">
+                  <button type="button" class="export-option-item excel-item" (click)="ejecutarExportacion('excel')">
+                    <span class="file-icon-badge excel-badge">XLS</span>
+                    <div class="option-text">
+                      <span class="option-title">Excel (.xlsx)</span>
+                      <span class="option-desc">Formato corporativo con estilos</span>
+                    </div>
+                  </button>
+
+                  <button type="button" class="export-option-item pdf-item" (click)="ejecutarExportacion('pdf')">
+                    <span class="file-icon-badge pdf-badge">PDF</span>
+                    <div class="option-text">
+                      <span class="option-title">Documento PDF (.pdf)</span>
+                      <span class="option-desc">Informe ejecutivo formal</span>
+                    </div>
+                  </button>
+
+                  <button type="button" class="export-option-item csv-item" (click)="ejecutarExportacion('csv')">
+                    <span class="file-icon-badge csv-badge">CSV</span>
+                    <div class="option-text">
+                      <span class="option-title">Datos CSV (.csv)</span>
+                      <span class="option-desc">Texto plano delimitado por ';'</span>
+                    </div>
+                  </button>
+                </div>
+              }
+            </div>
           </div>
         </header>
 
@@ -1001,6 +1034,11 @@ import {
       transform: translateY(-1px);
     }
 
+    .export-dropdown-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
     .btn-harbor-export {
       display: flex;
       align-items: center;
@@ -1009,7 +1047,7 @@ import {
       color: #ffffff;
       border: 1px solid #111827;
       border-radius: 8px;
-      padding: 0.45rem 1rem;
+      padding: 0.45rem 0.9rem;
       font-size: 0.78rem;
       font-weight: 600;
       cursor: pointer;
@@ -1031,6 +1069,107 @@ import {
     .export-mini-icon {
       width: 14px;
       height: 14px;
+    }
+
+    .chevron-mini {
+      transition: transform 0.2s ease;
+    }
+
+    .chevron-mini.open {
+      transform: rotate(180deg);
+    }
+
+    .export-menu-dropdown {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 10px;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(0, 0, 0, 0.08);
+      width: 240px;
+      padding: 0.4rem;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      animation: fadeInDown 0.15s ease-out;
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .export-option-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.75rem;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s ease;
+      width: 100%;
+    }
+
+    .export-option-item:hover {
+      background: #f8fafc;
+    }
+
+    .file-icon-badge {
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      padding: 0.25rem 0.45rem;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 36px;
+      flex-shrink: 0;
+    }
+
+    .excel-badge {
+      background: #e6f4ea;
+      color: #137333;
+      border: 1px solid #ceead6;
+    }
+
+    .pdf-badge {
+      background: #fce8e6;
+      color: #c5221f;
+      border: 1px solid #fad2cf;
+    }
+
+    .csv-badge {
+      background: #f1f3f4;
+      color: #5f6368;
+      border: 1px solid #dadce0;
+    }
+
+    .option-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .option-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #1f2937;
+    }
+
+    .option-desc {
+      font-size: 0.68rem;
+      color: #6b7280;
     }
 
     /* 2. Barra de Voz IA */
@@ -2176,6 +2315,7 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
   // Estados reactivos
   loading = signal<boolean>(true);
   exporting = signal<boolean>(false);
+  exportDropdownOpen = signal<boolean>(false);
   selectedRango = signal<string>('30D');
   selectedGranularidad = signal<'DIA' | 'SEMANA' | 'MES'>('MES');
   selectedMes = signal<number>(8); // Por defecto Agosto
@@ -2590,23 +2730,50 @@ export class ReportesDashboardPageComponent implements OnInit, OnDestroy {
     this.cargarDashboard(this.selectedRango(), gran);
   }
 
-  exportarReporte(): void {
+  toggleExportDropdown(): void {
+    if (this.exporting()) return;
+    this.exportDropdownOpen.update(v => !v);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.export-dropdown-wrapper')) {
+      this.exportDropdownOpen.set(false);
+    }
+  }
+
+  ejecutarExportacion(formato: 'excel' | 'pdf' | 'csv'): void {
+    this.exportDropdownOpen.set(false);
     this.exporting.set(true);
-    this.reportesService.exportarCSV().subscribe({
+
+    const filtros = {
+      rango: this.selectedRango(),
+      mes: this.selectedMes(),
+      anio: this.selectedAnio()
+    };
+
+    this.reportesService.exportarReporte(formato, filtros).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Reporte_Ejecutivo_FashionStore_${this.selectedGranularidad()}_${Date.now()}.csv`;
+        const ext = formato === 'excel' ? 'xlsx' : formato;
+        const mesPad = this.selectedMes() ? `_${this.selectedMes()}` : '';
+        a.download = `Informe_Ejecutivo_FashionStore_${this.selectedAnio()}${mesPad}_${Date.now()}.${ext}`;
         a.click();
         window.URL.revokeObjectURL(url);
         this.exporting.set(false);
       },
       error: (err) => {
-        console.error('Error al exportar CSV:', err);
+        console.error(`Error al exportar ${formato}:`, err);
         this.exporting.set(false);
       }
     });
+  }
+
+  exportarReporte(): void {
+    this.ejecutarExportacion('excel');
   }
 
   // Helpers de visualización

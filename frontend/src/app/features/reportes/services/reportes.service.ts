@@ -51,10 +51,23 @@ export class ReportesService {
     return this.http.post<AnalisisVozResponse>(`${this.apiUrl}/analisis-voz`, body);
   }
 
-  exportarCSV(): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/exportar`, {
+  exportarReporte(
+    formato: 'excel' | 'pdf' | 'csv' = 'excel',
+    filtros?: { rango?: string; mes?: number; anio?: number; sucursalId?: number }
+  ): Observable<Blob> {
+    let url = `${this.apiUrl}/exportar?formato=${formato}`;
+    if (filtros?.rango) url += `&rango=${encodeURIComponent(filtros.rango)}`;
+    if (filtros?.mes) url += `&mes=${filtros.mes}`;
+    if (filtros?.anio) url += `&anio=${filtros.anio}`;
+    if (filtros?.sucursalId) url += `&sucursal_id=${filtros.sucursalId}`;
+
+    return this.http.get(url, {
       responseType: 'blob'
     });
+  }
+
+  exportarCSV(): Observable<Blob> {
+    return this.exportarReporte('csv');
   }
 
   // =========================================================================

@@ -1011,20 +1011,574 @@ class ReportesService:
         )
 
     # =========================================================================
-    # 3. EXPORTACIÓN DE REPORTES EJECUTIVOS (CSV)
+    # 3. EXPORTACIÓN DE REPORTES EJECUTIVOS (EXCEL, PDF Y CSV)
     # =========================================================================
-    async def exportar_reporte_csv(self) -> str:
-        """Genera un archivo CSV con el reporte consolidado de operaciones y ventas."""
+    async def exportar_reporte_excel(
+        self,
+        rango: str = "30D",
+        mes: Optional[int] = None,
+        anio: Optional[int] = None,
+        sucursal_id: Optional[int] = None
+    ) -> bytes:
+        """Genera un archivo Excel (.xlsx) corporativo con diseño Atelier Haute Couture."""
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+        from openpyxl.utils import get_column_letter
+
+        meses_nombres = {
+            1: "Enero", 2: "Febrero", 3: "Marzo", 4: "Abril",
+            5: "Mayo", 6: "Junio", 7: "Julio", 8: "Agosto",
+            9: "Septiembre", 10: "Octubre", 11: "Noviembre", 12: "Diciembre"
+        }
+
+        dash = await self.obtener_dashboard_kpis(
+            rango=rango if not mes else "MES_ESPECIFICO",
+            granularidad="MES",
+            sucursal_id=sucursal_id,
+            mes=mes,
+            anio=anio
+        )
+        k = dash.kpis
+
+        mes_nombre = meses_nombres.get(mes, f"Mes {mes}") if mes else None
+        periodo_label = f"{mes_nombre} {anio}" if mes_nombre and anio else f"Últimos {rango}"
+        
+        sucursal_label = "Consolidado Global"
+        if sucursal_id:
+            res_suc = await self.db.execute(select(Sucursal).where(Sucursal.id == sucursal_id))
+            suc_obj = res_suc.scalar_one_or_none()
+            if suc_obj:
+                sucursal_label = f"Sucursal {suc_obj.nombre}"
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Informe Ejecutivo"
+        ws.views.sheetView[0].showGridLines = True
+
+        # Paleta de Colores Atelier Haute Couture
+        NAVY_FILL = PatternFill(start_color="1A1A24", end_color="1A1A24", fill_type="solid")
+        GOLD_TITLE_FONT = Font(name="Segoe UI", size=14, bold=True, color="E5C07B")
+        WHITE_SUB_FONT = Font(name="Segoe UI", size=9, bold=False, color="F7FAFC")
+        METADATA_FILL = PatternFill(start_color="2D3748", end_color="2D3748", fill_type="solid")
+
+        SEC_TITLE_FILL = PatternFill(start_color="1A1A24", end_color="1A1A24", fill_type="solid")
+        SEC_TITLE_FONT = Font(name="Segoe UI", size=11, bold=True, color="E5C07B")
+
+        TH_FILL = PatternFill(start_color="EDF2F7", end_color="EDF2F7", fill_type="solid")
+        TH_FONT = Font(name="Segoe UI", size=10, bold=True, color="1A202C")
+        
+        REGULAR_FONT = Font(name="Segoe UI", size=10, color="2D3748")
+        BOLD_FONT = Font(name="Segoe UI", size=10, bold=True, color="1A202C")
+        MUTED_FONT = Font(name="Segoe UI", size=9, italic=True, color="718096")
+
+        ALERT_CRIT_FILL = PatternFill(start_color="FED7D7", end_color="FED7D7", fill_type="solid")
+        ALERT_CRIT_FONT = Font(name="Segoe UI", size=9, bold=True, color="9B2C2C")
+        ALERT_WARN_FILL = PatternFill(start_color="FEEBC8", end_color="FEEBC8", fill_type="solid")
+        ALERT_WARN_FONT = Font(name="Segoe UI", size=9, bold=True, color="C05621")
+
+        thin_side = Side(border_style="thin", color="E2E8F0")
+        BORDER_ALL = Border(left=thin_side, right=thin_side, top=thin_side, bottom=thin_side)
+
+        # 1. TÍTULO PRINCIPAL
+        ws.merge_cells("A1:F1")
+        title_cell = ws["A1"]
+        title_cell.value = "FASHIONSTORE HAUTE COUTURE — INFORME EJECUTIVO GERENCIAL"
+        title_cell.font = GOLD_TITLE_FONT
+        title_cell.fill = NAVY_FILL
+        title_cell.alignment = Alignment(horizontal="center", vertical="center")
+        ws.row_dimensions[1].height = 36
+
+        # 2. SUBTÍTULO CON AUDITORÍA Y METADATOS
+        ws.merge_cells("A2:F2")
+        sub_cell = ws["A2"]
+        sub_cell.value = f"Período: {periodo_label}  |  Ámbito: {sucursal_label}  |  Generación: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}"
+        sub_cell.font = WHITE_SUB_FONT
+        sub_cell.fill = METADATA_FILL
+        sub_cell.alignment = Alignment(horizontal="center", vertical="center")
+        ws.row_dimensions[2].height = 22
+
+        current_row = 4
+
+        # -------------------------------------------------------------
+        # SECCIÓN 1: KPIS EJECUTIVOS
+        # -------------------------------------------------------------
+        ws.merge_cells(f"A{current_row}:C{current_row}")
+        sec1 = ws[f"A{current_row}"]
+        sec1.value = "  1. MÉTRICAS CLAVE DE DESEMPEÑO (KPIS)"
+        sec1.font = SEC_TITLE_FONT
+        sec1.fill = SEC_TITLE_FILL
+        sec1.alignment = Alignment(vertical="center")
+        ws.row_dimensions[current_row].height = 26
+        current_row += 1
+
+        kpi_headers = ["Indicador Operativo", "Valor Registrado", "Referencia / Comparativa"]
+        for col_idx, h in enumerate(kpi_headers, start=1):
+            c = ws.cell(row=current_row, column=col_idx, value=h)
+            c.font = TH_FONT
+            c.fill = TH_FILL
+            c.border = BORDER_ALL
+            c.alignment = Alignment(horizontal="center" if col_idx > 1 else "left", vertical="center")
+        ws.row_dimensions[current_row].height = 22
+        current_row += 1
+
+        kpis_rows = [
+            ("Facturación Total (USD)", k.total_revenue, f"{'+' if k.revenue_change_pct >= 0 else ''}{k.revenue_change_pct}% vs período anterior", "$#,##0.00"),
+            ("Ticket Promedio (USD)", k.avg_order_value, "Promedio global por orden", "$#,##0.00"),
+            ("Pedidos Activos en Curso", k.active_orders, f"{k.in_progress_fulfillment} en empaque prioritario", "#,##0"),
+            ("Tasa de Conversión General", (k.conversion_rate or 0.0) / 100.0, f"{'+' if k.conversion_change_pct >= 0 else ''}{k.conversion_change_pct}% variación", "0.0%"),
+            ("Citas y Reservas en Probadores", k.total_probadores, f"Ocupación: {k.tasa_ocupacion_probadores}%", "#,##0"),
+        ]
+
+        for label, val, ref, fmt in kpis_rows:
+            c1 = ws.cell(row=current_row, column=1, value=label)
+            c1.font = REGULAR_FONT
+            c1.border = BORDER_ALL
+
+            c2 = ws.cell(row=current_row, column=2, value=val)
+            c2.font = BOLD_FONT
+            c2.number_format = fmt
+            c2.alignment = Alignment(horizontal="right", vertical="center")
+            c2.border = BORDER_ALL
+
+            c3 = ws.cell(row=current_row, column=3, value=ref)
+            c3.font = MUTED_FONT
+            c3.border = BORDER_ALL
+            ws.row_dimensions[current_row].height = 20
+            current_row += 1
+
+        current_row += 1
+
+        # -------------------------------------------------------------
+        # SECCIÓN 2: PRODUCTOS MÁS VENDIDOS
+        # -------------------------------------------------------------
+        ws.merge_cells(f"A{current_row}:D{current_row}")
+        sec2 = ws[f"A{current_row}"]
+        sec2.value = "  2. PRODUCTOS MÁS VENDIDOS (TOP PERFORMERS)"
+        sec2.font = SEC_TITLE_FONT
+        sec2.fill = SEC_TITLE_FILL
+        sec2.alignment = Alignment(vertical="center")
+        ws.row_dimensions[current_row].height = 26
+        current_row += 1
+
+        prod_headers = ["Prenda de Colección", "Categoría", "Uds. Vendidas", "Ingresos Acumulados (USD)"]
+        for col_idx, h in enumerate(prod_headers, start=1):
+            c = ws.cell(row=current_row, column=col_idx, value=h)
+            c.font = TH_FONT
+            c.fill = TH_FILL
+            c.border = BORDER_ALL
+            c.alignment = Alignment(horizontal="center" if col_idx in [2, 3, 4] else "left", vertical="center")
+        ws.row_dimensions[current_row].height = 22
+        current_row += 1
+
+        for tp in dash.top_products:
+            c1 = ws.cell(row=current_row, column=1, value=tp.nombre)
+            c1.font = BOLD_FONT
+            c1.border = BORDER_ALL
+
+            c2 = ws.cell(row=current_row, column=2, value=tp.categoria)
+            c2.font = REGULAR_FONT
+            c2.border = BORDER_ALL
+            c2.alignment = Alignment(horizontal="center")
+
+            c3 = ws.cell(row=current_row, column=3, value=tp.unidades_vendidas)
+            c3.font = REGULAR_FONT
+            c3.number_format = "#,##0"
+            c3.border = BORDER_ALL
+            c3.alignment = Alignment(horizontal="right")
+
+            c4 = ws.cell(row=current_row, column=4, value=tp.ingresos_totales)
+            c4.font = BOLD_FONT
+            c4.number_format = "$#,##0.00"
+            c4.border = BORDER_ALL
+            c4.alignment = Alignment(horizontal="right")
+
+            ws.row_dimensions[current_row].height = 20
+            current_row += 1
+
+        current_row += 1
+
+        # -------------------------------------------------------------
+        # SECCIÓN 3: ALERTAS DE INVENTARIO CRÍTICO
+        # -------------------------------------------------------------
+        ws.merge_cells(f"A{current_row}:E{current_row}")
+        sec3 = ws[f"A{current_row}"]
+        sec3.value = "  3. ALERTAS DE INVENTARIO CRÍTICO"
+        sec3.font = SEC_TITLE_FONT
+        sec3.fill = SEC_TITLE_FILL
+        sec3.alignment = Alignment(vertical="center")
+        ws.row_dimensions[current_row].height = 26
+        current_row += 1
+
+        alert_headers = ["Prenda / Modelo", "Sucursal de Origen", "Stock Restante", "Nivel de Alerta", "Detalle de Logística"]
+        for col_idx, h in enumerate(alert_headers, start=1):
+            c = ws.cell(row=current_row, column=col_idx, value=h)
+            c.font = TH_FONT
+            c.fill = TH_FILL
+            c.border = BORDER_ALL
+            c.alignment = Alignment(horizontal="center" if col_idx in [2, 3, 4] else "left", vertical="center")
+        ws.row_dimensions[current_row].height = 22
+        current_row += 1
+
+        for al in dash.inventory_alerts:
+            c1 = ws.cell(row=current_row, column=1, value=al.nombre)
+            c1.font = REGULAR_FONT
+            c1.border = BORDER_ALL
+
+            c2 = ws.cell(row=current_row, column=2, value=al.sucursal)
+            c2.font = REGULAR_FONT
+            c2.border = BORDER_ALL
+
+            c3 = ws.cell(row=current_row, column=3, value=al.stock_actual)
+            c3.font = BOLD_FONT
+            c3.number_format = "#,##0"
+            c3.border = BORDER_ALL
+            c3.alignment = Alignment(horizontal="center")
+
+            c4 = ws.cell(row=current_row, column=4, value=al.nivel_alerta)
+            c4.border = BORDER_ALL
+            c4.alignment = Alignment(horizontal="center")
+            if "CRIT" in (al.nivel_alerta or "").upper():
+                c4.fill = ALERT_CRIT_FILL
+                c4.font = ALERT_CRIT_FONT
+            else:
+                c4.fill = ALERT_WARN_FILL
+                c4.font = ALERT_WARN_FONT
+
+            c5 = ws.cell(row=current_row, column=5, value=al.mensaje)
+            c5.font = MUTED_FONT
+            c5.border = BORDER_ALL
+
+            ws.row_dimensions[current_row].height = 20
+            current_row += 1
+
+        current_row += 1
+
+        # -------------------------------------------------------------
+        # SECCIÓN 4: ÓRDENES RECIENTES DE ALTO VALOR
+        # -------------------------------------------------------------
+        ws.merge_cells(f"A{current_row}:F{current_row}")
+        sec4 = ws[f"A{current_row}"]
+        sec4.value = "  4. ÓRDENES RECIENTES DE ALTO VALOR"
+        sec4.font = SEC_TITLE_FONT
+        sec4.fill = SEC_TITLE_FILL
+        sec4.alignment = Alignment(vertical="center")
+        ws.row_dimensions[current_row].height = 26
+        current_row += 1
+
+        ord_headers = ["Código Pedido", "Cliente", "Prendas / Resumen", "Ubicación / Canal", "Monto Total (USD)", "Estado"]
+        for col_idx, h in enumerate(ord_headers, start=1):
+            c = ws.cell(row=current_row, column=col_idx, value=h)
+            c.font = TH_FONT
+            c.fill = TH_FILL
+            c.border = BORDER_ALL
+            c.alignment = Alignment(horizontal="center" if col_idx in [1, 4, 5, 6] else "left", vertical="center")
+        ws.row_dimensions[current_row].height = 22
+        current_row += 1
+
+        for ord_row in dash.recent_orders:
+            c1 = ws.cell(row=current_row, column=1, value=ord_row.codigo_pedido)
+            c1.font = BOLD_FONT
+            c1.alignment = Alignment(horizontal="center")
+            c1.border = BORDER_ALL
+
+            c2 = ws.cell(row=current_row, column=2, value=ord_row.cliente_nombre)
+            c2.font = REGULAR_FONT
+            c2.border = BORDER_ALL
+
+            c3 = ws.cell(row=current_row, column=3, value=ord_row.items_resumen)
+            c3.font = REGULAR_FONT
+            c3.border = BORDER_ALL
+
+            c4 = ws.cell(row=current_row, column=4, value=ord_row.sucursal_o_ciudad)
+            c4.font = REGULAR_FONT
+            c4.border = BORDER_ALL
+
+            c5 = ws.cell(row=current_row, column=5, value=ord_row.monto_total)
+            c5.font = BOLD_FONT
+            c5.number_format = "$#,##0.00"
+            c5.alignment = Alignment(horizontal="right")
+            c5.border = BORDER_ALL
+
+            c6 = ws.cell(row=current_row, column=6, value=ord_row.estado)
+            c6.font = BOLD_FONT
+            c6.alignment = Alignment(horizontal="center")
+            c6.border = BORDER_ALL
+
+            ws.row_dimensions[current_row].height = 20
+            current_row += 1
+
+        # Auto-ajuste de anchos de columna dinámico
+        for col in ws.columns:
+            col_letter = get_column_letter(col[0].column)
+            max_len = 0
+            for cell in col:
+                if cell.row in [1, 2]:
+                    continue
+                v_str = str(cell.value or "")
+                if len(v_str) > max_len:
+                    max_len = len(v_str)
+            ws.column_dimensions[col_letter].width = max(max_len + 4, 14)
+
+        buf = io.BytesIO()
+        wb.save(buf)
+        return buf.getvalue()
+
+    async def exportar_reporte_pdf(
+        self,
+        rango: str = "30D",
+        mes: Optional[int] = None,
+        anio: Optional[int] = None,
+        sucursal_id: Optional[int] = None
+    ) -> bytes:
+        """Genera un archivo PDF ejecutivo formal con membrete y tablas estructuradas."""
+        from reportlab.lib.pagesizes import letter
+        from reportlab.lib import colors
+        from reportlab.platypus import (
+            SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+        )
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+
+        meses_nombres = {
+            1: "Enero", 2: "Febrero", 3: "Marzo", 4: "Abril",
+            5: "Mayo", 6: "Junio", 7: "Julio", 8: "Agosto",
+            9: "Septiembre", 10: "Octubre", 11: "Noviembre", 12: "Diciembre"
+        }
+
+        dash = await self.obtener_dashboard_kpis(
+            rango=rango if not mes else "MES_ESPECIFICO",
+            granularidad="MES",
+            sucursal_id=sucursal_id,
+            mes=mes,
+            anio=anio
+        )
+        k = dash.kpis
+
+        mes_nombre = meses_nombres.get(mes, f"Mes {mes}") if mes else None
+        periodo_label = f"{mes_nombre} {anio}" if mes_nombre and anio else f"Últimos {rango}"
+        
+        sucursal_label = "Consolidado Global"
+        if sucursal_id:
+            res_suc = await self.db.execute(select(Sucursal).where(Sucursal.id == sucursal_id))
+            suc_obj = res_suc.scalar_one_or_none()
+            if suc_obj:
+                sucursal_label = f"Sucursal {suc_obj.nombre}"
+
+        buf = io.BytesIO()
+        doc = SimpleDocTemplate(
+            buf,
+            pagesize=letter,
+            leftMargin=36,
+            rightMargin=36,
+            topMargin=36,
+            bottomMargin=36
+        )
+
+        styles = getSampleStyleSheet()
+
+        brand_title = ParagraphStyle(
+            'BrandTitle',
+            parent=styles['Heading1'],
+            fontName='Helvetica-Bold',
+            fontSize=15,
+            leading=18,
+            textColor=colors.HexColor('#1A1A24')
+        )
+        meta_style = ParagraphStyle(
+            'MetaRight',
+            parent=styles['Normal'],
+            fontName='Helvetica',
+            fontSize=8,
+            leading=11,
+            alignment=2,  # TA_RIGHT
+            textColor=colors.HexColor('#4A5568')
+        )
+        sec_title = ParagraphStyle(
+            'SecTitle',
+            parent=styles['Heading2'],
+            fontName='Helvetica-Bold',
+            fontSize=10,
+            leading=13,
+            textColor=colors.HexColor('#1A1A24')
+        )
+        th_cell = ParagraphStyle(
+            'THCell',
+            parent=styles['Normal'],
+            fontName='Helvetica-Bold',
+            fontSize=8,
+            leading=10,
+            textColor=colors.HexColor('#FFFFFF')
+        )
+        td_cell = ParagraphStyle(
+            'TDCell',
+            parent=styles['Normal'],
+            fontName='Helvetica',
+            fontSize=8,
+            leading=10,
+            textColor=colors.HexColor('#2D3748')
+        )
+        td_bold = ParagraphStyle(
+            'TDBold',
+            parent=styles['Normal'],
+            fontName='Helvetica-Bold',
+            fontSize=8,
+            leading=10,
+            textColor=colors.HexColor('#1A1A24')
+        )
+        td_right = ParagraphStyle(
+            'TDRight',
+            parent=styles['Normal'],
+            fontName='Helvetica',
+            fontSize=8,
+            leading=10,
+            alignment=2,
+            textColor=colors.HexColor('#2D3748')
+        )
+
+        story = []
+
+        # Membrete Ejecutivo
+        header_table_data = [
+            [
+                Paragraph("<b>FASHIONSTORE HAUTE COUTURE</b><br/><font color='#8C6D3B'>INFORME EJECUTIVO GERENCIAL DE OPERACIONES</font>", brand_title),
+                Paragraph(f"<b>Período:</b> {periodo_label}<br/><b>Ámbito:</b> {sucursal_label}<br/><b>Emisión:</b> {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}", meta_style)
+            ]
+        ]
+        h_table = Table(header_table_data, colWidths=[320, 220])
+        h_table.setStyle(TableStyle([
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+            ('TOPPADDING', (0, 0), (-1, -1), 0),
+        ]))
+        story.append(h_table)
+        story.append(Spacer(1, 8))
+        story.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor('#D4AF37'), spaceAfter=10))
+
+        # 1. KPIs
+        story.append(Paragraph("1. MÉTRICAS CLAVE DE DESEMPEÑO (KPIS)", sec_title))
+        story.append(Spacer(1, 4))
+
+        kpi_table_data = [
+            [Paragraph("<b>Indicador</b>", th_cell), Paragraph("<b>Valor Registrado</b>", th_cell), Paragraph("<b>Referencia / Comparativa</b>", th_cell)],
+            [Paragraph("Facturación Total (USD)", td_bold), Paragraph(f"${k.total_revenue:,.2f}", td_right), Paragraph(f"{'+' if k.revenue_change_pct >= 0 else ''}{k.revenue_change_pct}% vs anterior", td_cell)],
+            [Paragraph("Ticket Promedio (USD)", td_cell), Paragraph(f"${k.avg_order_value:,.2f}", td_right), Paragraph("Promedio global por venta", td_cell)],
+            [Paragraph("Pedidos Activos en Curso", td_cell), Paragraph(str(k.active_orders), td_right), Paragraph(f"{k.in_progress_fulfillment} en empaque prioritario", td_cell)],
+            [Paragraph("Tasa de Conversión", td_cell), Paragraph(f"{k.conversion_rate}%", td_right), Paragraph(f"{'+' if k.conversion_change_pct >= 0 else ''}{k.conversion_change_pct}% variación", td_cell)],
+            [Paragraph("Citas en Probadores", td_cell), Paragraph(str(k.total_probadores), td_right), Paragraph(f"Ocupación: {k.tasa_ocupacion_probadores}%", td_cell)],
+        ]
+        t_kpis = Table(kpi_table_data, colWidths=[200, 140, 200])
+        t_kpis.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1A1A24')),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E2E8F0')),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor('#FFFFFF'), colors.HexColor('#F8FAFC')]),
+        ]))
+        story.append(t_kpis)
+        story.append(Spacer(1, 10))
+
+        # 2. Top Productos
+        story.append(Paragraph("2. PRODUCTOS MÁS VENDIDOS (TOP PERFORMERS)", sec_title))
+        story.append(Spacer(1, 4))
+        top_prod_data = [
+            [Paragraph("<b>Prenda de Colección</b>", th_cell), Paragraph("<b>Categoría</b>", th_cell), Paragraph("<b>Uds.</b>", th_cell), Paragraph("<b>Ingresos (USD)</b>", th_cell)]
+        ]
+        for tp in dash.top_products:
+            top_prod_data.append([
+                Paragraph(tp.nombre, td_bold),
+                Paragraph(tp.categoria, td_cell),
+                Paragraph(str(tp.unidades_vendidas), td_right),
+                Paragraph(f"${tp.ingresos_totales:,.2f}", td_right)
+            ])
+        t_prod = Table(top_prod_data, colWidths=[220, 140, 60, 120])
+        t_prod.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1A1A24')),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E2E8F0')),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor('#FFFFFF'), colors.HexColor('#F8FAFC')]),
+        ]))
+        story.append(t_prod)
+        story.append(Spacer(1, 10))
+
+        # 3. Alertas de Inventario
+        story.append(Paragraph("3. ALERTAS DE INVENTARIO CRÍTICO", sec_title))
+        story.append(Spacer(1, 4))
+        alert_data = [
+            [Paragraph("<b>Prenda</b>", th_cell), Paragraph("<b>Sucursal</b>", th_cell), Paragraph("<b>Stock</b>", th_cell), Paragraph("<b>Nivel</b>", th_cell), Paragraph("<b>Detalle</b>", th_cell)]
+        ]
+        for al in dash.inventory_alerts:
+            alert_data.append([
+                Paragraph(al.nombre, td_cell),
+                Paragraph(al.sucursal, td_cell),
+                Paragraph(str(al.stock_actual), td_right),
+                Paragraph(f"<b>{al.nivel_alerta}</b>", td_cell),
+                Paragraph(al.mensaje, td_cell)
+            ])
+        t_alert = Table(alert_data, colWidths=[150, 90, 45, 65, 190])
+        t_alert.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1A1A24')),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E2E8F0')),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor('#FFFFFF'), colors.HexColor('#F8FAFC')]),
+        ]))
+        story.append(t_alert)
+        story.append(Spacer(1, 10))
+
+        # 4. Órdenes Recientes
+        story.append(Paragraph("4. ÓRDENES RECIENTES DE ALTO VALOR", sec_title))
+        story.append(Spacer(1, 4))
+        order_data = [
+            [Paragraph("<b>Código</b>", th_cell), Paragraph("<b>Cliente</b>", th_cell), Paragraph("<b>Resumen</b>", th_cell), Paragraph("<b>Ubicación</b>", th_cell), Paragraph("<b>Total (USD)</b>", th_cell), Paragraph("<b>Estado</b>", th_cell)]
+        ]
+        for ord_row in dash.recent_orders:
+            order_data.append([
+                Paragraph(ord_row.codigo_pedido, td_bold),
+                Paragraph(ord_row.cliente_nombre, td_cell),
+                Paragraph(ord_row.items_resumen, td_cell),
+                Paragraph(ord_row.sucursal_o_ciudad, td_cell),
+                Paragraph(f"${ord_row.monto_total:,.2f}", td_right),
+                Paragraph(ord_row.estado, td_cell)
+            ])
+        t_order = Table(order_data, colWidths=[65, 100, 140, 100, 75, 60])
+        t_order.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1A1A24')),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E2E8F0')),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor('#FFFFFF'), colors.HexColor('#F8FAFC')]),
+        ]))
+        story.append(t_order)
+
+        doc.build(story)
+        return buf.getvalue()
+
+    async def exportar_reporte_csv(
+        self,
+        rango: str = "30D",
+        mes: Optional[int] = None,
+        anio: Optional[int] = None,
+        sucursal_id: Optional[int] = None
+    ) -> str:
+        """Genera un archivo CSV con prefijo UTF-8 BOM y delimitador estándar ';'."""
         output = io.StringIO()
-        writer = csv.writer(output, delimiter=",")
+        output.write('\ufeff')  # BOM UTF-8 para apertura limpia en Excel
+        writer = csv.writer(output, delimiter=";")
+
+        dash = await self.obtener_dashboard_kpis(
+            rango=rango if not mes else "MES_ESPECIFICO",
+            granularidad="MES",
+            sucursal_id=sucursal_id,
+            mes=mes,
+            anio=anio
+        )
+        k = dash.kpis
 
         writer.writerow(["FASHIONSTORE HAUTE COUTURE - INFORME EJECUTIVO GERENCIAL (CU22)"])
-        writer.writerow(["Fecha de Generacion", datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")])
+        writer.writerow(["Fecha de Generación", datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")])
         writer.writerow([])
 
         # KPIs
-        dash = await self.obtener_dashboard_kpis("30D")
-        k = dash.kpis
         writer.writerow(["METRICAS CLAVE DE DESEMPEÑO"])
         writer.writerow(["Indicador", "Valor", "Referencia"])
         writer.writerow(["Facturacion Total (USD)", f"${k.total_revenue:,.2f}", f"+{k.revenue_change_pct}% vs anterior"])
@@ -1058,3 +1612,4 @@ class ReportesService:
             ])
 
         return output.getvalue()
+
