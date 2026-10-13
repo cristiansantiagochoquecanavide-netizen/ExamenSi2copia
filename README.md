@@ -38,6 +38,63 @@ El backend de FastAPI opera como una **API REST unificada con autenticación JWT
 
 ---
 
+## 🐳 Puesta en Marcha con Docker (Quickstart)
+
+### 1. Variables de Entorno (Opcional)
+Para personalizar credenciales, puertos o claves de API, copia la plantilla de entorno:
+
+- **PowerShell (Windows):**
+  ```powershell
+  Copy-Item .env.example .env
+  ```
+- **Bash (Linux / macOS):**
+  ```bash
+  cp .env.example .env
+  ```
+
+*(Si omites este paso, `docker-compose.yml` usará automáticamente los valores predeterminados de desarrollo).*
+
+### 2. Construir y Levantar Contenedores
+Con Docker en ejecución, corre el siguiente comando en la raíz del proyecto:
+
+```bash
+docker compose up --build
+```
+
+> 💡 **Ejecución en segundo plano:** Si deseas liberar la terminal:
+> ```bash
+> docker compose up -d --build
+> ```
+
+### 3. Servicios Disponibles
+
+| Servicio | URL / Puerto | Descripción |
+| :--- | :--- | :--- |
+| **Frontend Web** (Angular) | [http://localhost:4200](http://localhost:4200) | Plataforma de comercio electrónico y panel de administración |
+| **Backend REST API** (FastAPI) | [http://localhost:8000](http://localhost:8000) | API principal |
+| **Swagger / OpenAPI** | [http://localhost:8000/docs](http://localhost:8000/docs) | Documentación interactiva y prueba de endpoints |
+| **Base de Datos** (PostgreSQL 16) | `localhost:5432` | Base de datos relacional (`fashionstore_db`) |
+
+> ℹ️ **Inicialización Automática:**  
+> El contenedor de backend ejecuta de forma automática la creación de esquemas (`init_db.py`) y la carga de datos de prueba (`seed.py`), dejando el sistema listo para operar con las credenciales indicadas arriba.
+
+### 4. Comandos Útiles de Gestión
+
+- **Ver logs en tiempo real:**
+  ```bash
+  docker compose logs -f
+  ```
+- **Detener los servicios:**
+  ```bash
+  docker compose down
+  ```
+- **Detener y reiniciar la base de datos limpia (elimina volúmenes):**
+  ```bash
+  docker compose down -v
+  ```
+
+---
+
 ## 📌 Características Principales
 
 - **Gestión Multi-sucursal e Inventario Integrado**: Control unificado de existencias (disponible, reservado, vendido, agotado) en tiempo real por sucursal, ciudad, color y talla.

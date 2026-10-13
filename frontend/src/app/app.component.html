@@ -145,10 +145,10 @@
             <a routerLink="/inventario" [queryParams]="{tab: 'MOVIMIENTOS'}" routerLinkActive="active" [routerLinkActiveOptions]="{ matrixParams: 'ignored', queryParams: 'exact', paths: 'exact', fragment: 'ignored' }" (click)="closeMobileMenu()">
               <span class="menu-icon">&bull;</span> Kardex de Movimientos
             </a>
-            <a routerLink="/inventario" [queryParams]="{tab: 'TRANSFERENCIAS'}" routerLinkActive="active" [routerLinkActiveOptions]="{ matrixParams: 'ignored', queryParams: 'exact', paths: 'exact', fragment: 'ignored' }" (click)="closeMobileMenu()">
+            <a routerLink="/inventario/transferencias" routerLinkActive="active" (click)="closeMobileMenu()">
               <span class="menu-icon">&bull;</span> Transferencias entre Tiendas
             </a>
-            <a routerLink="/inventario" [queryParams]="{tab: 'COMPRAS'}" routerLinkActive="active" [routerLinkActiveOptions]="{ matrixParams: 'ignored', queryParams: 'exact', paths: 'exact', fragment: 'ignored' }" (click)="closeMobileMenu()">
+            <a routerLink="/inventario/recepcion" routerLinkActive="active" (click)="closeMobileMenu()">
               <span class="menu-icon">&bull;</span> Abastecimiento / Compras
             </a>
             <a routerLink="/inventario" [queryParams]="{tab: 'SUCURSALES'}" routerLinkActive="active" [routerLinkActiveOptions]="{ matrixParams: 'ignored', queryParams: 'exact', paths: 'exact', fragment: 'ignored' }" (click)="closeMobileMenu()">
