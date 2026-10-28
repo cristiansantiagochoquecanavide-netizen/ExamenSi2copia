@@ -8,11 +8,12 @@ import app.domains.ventas.models
 import app.domains.reservas.models
 import app.domains.ia_asistente.models
 import app.domains.notificaciones.models
+import app.domains.saas.models
 
 async def init_tables():
     print("==> Conectando a PostgreSQL...")
     async with engine.begin() as conn:
-        print("==> Creando todas las tablas del sistema FashionStore...")
+        print("==> Creando todas las tablas del sistema FashionStore (incluyendo SaaS Multitenant)...")
         await conn.run_sync(Base.metadata.create_all)
     print("==> Todas las tablas creadas exitosamente en PostgreSQL!")
     await engine.dispose()

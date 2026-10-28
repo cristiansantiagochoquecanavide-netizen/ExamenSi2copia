@@ -28,11 +28,11 @@ class _ReportesScreenState extends State<ReportesScreen> {
   final List<String> _rangos = ['24H', '7D', '30D', 'MES'];
 
   final List<Map<String, String>> _quickVoicePrompts = [
-    {'label': '🏆 Producto más vendido', 'query': 'Cual es el producto mas vendido?'},
-    {'label': '📈 Ingresos del mes', 'query': 'Como estan los ingresos este mes?'},
-    {'label': '👗 Ocupación de probadores', 'query': 'Cual es la ocupacion de probadores?'},
-    {'label': '⚠️ Stock crítico en tiendas', 'query': 'Cuales prendas tienen stock critico o bajo?'},
-    {'label': '📊 Resumen ejecutivo Atelier', 'query': 'Dame un resumen ejecutivo general de la empresa'},
+    {'label': 'Producto más vendido', 'query': 'Cual es el producto mas vendido?'},
+    {'label': 'Ingresos del mes', 'query': 'Como estan los ingresos este mes?'},
+    {'label': 'Ocupación de probadores', 'query': 'Cual es la ocupacion de probadores?'},
+    {'label': 'Stock crítico en tiendas', 'query': 'Cuales prendas tienen stock critico o bajo?'},
+    {'label': 'Resumen ejecutivo general', 'query': 'Dame un resumen ejecutivo general de la empresa'},
   ];
 
   @override

@@ -41,7 +41,7 @@ import {
             class="tab-btn"
             [class.active]="activeTab === 'checkout'"
             (click)="activeTab = 'checkout'">
-            <span>🛍️ Bolsa &amp; Checkout</span>
+            <span>Bolsa &amp; Checkout</span>
             <span class="tab-badge" *ngIf="(cartService.count$ | async) as count">{{ count }}</span>
           </button>
           <button
@@ -49,7 +49,7 @@ import {
             class="tab-btn"
             [class.active]="activeTab === 'pedidos'"
             (click)="cargarPedidosTab()">
-            <span>📦 Rastreo de Pedidos</span>
+            <span>Rastreo de Pedidos</span>
           </button>
         </div>
       </header>
@@ -81,11 +81,11 @@ import {
         <!-- SI HAY UN PEDIDO RECIÉN CONFIRMADO: VISTA COMPROBANTE -->
         <div *ngIf="pedidoConfirmado" class="order-confirmed-panel animate-fade">
           <div class="success-crest">
-            <div class="crest-icon">✦</div>
+            <span class="material-symbols-outlined crest-icon" style="font-size: 32px; color: #16a34a;">check_circle</span>
             <div class="stripe-success-tag" [ngSwitch]="ultimoMetodoPagoUtilizado">
-              <span *ngSwitchCase="'LIBELULA_BOLIVIA'">✓ PAGO ACREDITADO CON QR SIMPLE (LIBÉLULA)</span>
-              <span *ngSwitchCase="'PAYPAL_EXPRESS'">✓ PAGO AUTORIZADO CON PAYPAL EXPRESS</span>
-              <span *ngSwitchDefault>✓ PAGO AUTORIZADO CON STRIPE</span>
+              <span *ngSwitchCase="'LIBELULA_BOLIVIA'">PAGO ACREDITADO CON QR SIMPLE (LIBÉLULA)</span>
+              <span *ngSwitchCase="'PAYPAL_EXPRESS'">PAGO AUTORIZADO CON PAYPAL EXPRESS</span>
+              <span *ngSwitchDefault>PAGO AUTORIZADO CON STRIPE</span>
             </div>
             <h2>¡Tu compra ha sido exitosa!</h2>
             <p class="order-subtitle">Su pedido digital fue procesado, el pago ha sido confirmado y el comprobante fiscal fue emitido.</p>
@@ -118,10 +118,10 @@ import {
               <div class="detail-group">
                 <span class="lbl">Modalidad de Despacho:</span>
                 <span class="val" *ngIf="pedidoConfirmado.envio?.tipo_entrega === 'DOMICILIO'">
-                  🚚 Envío a Domicilio Express ({{ pedidoConfirmado.envio?.ciudad }})
+                  Envío a Domicilio Express ({{ pedidoConfirmado.envio?.ciudad }})
                 </span>
                 <span class="val" *ngIf="pedidoConfirmado.envio?.tipo_entrega === 'CLICK_AND_COLLECT'">
-                  🏛️ Click &amp; Collect (Recojo en Boutique)
+                  Click &amp; Collect (Recojo en Boutique)
                 </span>
                 <span class="val text-muted" *ngIf="pedidoConfirmado.envio?.direccion_linea1">
                   {{ pedidoConfirmado.envio?.direccion_linea1 }}
@@ -165,13 +165,13 @@ import {
 
             <div class="order-actions">
               <button type="button" class="btn-atelier-outline" (click)="imprimirComprobante()">
-                🖨️ Imprimir Voucher / Comprobante
+                Imprimir Voucher / Comprobante
               </button>
               <button type="button" class="btn-atelier-gold" (click)="verEnRastreo(pedidoConfirmado)">
-                📦 Rastrear Envío en Tiempo Real
+                Rastrear Envío en Tiempo Real
               </button>
               <button type="button" class="btn-atelier-text" (click)="nuevaCompra()">
-                ➕ Realizar otra compra
+                + Realizar otra compra
               </button>
             </div>
           </div>
@@ -190,7 +190,7 @@ import {
 
               <!-- SI EL CARRITO ESTÁ VACÍO -->
               <div *ngIf="cartItems.length === 0" class="empty-cart-state">
-                <div class="empty-icon">🛍️</div>
+                <span class="material-symbols-outlined empty-icon" style="font-size: 36px; color: #94a3b8;">shopping_bag</span>
                 <h4>Su bolsa de compras está vacía</h4>
                 <p>Seleccione prendas de nuestra colección de alta costura para iniciar su compra.</p>
 
@@ -266,7 +266,7 @@ import {
 
                 <div class="cart-table-footer">
                   <button type="button" class="btn-atelier-text text-danger" (click)="vaciarBolsa()">
-                    🗑️ Vaciar Bolsa
+                    Vaciar Bolsa
                   </button>
                 </div>
               </div>
@@ -275,7 +275,7 @@ import {
             <!-- DESGLOSE ECONÓMICO Y ENVÍO GRATIS -->
             <div class="panel-box shipping-incentive-box" *ngIf="cartItems.length > 0">
               <div *ngIf="subtotal >= 150" class="free-shipping-achieved">
-                <span class="incentive-badge">✨ BENEFICIO VIP EXCLUSIVO</span>
+                <span class="incentive-badge">BENEFICIO EXCLUSIVO</span>
                 <strong>¡Felicidades! Su compra califica para Envío Courier Express GRATUITO.</strong>
               </div>
               <div *ngIf="subtotal < 150" class="free-shipping-progress">
@@ -331,7 +331,7 @@ import {
                   </div>
                   <div class="delivery-card-content">
                     <div class="delivery-card-header">
-                      <span class="delivery-icon">🚚</span>
+                      <span class="material-symbols-outlined delivery-icon">local_shipping</span>
                       <strong>Envío a Domicilio Express</strong>
                     </div>
                     <p class="delivery-desc">Despacho courier a su puerta con número de seguimiento en tiempo real.</p>
@@ -351,7 +351,7 @@ import {
                   </div>
                   <div class="delivery-card-content">
                     <div class="delivery-card-header">
-                      <span class="delivery-icon">🏛️</span>
+                      <span class="material-symbols-outlined delivery-icon">storefront</span>
                       <strong>Click &amp; Collect (Boutique)</strong>
                     </div>
                     <p class="delivery-desc">Retiro personal sin costo en cualquiera de nuestras boutiques de alta costura.</p>
@@ -441,7 +441,7 @@ import {
 
                 <div *ngIf="cuponAplicado && cuponAplicado.valido" class="coupon-badge-applied">
                   <div class="coupon-applied-info">
-                    <span class="coupon-tag">✓ {{ cuponAplicado.codigo }}</span>
+                    <span class="coupon-tag">{{ cuponAplicado.codigo }}</span>
                     <span class="coupon-benefit">
                       {{ cuponAplicado.tipo_descuento === 'ENVIO_GRATIS' ? 'Envío Yaigo Bonificado (GRATIS)' : ('- Bs. ' + (cuponAplicado.descuento_calculado | number:'1.2-2') + ' de Descuento') }}
                     </span>
@@ -464,21 +464,21 @@ import {
                   class="pay-tab-btn"
                   [class.active]="pasarelaSeleccionada === 'LIBELULA_BOLIVIA'"
                   (click)="seleccionarPasarela('LIBELULA_BOLIVIA')">
-                  <span>📱 QR Simple Libélula</span>
+                  <span>QR Simple (Bolivia)</span>
                 </button>
                 <button
                   type="button"
                   class="pay-tab-btn"
                   [class.active]="pasarelaSeleccionada === 'STRIPE_INTL'"
                   (click)="seleccionarPasarela('STRIPE_INTL')">
-                  <span>💳 Tarjeta Stripe</span>
+                  <span>Tarjeta de Crédito / Débito</span>
                 </button>
                 <button
                   type="button"
                   class="pay-tab-btn"
                   [class.active]="pasarelaSeleccionada === 'PAYPAL_EXPRESS'"
                   (click)="seleccionarPasarela('PAYPAL_EXPRESS')">
-                  <span>🅿️ PayPal Express</span>
+                  <span>PayPal Express</span>
                 </button>
               </div>
 
@@ -504,7 +504,7 @@ import {
                           <small class="verifying-hint">Consultando compensación en red bancaria (Libélula / Simple)</small>
                         </div>
                       </div>
-                      <span class="qr-fiscal-label">✓ QR FISCAL INTEROPERABLE &bull; ASOBAN</span>
+                      <span class="qr-fiscal-label">QR FISCAL INTEROPERABLE &bull; ASOBAN</span>
                     </div>
 
                     <!-- METADATOS Y BOTÓN DE VERIFICACIÓN -->
@@ -538,7 +538,7 @@ import {
                         class="btn-verify-qr-now"
                         [disabled]="isVerificandoPago || isSubmitting || cartItems.length === 0"
                         (click)="iniciarVerificacionQR()">
-                        <span *ngIf="!isVerificandoPago">🔄 Verificar Pago</span>
+                        <span *ngIf="!isVerificandoPago">Verificar Pago</span>
                         <span *ngIf="isVerificandoPago">
                           <span class="spinner-dot"></span> Verificando pago bancario... ({{ segundosRestantesQR }}s)
                         </span>
@@ -578,10 +578,10 @@ import {
                   <div class="paypal-checkout-layout">
                     <div class="paypal-header-row">
                       <div class="paypal-brand-title">
-                        <span class="paypal-logo-icon">🅿️</span>
+                        <span class="material-symbols-outlined paypal-logo-icon">payments</span>
                         <strong>PayPal Express Checkout</strong>
                       </div>
-                      <span class="paypal-secure-pill">🔒 Sandbox Internacional</span>
+                      <span class="paypal-secure-pill">Pasarela Internacional</span>
                     </div>
 
                     <p class="paypal-desc">
@@ -593,7 +593,7 @@ import {
                         <span class="conv-label">Monto en Moneda Local:</span>
                         <span class="conv-val">Bs. {{ totalFinal | number:'1.2-2' }}</span>
                       </div>
-                      <div class="conv-divider">➔</div>
+                      <div class="conv-divider">&rarr;</div>
                       <div class="conv-item">
                         <span class="conv-label">Total a Autorizar (T/C 6.96):</span>
                         <span class="conv-val font-bold gold-text font-lg">$ {{ (totalFinal / 6.96) | number:'1.2-2' }} USD</span>
@@ -612,7 +612,7 @@ import {
                       class="btn-paypal-main"
                       [disabled]="isSubmitting || cartItems.length === 0"
                       (click)="iniciarPagoPaypal()">
-                      <span>🅿️ Pagar con PayPal Express ($ {{ (totalFinal / 6.96) | number:'1.2-2' }} USD)</span>
+                      <span>Pagar con PayPal Express ($ {{ (totalFinal / 6.96) | number:'1.2-2' }} USD)</span>
                     </button>
                   </div>
                 </div>
@@ -647,8 +647,8 @@ import {
                 (click)="accionConfirmar()">
                 <span *ngIf="!isSubmitting && !isVerificandoPago">
                   <ng-container [ngSwitch]="pasarelaSeleccionada">
-                    <span *ngSwitchCase="'LIBELULA_BOLIVIA'">📱 VERIFICAR PAGO QR &bull; <span class="currency">Bs.</span> {{ totalFinal | number:'1.2-2' }}</span>
-                    <span *ngSwitchCase="'PAYPAL_EXPRESS'">🅿️ PAGAR CON PAYPAL &bull; $ {{ (totalFinal / 6.96) | number:'1.2-2' }} USD</span>
+                    <span *ngSwitchCase="'LIBELULA_BOLIVIA'">VERIFICAR PAGO QR &bull; <span class="currency">Bs.</span> {{ totalFinal | number:'1.2-2' }}</span>
+                    <span *ngSwitchCase="'PAYPAL_EXPRESS'">PAGAR CON PAYPAL &bull; $ {{ (totalFinal / 6.96) | number:'1.2-2' }} USD</span>
                     <span *ngSwitchDefault>CONFIRMAR CON STRIPE &bull; <span class="currency">Bs.</span> {{ totalFinal | number:'1.2-2' }}</span>
                   </ng-container>
                 </span>
@@ -661,9 +661,9 @@ import {
               </button>
 
               <div class="security-badges">
-                <span>🔒 Protocolo Seguro SSL/TLS</span>
-                <span>💎 Garantía de Alta Costura</span>
-                <span>📦 Trazabilidad de Despacho</span>
+                <span>Protocolo Seguro SSL/TLS</span>
+                <span>Garantía de Calce (RN07)</span>
+                <span>Trazabilidad de Despacho</span>
               </div>
             </div>
 
@@ -706,7 +706,7 @@ import {
               </div>
 
               <button type="button" class="btn-refresh" (click)="cargarPedidosTab()" [disabled]="isLoadingPedidos">
-                🔄 Refrescar
+                Actualizar
               </button>
             </div>
           </div>
@@ -736,7 +736,7 @@ import {
                     <div class="tracking-cell">
                       <span class="code-venta font-bold">#{{ v.codigo_venta }}</span>
                       <span class="tracking-num font-mono gold-text" *ngIf="v.envio">
-                        🚚 {{ v.envio.codigo_seguimiento }}
+                        {{ v.envio.codigo_seguimiento }}
                       </span>
                     </div>
                   </td>
@@ -775,14 +775,14 @@ import {
                         class="btn-row-action"
                         title="Ver Detalle"
                         (click)="abrirDetallePedido(v)">
-                        👁️ Detalle
+                        Ver Detalle
                       </button>
                       <button
                         type="button"
                         class="btn-row-action highlight"
                         *ngIf="authService.isStaff() && v.envio && v.envio.estado_envio !== 'ENTREGADO' && v.envio.estado_envio !== 'CANCELADO'"
                         (click)="abrirModalActualizarEstado(v)">
-                        ⚡ Avanzar Estado
+                        Avanzar Estado
                       </button>
                     </div>
                   </td>

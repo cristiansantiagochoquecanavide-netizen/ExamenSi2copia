@@ -5,6 +5,15 @@ import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { LoginRequest, TokenResponse, UsuarioResponse } from '../../features/usuarios/models/usuarios.models';
 
+export interface TenantInfo {
+  empresaId: number;
+  subdominio: string;
+  planCodigo: string;
+  nombreEmpresa: string;
+  permiteOffline: boolean;
+  permiteIa: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -18,6 +27,7 @@ export class AuthService {
 
   readonly currentUser = signal<UsuarioResponse | null>(this.getStoredUser());
   readonly isAuthenticated = signal<boolean>(!!this.getToken());
+  readonly currentTenant = signal<TenantInfo>(this.extractTenantFromToken());
 
   login(credentials: LoginRequest): Observable<TokenResponse> {
     return this.http.post<TokenResponse>(`${this.baseUrl}/login`, credentials).pipe(
@@ -64,12 +74,46 @@ export class AuthService {
   }
 
   isCliente(): boolean {
-    // Si no está autenticado o su rol es CLIENTE
     return !this.isStaff() || this.userRole === 'CLIENTE';
   }
 
   isStaff(): boolean {
     return this.isAdmin() || this.isEncargado() || this.isCajero();
+  }
+
+  extractTenantFromToken(): TenantInfo {
+    const token = this.getToken();
+    if (token) {
+      try {
+        const parts = token.split('.');
+        if (parts.length >= 2) {
+          const raw = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
+          const payload = JSON.parse(raw);
+          const empId = payload.empresa_id || (payload.email && payload.email.includes('urban') ? 2 : 1);
+          const sub = payload.subdominio || (empId === 2 ? 'urbanstyle' : 'elegance');
+          const plan = payload.plan_codigo || (empId === 2 ? 'BASICO' : 'INTERMEDIO');
+          const nom = empId === 2 ? 'Urban Style Trend Bolivia' : 'Elegance Boutique S.R.L.';
+          return {
+            empresaId: empId,
+            subdominio: sub,
+            planCodigo: plan,
+            nombreEmpresa: nom,
+            permiteOffline: !!payload.permite_offline,
+            permiteIa: !!payload.permite_ia
+          };
+        }
+      } catch (e) {
+        console.warn('Error al decodificar claims de tenant en token:', e);
+      }
+    }
+    return {
+      empresaId: 1,
+      subdominio: 'elegance',
+      planCodigo: 'INTERMEDIO',
+      nombreEmpresa: 'Elegance Boutique S.R.L.',
+      permiteOffline: true,
+      permiteIa: true
+    };
   }
 
   private getStoredUser(): UsuarioResponse | null {
@@ -87,6 +131,7 @@ export class AuthService {
     localStorage.setItem(this.USER_KEY, JSON.stringify(authResult.usuario));
     this.currentUser.set(authResult.usuario);
     this.isAuthenticated.set(true);
+    this.currentTenant.set(this.extractTenantFromToken());
   }
 
   private clearSession(): void {
@@ -94,5 +139,6 @@ export class AuthService {
     localStorage.removeItem(this.USER_KEY);
     this.currentUser.set(null);
     this.isAuthenticated.set(false);
+    this.currentTenant.set(this.extractTenantFromToken());
   }
 }

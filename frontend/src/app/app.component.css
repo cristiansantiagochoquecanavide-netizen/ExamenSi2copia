@@ -10,7 +10,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.25rem 2.5rem;
+  padding: 0.55rem 1.25rem;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   background-color: #ffffff;
   position: sticky;
@@ -18,28 +18,30 @@
   z-index: 1000;
   box-sizing: border-box;
   width: 100%;
+  gap: 0.75rem;
 }
 
 .brand-zone {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
-/* --- BOTÓN HAMBURGUESA MÓVIL (<= 992px) --- */
+/* --- BOTÓN HAMBURGUESA MÓVIL (<= 1180px) --- */
 .btn-hamburger {
-  display: none;
+  display: none !important;
   flex-direction: column;
   justify-content: space-around;
-  width: 38px;
-  height: 38px;
-  padding: 8px 7px;
+  width: 36px;
+  height: 36px;
+  padding: 7px 6px;
   background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.18);
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
   box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .btn-hamburger:hover {
@@ -72,8 +74,9 @@
   text-decoration: none;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   transition: opacity 0.2s ease;
+  flex-shrink: 0;
 }
 
 .logo-link:hover {
@@ -81,33 +84,34 @@
 }
 
 .brand-icon-svg {
-  height: 36px;
-  width: 42px;
+  height: 28px;
+  width: 34px;
   display: block;
   flex-shrink: 0;
 }
 
 .brand-title {
   font-family: 'Bodoni Moda', 'Playfair Display', 'Didot', Georgia, serif;
-  font-size: 1.55rem;
+  font-size: 1.25rem;
   font-weight: 600;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.12em;
   color: #000000;
   line-height: 1;
   text-transform: uppercase;
   display: inline-flex;
   align-items: center;
+  white-space: nowrap;
 }
 
 .brand-word-gap {
   display: inline-block;
-  width: 0.42em;
+  width: 0.38em;
 }
 
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.45rem;
 }
 
 .mobile-nav-header {
@@ -125,13 +129,13 @@
   border: none;
   border-bottom: 2px solid transparent;
   color: #4b5563;
-  font-size: 0.82rem;
-  letter-spacing: 0.08em;
+  font-size: 0.76rem;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  padding: 0.6rem 0.85rem;
+  padding: 0.45rem 0.65rem;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   cursor: pointer;
   font-weight: 600;
   transition: all 0.2s ease;
@@ -156,13 +160,13 @@
   border: none;
   border-bottom: 2px solid transparent;
   color: #4b5563;
-  font-size: 0.82rem;
-  letter-spacing: 0.08em;
+  font-size: 0.76rem;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  padding: 0.6rem 0.85rem;
+  padding: 0.45rem 0.65rem;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   cursor: pointer;
   font-weight: 600;
   transition: all 0.2s ease;
@@ -263,60 +267,67 @@
   color: #000000;
 }
 
-/* --- ZONA DE PERFIL Y AUTENTICACIÓN --- */
+/* --- ZONA DE PERFIL Y AUTENTICACIÓN (SIEMPRE VISIBLE) --- */
 .user-auth-zone {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
+  flex-shrink: 0 !important;
+  margin-left: auto;
 }
 
 .user-profile-box {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding-left: 0.75rem;
-  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  gap: 0.5rem;
+  padding-left: 0.6rem;
+  border-left: 1px solid rgba(0, 0, 0, 0.12);
+  flex-shrink: 0 !important;
 }
 
 .user-role-badge {
   background-color: #000000;
   color: #ffffff;
   font-size: 0.65rem;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   font-weight: 700;
-  padding: 0.25rem 0.6rem;
-  border-radius: 0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  white-space: nowrap;
 }
 
 .user-name {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #111111;
   font-weight: 600;
   letter-spacing: 0.02em;
-  max-width: 130px;
+  max-width: 95px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .btn-logout {
-  background: transparent;
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  color: #4b5563;
+  background: #000000;
+  border: 1px solid #000000;
+  color: #ffffff;
   font-size: 0.72rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: 700;
   padding: 0.35rem 0.75rem;
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .btn-logout:hover {
-  border-color: #000000;
-  color: #000000;
-  background-color: #f9fafb;
+  border-color: #dc2626;
+  background-color: #dc2626;
+  color: #ffffff;
 }
 
 .btn-login-nav {
@@ -398,38 +409,66 @@
 
 .main-content {
   flex: 1;
-  padding: 2rem 3rem;
+  padding: 1rem 1.25rem;
   background-color: #ffffff;
   width: 100%;
+  max-width: 100vw;
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 /* ==========================================================================
-   MEDIA QUERIES: RESPONSIVIDAD PARA TABLETS Y SMARTPHONES (<= 992px)
+   MEDIA QUERIES: MODO COMPACTO PARA ESCRITORIO (1181px a 1440px)
+   ========================================================================== */
+@media (min-width: 1181px) and (max-width: 1440px) {
+  .navbar {
+    padding: 0.45rem 0.85rem;
+    gap: 0.35rem;
+  }
+  .brand-title {
+    font-size: 1.15rem;
+    letter-spacing: 0.08em;
+  }
+  .dropdown-trigger,
+  .client-nav-link {
+    padding: 0.35rem 0.45rem;
+    font-size: 0.72rem;
+    gap: 3px;
+  }
+  .user-name {
+    display: none;
+  }
+  .tenant-pill-name {
+    max-width: 90px;
+  }
+}
+
+/* ==========================================================================
+   MEDIA QUERIES: RESPONSIVIDAD PARA TABLETS Y SMARTPHONES (<= 1180px)
    ========================================================================== */
 
-@media (max-width: 992px) {
+@media (max-width: 1180px) {
   .navbar {
-    padding: 0.75rem 1rem;
-    gap: 0.5rem;
+    padding: 0.45rem 0.65rem;
+    gap: 0.4rem;
   }
 
   .btn-hamburger {
-    display: flex;
+    display: flex !important;
   }
 
   .brand-zone {
-    gap: 0.65rem;
+    gap: 0.5rem;
   }
 
   .brand-icon-svg {
-    height: 28px;
-    width: 32px;
+    height: 24px;
+    width: 28px;
   }
 
   .brand-title {
-    font-size: 1.2rem;
-    letter-spacing: 0.12em;
+    font-size: 1.1rem;
+    letter-spacing: 0.08em;
   }
 
   /* Backdrop Oscuro Táctil */
@@ -453,11 +492,11 @@
 
   /* Drawer Menú Lateral Izquierdo */
   .nav-links {
-    display: none;
+    display: none !important;
   }
 
   .nav-links.mobile-open {
-    display: flex;
+    display: flex !important;
     flex-direction: column;
     align-items: stretch;
     position: fixed;
@@ -637,4 +676,77 @@
   .main-content {
     padding: 1rem 0.5rem;
   }
+}
+
+/* --- TENANT BADGE PILL & SAAS HEADER BUTTON --- */
+.nav-icon {
+  font-size: 15px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
+
+.tenant-badge-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+  padding: 0.3rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  flex-shrink: 0 !important;
+}
+.tenant-badge-pill:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+.tenant-badge-pill.tenant-urban {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #14532d;
+}
+.tenant-badge-pill.tenant-urban:hover {
+  background: #dcfce7;
+}
+.tenant-pill-icon {
+  font-size: 15px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  color: #475569;
+}
+.tenant-badge-pill.tenant-urban .tenant-pill-icon {
+  color: #166534;
+}
+.tenant-pill-name {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tenant-pill-plan {
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 0.64rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+.tenant-badge-pill.tenant-urban .tenant-pill-plan {
+  background: #166534;
+}
+.saas-header-btn {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  gap: 6px;
 }

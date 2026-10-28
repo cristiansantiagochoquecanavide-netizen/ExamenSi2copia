@@ -46,6 +46,7 @@ services:
       - ./backend/app:/app/app
       - ./backend/init_db.py:/app/init_db.py
       - ./backend/seed.py:/app/seed.py
+      - ./backend/database-schema.sql:/app/database-schema.sql
 
   frontend:
     build:

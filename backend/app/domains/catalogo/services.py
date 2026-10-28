@@ -257,7 +257,8 @@ class PrendaService:
         sucursal_id: Optional[int] = None,
         activo_solo: bool = True,
         limit: int = 50,
-        offset: int = 0
+        offset: int = 0,
+        empresa_id: Optional[int] = None
     ) -> List[Prenda]:
         query = select(Prenda).options(
             selectinload(Prenda.categoria),
@@ -269,6 +270,8 @@ class PrendaService:
             selectinload(Prenda.calificaciones)
         )
         filters = []
+        if empresa_id:
+            filters.append(Prenda.empresa_id == empresa_id)
         if activo_solo:
             filters.append(Prenda.activo == True)
         if categoria_id:
@@ -313,7 +316,7 @@ class PrendaService:
         return prenda
 
     @staticmethod
-    async def crear(db: AsyncSession, data: PrendaCreate, admin: Optional[Usuario] = None, ip: Optional[str] = None) -> Prenda:
+    async def crear(db: AsyncSession, data: PrendaCreate, admin: Optional[Usuario] = None, ip: Optional[str] = None, empresa_id: Optional[int] = None) -> Prenda:
         # Validar SKU unico (E1)
         dupl = await db.execute(select(Prenda).where(Prenda.sku == data.sku.upper()))
         if dupl.scalar_one_or_none():
@@ -325,6 +328,7 @@ class PrendaService:
         temp = await db.get(Temporada, data.temporada_id)
         if not temp: raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Temporada no existe")
 
+        emp_id = empresa_id or getattr(data, "empresa_id", None) or (admin.empresa_id if admin and admin.empresa_id else 1)
         prenda = Prenda(
             sku=data.sku.upper(),
             nombre=data.nombre,
@@ -332,6 +336,7 @@ class PrendaService:
             precio_base=float(data.precio_base),
             categoria_id=data.categoria_id,
             temporada_id=data.temporada_id,
+            empresa_id=emp_id,
             activo=data.activo if data.activo is not None else True
         )
         db.add(prenda)

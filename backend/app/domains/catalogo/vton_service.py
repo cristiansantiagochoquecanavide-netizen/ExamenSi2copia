@@ -18,7 +18,10 @@ from pathlib import Path
 from typing import Optional, Dict, Any, Tuple
 from PIL import Image, ImageFilter, ImageEnhance, ImageOps
 import numpy as np
-import cv2
+try:
+    import cv2
+except ImportError:
+    cv2 = None
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -166,9 +169,11 @@ class VtonService:
         Retorna (target_x, target_y, target_width, target_height) y calce_score.
         """
         h, w, _ = user_np.shape
-        gray = cv2.cvtColor(user_np, cv2.COLOR_RGB2GRAY)
-        face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
-        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=4, minSize=(35, 35))
+        faces = []
+        if cv2 is not None:
+            gray = cv2.cvtColor(user_np, cv2.COLOR_RGB2GRAY)
+            face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+            faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=4, minSize=(35, 35))
 
         if len(faces) > 0:
             # Usuario detectado con rostro

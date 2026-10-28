@@ -192,7 +192,8 @@ import {
                   class="btn-tts-speak"
                   [class.speaking]="isSpeaking()"
                   (click)="toggleTTSPlayback()">
-                  <span>{{ isSpeaking() ? '⏹ Detener Audio' : '🔊 Escuchar Síntesis IA' }}</span>
+                  <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">{{ isSpeaking() ? 'stop' : 'volume_up' }}</span>
+                  <span>{{ isSpeaking() ? 'Detener Audio' : 'Escuchar Síntesis IA' }}</span>
                 </button>
                 <button type="button" class="btn-close-analysis" (click)="cerrarAnalisisVoz()">&times;</button>
               </div>
@@ -615,7 +616,7 @@ import {
               </div>
 
               <div class="bi-ai-insight-box">
-                <span class="ai-sparkle-symbol">✨</span>
+                <span class="material-symbols-outlined ai-sparkle-symbol" style="font-size: 16px;">auto_awesome</span>
                 <span class="ai-insight-text">{{ financialData().mensaje_insight }}</span>
               </div>
             </div>

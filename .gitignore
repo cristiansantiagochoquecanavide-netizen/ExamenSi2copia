@@ -63,3 +63,5 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+*.apk

@@ -36,6 +36,9 @@ class UsuarioModel {
   final String estado;
   final int rolId;
   final int? sucursalId;
+  final int? empresaId;
+  final String? subdominio;
+  final String? planCodigo;
   final RolModel? rol;
 
   const UsuarioModel({
@@ -50,6 +53,9 @@ class UsuarioModel {
     required this.estado,
     required this.rolId,
     this.sucursalId,
+    this.empresaId,
+    this.subdominio,
+    this.planCodigo,
     this.rol,
   });
 
@@ -75,6 +81,9 @@ class UsuarioModel {
       estado: json['estado'] as String? ?? 'ACTIVO',
       rolId: json['rol_id'] as int? ?? 0,
       sucursalId: json['sucursal_id'] as int?,
+      empresaId: json['empresa_id'] as int? ?? json['empresaId'] as int?,
+      subdominio: json['subdominio'] as String?,
+      planCodigo: json['plan_codigo'] as String?,
       rol: json['rol'] != null ? RolModel.fromJson(json['rol'] as Map<String, dynamic>) : null,
     );
   }
@@ -91,6 +100,9 @@ class UsuarioModel {
         'estado': estado,
         'rol_id': rolId,
         'sucursal_id': sucursalId,
+        'empresa_id': empresaId,
+        'subdominio': subdominio,
+        'plan_codigo': planCodigo,
         'rol': rol?.toJson(),
       };
 }

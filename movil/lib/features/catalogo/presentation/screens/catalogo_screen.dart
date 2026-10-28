@@ -21,6 +21,9 @@ class _CatalogoScreenState extends State<CatalogoScreen> {
   String? _errorMessage;
 
   String _selectedSector = 'TODAS';
+  String _selectedPriceFilter = 'TODOS';
+  String? _tenantNombre;
+  String? _planCodigo;
   final List<String> _sectores = ['TODAS', 'MUJERES', 'HOMBRES', 'UNISEX'];
 
   @override
@@ -50,7 +53,15 @@ class _CatalogoScreenState extends State<CatalogoScreen> {
 
       if (mounted) {
         setState(() {
-          _prendas = prendas;
+          var filtered = prendas;
+          if (_selectedPriceFilter == 'MENOR_200') {
+            filtered = filtered.where((p) => p.precioBase < 200).toList();
+          } else if (_selectedPriceFilter == '200_400') {
+            filtered = filtered.where((p) => p.precioBase >= 200 && p.precioBase <= 400).toList();
+          } else if (_selectedPriceFilter == 'MAYOR_400') {
+            filtered = filtered.where((p) => p.precioBase > 400).toList();
+          }
+          _prendas = filtered;
           _isLoading = false;
         });
       }
@@ -128,6 +139,43 @@ class _CatalogoScreenState extends State<CatalogoScreen> {
                     ),
                     const SizedBox(height: 16),
 
+                    
+                    // Multi-tenant Active Badge (CU05)
+                    if (_tenantNombre != null)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: _tenantNombre!.contains('Urban') ? const Color(0xFFF0FDF4) : const Color(0xFFEEF2FF),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: _tenantNombre!.contains('Urban') ? const Color(0xFFBBF7D0) : const Color(0xFFC7D2FE),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.apartment,
+                              size: 14,
+                              color: _tenantNombre!.contains('Urban') ? const Color(0xFF166534) : const Color(0xFF3730A3),
+                            ),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                '$_tenantNombre • $_planCodigo',
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: _tenantNombre!.contains('Urban') ? const Color(0xFF166534) : const Color(0xFF3730A3),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
                     // Search Input
                     TextField(
                       controller: _searchController,
@@ -183,6 +231,47 @@ class _CatalogoScreenState extends State<CatalogoScreen> {
                                     fontWeight: FontWeight.w700,
                                     fontSize: 11,
                                     letterSpacing: 1.0,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // Price Filter Chips (CU07)
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          {'key': 'TODOS', 'label': 'Todos los precios'},
+                          {'key': 'MENOR_200', 'label': '< Bs. 200'},
+                          {'key': '200_400', 'label': 'Bs. 200 - 400'},
+                          {'key': 'MAYOR_400', 'label': '> Bs. 400'},
+                        ].map((pf) {
+                          final isSel = _selectedPriceFilter == pf['key'];
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 6.0),
+                            child: InkWell(
+                              onTap: () {
+                                setState(() {
+                                  _selectedPriceFilter = pf['key']!;
+                                });
+                                _loadPrendas();
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: isSel ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  pf['label']!,
+                                  style: TextStyle(
+                                    color: isSel ? Colors.white : const Color(0xFF475569),
+                                    fontSize: 10,
+                                    fontWeight: isSel ? FontWeight.w700 : FontWeight.w500,
                                   ),
                                 ),
                               ),

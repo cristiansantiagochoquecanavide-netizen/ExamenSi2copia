@@ -11,6 +11,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/usuarios/pages/login-page.component').then(m => m.LoginPageComponent)
   },
   {
+    path: 'saas',
+    loadComponent: () => import('./features/saas/pages/saas-page.component').then(m => m.SaasPageComponent)
+  },
+  {
     path: 'usuarios',
     loadChildren: () => import('./features/usuarios/usuarios.routes').then(m => m.USUARIOS_ROUTES)
   },

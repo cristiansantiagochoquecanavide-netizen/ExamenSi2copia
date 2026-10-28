@@ -55,6 +55,7 @@ class Usuario(Base):
     estado: Mapped[str] = mapped_column(String(20), default="ACTIVO", nullable=False)  # ACTIVO, INACTIVO, BLOQUEADO
     rol_id: Mapped[int] = mapped_column(Integer, ForeignKey("roles.id"), nullable=False)
     sucursal_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # Vinculacion a sucursal si es personal
+    empresa_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, index=True)  # Tenant ID
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
@@ -89,6 +90,7 @@ class BitacoraAuditoria(Base):
     usuario_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     usuario_email: Mapped[Optional[str]] = mapped_column(String(150), nullable=True)
     ip_address: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    empresa_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, index=True)
     accion: Mapped[str] = mapped_column(String(50), index=True, nullable=False)
     modulo: Mapped[str] = mapped_column(String(50), index=True, nullable=False)
     detalle: Mapped[str] = mapped_column(Text, nullable=False)

@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.domains.usuarios.models import Usuario
+from app.core.tenant import get_optional_tenant_context, TenantContext
 from app.domains.usuarios.routers import get_current_user, get_optional_current_user, require_permissions
 from app.domains.catalogo.schemas import (
     CategoriaCreate, CategoriaUpdate, CategoriaResponse,
@@ -184,19 +185,23 @@ async def listar_prendas(
     activo_solo: bool = True,
     limit: int = 50,
     offset: int = 0,
+    tenant: Optional[TenantContext] = Depends(get_optional_tenant_context),
     db: AsyncSession = Depends(get_db)
 ):
-    return await PrendaService.listar(db, categoria_id, temporada_id, sector, sucursal_id, activo_solo, limit, offset)
+    empresa_id = tenant.empresa_id if tenant else None
+    return await PrendaService.listar(db, categoria_id, temporada_id, sector, sucursal_id, activo_solo, limit, offset, empresa_id)
 
 @router.post("/prendas", response_model=PrendaResponse, status_code=status.HTTP_201_CREATED, summary="Registrar Prenda en Catalogo (CU6)")
 async def crear_prenda(
     data: PrendaCreate,
     request: Request,
     current_user: Usuario = Depends(require_permissions("catalogo:write")),
+    tenant: Optional[TenantContext] = Depends(get_optional_tenant_context),
     db: AsyncSession = Depends(get_db)
 ):
     ip = request.client.host if request.client else None
-    return await PrendaService.crear(db, data, current_user, ip)
+    empresa_id = getattr(data, "empresa_id", None) or (tenant.empresa_id if tenant else (current_user.empresa_id if current_user else 1))
+    return await PrendaService.crear(db, data, current_user, ip, empresa_id)
 
 @router.get("/prendas/{prenda_id}", response_model=PrendaResponse, summary="Detalle de Prenda (CU6)")
 async def obtener_prenda(prenda_id: int, db: AsyncSession = Depends(get_db)):

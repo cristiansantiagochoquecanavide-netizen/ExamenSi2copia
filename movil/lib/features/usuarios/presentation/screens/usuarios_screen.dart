@@ -211,6 +211,7 @@ class _UsuariosScreenState extends State<UsuariosScreen> {
                   _buildRoleChip('Encargado', 'ENCARGADO'),
                   _buildRoleChip('Cajero', 'CAJERO'),
                   _buildRoleChip('Cliente', 'CLIENTE'),
+                  _buildRoleChip('Tenant 2 (Urban)', 'TENANT2'),
                 ],
               ),
             ],
@@ -452,6 +453,112 @@ class _UsuariosScreenState extends State<UsuariosScreen> {
           ),
         ),
         const SizedBox(height: 28),
+
+        // CU03: Estado de Cuenta y Suscripción SaaS Multi-Tenant
+        Container(
+          margin: const EdgeInsets.only(bottom: 20),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: user.subdominio == 'urbanstyle' ? const Color(0xFFF0FDF4) : const Color(0xFFF8FAFC),
+            border: Border.all(
+              color: user.subdominio == 'urbanstyle' ? const Color(0xFFBBF7D0) : const Color(0xFFCBD5E1),
+            ),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'SUSCRIPCIÓN & ESTADO SAAS',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.8,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF15803D),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Text(
+                      'ACTIVA',
+                      style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                user.subdominio == 'urbanstyle' ? 'Urban Style Trend Bolivia' : 'Elegance Boutique S.R.L.',
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Subdominio: ${user.subdominio ?? "elegance"}.fashionstore.bo',
+                style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+              ),
+              const Divider(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Plan Contratado:', style: TextStyle(fontSize: 12)),
+                  Text(
+                    user.planCodigo ?? 'INTERMEDIO',
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Cuota de Sucursales:', style: TextStyle(fontSize: 12)),
+                  Text(
+                    user.planCodigo == 'BASICO' ? 'Máx. 2 sucursales' : 'Máx. 10 sucursales',
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Soporte Modo Offline:', style: TextStyle(fontSize: 12)),
+                  Text(
+                    user.planCodigo == 'BASICO' ? 'No incluido' : 'Habilitado (SQLite)',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: user.planCodigo == 'BASICO' ? Colors.grey : const Color(0xFF15803D),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF1F2),
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: const Color(0xFFFECDD3)),
+                ),
+                child: const Text(
+                  'Política de Garantía (RN07): 7 días para cambio de prenda por talla. Estrictamente sin reembolso de dinero.',
+                  style: TextStyle(fontSize: 10, color: Color(0xFF9F1239)),
+                ),
+              ),
+            ],
+          ),
+        ),
 
         // User Info Details Card
         Container(

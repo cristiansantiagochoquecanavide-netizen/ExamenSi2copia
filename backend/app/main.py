@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
+from app.core.tenant import TenantIsolationMiddleware
 from app.domains.usuarios.routers import router as usuarios_router
 from app.domains.catalogo.routers import router as catalogo_router
 from app.domains.inventario.routers import router as inventario_router
@@ -11,6 +12,7 @@ from app.domains.ventas.routers import router as ventas_router
 from app.domains.ia_asistente.routers import router as ia_asistente_router
 from app.domains.notificaciones.routers import router as notificaciones_router
 from app.domains.reportes.routers import router as reportes_router
+from app.domains.saas.routers import router as saas_router
 
 
 @asynccontextmanager
@@ -24,6 +26,7 @@ async def lifespan(app: FastAPI):
     import app.domains.reservas.models
     import app.domains.ia_asistente.models
     import app.domains.notificaciones.models
+    import app.domains.saas.models
     try:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
@@ -42,6 +45,9 @@ app = FastAPI(
     redoc_url="/redoc",
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
+
+# Middleware de aislamiento Multitenant (SaaS)
+app.add_middleware(TenantIsolationMiddleware)
 
 # Configuracion CORS para aplicaciones Web (Angular) y Movil (Flutter)
 app.add_middleware(
@@ -70,6 +76,7 @@ os.makedirs(uploads_nobg_dir, exist_ok=True)
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # Registro centralizado de enrutadores por dominio de negocio
+app.include_router(saas_router, prefix=settings.API_V1_STR)
 app.include_router(usuarios_router, prefix=settings.API_V1_STR)
 app.include_router(catalogo_router, prefix=settings.API_V1_STR)
 app.include_router(inventario_router, prefix=settings.API_V1_STR)

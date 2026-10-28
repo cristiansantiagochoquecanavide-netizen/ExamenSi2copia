@@ -16,17 +16,147 @@ from app.domains.catalogo.models import (
     InventarioStock, MovimientoInventario
 )
 
+async def seed_saas_multitenant(session: AsyncSession):
+    print("--> Configurando Plataforma SaaS Multitenant, Planes y Tenants...")
+    from app.domains.saas.models import PlanSuscripcion, Empresa, Suscripcion, PoliticaGarantia, GuiaMedida
+    from decimal import Decimal
+    from datetime import timedelta
+
+    # Planes
+    planes_seed = [
+        ("BASICO", "Plan Básico Emprendedor", "Hasta 2 sucursales, catálogo y ventas estándar.", Decimal("29.99"), 2, False, False),
+        ("INTERMEDIO", "Plan Profesional Multitienda", "Hasta 10 sucursales, PWA/Móvil offline y reportes.", Decimal("79.99"), 10, True, True),
+        ("VIP", "Plan Corporativo VIP", "Sucursales ilimitadas, IA generativa y ML analítico.", Decimal("199.99"), 999, True, True),
+    ]
+    planes_dict = {}
+    for cod, nom, desc, prec, lim, ia, off in planes_seed:
+        pl_ex = (await session.execute(select(PlanSuscripcion).where(PlanSuscripcion.codigo == cod))).scalar_one_or_none()
+        if not pl_ex:
+            pl_ex = PlanSuscripcion(
+                codigo=cod, nombre=nom, descripcion=desc, precio_mensual=prec,
+                limite_sucursales=lim, permite_ia=ia, permite_offline=off, activo=True
+            )
+            session.add(pl_ex)
+            await session.flush()
+        planes_dict[cod] = pl_ex
+
+    # Empresas (Tenants)
+    emp1 = (await session.execute(select(Empresa).where(Empresa.subdominio == "elegance"))).scalar_one_or_none()
+    if not emp1:
+        emp1 = Empresa(
+            razon_social="Elegance Boutique S.R.L.", nit="1029384756", subdominio="elegance",
+            email_corporativo="contacto@eleganceboutique.com", telefono="+591-70012345",
+            direccion_fiscal="Av. San Martín #450, Santa Cruz", activo=True
+        )
+        session.add(emp1)
+        await session.flush()
+
+    emp2 = (await session.execute(select(Empresa).where(Empresa.subdominio == "urbanstyle"))).scalar_one_or_none()
+    if not emp2:
+        emp2 = Empresa(
+            razon_social="Urban Style Trend Bolivia", nit="9876543210", subdominio="urbanstyle",
+            email_corporativo="gerencia@urbanstyle.bo", telefono="+591-71098765",
+            direccion_fiscal="Calle 21 de Calacoto #102, La Paz", activo=True
+        )
+        session.add(emp2)
+        await session.flush()
+
+    # Suscripciones
+    sub1 = (await session.execute(select(Suscripcion).where(Suscripcion.empresa_id == emp1.id))).scalar_one_or_none()
+    if not sub1:
+        session.add(Suscripcion(
+            empresa_id=emp1.id, plan_id=planes_dict["INTERMEDIO"].id,
+            fecha_inicio=date.today(), fecha_fin=date.today() + timedelta(days=365),
+            estado="ACTIVA", monto_pago=planes_dict["INTERMEDIO"].precio_mensual * 12, renovacion_automatica=True
+        ))
+
+    sub2 = (await session.execute(select(Suscripcion).where(Suscripcion.empresa_id == emp2.id))).scalar_one_or_none()
+    if not sub2:
+        session.add(Suscripcion(
+            empresa_id=emp2.id, plan_id=planes_dict["BASICO"].id,
+            fecha_inicio=date.today(), fecha_fin=date.today() + timedelta(days=365),
+            estado="ACTIVA", monto_pago=planes_dict["BASICO"].precio_mensual * 12, renovacion_automatica=True
+        ))
+
+    # Políticas de Garantía (RN07: admite_reembolso_dinero = False)
+    for emp in [emp1, emp2]:
+        pol_ex = (await session.execute(select(PoliticaGarantia).where(PoliticaGarantia.empresa_id == emp.id))).scalar_one_or_none()
+        if not pol_ex:
+            session.add(PoliticaGarantia(
+                empresa_id=emp.id, plazo_dias_cambio=7, permite_cambio_talla=True,
+                admite_reembolso_dinero=False, requiere_etiqueta_original=True, activo=True
+            ))
+
+    # Usuario Administrador para Tenant 2 (Urban Style Trend Bolivia)
+    u_urban = (await session.execute(select(Usuario).where(Usuario.email == "gerencia@urbanstyle.bo"))).scalar_one_or_none()
+    if not u_urban:
+        admin_rol = (await session.execute(select(Rol).where(Rol.nombre == "ADMINISTRADOR"))).scalar_one_or_none()
+        if admin_rol:
+            u_urban = Usuario(
+                email="gerencia@urbanstyle.bo",
+                password_hash=hash_password("Password123!"),
+                nombre="Gerente Urban",
+                apellido="Style",
+                ci_nit="98765432",
+                telefono="+591 71098765",
+                direccion="Calle 21 de Calacoto #102, La Paz",
+                tipo_usuario="PERSONAL",
+                estado="ACTIVO",
+                rol_id=admin_rol.id,
+                empresa_id=emp2.id,
+                sucursal_id=None
+            )
+            session.add(u_urban)
+
+    # Sucursal base para Tenant 2 (Urban Style)
+    suc_urban = (await session.execute(select(Sucursal).where(Sucursal.empresa_id == emp2.id))).scalar_one_or_none()
+    if not suc_urban:
+        suc_urban = Sucursal(
+            empresa_id=emp2.id,
+            nombre="Sucursal Calacoto Urban",
+            direccion="Calle 21 de Calacoto #102",
+            telefono="+591 71098765",
+            horario_atencion="09:00 - 20:00",
+            capacidad_probadores=4,
+            ciudad_id=2,
+            activo=True
+        )
+        session.add(suc_urban)
+
+    # Asociar usuarios, sucursales y prendas base a Tenant 1 (Elegance)
+    usr_update = await session.execute(select(Usuario).where(Usuario.empresa_id == None))
+    for u in usr_update.scalars().all():
+        u.empresa_id = emp1.id
+
+    suc_update = await session.execute(select(Sucursal).where(Sucursal.empresa_id == None))
+    for s in suc_update.scalars().all():
+        s.empresa_id = emp1.id
+
+    prn_update = await session.execute(select(Prenda).where(Prenda.empresa_id == None))
+    for p in prn_update.scalars().all():
+        p.empresa_id = emp1.id
+
+    await session.commit()
+
+
 async def run_seed():
     print("=========================================================")
     print("  INICIANDO SEED DE BASE DE DATOS - FASHIONSTORE (CICLO 1)")
     print("=========================================================")
 
     async with async_session_factory() as session:
-        # Verificación rápida: si el catálogo real ya está cargado en PostgreSQL, omitir seed para arranque ultrarrápido (<0.1s)
+        # Verificación rápida: si el catálogo y el SaaS multitenant ya están cargados, omitir
         if not os.getenv("FORCE_SEED"):
             prenda_existente = (await session.execute(select(Prenda).where(Prenda.sku == "NOIR-6647"))).scalar_one_or_none()
             if prenda_existente:
-                print("--> [SEED] Base de datos ya sembrada previamente (Prenda real NOIR-6647 detectada). Omitiendo seed para arranque instantáneo.")
+                from app.domains.saas.models import PlanSuscripcion
+                plan_ex = (await session.execute(select(PlanSuscripcion).where(PlanSuscripcion.codigo == "BASICO"))).scalar_one_or_none()
+                if plan_ex:
+                    print("--> [SEED] Base de datos y módulo SaaS ya sembrados previamente. Arranque instantáneo.")
+                    return
+                print("--> [SEED] Catálogo existente detectado. Procediendo a inicializar módulo SaaS Multitenant...")
+                await seed_saas_multitenant(session)
+                print("--> [SEED] Módulo SaaS inicializado con éxito sobre base de datos existente.")
                 return
 
         # 1. PERMISOS RBAC
@@ -624,6 +754,128 @@ async def run_seed():
             await seed_reviews()
         except Exception as e_rev:
             print(f"--> Nota en seed_reviews: {e_rev}")
+
+        # 10. SAAS MULTITENANT (2DO PARCIAL - PRESENTACIÓN 1)
+        print("--> 10. Configurando Plataforma SaaS Multitenant, Planes y Tenants...")
+        from app.domains.saas.models import PlanSuscripcion, Empresa, Suscripcion, PoliticaGarantia, GuiaMedida
+        from decimal import Decimal
+        from datetime import timedelta
+
+        # Planes
+        planes_seed = [
+            ("BASICO", "Plan Básico Emprendedor", "Hasta 2 sucursales, catálogo y ventas estándar.", Decimal("29.99"), 2, False, False),
+            ("INTERMEDIO", "Plan Profesional Multitienda", "Hasta 10 sucursales, PWA/Móvil offline y reportes.", Decimal("79.99"), 10, True, True),
+            ("VIP", "Plan Corporativo VIP", "Sucursales ilimitadas, IA generativa y ML analítico.", Decimal("199.99"), 999, True, True),
+        ]
+        planes_dict = {}
+        for cod, nom, desc, prec, lim, ia, off in planes_seed:
+            pl_ex = (await session.execute(select(PlanSuscripcion).where(PlanSuscripcion.codigo == cod))).scalar_one_or_none()
+            if not pl_ex:
+                pl_ex = PlanSuscripcion(
+                    codigo=cod, nombre=nom, descripcion=desc, precio_mensual=prec,
+                    limite_sucursales=lim, permite_ia=ia, permite_offline=off, activo=True
+                )
+                session.add(pl_ex)
+                await session.flush()
+            planes_dict[cod] = pl_ex
+
+        # Empresas (Tenants)
+        emp1 = (await session.execute(select(Empresa).where(Empresa.subdominio == "elegance"))).scalar_one_or_none()
+        if not emp1:
+            emp1 = Empresa(
+                razon_social="Elegance Boutique S.R.L.", nit="1029384756", subdominio="elegance",
+                email_corporativo="contacto@eleganceboutique.com", telefono="+591-70012345",
+                direccion_fiscal="Av. San Martín #450, Santa Cruz", activo=True
+            )
+            session.add(emp1)
+            await session.flush()
+
+        emp2 = (await session.execute(select(Empresa).where(Empresa.subdominio == "urbanstyle"))).scalar_one_or_none()
+        if not emp2:
+            emp2 = Empresa(
+                razon_social="Urban Style Trend Bolivia", nit="9876543210", subdominio="urbanstyle",
+                email_corporativo="gerencia@urbanstyle.bo", telefono="+591-71098765",
+                direccion_fiscal="Calle 21 de Calacoto #102, La Paz", activo=True
+            )
+            session.add(emp2)
+            await session.flush()
+
+        # Suscripciones
+        sub1 = (await session.execute(select(Suscripcion).where(Suscripcion.empresa_id == emp1.id))).scalar_one_or_none()
+        if not sub1:
+            session.add(Suscripcion(
+                empresa_id=emp1.id, plan_id=planes_dict["INTERMEDIO"].id,
+                fecha_inicio=date.today(), fecha_fin=date.today() + timedelta(days=365),
+                estado="ACTIVA", monto_pago=planes_dict["INTERMEDIO"].precio_mensual * 12, renovacion_automatica=True
+            ))
+
+        sub2 = (await session.execute(select(Suscripcion).where(Suscripcion.empresa_id == emp2.id))).scalar_one_or_none()
+        if not sub2:
+            session.add(Suscripcion(
+                empresa_id=emp2.id, plan_id=planes_dict["BASICO"].id,
+                fecha_inicio=date.today(), fecha_fin=date.today() + timedelta(days=365),
+                estado="ACTIVA", monto_pago=planes_dict["BASICO"].precio_mensual * 12, renovacion_automatica=True
+            ))
+
+        # Políticas de Garantía (RN07: admite_reembolso_dinero = False)
+        for emp in [emp1, emp2]:
+            pol_ex = (await session.execute(select(PoliticaGarantia).where(PoliticaGarantia.empresa_id == emp.id))).scalar_one_or_none()
+            if not pol_ex:
+                session.add(PoliticaGarantia(
+                    empresa_id=emp.id, plazo_dias_cambio=7, permite_cambio_talla=True,
+                    admite_reembolso_dinero=False, requiere_etiqueta_original=True, activo=True
+                ))
+
+        # Usuario Administrador para Tenant 2 (Urban Style Trend Bolivia)
+    u_urban = (await session.execute(select(Usuario).where(Usuario.email == "gerencia@urbanstyle.bo"))).scalar_one_or_none()
+    if not u_urban:
+        admin_rol = (await session.execute(select(Rol).where(Rol.nombre == "ADMINISTRADOR"))).scalar_one_or_none()
+        if admin_rol:
+            u_urban = Usuario(
+                email="gerencia@urbanstyle.bo",
+                password_hash=hash_password("Password123!"),
+                nombre="Gerente Urban",
+                apellido="Style",
+                ci_nit="98765432",
+                telefono="+591 71098765",
+                direccion="Calle 21 de Calacoto #102, La Paz",
+                tipo_usuario="PERSONAL",
+                estado="ACTIVO",
+                rol_id=admin_rol.id,
+                empresa_id=emp2.id,
+                sucursal_id=None
+            )
+            session.add(u_urban)
+
+    # Sucursal base para Tenant 2 (Urban Style)
+    suc_urban = (await session.execute(select(Sucursal).where(Sucursal.empresa_id == emp2.id))).scalar_one_or_none()
+    if not suc_urban:
+        suc_urban = Sucursal(
+            empresa_id=emp2.id,
+            nombre="Sucursal Calacoto Urban",
+            direccion="Calle 21 de Calacoto #102",
+            telefono="+591 71098765",
+            horario_atencion="09:00 - 20:00",
+            capacidad_probadores=4,
+            ciudad_id=2,
+            activo=True
+        )
+        session.add(suc_urban)
+
+    # Asociar usuarios, sucursales y prendas base a Tenant 1 (Elegance)
+        usr_update = await session.execute(select(Usuario).where(Usuario.empresa_id == None))
+        for u in usr_update.scalars().all():
+            u.empresa_id = emp1.id
+
+        suc_update = await session.execute(select(Sucursal).where(Sucursal.empresa_id == None))
+        for s in suc_update.scalars().all():
+            s.empresa_id = emp1.id
+
+        prn_update = await session.execute(select(Prenda).where(Prenda.empresa_id == None))
+        for p in prn_update.scalars().all():
+            p.empresa_id = emp1.id
+
+        await session.commit()
         print("=========================================================")
         print("  SEED EJECUTADO EXITOSAMENTE!")
         print("  Credenciales de acceso:")

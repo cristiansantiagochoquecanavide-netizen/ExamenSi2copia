@@ -26,6 +26,7 @@ import { Sucursal } from '../../inventario/models/inventario.models';
 import { IaAsistenteService } from '../../ia-asistente/services/ia-asistente.service';
 import { OutfitSugerido } from '../../ia-asistente/models/ia-asistente.models';
 import { CartService } from '../../ventas/services/cart.service';
+import { SaasService } from '../../../core/services/saas.service';
 
 
 @Component({
@@ -46,7 +47,7 @@ import { CartService } from '../../ventas/services/cart.service';
             Sastrería contemporánea, siluetas desestructuradas y tecnología de Realidad Aumentada (AR) con modelos 3D (.glb / .usdz) para probadores virtuales y control de inventario por sucursal.
           </p>
           <div class="hero-ia-banner" (click)="irAEstilistaIA()">
-            <span class="hero-ia-chip">✦ ATELIER IA</span>
+            <span class="hero-ia-chip"><span class="material-symbols-outlined hero-ia-icon">auto_awesome</span> ATELIER IA</span>
             <span class="hero-ia-text">¿Buscás asesoramiento exclusivo? Descubrí recomendaciones hiperpersonalizadas y looks completos coordinados.</span>
             <span class="hero-ia-link">Probar Atelier Stylist &rarr;</span>
           </div>
@@ -147,7 +148,7 @@ import { CartService } from '../../ventas/services/cart.service';
         <div class="action-buttons-group">
           @if (authService.isStaff()) {
             <button type="button" class="btn-action-gold" (click)="router.navigate(['/catalogo/gestion'])">
-              ⚙ GESTIONAR PRENDAS
+              GESTIONAR PRENDAS
             </button>
             <button type="button" class="btn-action-outline" (click)="router.navigate(['/catalogo/gestion'])">
               + AÑADIR PRENDA
@@ -246,7 +247,7 @@ import { CartService } from '../../ventas/services/cart.service';
                   <div class="rating-strip" (click)="openDetail(prenda, 'resenas'); $event.stopPropagation()" title="Ver opiniones de clientes">
                     <span class="stars-gold">
                       @for (star of getStarIcons(prenda.rating_promedio || 0); track $index) {
-                        <span [class.star-filled]="star === '★'" [class.star-empty]="star === '☆'">{{ star }}</span>
+                        <span class="material-symbols-outlined rating-star-symbol" [class.star-filled]="star === 'star'" [class.star-empty]="star === 'star_border'">{{ star }}</span>
                       }
                     </span>
                     <span class="rating-num">{{ (prenda.rating_promedio || 0) | number:'1.1-1' }}</span>
@@ -317,22 +318,30 @@ import { CartService } from '../../ventas/services/cart.service';
                 class="modal-tab-btn" 
                 [class.active]="activeModalTab() === 'info'" 
                 (click)="activeModalTab.set('info')">
-                <span class="tab-icon">&diams;</span> INFORMACIÓN &bull; AR 3D
+                <span class="material-symbols-outlined tab-icon">info</span> INFORMACIÓN &bull; AR 3D
               </button>
               <button 
                 type="button" 
                 class="modal-tab-btn" 
                 [class.active]="activeModalTab() === 'resenas'" 
                 (click)="activeModalTab.set('resenas')">
-                <span class="tab-icon">★</span> RESEÑAS &bull; OPINIONES ({{ califEstadisticas()?.total_resenas || prenda.total_resenas || 0 }})
+                <span class="material-symbols-outlined tab-icon">rate_review</span> RESEÑAS &bull; OPINIONES ({{ califEstadisticas()?.total_resenas || prenda.total_resenas || 0 }})
               </button>
               <button 
                 type="button" 
                 class="modal-tab-btn" 
                 [class.active]="activeModalTab() === 'look'" 
                 (click)="abrirTabLook(prenda.id)">
-                <span class="tab-icon">✦</span> COMPLETA TU LOOK (IA)
+                <span class="material-symbols-outlined tab-icon">auto_awesome</span> COMPLETA TU LOOK (IA)
               </button>
+              <button 
+                type="button" 
+                class="modal-tab-btn" 
+                [class.active]="activeModalTab() === 'medidas'" 
+                (click)="abrirTabMedidas(prenda.id)">
+                <span class="material-symbols-outlined tab-icon">straighten</span> GUÍA DE MEDIDAS (CM)
+              </button>
+
             </div>
 
             <!-- TAB 1: INFORMACIÓN Y 3D AR -->
@@ -569,35 +578,35 @@ import { CartService } from '../../ventas/services/cart.service';
                   <!-- Desglose por Estrellas (Barras de distribución) -->
                   <div class="stats-col-bars">
                     <div class="breakdown-row">
-                      <span class="bar-label">5 ★</span>
+                      <span class="bar-label">5 Estrellas</span>
                       <div class="bar-track">
                         <div class="bar-fill" [style.width.%]="getPercentage(califEstadisticas()?.desglose_estrellas?.estrellas_5 || 0, califEstadisticas()?.total_resenas || 0)"></div>
                       </div>
                       <span class="bar-count">{{ califEstadisticas()?.desglose_estrellas?.estrellas_5 || 0 }}</span>
                     </div>
                     <div class="breakdown-row">
-                      <span class="bar-label">4 ★</span>
+                      <span class="bar-label">4 Estrellas</span>
                       <div class="bar-track">
                         <div class="bar-fill" [style.width.%]="getPercentage(califEstadisticas()?.desglose_estrellas?.estrellas_4 || 0, califEstadisticas()?.total_resenas || 0)"></div>
                       </div>
                       <span class="bar-count">{{ califEstadisticas()?.desglose_estrellas?.estrellas_4 || 0 }}</span>
                     </div>
                     <div class="breakdown-row">
-                      <span class="bar-label">3 ★</span>
+                      <span class="bar-label">3 Estrellas</span>
                       <div class="bar-track">
                         <div class="bar-fill" [style.width.%]="getPercentage(califEstadisticas()?.desglose_estrellas?.estrellas_3 || 0, califEstadisticas()?.total_resenas || 0)"></div>
                       </div>
                       <span class="bar-count">{{ califEstadisticas()?.desglose_estrellas?.estrellas_3 || 0 }}</span>
                     </div>
                     <div class="breakdown-row">
-                      <span class="bar-label">2 ★</span>
+                      <span class="bar-label">2 Estrellas</span>
                       <div class="bar-track">
                         <div class="bar-fill" [style.width.%]="getPercentage(califEstadisticas()?.desglose_estrellas?.estrellas_2 || 0, califEstadisticas()?.total_resenas || 0)"></div>
                       </div>
                       <span class="bar-count">{{ califEstadisticas()?.desglose_estrellas?.estrellas_2 || 0 }}</span>
                     </div>
                     <div class="breakdown-row">
-                      <span class="bar-label">1 ★</span>
+                      <span class="bar-label">1 Estrella</span>
                       <div class="bar-track">
                         <div class="bar-fill" [style.width.%]="getPercentage(califEstadisticas()?.desglose_estrellas?.estrellas_1 || 0, califEstadisticas()?.total_resenas || 0)"></div>
                       </div>
@@ -721,7 +730,7 @@ import { CartService } from '../../ventas/services/cart.service';
                                   (mouseenter)="hoverEstrellas.set(num)"
                                   (mouseleave)="hoverEstrellas.set(0)"
                                   (click)="nuevaCalificacion.puntuacion = num">
-                                  ★
+                                  <span class="material-symbols-outlined" style="font-size: 18px;">star</span>
                                 </button>
                               }
                               <span class="star-rating-text">{{ getRatingLabel(nuevaCalificacion.puntuacion) }}</span>
@@ -883,7 +892,7 @@ import { CartService } from '../../ventas/services/cart.service';
                     <div class="look-coordination-panel">
                       <div class="look-coordination-header">
                         <div class="look-header-titles">
-                          <span class="look-badge-gold">✦ SUGERENCIA DE ESTILISMO &bull; {{ outfit.match_score }}% MATCH</span>
+                          <span class="look-badge-gold"><span class="material-symbols-outlined" style="font-size: 13px; vertical-align: middle;">auto_awesome</span> SUGERENCIA DE ESTILISMO &bull; {{ outfit.match_score }}% MATCH</span>
                           <h3 class="look-panel-title">{{ outfit.nombre_look }}</h3>
                           <p class="look-panel-desc">{{ outfit.descripcion_estilo }}</p>
                         </div>
@@ -1093,17 +1102,18 @@ import { CartService } from '../../ventas/services/cart.service';
   `,
   styles: [`
     .catalogo-container {
-      max-width: 1400px;
+      max-width: 100%;
       margin: 0 auto;
-      padding: 2.5rem 3rem 4rem 3rem;
+      padding: 0.75rem 0.5rem 3rem;
       color: #111111;
       background-color: #ffffff;
+      box-sizing: border-box;
     }
 
     .editorial-hero {
-      padding: 0 0 2.5rem 0;
+      padding: 0 0 1.25rem 0;
       border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-      margin-bottom: 2rem;
+      margin-bottom: 1.25rem;
     }
 
     .editorial-eyebrow {
@@ -1111,11 +1121,11 @@ import { CartService } from '../../ventas/services/cart.service';
       align-items: center;
       gap: 0.5rem;
       font-size: 0.72rem;
-      letter-spacing: 0.25em;
+      letter-spacing: 0.2em;
       color: #374151;
       font-weight: 700;
       text-transform: uppercase;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.5rem;
     }
 
     .gold-dot {
@@ -1124,20 +1134,20 @@ import { CartService } from '../../ventas/services/cart.service';
 
     .hero-title {
       font-family: 'Inter', sans-serif;
-      font-size: 2.5rem;
+      font-size: 1.75rem;
       font-weight: 800;
       letter-spacing: -0.02em;
-      margin: 0 0 0.75rem 0;
+      margin: 0 0 0.35rem 0;
       color: #000000;
     }
 
     .hero-description {
       font-family: 'Inter', sans-serif;
-      font-size: 0.95rem;
+      font-size: 0.88rem;
       color: #4b5563;
       max-width: 800px;
-      line-height: 1.6;
-      margin-bottom: 2rem;
+      line-height: 1.4;
+      margin-bottom: 1.25rem;
     }
 
     /* CONTROLES DEL CATÁLOGO: 2 FILAS FIEL AL MOCKUP APROBADO (STICKY TOOLBAR) */
@@ -3786,6 +3796,99 @@ import { CartService } from '../../ventas/services/cart.service';
         padding-bottom: 1rem !important;
       }
     }
+  
+    .modal-medidas-view {
+      padding: 1.75rem;
+      background: #ffffff;
+    }
+    .medidas-header {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .medidas-icon-badge {
+      font-size: 2rem;
+      background: #f8fafc;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+    .medidas-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin: 0 0 0.25rem;
+    }
+    .medidas-subtitle {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin: 0;
+    }
+    .medidas-table-wrapper {
+      overflow-x: auto;
+      margin-bottom: 1.5rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .medidas-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    .medidas-table th {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .medidas-table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.9rem;
+    }
+    .talla-col strong {
+      background: #f1f5f9;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 800;
+    }
+    .fit-tag {
+      background: #fef3c7;
+      color: #92400e;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+    }
+    .medidas-tips-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.25rem;
+    }
+    .medidas-tips-card h4 {
+      margin: 0 0 0.5rem;
+      font-size: 0.95rem;
+    }
+    .medidas-tips-card ul {
+      margin: 0 0 1rem;
+      padding-left: 1.25rem;
+      font-size: 0.85rem;
+      color: #475569;
+      line-height: 1.5;
+    }
+    .garantia-reminder-box {
+      background: #fff1f2;
+      border: 1px solid #fecdd3;
+      color: #9f1239;
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
   `]
 })
 export class CatalogoPageComponent implements OnInit {
@@ -3795,6 +3898,7 @@ export class CatalogoPageComponent implements OnInit {
   readonly authService = inject(AuthService);
   readonly router = inject(Router);
   readonly cartService = inject(CartService);
+  private readonly saasService = inject(SaasService);
 
   // E-Commerce Purchase State in Modal
   selectedColorId = signal<number | null>(null);
@@ -3810,7 +3914,37 @@ export class CatalogoPageComponent implements OnInit {
   sucursales = signal<Sucursal[]>([]);
 
   // CU18: Calificaciones y Reseñas
-  activeModalTab = signal<'info' | 'resenas' | 'look'>('info');
+  activeModalTab = signal<'info' | 'resenas' | 'look' | 'medidas'>('info');
+  readonly guiaMedidas = signal<any[]>([]);
+
+  abrirTabMedidas(prendaId: number): void {
+    this.activeModalTab.set('medidas');
+    this.saasService.getGuiaMedidas(prendaId).subscribe({
+      next: (res: any) => {
+        if (res && res.medidas && res.medidas.length > 0) {
+          this.guiaMedidas.set(res.medidas);
+        } else {
+          this.guiaMedidas.set([
+            { talla_nombre: 'XS', pecho_cm: 82, cintura_cm: 64, cadera_cm: 88, largo_cm: 68, manga_cm: 58 },
+            { talla_nombre: 'S',  pecho_cm: 88, cintura_cm: 70, cadera_cm: 94, largo_cm: 70, manga_cm: 60 },
+            { talla_nombre: 'M',  pecho_cm: 94, cintura_cm: 76, cadera_cm: 100, largo_cm: 72, manga_cm: 62 },
+            { talla_nombre: 'L',  pecho_cm: 102, cintura_cm: 84, cadera_cm: 108, largo_cm: 74, manga_cm: 64 },
+            { talla_nombre: 'XL', pecho_cm: 110, cintura_cm: 92, cadera_cm: 116, largo_cm: 76, manga_cm: 66 }
+          ]);
+        }
+      },
+      error: () => {
+        this.guiaMedidas.set([
+          { talla_nombre: 'XS', pecho_cm: 82, cintura_cm: 64, cadera_cm: 88, largo_cm: 68, manga_cm: 58 },
+          { talla_nombre: 'S',  pecho_cm: 88, cintura_cm: 70, cadera_cm: 94, largo_cm: 70, manga_cm: 60 },
+          { talla_nombre: 'M',  pecho_cm: 94, cintura_cm: 76, cadera_cm: 100, largo_cm: 72, manga_cm: 62 },
+          { talla_nombre: 'L',  pecho_cm: 102, cintura_cm: 84, cadera_cm: 108, largo_cm: 74, manga_cm: 64 },
+          { talla_nombre: 'XL', pecho_cm: 110, cintura_cm: 92, cadera_cm: 116, largo_cm: 76, manga_cm: 66 }
+        ]);
+      }
+    });
+  }
+
   califListado = signal<Calificacion[]>([]);
   califEstadisticas = signal<EstadisticasCalificaciones | null>(null);
   miCalificacion = signal<Calificacion | null>(null);
@@ -4230,7 +4364,7 @@ export class CatalogoPageComponent implements OnInit {
     const rounded = Math.round(rating);
     const stars: string[] = [];
     for (let i = 1; i <= 5; i++) {
-      stars.push(i <= rounded ? '★' : '☆');
+      stars.push(i <= rounded ? 'star' : 'star_border');
     }
     return stars;
   }

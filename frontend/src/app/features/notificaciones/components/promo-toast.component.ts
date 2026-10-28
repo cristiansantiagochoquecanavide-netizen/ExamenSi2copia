@@ -29,7 +29,7 @@ import { NotificacionesService, PushToastData } from '../services/notificaciones
           <!-- Cabecera de Tipo -->
           <div class="toast-header-row">
             <span class="toast-tag-badge push-badge">
-              <span class="tag-sparkle">{{ getPushIcon(push) }}</span>
+              <span class="material-symbols-outlined tag-sparkle">{{ getPushIcon(push) }}</span>
               {{ getPushBadgeText(push) }}
             </span>
             <span class="toast-live-pill">&bull; EN VIVO</span>
@@ -76,7 +76,7 @@ import { NotificacionesService, PushToastData } from '../services/notificaciones
           <!-- Cabecera de la Oferta -->
           <div class="toast-header-row">
             <span class="toast-tag-badge">
-              <span class="tag-sparkle">🏷️</span> OFERTA EXCLUSIVA
+              <span class="material-symbols-outlined tag-sparkle">local_offer</span> OFERTA EXCLUSIVA
             </span>
             @if (getDescuento(promo)) {
               <span class="toast-discount-pill">{{ getDescuento(promo) }}</span>
@@ -378,9 +378,9 @@ export class PromoToastComponent {
 
   // --- MÉTODOS PARA TOAST PUSH TRANSACCIONAL ---
   getPushIcon(push: PushToastData): string {
-    if (push.tipo === 'ESTADO_PEDIDO') return '🛍️';
-    if (push.tipo === 'RESERVA_PROBADOR') return '🕒';
-    return '🔔';
+    if (push.tipo === 'ESTADO_PEDIDO') return 'shopping_bag';
+    if (push.tipo === 'RESERVA_PROBADOR') return 'schedule';
+    return 'notifications';
   }
 
   getPushBadgeText(push: PushToastData): string {

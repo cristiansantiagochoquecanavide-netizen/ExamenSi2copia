@@ -41,13 +41,37 @@
   padding: 0;
 }
 
+html {
+  font-size: 13.5px;
+  box-sizing: border-box;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (min-width: 1440px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 1800px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  html {
+    font-size: 13px;
+  }
+}
+
 html, body {
   background-color: #ffffff !important;
   color: #111111 !important;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  line-height: 1.6;
+  line-height: 1.5;
   min-height: 100vh;
 }
 
@@ -73,6 +97,25 @@ p, span, label, td, th {
 
 button, input, select, textarea {
   font-family: var(--font-sans);
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: 300;
+  font-style: normal;
+  font-size: 18px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  vertical-align: middle;
 }
 
 /* =========================================================
@@ -170,11 +213,12 @@ table thead tr {
 table thead tr th {
   color: #000000 !important;
   font-weight: 700 !important;
-  font-size: 0.82rem !important;
-  letter-spacing: 0.08em !important;
+  font-size: 0.74rem !important;
+  letter-spacing: 0.06em !important;
   text-transform: uppercase;
-  padding: 1rem !important;
+  padding: 0.55rem 0.75rem !important;
   border-bottom: none !important;
+  white-space: nowrap;
 }
 
 table tbody tr {
@@ -187,9 +231,9 @@ table tbody tr:hover {
 }
 
 table tbody tr td {
-  padding: 1rem !important;
+  padding: 0.55rem 0.75rem !important;
   color: #1f2937 !important;
-  font-size: 0.9rem !important;
+  font-size: 0.82rem !important;
 }
 
 /* =========================================================
@@ -198,7 +242,7 @@ table tbody tr td {
    ========================================================= */
 
 /* Curvatura semi-circular (pill) para todos los botones del sistema */
-button:not(.dropdown-trigger):not(.btn-close-banner):not(.toast-close):not(.modal-close):not(.modal-close-btn):not(.btn-clear-query):not(.btn-clear):not(.btn-copy):not(.icon-btn):not(.nav-circle-btn):not(.nav-cart-btn):not(.nav-bell-btn):not(.btn-search-mockup):not(.btn-search-pill):not(.btn-search-action),
+button:not(.btn-hamburger):not(.btn-close-mobile-nav):not(.dropdown-trigger):not(.btn-close-banner):not(.toast-close):not(.modal-close):not(.modal-close-btn):not(.btn-clear-query):not(.btn-clear):not(.btn-copy):not(.icon-btn):not(.nav-circle-btn):not(.nav-cart-btn):not(.nav-bell-btn):not(.btn-search-mockup):not(.btn-search-pill):not(.btn-search-action),
 input[type="button"],
 input[type="submit"],
 input[type="reset"],
@@ -246,6 +290,20 @@ input[type="reset"],
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* Botón Hamburguesa Limpio (solo visible en pantallas <= 1180px) */
+.btn-hamburger {
+  display: none;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  padding: 7px 6px !important;
+}
+
+@media (max-width: 1180px) {
+  .btn-hamburger {
+    display: flex !important;
+  }
 }
 
 /* Píldoras y Chips: más juntos lateralmente */
@@ -430,13 +488,52 @@ a.btn + button {
   margin-left: 0;
 }
 
-/* Formularios, Inputs y Selects */
+/* =========================================================
+   DISEÑO VISUAL UNIFICADO DE FORMULARIOS Y VENTANAS MODALES
+   SaaS Administrativo: Altura 42px, Radio 6px, Espaciado 20px,
+   Labels a 8px sobre los inputs, 100% de Ancho, Modales con 28-32px
+   ========================================================= */
+
+/* Grupos de Formulario y Separación Vertical de 18 a 24px */
+.form-group,
+.field-group,
+.form-field,
+.input-group-vertical {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  margin-bottom: 20px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.form-group:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* Etiquetas (Labels) siempre encima de los campos con 8px de separación */
+.form-group > label,
+.form-field > label,
+.form-label,
+label.field-label {
+  display: block !important;
+  margin-bottom: 0 !important; /* El gap: 8px del contenedor garantiza la separación exacta */
+  color: #374151 !important;
+  font-size: 0.76rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  text-align: left !important;
+}
+
+/* Inputs, Selects y Textareas con Ancho Uniforme (100%) y Bordes Redondeados Discretos (6px) */
 input[type="text"]:not(.search-input-mockup):not(.search-input),
 input[type="number"],
 input[type="email"],
 input[type="password"],
 input[type="date"],
 input[type="search"],
+input[type="tel"],
 select,
 textarea,
 .form-input,
@@ -444,11 +541,47 @@ textarea,
 .form-control,
 .filter-input,
 .filter-select {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
   background-color: #ffffff !important;
-  color: #111111 !important;
-  border: 1px solid rgba(0, 0, 0, 0.2) !important;
-  padding: 0.65rem 0.85rem !important;
-  font-size: 0.9rem !important;
+  color: #111827 !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  padding: 0.5rem 0.85rem !important;
+  font-size: 0.88rem !important;
+  line-height: 1.4 !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+/* Altura uniforme de 40 a 44px (42px estándar) para campos de una línea */
+input[type="text"]:not(.search-input-mockup):not(.search-input),
+input[type="number"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+input[type="search"],
+input[type="tel"],
+select,
+.form-input,
+.form-select,
+.form-control:not(textarea) {
+  height: 42px !important;
+  min-height: 42px !important;
+}
+
+textarea,
+textarea.form-control {
+  min-height: 84px !important;
+  resize: vertical;
+}
+
+/* Estados de Enfoque y Hover */
+input:not([type="checkbox"]):not([type="radio"]):hover,
+select:hover,
+textarea:hover,
+.form-control:hover {
+  border-color: #94a3b8 !important;
 }
 
 input:focus,
@@ -461,22 +594,259 @@ textarea:focus,
 .filter-select:focus {
   outline: none !important;
   border-color: #000000 !important;
-  box-shadow: 0 0 0 1px #000000 !important;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.12) !important;
 }
 
 input::placeholder,
 textarea::placeholder,
-.form-input::placeholder {
+.form-input::placeholder,
+.form-control::placeholder {
   color: #9ca3af !important;
+  font-size: 0.85rem !important;
 }
 
-.form-label,
-label {
+/* Checkboxes y Radiobuttons con espaciado adecuado respecto a su texto */
+.checkbox-cluster,
+.checkbox-group,
+.form-check-group {
+  display: flex !important;
+  align-items: center !important;
+  gap: 20px !important;
+  flex-wrap: wrap !important;
+  margin-top: 6px !important;
+  margin-bottom: 16px !important;
+  width: 100% !important;
+}
+
+.checkbox-cluster label,
+.checkbox-group label,
+.form-check label,
+label.checkbox-label {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
   color: #374151 !important;
-  font-size: 0.78rem !important;
+  font-size: 0.82rem !important;
+  font-weight: 500 !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  cursor: pointer !important;
+  margin: 0 !important;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  width: 18px !important;
+  height: 18px !important;
+  min-height: 18px !important;
+  max-width: 18px !important;
+  accent-color: #000000 !important;
+  cursor: pointer !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+/* Ventanas Modales: Padding interno de 28 a 32px y estructura profesional */
+.saas-modal-backdrop,
+.modal-overlay,
+.modal-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(15, 23, 42, 0.6) !important;
+  backdrop-filter: blur(4px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 2000 !important;
+  padding: 1.5rem !important;
+  box-sizing: border-box !important;
+}
+
+/* Modales Estándar (SaaS, Confirmaciones, Formularios simples de una columna) */
+.saas-modal-card,
+.modal-card,
+.dialog-card {
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  padding: 28px 32px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid #e2e8f0 !important;
+  width: 100% !important;
+  max-width: 560px !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+}
+
+/* Modales Amplios y Editores Maestros (Gestión de Prendas, Catálogo Completo, Matrices) */
+.modal-dialog,
+.modal-wide,
+.modal-lg,
+.modal-container.modal-wide {
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35) !important;
+  border: 1px solid #cbd5e1 !important;
+  width: 1060px !important;
+  max-width: 95vw !important;
+  max-height: 92vh !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
+}
+
+.modal-dialog .modal-header {
+  padding: 1.15rem 1.75rem !important;
+  margin-bottom: 0 !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  background: #ffffff !important;
+  flex-shrink: 0 !important;
+}
+
+.modal-card-header,
+.saas-modal-card .modal-card-header,
+.modal-card .modal-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 20px !important;
+  padding-bottom: 14px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  width: 100% !important;
+}
+
+.modal-card-header h3,
+.modal-header .modal-title,
+.modal-title {
+  margin: 0 !important;
+  font-size: 1.25rem !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.01em !important;
+  color: #0f172a !important;
+}
+
+.btn-close-modal,
+.btn-close {
+  background: none !important;
+  border: none !important;
+  font-size: 1.6rem !important;
+  cursor: pointer !important;
+  color: #94a3b8 !important;
+  line-height: 1 !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  transition: color 0.15s ease !important;
+}
+
+.btn-close-modal:hover,
+.btn-close:hover {
+  color: #0f172a !important;
+}
+
+/* Botones Cancelar y Acción con separación adecuada */
+.modal-actions,
+.modal-footer,
+.form-actions {
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-top: 24px !important;
+  padding-top: 18px !important;
+  border-top: 1px solid #f1f5f9 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.modal-actions .btn-secondary,
+.modal-footer .btn-secondary,
+.modal-actions .btn-cancel,
+.modal-footer .btn-cancel,
+.btn-cancel {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #475569 !important;
+  padding: 0.6rem 1.4rem !important;
+  height: 42px !important;
   font-weight: 600 !important;
-  letter-spacing: 0.05em !important;
-  text-transform: uppercase !important;
+  font-size: 0.85rem !important;
+  border-radius: 9999px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.modal-actions .btn-secondary:hover,
+.modal-footer .btn-secondary:hover,
+.btn-cancel:hover {
+  background: #f8fafc !important;
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
+}
+
+.modal-actions .btn-primary,
+.modal-footer .btn-primary,
+.modal-actions .btn-save,
+.modal-footer .btn-save,
+.btn-save {
+  background: #000000 !important;
+  border: 1px solid #000000 !important;
+  color: #ffffff !important;
+  padding: 0.6rem 1.6rem !important;
+  height: 42px !important;
+  font-weight: 700 !important;
+  font-size: 0.85rem !important;
+  letter-spacing: 0.04em !important;
+  border-radius: 9999px !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+  transition: all 0.15s ease !important;
+}
+
+.modal-actions .btn-primary:hover,
+.modal-footer .btn-primary:hover,
+.btn-save:hover {
+  background: #262626 !important;
+  transform: translateY(-1px);
+}
+
+.modal-actions .btn-primary:disabled,
+.modal-footer .btn-primary:disabled,
+.btn-save:disabled {
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+/* Adaptabilidad Responsiva para Móviles */
+@media (max-width: 600px) {
+  .saas-modal-card,
+  .modal-card,
+  .dialog-card {
+    padding: 20px 18px !important;
+    width: 100% !important;
+    max-width: calc(100vw - 20px) !important;
+  }
+
+  .modal-actions,
+  .modal-footer,
+  .form-actions {
+    flex-direction: column-reverse !important;
+    gap: 10px !important;
+  }
+
+  .modal-actions button,
+  .modal-footer button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .checkbox-cluster {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
 }
 
 /* Badges y Estados */
@@ -709,13 +1079,42 @@ html, body, .app-layout, app-root {
   overflow-x: hidden;
 }
 
+/* Contenedores globales de páginas adaptados a 100% de escala */
+.gestion-container,
+.sucursales-container,
+.saas-viewport,
+.admin-container,
+.page-container,
+.content-container,
+.catalog-container,
+.pos-container {
+  width: 100% !important;
+  max-width: 1400px !important;
+  box-sizing: border-box !important;
+  padding-left: clamp(0.75rem, 2vw, 1.5rem) !important;
+  padding-right: clamp(0.75rem, 2vw, 1.5rem) !important;
+  padding-top: clamp(0.75rem, 1.5vw, 1.25rem) !important;
+  padding-bottom: 3rem !important;
+  margin: 0 auto !important;
+}
+
+/* Encabezados y títulos compactos para evitar saltos de línea gigantes */
+.page-title,
+.header-title,
+.main-title,
+.editorial-heading {
+  font-size: clamp(1.4rem, 2.4vw, 2rem) !important;
+  line-height: 1.2 !important;
+}
+
 /* Tablas con desplazamiento horizontal táctil fluido */
 .table-responsive,
 .table-container,
 .table-wrap,
 .table-scroll,
 .data-table-container,
-.matrix-container {
+.matrix-container,
+.guia-medidas-table-wrap {
   width: 100% !important;
   max-width: 100% !important;
   overflow-x: auto !important;

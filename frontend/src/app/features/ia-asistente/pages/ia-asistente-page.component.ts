@@ -40,7 +40,7 @@ import { AuthService } from '../../../core/services/auth.service';
 
           <div class="hero-actions">
             <button type="button" class="btn-action-gold" (click)="abrirModalQuiz()">
-              ⚡ {{ dashboard()?.perfil_completado ? 'REFINAR MI TEST DE ESTILO' : 'REALIZAR TEST DE ESTILO PERSONAL' }}
+              <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">tune</span> {{ dashboard()?.perfil_completado ? 'REFINAR MI TEST DE ESTILO' : 'REALIZAR TEST DE ESTILO PERSONAL' }}
             </button>
 
             @if (dashboard()?.perfil_completado && dashboard()?.preferencias) {
@@ -81,7 +81,7 @@ import { AuthService } from '../../../core/services/auth.service';
               <span class="section-tag">CURADURÍA DE LOOKS</span>
               <h2 class="section-title">Looks Completos Coordinados por Atelier IA</h2>
             </div>
-            <span class="coordination-badge">✓ Armonía cromática &amp; corte garantizados</span>
+            <span class="coordination-badge"><span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">check</span> Armonía cromática &amp; corte garantizados</span>
           </div>
 
           <div class="outfits-grid">
@@ -89,7 +89,7 @@ import { AuthService } from '../../../core/services/auth.service';
               <div class="outfit-card">
                 <div class="outfit-header">
                   <div class="outfit-info">
-                    <span class="outfit-match">★ {{ outfit.match_score }}% Match Estilístico</span>
+                    <span class="outfit-match">{{ outfit.match_score }}% Match Estilístico</span>
                     <h3 class="outfit-title">{{ outfit.nombre_look }}</h3>
                     <p class="outfit-desc">{{ outfit.descripcion_estilo }}</p>
                   </div>
@@ -150,7 +150,7 @@ import { AuthService } from '../../../core/services/auth.service';
               <div class="recom-card">
                 <!-- Badges Superiores -->
                 <div class="card-badges-top">
-                  <span class="match-badge">⚡ {{ prenda.match_score }}% MATCH</span>
+                  <span class="match-badge">{{ prenda.match_score }}% MATCH</span>
                   <span class="ia-tag">{{ prenda.etiqueta_ia }}</span>
                 </div>
 
@@ -176,7 +176,7 @@ import { AuthService } from '../../../core/services/auth.service';
 
                   <!-- Calificación de Estrellas (CU18) -->
                   <div class="rating-row">
-                    <span class="stars">★★★★★</span>
+                    <span class="stars"><span class="material-symbols-outlined" style="font-size: 14px; color: #f59e0b;">star</span></span>
                     <span class="rating-num">{{ prenda.rating_promedio }}</span>
                     <span class="review-count">({{ prenda.total_resenas }} reseñas)</span>
                   </div>
@@ -228,7 +228,7 @@ import { AuthService } from '../../../core/services/auth.service';
                 <span class="modal-pre-tag">PERFIL DE MODA INTELIGENTE</span>
                 <h3 class="modal-title">Test de Estilo Personal • Atelier IA</h3>
               </div>
-              <button type="button" class="btn-close-modal" (click)="cerrarModalQuiz()">✕</button>
+              <button type="button" class="btn-close-modal" (click)="cerrarModalQuiz()">&times;</button>
             </div>
 
             <div class="modal-body">
@@ -352,7 +352,7 @@ import { AuthService } from '../../../core/services/auth.service';
                 <span class="modal-pre-tag">COMBINACIÓN SUGERIDA POR ATELIER IA</span>
                 <h3 class="modal-title">{{ outfitModalData()?.nombre_look || 'Completa tu Look' }}</h3>
               </div>
-              <button type="button" class="btn-close-modal" (click)="cerrarModalOutfit()">✕</button>
+              <button type="button" class="btn-close-modal" (click)="cerrarModalOutfit()">&times;</button>
             </div>
 
             <div class="modal-body">

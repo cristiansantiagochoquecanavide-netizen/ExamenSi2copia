@@ -31,6 +31,20 @@ class AuthRepository {
 
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(_tokenKey, tokenResponse.accessToken);
+        try {
+          final parts = tokenResponse.accessToken.split('.');
+          if (parts.length >= 2) {
+            final normalized = base64Url.normalize(parts[1]);
+            final payloadStr = utf8.decode(base64Url.decode(normalized));
+            final payload = jsonDecode(payloadStr) as Map<String, dynamic>;
+            final empresaId = payload['empresa_id'] as int? ?? 1;
+            final subdominio = payload['subdominio'] as String? ?? 'elegance';
+            final planCodigo = payload['plan_codigo'] as String? ?? 'INTERMEDIO';
+            await prefs.setInt('fashionstore_tenant_id', empresaId);
+            await prefs.setString('fashionstore_subdominio', subdominio);
+            await prefs.setString('fashionstore_plan_codigo', planCodigo);
+          }
+        } catch (_) {}
         await prefs.setString(_userKey, jsonEncode(tokenResponse.usuario.toJson()));
 
         return tokenResponse;
@@ -85,6 +99,9 @@ class AuthRepository {
       } catch (_) {}
     }
     await prefs.remove(_tokenKey);
+    await prefs.remove('fashionstore_tenant_id');
+    await prefs.remove('fashionstore_subdominio');
+    await prefs.remove('fashionstore_plan_codigo');
     await prefs.remove(_userKey);
   }
 }

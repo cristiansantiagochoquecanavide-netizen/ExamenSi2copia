@@ -23,6 +23,7 @@ class Sucursal(Base):
     __tablename__ = "sucursales"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    empresa_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, index=True)  # Multitenant ID
     nombre: Mapped[str] = mapped_column(String(150), unique=True, index=True, nullable=False)
     direccion: Mapped[str] = mapped_column(String(255), nullable=False)
     telefono: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
@@ -43,6 +44,7 @@ class Proveedor(Base):
     __tablename__ = "proveedores"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    empresa_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, index=True)  # Multitenant ID
     razon_social: Mapped[str] = mapped_column(String(150), unique=True, index=True, nullable=False)
     nit: Mapped[str] = mapped_column(String(25), index=True, nullable=False)
     contacto_nombre: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
@@ -125,5 +127,3 @@ class DetalleTransferenciaStock(Base):
 
     transferencia: Mapped["TransferenciaStock"] = relationship("TransferenciaStock", back_populates="detalles")
     variante: Mapped["PrendaVariante"] = relationship("app.domains.catalogo.models.PrendaVariante", lazy="selectin")
-
-

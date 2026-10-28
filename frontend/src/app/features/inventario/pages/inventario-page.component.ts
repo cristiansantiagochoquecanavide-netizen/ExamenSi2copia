@@ -1,7 +1,8 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../../core/services/auth.service';
 import { InventarioService } from '../services/inventario.service';
 import { CatalogoService } from '../../catalogo/services/catalogo.service';
 import { UsuariosService } from '../../usuarios/services/usuarios.service';
@@ -16,7 +17,7 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
 @Component({
   selector: 'app-inventario-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   template: `
     <div class="sucursales-container">
       <!-- Header Editorial -->
@@ -316,6 +317,28 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
       <!-- TAB 2: SUCURSALES FÍSICAS                  -->
       <!-- ========================================== -->
       @if (!isLoading() && activeTab() === 'SUCURSALES') {
+        <!-- BANNER DE CUOTA DE SUCURSALES (CU04 / RN08) -->
+        <div class="saas-quota-banner" [class.warning]="sucursales().length >= getLimiteSucursales()">
+          <span class="material-symbols-outlined quota-icon">domain</span>
+          <div class="quota-content">
+            <div class="quota-top">
+              <strong>Control de Cuota Multi-Tenant (CU04):</strong>
+              <span>Plan {{ authService.currentTenant().planCodigo }} &bull; {{ sucursales().length }} de {{ getLimiteSucursales() }} sucursales utilizadas</span>
+            </div>
+            @if (sucursales().length >= getLimiteSucursales()) {
+              <p class="quota-msg limit">
+                Has alcanzado el límite máximo de sucursales permitidas para tu plan ({{ getLimiteSucursales() }} sucursales). 
+                Para abrir nuevas tiendas físicas debes solicitar una ampliación de plan (Upgrade a Intermedio o VIP).
+              </p>
+            } @else {
+              <p class="quota-msg ok">
+                Tu plan te permite registrar {{ getLimiteSucursales() - sucursales().length }} sucursal(es) adicional(es) en este tenant.
+              </p>
+            }
+          </div>
+          <a routerLink="/saas" class="btn-quota-saas" title="Ver gestión del SaaS y suscripción">Ver Plan SaaS</a>
+        </div>
+
         <div class="branches-grid">
           @for (s of sucursales(); track s.id) {
             <article class="branch-card">
@@ -577,48 +600,48 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
     }
 
     .header-section {
-      padding: 1.5rem 0 2rem 0;
+      padding: 0.75rem 0 1.25rem 0;
       border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-      margin-bottom: 2rem;
+      margin-bottom: 1.25rem;
     }
 
     .eyebrow {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      font-size: 0.75rem;
-      letter-spacing: 0.2em;
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
       color: #374151;
       font-weight: 700;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.35rem;
       text-transform: uppercase;
     }
 
     .gold-dot {
       color: #000000;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
     }
 
     .page-title {
       font-family: 'Inter', sans-serif;
-      font-size: 2.75rem;
+      font-size: 1.75rem;
       font-weight: 800;
       letter-spacing: -0.02em;
       text-transform: uppercase;
       color: #000000;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.35rem;
     }
 
     .subtitle {
       color: #4b5563;
-      font-size: 0.95rem;
+      font-size: 0.88rem;
     }
 
     .tabs-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 2rem;
+      margin-top: 1.25rem;
       flex-wrap: wrap;
       gap: 1rem;
     }
@@ -1328,14 +1351,16 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
 
     .modal-container {
       background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.15);
-      max-width: 750px;
+      border: 1px solid #cbd5e1;
+      max-width: 720px;
       width: 100%;
       max-height: 90vh;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
-      border-radius: 0;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      border-radius: 12px;
+      overflow: hidden;
+      box-sizing: border-box;
     }
 
     .modal-container.sm {
@@ -1343,48 +1368,58 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
     }
 
     .modal-header {
-      padding: 1.5rem 2rem;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      padding: 24px 28px 18px;
+      border-bottom: 1px solid #f1f5f9;
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
+      background: #ffffff;
     }
 
     .modal-eyebrow {
-      font-size: 0.65rem;
-      letter-spacing: 0.2em;
-      color: #4b5563;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      color: #374151;
       font-weight: 700;
       text-transform: uppercase;
+      display: block;
+      margin-bottom: 4px;
     }
 
     .modal-title {
       font-family: 'Inter', sans-serif;
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #000000;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.01em;
+      margin: 0;
     }
 
     .btn-close {
       background: transparent;
       border: none;
-      color: #6b7280;
-      font-size: 2rem;
+      color: #94a3b8;
+      font-size: 1.6rem;
       cursor: pointer;
+      line-height: 1;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: color 0.15s ease;
     }
 
     .btn-close:hover {
-      color: #000000;
+      color: #0f172a;
     }
 
     .modal-form {
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      flex: 1;
     }
 
     .modal-body {
-      padding: 2rem;
+      padding: 24px 28px;
       overflow-y: auto;
     }
 
@@ -1401,76 +1436,172 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
     .form-group {
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
+      gap: 8px;
+      margin-bottom: 18px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .form-label {
-      font-size: 0.72rem;
-      letter-spacing: 0.12em;
+      font-size: 0.76rem;
+      letter-spacing: 0.06em;
       color: #374151;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
+      display: block;
+      margin: 0;
     }
 
     .form-input {
       background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.2);
-      color: #111111;
-      padding: 0.75rem 1rem;
-      font-size: 0.85rem;
-      border-radius: 0;
+      border: 1px solid #cbd5e1;
+      color: #111827;
+      padding: 0.5rem 0.85rem;
+      font-size: 0.88rem;
+      border-radius: 6px;
+      height: 42px;
+      min-height: 42px;
+      width: 100%;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .form-input:hover {
+      border-color: #94a3b8;
     }
 
     .form-input:focus {
-      outline: none;
       border-color: #000000;
-      box-shadow: 0 0 0 1px #000000;
+      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.12);
     }
 
     .modal-footer {
-      padding: 1.25rem 2rem;
-      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      padding: 18px 28px 24px;
+      border-top: 1px solid #f1f5f9;
       display: flex;
       justify-content: flex-end;
-      gap: 1rem;
+      align-items: center;
+      gap: 12px;
+      box-sizing: border-box;
+      background: #ffffff;
     }
 
     .btn-cancel {
       background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.25);
-      color: #374151;
-      padding: 0.75rem 1.5rem;
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.15em;
+      border: 1px solid #cbd5e1;
+      color: #475569;
+      padding: 0.6rem 1.4rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
       cursor: pointer;
-      border-radius: 0;
+      border-radius: 9999px;
+      height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
     }
 
     .btn-cancel:hover {
-      background: #f3f4f6;
-      color: #000000;
+      background: #f8fafc;
+      border-color: #94a3b8;
+      color: #0f172a;
     }
 
     .btn-save {
       background: #000000;
       color: #ffffff;
       border: 1px solid #000000;
-      padding: 0.75rem 2rem;
-      font-size: 0.75rem;
+      padding: 0.6rem 1.6rem;
+      font-size: 0.82rem;
       font-weight: 700;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.06em;
       cursor: pointer;
-      border-radius: 0;
+      border-radius: 9999px;
+      height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       text-transform: uppercase;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      transition: all 0.15s ease;
     }
 
     .btn-save:hover:not(:disabled) {
       background: #262626;
+      transform: translateY(-1px);
+    }
+      background: #262626;
+    }
+  
+    .saas-quota-banner {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .saas-quota-banner.warning {
+      background: #fff1f2;
+      border-color: #fecdd3;
+    }
+    .quota-icon {
+      font-size: 2.2rem;
+    }
+    .quota-content {
+      flex-grow: 1;
+    }
+    .quota-top {
+      display: flex;
+      gap: 0.75rem;
+      align-items: baseline;
+      margin-bottom: 0.35rem;
+      font-size: 0.95rem;
+    }
+    .quota-msg {
+      margin: 0;
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+    .quota-msg.limit {
+      color: #991b1b;
+      font-weight: 600;
+    }
+    .quota-msg.ok {
+      color: #166534;
+      font-weight: 500;
+    }
+    .btn-quota-saas {
+      background: #000;
+      color: #fff;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .btn-quota-saas:hover {
+      background: #27272a;
     }
   `]
 })
 export class InventarioPageComponent implements OnInit {
+  readonly authService = inject(AuthService);
+
+  getLimiteSucursales(): number {
+    const plan = this.authService.currentTenant().planCodigo;
+    if (plan === 'BASICO') return 2;
+    if (plan === 'INTERMEDIO') return 10;
+    return 999;
+  }
+
   private readonly inventarioService = inject(InventarioService);
   private readonly catalogoService = inject(CatalogoService);
   private readonly usuariosService = inject(UsuariosService);

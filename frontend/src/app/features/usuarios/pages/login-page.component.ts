@@ -31,6 +31,7 @@ import { AuthService } from '../../../core/services/auth.service';
               <button type="button" class="btn-role-chip" (click)="fillRole('ENCARGADO')">Encargado</button>
               <button type="button" class="btn-role-chip" (click)="fillRole('CAJERO')">Cajero</button>
               <button type="button" class="btn-role-chip" (click)="fillRole('CLIENTE')">Cliente</button>
+              <button type="button" class="btn-role-chip" (click)="fillRole('TENANT2')">Tenant 2 (Urban)</button>
             </div>
           </div>
 
@@ -99,50 +100,51 @@ import { AuthService } from '../../../core/services/auth.service';
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 3rem 1rem;
+      padding: 1.5rem 1rem;
       background: #fafafa;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      box-sizing: border-box;
     }
 
     .login-wrapper {
       width: 100%;
-      max-width: 480px;
+      max-width: 460px;
     }
 
     .brand-header {
       text-align: center;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
 
     .brand-subtitle {
       display: block;
-      font-size: 0.75rem;
-      letter-spacing: 0.2em;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
       color: #6b7280;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.35rem;
       font-weight: 600;
       text-transform: uppercase;
     }
 
     .brand-title {
-      font-size: 2.25rem;
+      font-size: 1.85rem;
       font-weight: 700;
       letter-spacing: -0.02em;
       color: #000000;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.35rem;
     }
 
     .brand-caption {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: #6b7280;
-      line-height: 1.5;
+      line-height: 1.4;
     }
 
     .login-card {
       background: #ffffff;
       border: 1px solid rgba(0, 0, 0, 0.08);
       border-radius: 12px;
-      padding: 2.5rem;
+      padding: clamp(1.25rem, 4vw, 2rem);
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
       position: relative;
     }
@@ -334,7 +336,7 @@ export class LoginPageComponent {
     }
   }
 
-  fillRole(role: 'ADMIN' | 'ENCARGADO' | 'CAJERO' | 'CLIENTE'): void {
+  fillRole(role: 'ADMIN' | 'ENCARGADO' | 'CAJERO' | 'CLIENTE' | 'TENANT2'): void {
     if (role === 'ADMIN') {
       this.email = 'AdminFashion@gmail.com';
       this.password = 'Admin123';
@@ -344,6 +346,9 @@ export class LoginPageComponent {
     } else if (role === 'CAJERO') {
       this.email = 'CajeroFashion@gmail.com';
       this.password = 'Cajero123';
+    } else if (role === 'TENANT2') {
+      this.email = 'gerencia@urbanstyle.bo';
+      this.password = 'Password123!';
     } else {
       this.email = 'ClienteFashion@gmail.com';
       this.password = 'Cliente123';

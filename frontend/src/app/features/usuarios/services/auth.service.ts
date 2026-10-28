@@ -1,1 +1,1 @@
-﻿export { AuthService } from '../../../core/services/auth.service';
+export { AuthService } from '../../../core/services/auth.service';

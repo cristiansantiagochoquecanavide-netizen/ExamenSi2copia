@@ -437,6 +437,117 @@ class _PrendaDetailModalState extends State<PrendaDetailModal> {
                     const SizedBox(height: 24),
                   ],
 
+                  // CU06 / CU07: Guía Anatómica de Medidas en cm
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      borderRadius: BorderRadius.circular(8),
+                      color: const Color(0xFFF8FAFC),
+                    ),
+                    child: Theme(
+                      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                      child: ExpansionTile(
+                        leading: const Icon(Icons.straighten, size: 18, color: Colors.black87),
+                        title: const Text(
+                          'GUÍA ANATÓMICA DE MEDIDAS (CM)',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                        subtitle: const Text(
+                          'Consulta las medidas en centímetros por talla (CU06)',
+                          style: TextStyle(fontSize: 10, color: Color(0xFF64748B)),
+                        ),
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                            child: Column(
+                              children: [
+                                Table(
+                                  border: TableBorder.all(color: const Color(0xFFE2E8F0)),
+                                  children: [
+                                    const TableRow(
+                                      decoration: BoxDecoration(color: Color(0xFF0F172A)),
+                                      children: [
+                                        Padding(
+                                          padding: EdgeInsets.all(6),
+                                          child: Text('TALLA', style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                                        ),
+                                        Padding(
+                                          padding: EdgeInsets.all(6),
+                                          child: Text('PECHO', style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                                        ),
+                                        Padding(
+                                          padding: EdgeInsets.all(6),
+                                          child: Text('CINTURA', style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                                        ),
+                                        Padding(
+                                          padding: EdgeInsets.all(6),
+                                          child: Text('CADERA', style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                                        ),
+                                        Padding(
+                                          padding: EdgeInsets.all(6),
+                                          child: Text('LARGO', style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                                        ),
+                                      ],
+                                    ),
+                                    ...['XS', 'S', 'M', 'L', 'XL'].map((tallaCode) {
+                                      final isCur = _selectedTalla?.codigo == tallaCode;
+                                      final pcm = tallaCode == 'XS' ? 82 : (tallaCode == 'S' ? 88 : (tallaCode == 'M' ? 94 : (tallaCode == 'L' ? 102 : 110)));
+                                      final ccm = pcm - 18;
+                                      final cadcm = pcm + 6;
+                                      final lcm = tallaCode == 'XS' ? 68 : (tallaCode == 'S' ? 70 : (tallaCode == 'M' ? 72 : 74));
+                                      return TableRow(
+                                        decoration: BoxDecoration(color: isCur ? const Color(0xFFFEF3C7) : Colors.white),
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(6),
+                                            child: Text(tallaCode, style: TextStyle(fontSize: 10, fontWeight: isCur ? FontWeight.w900 : FontWeight.normal), textAlign: TextAlign.center),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(6),
+                                            child: Text('$pcm cm', style: const TextStyle(fontSize: 10), textAlign: TextAlign.center),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(6),
+                                            child: Text('$ccm cm', style: const TextStyle(fontSize: 10), textAlign: TextAlign.center),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(6),
+                                            child: Text('$cadcm cm', style: const TextStyle(fontSize: 10), textAlign: TextAlign.center),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(6),
+                                            child: Text('$lcm cm', style: const TextStyle(fontSize: 10), textAlign: TextAlign.center),
+                                          ),
+                                        ],
+                                      );
+                                    }),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFFF1F2),
+                                    borderRadius: BorderRadius.circular(4),
+                                    border: Border.all(color: const Color(0xFFFECDD3)),
+                                  ),
+                                  child: const Text(
+                                    'Garantía de Calce (RN07): 7 días para cambio de talla sin recargo. Estrictamente sin reembolso de dinero.',
+                                    style: TextStyle(fontSize: 9, color: Color(0xFF9F1239)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   // Action Buttons
                   ElevatedButton.icon(
                     onPressed: () {

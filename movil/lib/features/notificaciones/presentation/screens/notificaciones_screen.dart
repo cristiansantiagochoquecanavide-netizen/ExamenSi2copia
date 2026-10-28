@@ -24,10 +24,10 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
   final List<Map<String, String>> _filtros = [
     {'id': 'TODAS', 'label': 'Todas'},
     {'id': 'NO_LEIDAS', 'label': 'No Leídas'},
-    {'id': 'RECOMENDACION_IA', 'label': '✨ IA Stylist (CU19)'},
-    {'id': 'RESERVA_PROBADOR', 'label': '🕒 Probadores'},
-    {'id': 'ESTADO_PEDIDO', 'label': '🛍️ Pedidos'},
-    {'id': 'PROMOCION', 'label': '🏷️ Promos'},
+    {'id': 'RECOMENDACION_IA', 'label': 'IA Stylist'},
+    {'id': 'RESERVA_PROBADOR', 'label': 'Probadores'},
+    {'id': 'ESTADO_PEDIDO', 'label': 'Pedidos'},
+    {'id': 'PROMOCION', 'label': 'Promociones'},
   ];
 
   @override
@@ -253,7 +253,7 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
                                   : () => _simularAlerta(_selectedFilter == 'TODAS' || _selectedFilter == 'NO_LEIDAS' ? 'RECOMENDACION_IA' : _selectedFilter),
                               child: Text(
                                 _selectedFilter == 'PROMOCION'
-                                    ? '🏷️ Simular Cupón en Promos (5s)'
+                                    ? 'Simular Cupón en Promos (5s)'
                                     : 'Simular Alerta de IA (CU19)',
                               ),
                             ),
@@ -397,7 +397,7 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
                       side: const BorderSide(color: Color(0xFFD1D5DB)),
                     ),
                     onPressed: () => _simularAlerta('RECOMENDACION_IA'),
-                    child: const Text('✨ IA (CU19)', style: TextStyle(fontSize: 11, color: Colors.black)),
+                    child: const Text('IA Stylist', style: TextStyle(fontSize: 11, color: Colors.black)),
                   ),
                   const SizedBox(width: 6),
                   OutlinedButton(
@@ -408,7 +408,7 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
                     ),
                     onPressed: _simularAlertaCupon5s,
                     child: const Text(
-                      '🏷️ Promo (5s)',
+                      'Promociones (5s)',
                       style: TextStyle(fontSize: 11, color: Color(0xFF047857), fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -419,7 +419,7 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
                       side: const BorderSide(color: Color(0xFFD1D5DB)),
                     ),
                     onPressed: () => _simularAlerta('RESERVA_PROBADOR'),
-                    child: const Text('🕒 Cita', style: TextStyle(fontSize: 11, color: Colors.black)),
+                    child: const Text('Cita Probador', style: TextStyle(fontSize: 11, color: Colors.black)),
                   ),
                   const SizedBox(width: 6),
                   OutlinedButton(
@@ -428,7 +428,7 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
                       side: const BorderSide(color: Color(0xFFD1D5DB)),
                     ),
                     onPressed: () => _simularAlerta('ESTADO_PEDIDO'),
-                    child: const Text('🛍️ Pedido', style: TextStyle(fontSize: 11, color: Colors.black)),
+                    child: const Text('Pedido', style: TextStyle(fontSize: 11, color: Colors.black)),
                   ),
                 ],
               ),

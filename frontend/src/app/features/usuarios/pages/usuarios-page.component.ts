@@ -357,29 +357,30 @@ import { Sucursal } from '../../inventario/models/inventario.models';
   `,
   styles: [`
     .usuarios-container {
-      max-width: 1400px;
+      max-width: 100%;
       margin: 0 auto;
-      padding: 2rem 1.5rem 4rem;
+      padding: 0.75rem 0.5rem 3rem;
       background-color: #ffffff;
       color: #111111;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      box-sizing: border-box;
     }
 
     .header-section {
-      padding: 0 0 2rem 0;
+      padding: 0 0 1.25rem 0;
       border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-      margin-bottom: 2rem;
+      margin-bottom: 1.25rem;
     }
 
     .eyebrow {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 700;
-      letter-spacing: 0.18em;
+      letter-spacing: 0.15em;
       color: #374151;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.35rem;
       text-transform: uppercase;
     }
 
@@ -389,18 +390,18 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     }
 
     .page-title {
-      font-size: 2.5rem;
+      font-size: 1.75rem;
       font-weight: 800;
       color: #000000;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.35rem;
       letter-spacing: -0.02em;
       text-transform: uppercase;
     }
 
     .subtitle {
       color: #4b5563;
-      font-size: 0.95rem;
-      line-height: 1.5;
+      font-size: 0.88rem;
+      line-height: 1.4;
       max-width: 700px;
     }
 
@@ -736,38 +737,42 @@ import { Sucursal } from '../../inventario/models/inventario.models';
 
     .modal-container {
       background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.15);
-      border-radius: 0;
-      max-width: 750px;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      max-width: 720px;
       width: 100%;
       max-height: 90vh;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
       overflow: hidden;
+      box-sizing: border-box;
     }
 
     .modal-header {
-      padding: 1.25rem 1.75rem;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      padding: 24px 28px 18px;
+      border-bottom: 1px solid #f1f5f9;
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
+      background: #ffffff;
     }
 
     .modal-eyebrow {
-      font-size: 0.7rem;
+      font-size: 0.72rem;
       font-weight: 700;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.12em;
       color: #374151;
       text-transform: uppercase;
+      display: block;
+      margin-bottom: 4px;
     }
 
     .modal-title {
-      font-size: 1.5rem;
+      font-size: 1.35rem;
       font-weight: 800;
-      color: #000000;
-      margin: 0.25rem 0 0;
+      color: #0f172a;
+      margin: 0;
       letter-spacing: -0.01em;
       text-transform: uppercase;
     }
@@ -775,23 +780,28 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     .btn-close {
       background: transparent;
       border: none;
-      color: #6b7280;
-      font-size: 1.8rem;
+      color: #94a3b8;
+      font-size: 1.6rem;
       cursor: pointer;
+      line-height: 1;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: color 0.15s ease;
     }
 
     .btn-close:hover {
-      color: #000000;
+      color: #0f172a;
     }
 
     .modal-form {
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      flex: 1;
     }
 
     .modal-body {
-      padding: 1.75rem;
+      padding: 24px 28px;
       overflow-y: auto;
     }
 
@@ -808,75 +818,104 @@ import { Sucursal } from '../../inventario/models/inventario.models';
     .form-group {
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
+      gap: 8px;
+      margin-bottom: 18px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .form-label {
-      font-size: 0.72rem;
+      font-size: 0.76rem;
       font-weight: 700;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.06em;
       color: #374151;
       text-transform: uppercase;
+      margin: 0;
+      display: block;
     }
 
     .form-input {
       background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.2);
-      border-radius: 0;
-      color: #111111;
-      padding: 0.65rem 0.85rem;
-      font-size: 0.85rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      color: #111827;
+      padding: 0.5rem 0.85rem;
+      font-size: 0.88rem;
+      height: 42px;
+      min-height: 42px;
+      width: 100%;
+      box-sizing: border-box;
       outline: none;
-      transition: border-color 0.2s;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .form-input:hover {
+      border-color: #94a3b8;
     }
 
     .form-input:focus {
       border-color: #000000;
+      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.12);
     }
 
     .modal-footer {
-      padding: 1.25rem 1.75rem;
-      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      padding: 18px 28px 24px;
+      border-top: 1px solid #f1f5f9;
       background: #ffffff;
       display: flex;
       justify-content: flex-end;
-      gap: 0.75rem;
+      align-items: center;
+      gap: 12px;
+      box-sizing: border-box;
     }
 
     .btn-cancel {
       background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.2);
-      color: #000000;
-      padding: 0.65rem 1.25rem;
-      font-size: 0.75rem;
+      border: 1px solid #cbd5e1;
+      color: #475569;
+      padding: 0.6rem 1.4rem;
+      font-size: 0.82rem;
       font-weight: 700;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      border-radius: 0;
+      border-radius: 9999px;
+      height: 42px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .btn-cancel:hover {
-      background: #f3f4f6;
-      border-color: #000000;
+      background: #f8fafc;
+      border-color: #94a3b8;
+      color: #0f172a;
     }
 
     .btn-save {
       background: #000000;
       color: #ffffff;
       border: 1px solid #000000;
-      padding: 0.65rem 1.5rem;
-      font-size: 0.75rem;
+      padding: 0.6rem 1.6rem;
+      font-size: 0.82rem;
       font-weight: 700;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      border-radius: 0;
+      border-radius: 9999px;
+      height: 42px;
       cursor: pointer;
-      transition: all 0.2s;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .btn-save:hover:not(:disabled) {
+      background: #262626;
+      transform: translateY(-1px);
+    }
       background: #262626;
     }
   `]

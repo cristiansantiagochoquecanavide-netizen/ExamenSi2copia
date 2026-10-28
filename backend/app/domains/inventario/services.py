@@ -111,6 +111,12 @@ class SucursalService:
 
     @staticmethod
     async def crear(db: AsyncSession, data: SucursalCreate, admin: Optional[Usuario] = None, ip: Optional[str] = None) -> Sucursal:
+        # Validar límite de sucursales según plan de suscripción del tenant (CU04 / RN08)
+        empresa_id = getattr(data, "empresa_id", None) or (admin.empresa_id if admin else None)
+        if empresa_id:
+            from app.domains.saas.services import validate_branch_creation_limit
+            await validate_branch_creation_limit(db, empresa_id)
+
         # Validar ciudad
         await CiudadService.obtener_por_id(db, data.ciudad_id)
 
@@ -135,6 +141,7 @@ class SucursalService:
             capacidad_probadores=data.capacidad_probadores,
             ciudad_id=data.ciudad_id,
             encargado_id=data.encargado_id,
+            empresa_id=empresa_id,
             activo=data.activo
         )
         db.add(sucursal)

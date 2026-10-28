@@ -76,7 +76,7 @@ import { Notificacion } from '../models/notificaciones.models';
               <div class="notif-loading">Cargando alertas...</div>
             } @else if (filteredNotifications().length === 0) {
               <div class="notif-empty">
-                <span class="empty-icon">🔔</span>
+                <span class="material-symbols-outlined empty-icon" style="font-size: 32px; color: #94a3b8;">notifications_none</span>
                 <p>No tenés notificaciones en esta sección.</p>
               </div>
             } @else {
@@ -89,7 +89,7 @@ import { Notificacion } from '../models/notificaciones.models';
                 >
                   <div class="notif-icon-col">
                     <span class="type-icon-badge" [ngClass]="getBadgeClass(notif.tipo)">
-                      {{ getEmojiForType(notif.tipo) }}
+                      <span class="material-symbols-outlined notif-symbol">{{ getIconForType(notif.tipo) }}</span>
                     </span>
                   </div>
 
@@ -138,7 +138,7 @@ import { Notificacion } from '../models/notificaciones.models';
                 (click)="simularAlerta('RECOMENDACION_IA')"
                 title="Generar alerta de look IA"
               >
-                ✨ IA Stylist
+                IA Stylist
               </button>
               <button
                 type="button"
@@ -146,7 +146,7 @@ import { Notificacion } from '../models/notificaciones.models';
                 (click)="simularAlerta('RESERVA_PROBADOR')"
                 title="Generar alerta de probador"
               >
-                🕒 Probador
+                Probador
               </button>
               <button
                 type="button"
@@ -154,7 +154,7 @@ import { Notificacion } from '../models/notificaciones.models';
                 (click)="simularAlerta('ESTADO_PEDIDO')"
                 title="Generar alerta de pedido"
               >
-                🛍️ Pedido
+                Pedido
               </button>
               <button
                 type="button"
@@ -162,7 +162,7 @@ import { Notificacion } from '../models/notificaciones.models';
                 (click)="simularAlerta('PROMOCION')"
                 title="Generar alerta de descuento"
               >
-                🏷️ Promo
+                Promo
               </button>
             </div>
           </footer>
@@ -672,14 +672,14 @@ export class NotificationBellComponent {
     }
   }
 
-  getEmojiForType(tipo: string): string {
+  getIconForType(tipo: string): string {
     switch (tipo) {
-      case 'RECOMENDACION_IA': return '✨';
-      case 'RESERVA_PROBADOR': return '🕒';
-      case 'ESTADO_PEDIDO': return '🛍️';
-      case 'PROMOCION': return '🏷️';
-      case 'ALERTA_STOCK': return '⚠️';
-      default: return '🔔';
+      case 'RECOMENDACION_IA': return 'auto_awesome';
+      case 'RESERVA_PROBADOR': return 'schedule';
+      case 'ESTADO_PEDIDO': return 'shopping_bag';
+      case 'PROMOCION': return 'local_offer';
+      case 'ALERTA_STOCK': return 'inventory_2';
+      default: return 'notifications';
     }
   }
 

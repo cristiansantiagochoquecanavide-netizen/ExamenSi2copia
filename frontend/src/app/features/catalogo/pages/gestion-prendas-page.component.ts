@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { CatalogoService } from '../services/catalogo.service';
+import { SaasService } from '../../../core/services/saas.service';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../../core/services/auth.service';
 import {
@@ -134,7 +135,9 @@ interface FotoLocal {
 
       <!-- Empty State -->
       <div *ngIf="!isLoading() && prendasFiltradas().length === 0" class="empty-state">
-        <div class="empty-icon">👗</div>
+        <div class="empty-icon">
+          <span class="material-symbols-outlined" style="font-size: 40px; color: #64748b;">inventory_2</span>
+        </div>
         <h3 class="empty-title">NO HAY PRENDAS REGISTRADAS</h3>
         <p class="empty-desc">
           El catálogo se encuentra limpio y listo para cargar las prendas de tu boutique.
@@ -315,7 +318,8 @@ interface FotoLocal {
 
                     <!-- Upload Spinner / Error -->
                     <div *ngIf="uploadError()" class="upload-error-alert">
-                      <span>⚠️ {{ uploadError() }}</span>
+                      <span class="material-symbols-outlined alert-symbol">warning</span>
+                      <span>{{ uploadError() }}</span>
                     </div>
 
                     <!-- Gallery Grid -->
@@ -328,7 +332,7 @@ interface FotoLocal {
 
                         <!-- Cover Badge -->
                         <div class="cover-indicator" *ngIf="f.es_portada">
-                          ★ PORTADA
+                          PORTADA
                         </div>
 
                         <!-- Actions overlay -->
@@ -354,7 +358,7 @@ interface FotoLocal {
 
                     <!-- Required warning if 0 photos -->
                     <p *ngIf="fotosSubidas().length === 0" class="field-warning">
-                      ⚠️ Es obligatorio agregar al menos 1 foto para guardar la prenda.
+                      <span class="material-symbols-outlined alert-symbol">info</span> Es obligatorio agregar al menos 1 foto para guardar la prenda.
                     </p>
                   </fieldset>
                 </div>
@@ -472,10 +476,10 @@ interface FotoLocal {
                           </label>
                           <div class="visibilidad-info">
                             <span class="visibilidad-title">
-                              {{ formData.activo ? '🟢 Prenda Activa (Visible al público)' : '⚪ Prenda Pausada (Oculta para clientes)' }}
+                              {{ formData.activo ? 'Prenda Activa (Visible en catálogo)' : 'Prenda Pausada (Oculta para clientes)' }}
                             </span>
                             <span class="visibilidad-sub">
-                              {{ formData.activo ? 'Los clientes pueden buscarla, verla y comprarla en el catálogo.' : 'Oculta en la web. Ideal para preparar promociones y activarlas en horarios específicos.' }}
+                              {{ formData.activo ? 'Disponible para búsqueda, visualización y compra en catálogo.' : 'Oculta en la web. Ideal para preparar lanzamientos y colecciones.' }}
                             </span>
                           </div>
                         </div>
@@ -584,6 +588,37 @@ interface FotoLocal {
                       </div>
                     </div>
                   </fieldset>
+
+                  <!-- SECCIÓN 4: GUÍA ANATÓMICA DE MEDIDAS EN CENTÍMETROS (CU06) -->
+                  <fieldset class="form-section-box" style="margin-top: 0.65rem;" *ngIf="selectedTallasIds().length > 0">
+                    <legend class="section-legend">GUÍA ANATÓMICA DE MEDIDAS (EN CM - CU06)</legend>
+                    <p class="section-desc">Dimensiones corporales en centímetros por talla (pecho, cintura, cadera, largo, manga).</p>
+
+                    <div class="guia-medidas-table-wrap">
+                      <table class="guia-table">
+                        <thead>
+                          <tr>
+                            <th>Talla</th>
+                            <th>Pecho (cm)</th>
+                            <th>Cintura (cm)</th>
+                            <th>Cadera (cm)</th>
+                            <th>Largo (cm)</th>
+                            <th>Manga (cm)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let t of getSelectedTallasList()">
+                            <td class="cell-talla-code"><strong>{{ t.codigo }}</strong></td>
+                            <td><input type="number" min="1" step="0.5" [(ngModel)]="getMedida(t.id).pecho_cm" [name]="'pecho_' + t.id" class="input-measure" /></td>
+                            <td><input type="number" min="1" step="0.5" [(ngModel)]="getMedida(t.id).cintura_cm" [name]="'cintura_' + t.id" class="input-measure" /></td>
+                            <td><input type="number" min="1" step="0.5" [(ngModel)]="getMedida(t.id).cadera_cm" [name]="'cadera_' + t.id" class="input-measure" /></td>
+                            <td><input type="number" min="1" step="0.5" [(ngModel)]="getMedida(t.id).largo_cm" [name]="'largo_' + t.id" class="input-measure" /></td>
+                            <td><input type="number" min="1" step="0.5" [(ngModel)]="getMedida(t.id).manga_cm" [name]="'manga_' + t.id" class="input-measure" /></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </fieldset>
                 </div>
               </div>
             </div>
@@ -617,7 +652,9 @@ interface FotoLocal {
       <!-- ======================================================== -->
       <div *ngIf="prendaAEliminar()" class="modal-backdrop" (click)="prendaAEliminar.set(null)">
         <div class="confirm-dialog" (click)="$event.stopPropagation()">
-          <div class="confirm-icon">🗑️</div>
+          <div class="confirm-icon">
+            <span class="material-symbols-outlined" style="font-size: 32px; color: #dc2626;">delete_forever</span>
+          </div>
           <h3 class="confirm-title">¿Eliminar esta prenda?</h3>
           <p class="confirm-text">
             Estás por eliminar permanentemente <strong>{{ prendaAEliminar()?.nombre }}</strong> (SKU: {{ prendaAEliminar()?.sku }}).
@@ -638,20 +675,23 @@ interface FotoLocal {
   `,
   styles: [`
     .gestion-container {
-      max-width: 1440px;
+      max-width: 100%;
       margin: 0 auto;
-      padding: 2.5rem 2rem 5rem;
+      padding: 0.75rem 0.5rem 3rem;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       color: #111827;
+      box-sizing: border-box;
     }
 
     .gestion-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 2.5rem;
-      padding-bottom: 1.75rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
       border-bottom: 1px solid #e5e7eb;
+      gap: 1rem;
+      flex-wrap: wrap;
     }
 
     .eyebrow {
@@ -663,7 +703,7 @@ interface FotoLocal {
       letter-spacing: 0.15em;
       color: #92400e;
       text-transform: uppercase;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.35rem;
     }
 
     .gold-dot {
@@ -672,25 +712,26 @@ interface FotoLocal {
     }
 
     .header-title {
-      font-size: 2.25rem;
+      font-size: 1.65rem;
       font-weight: 800;
-      letter-spacing: -0.03em;
+      letter-spacing: -0.02em;
       color: #0f172a;
-      margin: 0 0 0.5rem 0;
+      margin: 0 0 0.35rem 0;
     }
 
     .header-subtitle {
-      font-size: 0.95rem;
+      font-size: 0.88rem;
       color: #64748b;
       max-width: 700px;
-      line-height: 1.5;
+      line-height: 1.4;
       margin: 0;
     }
 
     .header-actions {
       display: flex;
-      gap: 1rem;
+      gap: 0.75rem;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     .btn-back-catalog {
@@ -698,8 +739,8 @@ interface FotoLocal {
       border: 1px solid #cbd5e1;
       color: #475569;
       font-weight: 700;
-      font-size: 0.85rem;
-      padding: 0.75rem 1.25rem;
+      font-size: 0.8rem;
+      padding: 0.55rem 1rem;
       border-radius: 6px;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -715,9 +756,9 @@ interface FotoLocal {
       color: #ffffff;
       border: 1px solid #0f172a;
       font-weight: 700;
-      font-size: 0.85rem;
-      letter-spacing: 0.08em;
-      padding: 0.75rem 1.6rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      padding: 0.55rem 1.25rem;
       border-radius: 6px;
       cursor: pointer;
       box-shadow: 0 2px 8px rgba(15, 23, 42, 0.15);
@@ -853,29 +894,34 @@ interface FotoLocal {
       background: #ffffff;
       border: 1px solid #e2e8f0;
       border-radius: 10px;
-      overflow: hidden;
+      overflow-x: auto;
+      width: 100%;
+      max-width: 100%;
+      -webkit-overflow-scrolling: touch;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
     .gestion-table {
       width: 100%;
+      min-width: 820px;
       border-collapse: collapse;
       text-align: left;
     }
     .gestion-table th {
       background: #f8fafc;
       color: #475569;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 800;
-      letter-spacing: 0.08em;
-      padding: 1rem 1.25rem;
+      letter-spacing: 0.06em;
+      padding: 0.55rem 0.7rem;
       border-bottom: 1px solid #e2e8f0;
       text-transform: uppercase;
+      white-space: nowrap;
     }
     .gestion-table td {
-      padding: 1rem 1.25rem;
+      padding: 0.55rem 0.7rem;
       border-bottom: 1px solid #f1f5f9;
       vertical-align: middle;
-      font-size: 0.88rem;
+      font-size: 0.8rem;
     }
     .gestion-table tr:last-child td {
       border-bottom: none;
@@ -885,12 +931,13 @@ interface FotoLocal {
     }
 
     .thumb-wrapper {
-      width: 50px;
-      height: 60px;
+      width: 38px;
+      height: 46px;
       border-radius: 4px;
       overflow: hidden;
       background: #f1f5f9;
       border: 1px solid #e2e8f0;
+      flex-shrink: 0;
     }
     .table-thumb {
       width: 100%;
@@ -1130,15 +1177,16 @@ interface FotoLocal {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 3.5rem 1.5rem 2rem;
+      padding: 1rem 0.75rem;
+      box-sizing: border-box;
     }
 
     .modal-dialog {
       background: #ffffff;
-      border-radius: 14px;
-      width: 960px;
+      border-radius: 12px;
+      width: 1040px;
       max-width: 95vw;
-      max-height: 86vh;
+      max-height: 92vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -1151,7 +1199,7 @@ interface FotoLocal {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.85rem 1.5rem;
+      padding: 1.15rem 1.75rem;
       border-bottom: 1px solid #f1f5f9;
       background: #ffffff;
       flex-shrink: 0;
@@ -1201,15 +1249,15 @@ interface FotoLocal {
       min-height: 0;
       overflow-y: auto;
       overflow-x: hidden;
-      padding: 1rem 1.25rem;
+      padding: 1.25rem 1.75rem;
     }
 
     .modal-two-cols {
       display: grid;
-      grid-template-columns: 280px 556px;
-      gap: 1.25rem;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 1.5rem;
       align-items: start;
-      justify-content: center;
+      width: 100%;
     }
 
     .col-photos,
@@ -1405,25 +1453,24 @@ interface FotoLocal {
     /* Form Inputs & Comerciales Grid */
     .comerciales-grid {
       display: grid;
-      grid-template-columns: auto auto auto;
-      gap: 0.55rem 0.85rem;
-      width: fit-content;
-      max-width: 100%;
+      grid-template-columns: 1.15fr 1fr 1fr;
+      gap: 1rem;
+      width: 100%;
     }
     .field-sku {
-      width: 160px;
+      width: 100%;
     }
     .field-sku .form-ctrl {
       width: 100%;
     }
     .field-precio {
-      width: 155px;
+      width: 100%;
     }
     .field-precio .form-ctrl {
       width: 100%;
     }
     .field-stock {
-      width: 180px;
+      width: 100%;
     }
     .field-stock .form-ctrl {
       width: 100%;
@@ -1569,33 +1616,44 @@ interface FotoLocal {
     .form-field {
       display: flex;
       flex-direction: column;
-      gap: 0.25rem;
+      gap: 8px;
       min-width: 0;
+      margin-bottom: 12px;
     }
     .form-field label {
-      font-size: 0.7rem;
-      font-weight: 800;
-      letter-spacing: 0.04em;
-      color: #475569;
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: #374151;
       text-transform: uppercase;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      white-space: normal;
+      line-height: 1.25;
+      margin: 0;
+      display: block;
+    }
+    .field-hint {
+      font-size: 0.68rem;
+      color: #94a3b8;
+      white-space: normal;
+      line-height: 1.2;
     }
     .form-ctrl {
-      padding: 0.52rem 0.75rem;
+      padding: 0.5rem 0.85rem;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       color: #0f172a;
       background: #ffffff;
       outline: none;
       box-sizing: border-box;
       width: 100%;
+      height: 42px;
+      min-height: 42px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
     .form-ctrl:focus {
-      border-color: #0f172a;
-      box-shadow: 0 0 0 1px #0f172a;
+      border-color: #000000;
+      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.12);
     }
     .textarea-ctrl {
       resize: vertical;
@@ -1914,7 +1972,7 @@ interface FotoLocal {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.85rem 1.5rem;
+      padding: 1rem 1.75rem;
       background: #f8fafc;
       border-top: 1px solid #e2e8f0;
       gap: 1rem;
@@ -1986,11 +2044,12 @@ interface FotoLocal {
 
     @media (max-width: 960px) {
       .modal-dialog {
-        height: auto;
+        width: 96vw;
         max-height: 94vh;
       }
       .modal-two-cols {
         grid-template-columns: 1fr;
+        gap: 1.25rem;
       }
       .modal-footer-actions {
         flex-direction: column;
@@ -2060,6 +2119,45 @@ interface FotoLocal {
       cursor: not-allowed;
     }
 
+    .guia-medidas-table-wrap {
+      overflow-x: auto;
+      margin-top: 0.5rem;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+    .guia-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+    .guia-table th {
+      background: #f8fafc;
+      padding: 0.5rem 0.6rem;
+      border: 1px solid #e2e8f0;
+      text-align: center;
+      font-weight: 700;
+      color: #334155;
+    }
+    .guia-table td {
+      padding: 0.4rem 0.5rem;
+      border: 1px solid #e2e8f0;
+      text-align: center;
+    }
+    .cell-talla-code {
+      background: #f1f5f9;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .input-measure {
+      width: 70px;
+      padding: 0.35rem 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      text-align: center;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
     .loading-state {
       text-align: center;
       padding: 5rem 1rem;
@@ -2082,6 +2180,7 @@ interface FotoLocal {
 })
 export class GestionPrendasPageComponent implements OnInit {
   private readonly catalogoService = inject(CatalogoService);
+  private readonly saasService = inject(SaasService);
   readonly authService = inject(AuthService);
   readonly router = inject(Router);
 
@@ -2090,6 +2189,45 @@ export class GestionPrendasPageComponent implements OnInit {
   temporadas = signal<Temporada[]>([]);
   tallas = signal<Talla[]>([]);
   colores = signal<Color[]>([]);
+
+  // Guía anatómica de medidas (CU06)
+  medidasAnatomicas: Record<number, { pecho_cm: number; cintura_cm: number; cadera_cm: number; largo_cm: number; manga_cm: number }> = {};
+
+  getMedida(tallaId: number) {
+    if (!this.medidasAnatomicas[tallaId]) {
+      const t = this.tallas().find(x => x.id === tallaId);
+      const orden = t?.orden ?? 1;
+      const base = 84 + (orden * 4);
+      this.medidasAnatomicas[tallaId] = {
+        pecho_cm: base,
+        cintura_cm: base - 20,
+        cadera_cm: base + 6,
+        largo_cm: 130 + (orden * 2),
+        manga_cm: 56 + orden
+      };
+    }
+    return this.medidasAnatomicas[tallaId];
+  }
+
+  getSelectedTallasList(): Talla[] {
+    const ids = this.selectedTallasIds();
+    return this.tallas().filter(t => ids.includes(t.id));
+  }
+
+  guardarMedidasPrenda(prendaId: number): void {
+    for (const t of this.getSelectedTallasList()) {
+      const med = this.getMedida(t.id);
+      this.saasService.guardarGuiaMedida(prendaId, {
+        talla_id: t.id,
+        pecho_cm: med.pecho_cm,
+        cintura_cm: med.cintura_cm,
+        cadera_cm: med.cadera_cm,
+        largo_cm: med.largo_cm,
+        manga_cm: med.manga_cm,
+        observacion_calce: `Calce anatómico para talla ${t.codigo} en centímetros`
+      }).subscribe({ error: () => {} });
+    }
+  }
 
   categoriasMujer = computed(() => this.categorias().filter(c => c.sector === 'MUJERES'));
   categoriasHombre = computed(() => this.categorias().filter(c => c.sector === 'HOMBRES'));
@@ -2521,6 +2659,7 @@ export class GestionPrendasPageComponent implements OnInit {
 
       this.catalogoService.updatePrenda(this.editingPrendaId, updateData).subscribe({
         next: (actualizada) => {
+          this.guardarMedidasPrenda(actualizada.id);
           this.isSaving.set(false);
           this.cerrarModalForm();
           this.mostrarMensaje(`Prenda '${actualizada.nombre}' actualizada exitosamente.`);
@@ -2550,6 +2689,7 @@ export class GestionPrendasPageComponent implements OnInit {
 
       this.catalogoService.createPrenda(createData).subscribe({
         next: (creada) => {
+          this.guardarMedidasPrenda(creada.id);
           this.isSaving.set(false);
           this.cerrarModalForm();
           this.mostrarMensaje(`Prenda '${creada.nombre}' creada y vinculada con ${multimediaPayload.length} fotos exitosamente.`);

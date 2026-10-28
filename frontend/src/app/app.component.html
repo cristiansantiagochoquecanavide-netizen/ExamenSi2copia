@@ -58,35 +58,35 @@
       <!-- 1. VISTA EXCLUSIVA PARA CLIENTE / VISITANTE -->
       @if (authService.isCliente()) {
         <a routerLink="/catalogo" class="client-nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()">
-          <span>✦</span> Colección &amp; Catálogo
+          <span class="material-symbols-outlined nav-icon">storefront</span> Colección &amp; Catálogo
         </a>
         <a routerLink="/ia-asistente" class="client-nav-link" routerLinkActive="active" (click)="closeMobileMenu()">
-          <span>✨</span> Atelier Stylist (IA)
+          <span class="material-symbols-outlined nav-icon">auto_awesome</span> Asistente IA
         </a>
         <a routerLink="/reservas" class="client-nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()">
-          <span>🏛️</span> Reservar Probador
+          <span class="material-symbols-outlined nav-icon">event_available</span> Reservar Probador
         </a>
         <a routerLink="/ventas/checkout" class="client-nav-link" routerLinkActive="active" (click)="closeMobileMenu()">
-          <span>🛍️</span> Mi Bolsa &amp; Pedidos
+          <span class="material-symbols-outlined nav-icon">shopping_bag</span> Bolsa &amp; Pedidos
         </a>
       }
 
       <!-- 2. VISTA PARA CAJERO -->
       @else if (authService.isCajero()) {
         <a routerLink="/ventas" class="client-nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()">
-          <span>💳</span> Punto de Venta POS
+          <span class="material-symbols-outlined nav-icon">point_of_sale</span> Terminal POS
         </a>
         <a routerLink="/catalogo" class="client-nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()">
-          <span>👗</span> Catálogo
+          <span class="material-symbols-outlined nav-icon">inventory_2</span> Catálogo
         </a>
         <a routerLink="/ventas/checkout" class="client-nav-link" routerLinkActive="active" (click)="closeMobileMenu()">
-          <span>🛍️</span> E-Commerce
+          <span class="material-symbols-outlined nav-icon">local_shipping</span> E-Commerce
         </a>
         <a routerLink="/ventas/devoluciones" class="client-nav-link" routerLinkActive="active" (click)="closeMobileMenu()">
-          <span>🔄</span> Devoluciones &amp; Cambios
+          <span class="material-symbols-outlined nav-icon">published_with_changes</span> Devoluciones
         </a>
         <a routerLink="/ventas/pagos" class="client-nav-link" routerLinkActive="active" (click)="closeMobileMenu()">
-          <span>📱</span> Pasarela de Pagos
+          <span class="material-symbols-outlined nav-icon">payments</span> Pasarela de Pagos
         </a>
       }
 
@@ -96,7 +96,7 @@
         @if (authService.isAdmin()) {
           <div class="nav-dropdown" [class.active-module]="isModuleActive('/usuarios')" [class.mobile-expanded]="openMobileDropdown() === 'usuarios'">
             <button type="button" class="dropdown-trigger" (click)="toggleMobileDropdown('usuarios')">
-              <span>Seguridad &amp; Usuarios</span>
+              <span>Seguridad</span>
               <span class="dropdown-chevron">&#9662;</span>
             </button>
             <div class="dropdown-menu">
@@ -116,7 +116,7 @@
         <!-- MÓDULO 1.5.2: CATÁLOGO DE MODA -->
         <div class="nav-dropdown" [class.active-module]="isCatalogoActive()" [class.mobile-expanded]="openMobileDropdown() === 'catalogo'">
           <button type="button" class="dropdown-trigger" (click)="toggleMobileDropdown('catalogo')">
-            <span>Catálogo de Moda</span>
+            <span>Catálogo</span>
             <span class="dropdown-chevron">&#9662;</span>
           </button>
           <div class="dropdown-menu">
@@ -135,7 +135,7 @@
         <!-- MÓDULO 1.5.3: INVENTARIO & SUCURSALES -->
         <div class="nav-dropdown" [class.active-module]="isInventarioActive()" [class.mobile-expanded]="openMobileDropdown() === 'inventario'">
           <button type="button" class="dropdown-trigger" (click)="toggleMobileDropdown('inventario')">
-            <span>Inventario &amp; Sucursales</span>
+            <span>Inventario</span>
             <span class="dropdown-chevron">&#9662;</span>
           </button>
           <div class="dropdown-menu">
@@ -160,7 +160,7 @@
         <!-- MÓDULO 1.5.4: VENTAS & E-COMMERCE -->
         <div class="nav-dropdown" [class.active-module]="isModuleActive('/ventas')" [class.mobile-expanded]="openMobileDropdown() === 'ventas'">
           <button type="button" class="dropdown-trigger" (click)="toggleMobileDropdown('ventas')">
-            <span>Ventas &amp; Pagos</span>
+            <span>Ventas</span>
             <span class="dropdown-chevron">&#9662;</span>
           </button>
           <div class="dropdown-menu">
@@ -185,7 +185,7 @@
         <!-- MÓDULO 1.5.5: RESERVAS & CITAS -->
         <div class="nav-dropdown" [class.active-module]="isModuleActive('/reservas')" [class.mobile-expanded]="openMobileDropdown() === 'reservas'">
           <button type="button" class="dropdown-trigger" (click)="toggleMobileDropdown('reservas')">
-            <span>Probador &amp; Citas</span>
+            <span>Probador</span>
             <span class="dropdown-chevron">&#9662;</span>
           </button>
           <div class="dropdown-menu">
@@ -201,7 +201,7 @@
         <!-- MÓDULO 1.5.6: DASHBOARD & IA -->
         <div class="nav-dropdown" [class.active-module]="isModuleActive('/dashboard') || isModuleActive('/ia-asistente')" [class.mobile-expanded]="openMobileDropdown() === 'dashboard'">
           <button type="button" class="dropdown-trigger" (click)="toggleMobileDropdown('dashboard')">
-            <span>Dashboard &amp; IA</span>
+            <span>Dashboard</span>
             <span class="dropdown-chevron">&#9662;</span>
           </button>
           <div class="dropdown-menu">
@@ -214,7 +214,13 @@
           </div>
         </div>
       }
-    </nav>
+            <!-- MÓDULO 2DO PARCIAL: SAAS & PLANES MULTITENANT (Sólo Administrador) -->
+        @if (authService.isAdmin()) {
+          <a routerLink="/saas" class="client-nav-link saas-header-btn" routerLinkActive="active" (click)="closeMobileMenu()">
+            <span class="material-symbols-outlined nav-icon">grid_view</span> SaaS
+          </a>
+        }
+      </nav>
 
     <div class="user-auth-zone">
       <!-- CU21: Centro de Notificaciones & Alertas -->
@@ -229,6 +235,11 @@
         <span class="cart-badge">{{ (cartService.count$ | async) || 0 }}</span>
       </a>
       @if (authService.isAuthenticated()) {
+        <a routerLink="/saas" class="tenant-badge-pill" [class.tenant-urban]="authService.currentTenant().empresaId === 2" title="Empresa Tenant Activa y Plan de Suscripción (Clic para gestionar)">
+          <span class="material-symbols-outlined tenant-pill-icon">business</span>
+          <span class="tenant-pill-name">{{ authService.currentTenant().nombreEmpresa }}</span>
+          <span class="tenant-pill-plan">{{ authService.currentTenant().planCodigo }}</span>
+        </a>
         <div class="user-profile-box">
           <span class="user-role-badge">{{ authService.currentUser()?.rol?.nombre || 'AUTENTICADO' }}</span>
           <span class="user-name">{{ authService.currentUser()?.nombre }}</span>

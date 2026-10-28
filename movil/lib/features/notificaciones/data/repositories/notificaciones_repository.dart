@@ -89,7 +89,7 @@ class NotificacionesRepository {
     return [
       NotificacionModel(
         id: 991,
-        titulo: '✨ Atelier Stylist (CU19): Nuevo look curado',
+        titulo: 'Atelier Stylist (CU19): Nuevo look curado',
         mensaje: 'Hemos seleccionado siluetas exclusivas de noche para tu perfil de gala.',
         tipo: 'RECOMENDACION_IA',
         canal: 'TODOS',
@@ -100,7 +100,7 @@ class NotificacionesRepository {
       ),
       NotificacionModel(
         id: 992,
-        titulo: '🕒 Probador VIP agendado',
+        titulo: 'Probador VIP agendado',
         mensaje: 'Tu cita en Boutique Equipetrol está confirmada para las 18:00.',
         tipo: 'RESERVA_PROBADOR',
         canal: 'TODOS',

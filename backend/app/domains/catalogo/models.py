@@ -62,6 +62,7 @@ class Prenda(Base):
     __tablename__ = "prendas"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    empresa_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, index=True)  # Multitenant ID
     sku: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
     nombre: Mapped[str] = mapped_column(String(150), index=True, nullable=False)
     descripcion: Mapped[str] = mapped_column(Text, nullable=False)
@@ -188,4 +189,3 @@ class CalificacionPrenda(Base):
 
     prenda: Mapped["Prenda"] = relationship("Prenda", back_populates="calificaciones")
     usuario: Mapped["app.domains.usuarios.models.Usuario"] = relationship("app.domains.usuarios.models.Usuario", lazy="selectin")
-

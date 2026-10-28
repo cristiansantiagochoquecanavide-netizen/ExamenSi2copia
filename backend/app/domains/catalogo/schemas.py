@@ -124,6 +124,7 @@ class PrendaCreate(BaseModel):
     precio_base: Decimal = Field(..., ge=0)
     categoria_id: int
     temporada_id: int
+    empresa_id: Optional[int] = None
     stock_inicial: Optional[int] = Field(50, ge=0)
     stock_distribucion: Optional[List[StockDistribucionItem]] = None
     activo: bool = True
@@ -192,6 +193,7 @@ class PrendaResponse(BaseSchema):
     precio_base: Decimal
     categoria_id: int
     temporada_id: int
+    empresa_id: Optional[int] = None
     activo: bool
     created_at: datetime
     categoria: Optional[CategoriaResponse] = None
