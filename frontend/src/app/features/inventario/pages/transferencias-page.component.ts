@@ -102,7 +102,7 @@ interface LineaTransferenciaForm {
 
           <div class="filter-select-group">
             <label class="filter-label">SUCURSAL:</label>
-            <select class="filter-select" [(ngModel)]="filtroSucursalId">
+            <select class="filter-select" [ngModel]="filtroSucursalId()" (ngModelChange)="filtroSucursalId.set($event)">
               <option [ngValue]="null">Todas las Sucursales</option>
               @for (s of sucursales(); track s.id) {
                 <option [ngValue]="s.id">{{ s.nombre }}</option>
@@ -1516,7 +1516,7 @@ export class TransferenciasPageComponent implements OnInit {
   readonly feedbackIsError = signal(false);
 
   readonly filtroEstado = signal<'TODOS' | 'EN_TRANSITO' | 'COMPLETADA' | 'CANCELADA'>('TODOS');
-  filtroSucursalId: number | null = null;
+  readonly filtroSucursalId = signal<number | null>(null);
 
   readonly showCreateModal = signal(false);
   readonly selectedTransferencia = signal<TransferenciaStockResponse | null>(null);
@@ -1553,10 +1553,11 @@ export class TransferenciasPageComponent implements OnInit {
     if (this.filtroEstado() !== 'TODOS') {
       list = list.filter(t => t.estado === this.filtroEstado());
     }
-    if (this.filtroSucursalId) {
+    const sucId = this.filtroSucursalId();
+    if (sucId !== null) {
       list = list.filter(t =>
-        t.sucursal_origen_id === this.filtroSucursalId ||
-        t.sucursal_destino_id === this.filtroSucursalId
+        t.sucursal_origen_id === sucId ||
+        t.sucursal_destino_id === sucId
       );
     }
     return list;

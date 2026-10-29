@@ -16,7 +16,8 @@ import {
   Talla,
   Color,
   Sucursal,
-  StockDistribucionItem
+  StockDistribucionItem,
+  PrendaVariante
 } from '../models/catalogo.models';
 
 interface FotoLocal {
@@ -71,11 +72,18 @@ interface FotoLocal {
           </svg>
           <input
             type="text"
-            [(ngModel)]="searchQuery"
-            placeholder="Buscar por nombre, SKU o descripción..."
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+            (keyup.escape)="limpiarBusqueda()"
+            placeholder="Buscar por nombre, SKU, categoría o descripción..."
             class="search-input"
           />
-          <button *ngIf="searchQuery" type="button" class="btn-clear-search" (click)="searchQuery = ''">&times;</button>
+          <button
+            *ngIf="searchQuery()"
+            type="button"
+            class="btn-clear-search"
+            (click)="limpiarBusqueda()"
+            title="Limpiar búsqueda">&times;</button>
         </div>
 
         <!-- Sector Filter Chips -->
@@ -112,7 +120,10 @@ interface FotoLocal {
 
         <!-- Category Dropdown -->
         <div class="category-select-wrap">
-          <select [(ngModel)]="selectedCategoriaId" class="category-dropdown">
+          <select
+            [ngModel]="selectedCategoriaId()"
+            (ngModelChange)="onCategoriaChange($event)"
+            class="category-dropdown">
             <option value="ALL">Todas las categorías</option>
             <optgroup label="MUJERES">
               <option *ngFor="let cat of categoriasMujer()" [value]="cat.id">{{ cat.nombre }}</option>
@@ -127,14 +138,59 @@ interface FotoLocal {
         </div>
       </section>
 
+      <!-- Active Filters / Results bar -->
+      <div class="filters-status-bar" *ngIf="searchQuery().trim() || selectedSector() !== 'TODAS' || selectedCategoriaId() !== 'ALL'">
+        <div class="status-bar-info">
+          <span class="results-badge">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            Mostrando <strong>{{ prendasFiltradas().length }}</strong> de <strong>{{ prendas().length }}</strong> prendas
+          </span>
+          <span *ngIf="searchQuery().trim()" class="active-filter-pill">
+            Búsqueda: "{{ searchQuery() }}"
+            <button type="button" class="btn-remove-pill" (click)="limpiarBusqueda()">&times;</button>
+          </span>
+          <span *ngIf="selectedSector() !== 'TODAS'" class="active-filter-pill">
+            Sector: {{ selectedSector() }}
+            <button type="button" class="btn-remove-pill" (click)="selectedSector.set('TODAS')">&times;</button>
+          </span>
+          <span *ngIf="selectedCategoriaId() !== 'ALL'" class="active-filter-pill">
+            Categoría: {{ getSelectedCategoriaNombre() }}
+            <button type="button" class="btn-remove-pill" (click)="selectedCategoriaId.set('ALL')">&times;</button>
+          </span>
+        </div>
+        <button type="button" class="btn-reset-filters-link" (click)="limpiarTodosLosFiltros()">
+          Limpiar filtros
+        </button>
+      </div>
+
       <!-- Loading State -->
       <div *ngIf="isLoading()" class="loading-state">
         <div class="spinner-gold"></div>
         <p>Cargando inventario maestro de prendas...</p>
       </div>
 
-      <!-- Empty State -->
-      <div *ngIf="!isLoading() && prendasFiltradas().length === 0" class="empty-state">
+      <!-- Empty State: Sin resultados de búsqueda -->
+      <div *ngIf="!isLoading() && prendas().length > 0 && prendasFiltradas().length === 0" class="empty-state">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#94a3b8" stroke-width="1.8" style="margin: 0 auto; display: block;">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            <line x1="8" y1="11" x2="14" y2="11"></line>
+          </svg>
+        </div>
+        <h3 class="empty-title">NO SE ENCONTRARON PRENDAS</h3>
+        <p class="empty-desc">
+          No hay prendas que coincidan con la búsqueda <strong *ngIf="searchQuery().trim()">"{{ searchQuery() }}"</strong> o los filtros aplicados.
+        </p>
+        <button type="button" class="btn-empty-reset" (click)="limpiarTodosLosFiltros()">
+          Restablecer filtros y mostrar todas
+        </button>
+      </div>
+
+      <!-- Truly Empty Catalog State -->
+      <div *ngIf="!isLoading() && prendas().length === 0" class="empty-state">
         <div class="empty-icon">
           <span class="material-symbols-outlined" style="font-size: 40px; color: #64748b;">inventory_2</span>
         </div>
@@ -167,14 +223,14 @@ interface FotoLocal {
             <tr *ngFor="let p of prendasFiltradas()">
               <!-- Foto Portada -->
               <td>
-                <div class="thumb-wrapper">
+                <div class="thumb-wrapper clickable-cell" (click)="abrirModalConsultar(p)" title="Consultar ficha técnica">
                   <img [src]="getPortadaUrl(p)" [alt]="p.nombre" class="table-thumb" (error)="handleImgError($event)" />
                 </div>
               </td>
 
               <!-- Nombre y SKU -->
               <td>
-                <div class="prenda-main-cell">
+                <div class="prenda-main-cell clickable-cell" (click)="abrirModalConsultar(p)" title="Consultar ficha técnica">
                   <span class="prenda-name">{{ p.nombre }}</span>
                   <span class="prenda-sku">{{ p.sku }}</span>
                 </div>
@@ -234,6 +290,13 @@ interface FotoLocal {
               <!-- Acciones -->
               <td style="text-align: right;">
                 <div class="row-actions">
+                  <button type="button" class="btn-icon-action btn-consult" (click)="abrirModalConsultar(p)" title="Consultar ficha técnica">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <span>Consultar</span>
+                  </button>
                   <button type="button" class="btn-icon-action btn-edit" (click)="abrirModalEditar(p)" title="Editar prenda">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -671,6 +734,162 @@ interface FotoLocal {
         </div>
       </div>
 
+      <!-- ======================================================== -->
+      <!-- MODAL CONSULTA DE FICHA TÉCNICA DE PRENDA                -->
+      <!-- ======================================================== -->
+      <div *ngIf="prendaConsultar()" class="modal-backdrop" (click)="cerrarModalConsultar()">
+        <div class="modal-dialog modal-dialog-consulta" (click)="$event.stopPropagation()">
+          <header class="modal-header">
+            <div class="modal-title-group">
+              <span class="modal-badge-consult">FICHA DE CONSULTA</span>
+              <h2 class="modal-title">{{ prendaConsultar()?.nombre }}</h2>
+              <div class="consult-meta-header">
+                <span class="consult-sku-tag">SKU: {{ prendaConsultar()?.sku }}</span>
+                <span class="consult-status-tag" [class.active]="prendaConsultar()?.activo">
+                  {{ prendaConsultar()?.activo ? 'ACTIVA' : 'INACTIVA' }}
+                </span>
+              </div>
+            </div>
+            <button type="button" class="btn-close-modal" (click)="cerrarModalConsultar()">&times;</button>
+          </header>
+
+          <div class="modal-scroll-body modal-scroll-consulta">
+            <div class="consult-layout">
+              <!-- Left: Gallery Preview -->
+              <div class="consult-gallery-panel">
+                <div class="consult-main-img-box">
+                  <img [src]="fotoConsultaActiva()" [alt]="prendaConsultar()?.nombre" class="consult-main-img" (error)="handleImgError($event)" />
+                </div>
+                <div *ngIf="(prendaConsultar()?.multimedia?.length || 0) > 1" class="consult-thumbs-strip">
+                  <button
+                    *ngFor="let m of prendaConsultar()?.multimedia"
+                    type="button"
+                    class="consult-thumb-btn"
+                    [class.active]="fotoConsultaActiva() === resolveImageUrl(m.url)"
+                    (click)="cambiarFotoConsulta(m.url)">
+                    <img [src]="resolveImageUrl(m.url)" alt="Miniatura" class="consult-thumb-img" (error)="handleImgError($event)" />
+                  </button>
+                </div>
+              </div>
+
+              <!-- Right: Detailed Info -->
+              <div class="consult-info-panel">
+                <!-- Badges row -->
+                <div class="consult-badges-row">
+                  <span class="consult-pill-cat">{{ prendaConsultar()?.categoria?.nombre || 'General' }}</span>
+                  <span class="consult-pill-sector">{{ prendaConsultar()?.categoria?.sector || 'UNISEX' }}</span>
+                  <span class="consult-pill-temp" *ngIf="prendaConsultar()?.temporada?.nombre">
+                    {{ prendaConsultar()?.temporada?.nombre }}
+                  </span>
+                </div>
+
+                <!-- Price and Stock highlights -->
+                <div class="consult-stats-grid">
+                  <div class="consult-stat-card">
+                    <span class="stat-label">PRECIO BASE</span>
+                    <span class="stat-value-price">Bs. {{ prendaConsultar()?.precio_base | number:'1.2-2' }}</span>
+                  </div>
+                  <div class="consult-stat-card">
+                    <span class="stat-label">STOCK TOTAL</span>
+                    <span class="stat-value-stock" [class.in-stock]="(prendaConsultar()?.stock_total || 0) > 0">
+                      {{ (prendaConsultar()?.stock_total || 0) > 0 ? (prendaConsultar()?.stock_total + ' uds') : 'Agotado' }}
+                    </span>
+                  </div>
+                  <div class="consult-stat-card">
+                    <span class="stat-label">TOTAL VARIANTES</span>
+                    <span class="stat-value-variants">{{ prendaConsultar()?.variantes?.length || 0 }} combinaciones</span>
+                  </div>
+                </div>
+
+                <!-- Description -->
+                <div class="consult-section">
+                  <h4 class="consult-section-title">DESCRIPCIÓN DE LA PRENDA</h4>
+                  <p class="consult-desc-text">
+                    {{ prendaConsultar()?.descripcion || 'Sin descripción detallada registrada.' }}
+                  </p>
+                </div>
+
+                <!-- Variantes Breakdown -->
+                <div class="consult-section">
+                  <h4 class="consult-section-title">VARIANTES Y TALLAS DISPONIBLES</h4>
+                  <div class="consult-variants-table-wrap">
+                    <table class="consult-variants-table">
+                      <thead>
+                        <tr>
+                          <th>TALLA</th>
+                          <th>COLOR</th>
+                          <th>SKU VARIANTE</th>
+                          <th>STOCK DISPONIBLE</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let v of prendaConsultar()?.variantes">
+                          <td><strong>{{ v.talla?.codigo }}</strong> <span class="talla-desc-muted" *ngIf="v.talla?.descripcion">({{ v.talla?.descripcion }})</span></td>
+                          <td>
+                            <div class="consult-color-chip">
+                              <span class="color-dot" [style.background-color]="v.color?.codigo_hex || '#475569'"></span>
+                              <span>{{ v.color?.nombre }}</span>
+                            </div>
+                          </td>
+                          <td class="font-mono-sku">{{ v.sku_variante || '-' }}</td>
+                          <td>
+                            <span class="stock-pill-sm" [class.has-stock]="(getStockVariante(v)) > 0">
+                              {{ getStockVariante(v) }} uds
+                            </span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- Guía Anatómica de Medidas -->
+                <div class="consult-section" *ngIf="guiaMedidasConsulta().length > 0">
+                  <h4 class="consult-section-title">GUÍA ANATÓMICA DE MEDIDAS (CM)</h4>
+                  <div class="guia-medidas-table-wrap">
+                    <table class="guia-medidas-table">
+                      <thead>
+                        <tr>
+                          <th>TALLA</th>
+                          <th>PECHO</th>
+                          <th>CINTURA</th>
+                          <th>CADERA</th>
+                          <th>LARGO</th>
+                          <th>MANGA</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let g of guiaMedidasConsulta()">
+                          <td><strong>{{ g.talla_nombre || ('Talla #' + g.talla_id) }}</strong></td>
+                          <td>{{ g.pecho_cm ? (g.pecho_cm + ' cm') : '-' }}</td>
+                          <td>{{ g.cintura_cm ? (g.cintura_cm + ' cm') : '-' }}</td>
+                          <td>{{ g.cadera_cm ? (g.cadera_cm + ' cm') : '-' }}</td>
+                          <td>{{ g.largo_cm ? (g.largo_cm + ' cm') : '-' }}</td>
+                          <td>{{ g.manga_cm ? (g.manga_cm + ' cm') : '-' }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <footer class="modal-footer-actions consult-footer">
+            <button type="button" class="btn-modal-cancel" (click)="cerrarModalConsultar()">
+              Cerrar Consulta
+            </button>
+            <button type="button" class="btn-consult-edit" (click)="consultarYEditar(prendaConsultar()!)">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+              <span>Editar esta Prenda</span>
+            </button>
+          </footer>
+        </div>
+      </div>
+
     </div>
   `,
   styles: [`
@@ -889,6 +1108,71 @@ interface FotoLocal {
       outline: none;
     }
 
+    /* Filters Status Bar */
+    .filters-status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 0.6rem 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .status-bar-info {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      font-size: 0.82rem;
+      color: #334155;
+    }
+    .results-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: #0f172a;
+      font-weight: 600;
+    }
+    .active-filter-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 20px;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .btn-remove-pill {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 0.95rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
+    }
+    .btn-remove-pill:hover {
+      color: #dc2626;
+    }
+    .btn-reset-filters-link {
+      background: none;
+      border: none;
+      color: #2563eb;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .btn-reset-filters-link:hover {
+      color: #1d4ed8;
+    }
+
     /* Table */
     .table-container {
       background: #ffffff;
@@ -949,6 +1233,17 @@ interface FotoLocal {
       display: flex;
       flex-direction: column;
       gap: 0.2rem;
+    }
+    .clickable-cell {
+      cursor: pointer;
+      transition: opacity 0.15s ease;
+    }
+    .clickable-cell:hover {
+      opacity: 0.85;
+    }
+    .clickable-cell .prenda-name:hover {
+      color: #2563eb;
+      text-decoration: underline;
     }
     .prenda-name {
       font-weight: 700;
@@ -1117,6 +1412,13 @@ interface FotoLocal {
       background: #f8fafc;
       border-color: #cbd5e1;
     }
+    .btn-consult {
+      color: #2563eb;
+    }
+    .btn-consult:hover {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+    }
     .btn-delete {
       color: #dc2626;
     }
@@ -1150,6 +1452,21 @@ interface FotoLocal {
       color: #64748b;
       margin: 0 0 1.5rem 0;
     }
+    .btn-empty-reset {
+      background: #ffffff;
+      color: #0f172a;
+      border: 1px solid #cbd5e1;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-empty-reset:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+    }
     .btn-empty-add {
       background: #0f172a;
       color: #ffffff;
@@ -1165,6 +1482,294 @@ interface FotoLocal {
     .btn-empty-add:hover {
       background: #1e293b;
       transform: translateY(-2px);
+    }
+
+    /* Modal Consulta */
+    .modal-dialog-consulta {
+      width: 920px !important;
+      max-width: 95vw !important;
+    }
+    .modal-scroll-consulta {
+      max-height: 80vh !important;
+      padding: 1.5rem !important;
+    }
+    .modal-badge-consult {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      color: #2563eb;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+    .consult-meta-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-top: 0.35rem;
+    }
+    .consult-sku-tag {
+      font-family: monospace;
+      font-size: 0.78rem;
+      color: #64748b;
+      font-weight: 700;
+      background: #f1f5f9;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+    }
+    .consult-status-tag {
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 0.15rem 0.5rem;
+      border-radius: 12px;
+      background: #fee2e2;
+      color: #dc2626;
+    }
+    .consult-status-tag.active {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+    .consult-layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 1.75rem;
+    }
+    .consult-gallery-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .consult-main-img-box {
+      width: 100%;
+      height: 380px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .consult-main-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .consult-thumbs-strip {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.35rem;
+    }
+    .consult-thumb-btn {
+      width: 58px;
+      height: 68px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 2px solid #e2e8f0;
+      background: #f8fafc;
+      cursor: pointer;
+      padding: 0;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+    .consult-thumb-btn.active {
+      border-color: #0f172a;
+      box-shadow: 0 0 0 1px #0f172a;
+    }
+    .consult-thumb-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .consult-info-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .consult-badges-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .consult-pill-cat {
+      background: #f1f5f9;
+      color: #334155;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.65rem;
+      border-radius: 4px;
+    }
+    .consult-pill-sector {
+      background: #fef3c7;
+      color: #92400e;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 0.25rem 0.65rem;
+      border-radius: 4px;
+    }
+    .consult-pill-temp {
+      background: #e0e7ff;
+      color: #3730a3;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.65rem;
+      border-radius: 4px;
+    }
+    .consult-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+    }
+    .consult-stat-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .stat-label {
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      text-transform: uppercase;
+    }
+    .stat-value-price {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .stat-value-stock {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #dc2626;
+    }
+    .stat-value-stock.in-stock {
+      color: #16a34a;
+    }
+    .stat-value-variants {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #334155;
+    }
+    .consult-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .consult-section-title {
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      margin: 0;
+      text-transform: uppercase;
+    }
+    .consult-desc-text {
+      font-size: 0.88rem;
+      color: #334155;
+      line-height: 1.5;
+      margin: 0;
+      background: #ffffff;
+      border: 1px solid #f1f5f9;
+      padding: 0.75rem;
+      border-radius: 6px;
+    }
+    .consult-variants-table-wrap, .guia-medidas-table-wrap {
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      overflow-x: auto;
+      background: #ffffff;
+    }
+    .consult-variants-table, .guia-medidas-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+    .consult-variants-table th, .guia-medidas-table th {
+      background: #f8fafc;
+      padding: 0.45rem 0.65rem;
+      border-bottom: 1px solid #e2e8f0;
+      font-weight: 800;
+      color: #475569;
+      text-align: left;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+    }
+    .consult-variants-table td, .guia-medidas-table td {
+      padding: 0.45rem 0.65rem;
+      border-bottom: 1px solid #f1f5f9;
+      color: #1e293b;
+    }
+    .consult-variants-table tr:last-child td, .guia-medidas-table tr:last-child td {
+      border-bottom: none;
+    }
+    .consult-color-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .color-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.15);
+      flex-shrink: 0;
+    }
+    .font-mono-sku {
+      font-family: monospace;
+      color: #64748b;
+      font-size: 0.75rem;
+    }
+    .stock-pill-sm {
+      display: inline-block;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: #fef2f2;
+      color: #dc2626;
+    }
+    .stock-pill-sm.has-stock {
+      background: #ecfdf5;
+      color: #065f46;
+    }
+    .talla-desc-muted {
+      font-size: 0.72rem;
+      color: #64748b;
+      font-weight: normal;
+    }
+    .btn-consult-edit {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: #0f172a;
+      color: #ffffff;
+      border: none;
+      padding: 0.55rem 1.1rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-consult-edit:hover {
+      background: #1e293b;
+    }
+    @media (max-width: 768px) {
+      .consult-layout {
+        grid-template-columns: 1fr;
+      }
+      .consult-stats-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     /* Modal */
@@ -2244,15 +2849,82 @@ export class GestionPrendasPageComponent implements OnInit {
   uploadError = signal<string | null>(null);
 
   // Filters
-  searchQuery = '';
+  searchQuery = signal<string>('');
   selectedSector = signal<'TODAS' | 'MUJERES' | 'HOMBRES' | 'UNISEX'>('TODAS');
-  selectedCategoriaId: number | 'ALL' = 'ALL';
+  selectedCategoriaId = signal<number | 'ALL'>('ALL');
+
+  // Consultation
+  prendaConsultar = signal<Prenda | null>(null);
+  fotoConsultaActiva = signal<string>('');
+  guiaMedidasConsulta = signal<any[]>([]);
+  cargandoGuiaConsulta = signal<boolean>(false);
 
   // Modals
   showFormModal = signal<boolean>(false);
   isEditing = signal<boolean>(false);
   editingPrendaId: number | null = null;
   prendaAEliminar = signal<Prenda | null>(null);
+
+  onCategoriaChange(val: any): void {
+    if (val === 'ALL' || val === null || val === undefined) {
+      this.selectedCategoriaId.set('ALL');
+    } else {
+      this.selectedCategoriaId.set(Number(val));
+    }
+  }
+
+  limpiarBusqueda(): void {
+    this.searchQuery.set('');
+  }
+
+  limpiarTodosLosFiltros(): void {
+    this.searchQuery.set('');
+    this.selectedSector.set('TODAS');
+    this.selectedCategoriaId.set('ALL');
+  }
+
+  getSelectedCategoriaNombre(): string {
+    const id = this.selectedCategoriaId();
+    if (id === 'ALL') return 'Todas';
+    const cat = this.categorias().find(c => c.id === id);
+    return cat ? cat.nombre : `Categoría #${id}`;
+  }
+
+  abrirModalConsultar(prenda: Prenda): void {
+    this.prendaConsultar.set(prenda);
+    this.fotoConsultaActiva.set(this.getPortadaUrl(prenda));
+    this.guiaMedidasConsulta.set([]);
+    this.cargandoGuiaConsulta.set(true);
+
+    this.saasService.getGuiaMedidas(prenda.id).subscribe({
+      next: (res) => {
+        this.cargandoGuiaConsulta.set(false);
+        this.guiaMedidasConsulta.set(res?.medidas || []);
+      },
+      error: () => {
+        this.cargandoGuiaConsulta.set(false);
+        this.guiaMedidasConsulta.set([]);
+      }
+    });
+  }
+
+  cerrarModalConsultar(): void {
+    this.prendaConsultar.set(null);
+  }
+
+  cambiarFotoConsulta(url: string): void {
+    this.fotoConsultaActiva.set(this.resolveImageUrl(url));
+  }
+
+  consultarYEditar(prenda: Prenda): void {
+    this.cerrarModalConsultar();
+    this.abrirModalEditar(prenda);
+  }
+
+  getStockVariante(variante: PrendaVariante): number {
+    if (!variante.stock_items || variante.stock_items.length === 0) return 0;
+    return variante.stock_items.reduce((sum: number, s: any) => sum + (s.cantidad_disponible || 0), 0);
+  }
 
   // Form Model
   formData: PrendaCreate = {
@@ -2338,8 +3010,8 @@ export class GestionPrendasPageComponent implements OnInit {
   prendasFiltradas = computed(() => {
     let list = this.prendas();
     const sec = this.selectedSector();
-    const catId = this.selectedCategoriaId;
-    const query = this.searchQuery.trim().toLowerCase();
+    const catId = this.selectedCategoriaId();
+    const query = this.searchQuery().trim().toLowerCase();
 
     if (sec !== 'TODAS') {
       list = list.filter(p => p.categoria?.sector === sec || p.categoria?.sector === 'UNISEX');
@@ -2350,12 +3022,32 @@ export class GestionPrendasPageComponent implements OnInit {
     }
 
     if (query) {
-      list = list.filter(p =>
-        p.nombre.toLowerCase().includes(query) ||
-        p.sku.toLowerCase().includes(query) ||
-        p.descripcion.toLowerCase().includes(query) ||
-        (p.categoria?.nombre && p.categoria.nombre.toLowerCase().includes(query))
-      );
+      list = list.filter(p => {
+        const nombre = (p.nombre || '').toLowerCase();
+        const sku = (p.sku || '').toLowerCase();
+        const desc = (p.descripcion || '').toLowerCase();
+        const catNombre = (p.categoria?.nombre || '').toLowerCase();
+        const catSector = (p.categoria?.sector || '').toLowerCase();
+        const tempNombre = (p.temporada?.nombre || '').toLowerCase();
+
+        // Variantes (SKU, talla, color)
+        const matchesVariante = (p.variantes || []).some(v =>
+          (v.sku_variante && v.sku_variante.toLowerCase().includes(query)) ||
+          (v.talla?.codigo && v.talla.codigo.toLowerCase().includes(query)) ||
+          (v.talla?.descripcion && v.talla.descripcion.toLowerCase().includes(query)) ||
+          (v.color?.nombre && v.color.nombre.toLowerCase().includes(query))
+        );
+
+        return (
+          nombre.includes(query) ||
+          sku.includes(query) ||
+          desc.includes(query) ||
+          catNombre.includes(query) ||
+          catSector.includes(query) ||
+          tempNombre.includes(query) ||
+          matchesVariante
+        );
+      });
     }
 
     return list;

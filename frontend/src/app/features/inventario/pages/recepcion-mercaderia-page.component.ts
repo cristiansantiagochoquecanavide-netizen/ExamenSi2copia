@@ -98,10 +98,15 @@ interface LineaRecepcionForm {
             <div class="search-box">
               <input
                 type="text"
-                [(ngModel)]="searchProveedorQuery"
+                [ngModel]="searchProveedorQuery()"
+                (ngModelChange)="searchProveedorQuery.set($event)"
+                (keyup.escape)="searchProveedorQuery.set('')"
                 placeholder="Buscar por razón social, NIT o contacto..."
                 class="search-input"
               />
+              @if (searchProveedorQuery()) {
+                <button type="button" class="btn-clear-search-mini" (click)="searchProveedorQuery.set('')" title="Limpiar búsqueda">&times;</button>
+              }
             </div>
           </div>
 
@@ -670,11 +675,17 @@ interface LineaRecepcionForm {
       color: #4b5563;
     }
 
+    .search-box {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
     .search-box input {
       background: #ffffff;
       border: 1px solid rgba(0, 0, 0, 0.2);
       color: #000000;
-      padding: 0.5rem 0.85rem;
+      padding: 0.5rem 2rem 0.5rem 0.85rem;
       font-size: 0.8rem;
       outline: none;
       min-width: 280px;
@@ -684,6 +695,22 @@ interface LineaRecepcionForm {
 
     .search-box input:focus {
       border-color: #000000;
+    }
+
+    .btn-clear-search-mini {
+      position: absolute;
+      right: 0.5rem;
+      background: none;
+      border: none;
+      color: #9ca3af;
+      font-size: 1.15rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .btn-clear-search-mini:hover {
+      color: #111111;
     }
 
     .table-wrap {
@@ -1268,15 +1295,30 @@ export class RecepcionMercaderiaPageComponent implements OnInit {
   prendas = signal<Prenda[]>([]);
 
   // Search & Filter
-  searchProveedorQuery = '';
+  searchProveedorQuery = signal<string>('');
   filteredProveedores = computed(() => {
-    const q = this.searchProveedorQuery.trim().toLowerCase();
+    const q = this.searchProveedorQuery().trim().toLowerCase();
     if (!q) return this.proveedores();
-    return this.proveedores().filter(p =>
-      p.razon_social.toLowerCase().includes(q) ||
-      p.nit.toLowerCase().includes(q) ||
-      (p.contacto_nombre && p.contacto_nombre.toLowerCase().includes(q))
-    );
+    return this.proveedores().filter(p => {
+      const razon = (p.razon_social || '').toLowerCase();
+      const nit = (p.nit || '').toLowerCase();
+      const contacto = (p.contacto_nombre || '').toLowerCase();
+      const tel = (p.telefono || '').toLowerCase();
+      const email = (p.email || '').toLowerCase();
+      const dir = (p.direccion || '').toLowerCase();
+      const idStr = String(p.id);
+
+      return (
+        razon.includes(q) ||
+        nit.includes(q) ||
+        contacto.includes(q) ||
+        tel.includes(q) ||
+        email.includes(q) ||
+        dir.includes(q) ||
+        idStr === q ||
+        `#${idStr}` === q
+      );
+    });
   });
 
   // Modals Visibility

@@ -258,7 +258,8 @@ class PrendaService:
         activo_solo: bool = True,
         limit: int = 50,
         offset: int = 0,
-        empresa_id: Optional[int] = None
+        empresa_id: Optional[int] = None,
+        search: Optional[str] = None
     ) -> List[Prenda]:
         query = select(Prenda).options(
             selectinload(Prenda.categoria),
@@ -288,6 +289,16 @@ class PrendaService:
                     PrendaVariante.stock_items.any(
                         and_(InventarioStock.sucursal_id == sucursal_id, InventarioStock.cantidad_disponible > 0)
                     )
+                )
+            )
+
+        if search and search.strip():
+            s = f"%{search.strip()}%"
+            filters.append(
+                or_(
+                    Prenda.nombre.ilike(s),
+                    Prenda.sku.ilike(s),
+                    Prenda.descripcion.ilike(s)
                 )
             )
 

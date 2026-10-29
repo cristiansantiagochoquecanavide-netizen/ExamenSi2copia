@@ -4056,10 +4056,16 @@ export class CatalogoPageComponent implements OnInit {
     // 3. Filtrar por búsqueda activa
     if (query) {
       list = list.filter(p =>
-        p.nombre.toLowerCase().includes(query) ||
-        p.sku.toLowerCase().includes(query) ||
-        p.descripcion.toLowerCase().includes(query) ||
-        (p.categoria?.nombre && p.categoria.nombre.toLowerCase().includes(query))
+        (p.nombre && p.nombre.toLowerCase().includes(query)) ||
+        (p.sku && p.sku.toLowerCase().includes(query)) ||
+        (p.descripcion && p.descripcion.toLowerCase().includes(query)) ||
+        (p.categoria?.nombre && p.categoria.nombre.toLowerCase().includes(query)) ||
+        (p.temporada?.nombre && p.temporada.nombre.toLowerCase().includes(query)) ||
+        (p.variantes || []).some(v =>
+          (v.sku_variante && v.sku_variante.toLowerCase().includes(query)) ||
+          (v.talla?.codigo && v.talla.codigo.toLowerCase().includes(query)) ||
+          (v.color?.nombre && v.color.nombre.toLowerCase().includes(query))
+        )
       );
     }
 

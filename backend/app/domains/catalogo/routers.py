@@ -182,6 +182,7 @@ async def listar_prendas(
     temporada_id: Optional[int] = None,
     sector: Optional[str] = None,
     sucursal_id: Optional[int] = None,
+    search: Optional[str] = None,
     activo_solo: bool = True,
     limit: int = 50,
     offset: int = 0,
@@ -189,7 +190,7 @@ async def listar_prendas(
     db: AsyncSession = Depends(get_db)
 ):
     empresa_id = tenant.empresa_id if tenant else None
-    return await PrendaService.listar(db, categoria_id, temporada_id, sector, sucursal_id, activo_solo, limit, offset, empresa_id)
+    return await PrendaService.listar(db, categoria_id, temporada_id, sector, sucursal_id, activo_solo, limit, offset, empresa_id, search)
 
 @router.post("/prendas", response_model=PrendaResponse, status_code=status.HTTP_201_CREATED, summary="Registrar Prenda en Catalogo (CU6)")
 async def crear_prenda(

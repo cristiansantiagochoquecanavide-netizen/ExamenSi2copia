@@ -139,9 +139,10 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
                   placeholder="Ej: Camisa, Blazer, NOIR-6647..."
                   [ngModel]="stockSearchTerm()"
                   (ngModelChange)="stockSearchTerm.set($event)"
+                  (keyup.escape)="stockSearchTerm.set('')"
                 />
                 @if (stockSearchTerm()) {
-                  <button type="button" class="btn-clear-search" (click)="stockSearchTerm.set('')">&times;</button>
+                  <button type="button" class="btn-clear-search" (click)="stockSearchTerm.set('')" title="Limpiar búsqueda">&times;</button>
                 }
               </div>
             </div>
@@ -227,8 +228,17 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
               <div class="empty-icon">&#128230;</div>
               <h3 class="empty-title">Sin registros de stock coincidentes</h3>
               <p class="empty-desc">
-                No se encontraron variantes con los filtros seleccionados para esta sucursal.
+                @if (stockSearchTerm().trim()) {
+                  No se encontraron prendas ni variantes para la búsqueda "<strong>{{ stockSearchTerm() }}</strong>".
+                } @else {
+                  No se encontraron variantes con los filtros seleccionados para esta sucursal.
+                }
               </p>
+              @if (stockSearchTerm().trim() || stockFilter() !== 'ALL') {
+                <button type="button" class="btn-clear-search-empty" (click)="resetStockFilters()">
+                  Restablecer búsqueda y filtros
+                </button>
+              }
             </div>
           } @else {
             <div class="table-card">
@@ -1136,6 +1146,23 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
       color: #6b7280;
     }
 
+    .btn-clear-search-empty {
+      margin-top: 1rem;
+      background: #0f172a;
+      color: #ffffff;
+      border: none;
+      padding: 0.6rem 1.4rem;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .btn-clear-search-empty:hover {
+      background: #1e293b;
+    }
+
     .info-banner {
       background: #f9fafb;
       border: 1px solid rgba(0, 0, 0, 0.08);
@@ -1533,8 +1560,6 @@ import { UsuarioResponse } from '../../usuarios/models/usuarios.models';
       background: #262626;
       transform: translateY(-1px);
     }
-      background: #262626;
-    }
   
     .saas-quota-banner {
       display: flex;
@@ -1654,6 +1679,11 @@ export class InventarioPageComponent implements OnInit {
     return this.personal().filter(u => u.tipo_usuario === 'PERSONAL');
   });
 
+  resetStockFilters(): void {
+    this.stockSearchTerm.set('');
+    this.stockFilter.set('ALL');
+  }
+
   // Filtered Stock Computed
   readonly filteredStock = computed(() => {
     const list = this.stockList();
@@ -1663,16 +1693,24 @@ export class InventarioPageComponent implements OnInit {
     return list.filter(item => {
       const prendaNombre = (item.variante?.prenda?.nombre || '').toLowerCase();
       const prendaSKU = (item.variante?.prenda?.sku || '').toLowerCase();
+      const prendaDesc = (item.variante?.prenda?.descripcion || '').toLowerCase();
       const varianteSKU = (item.variante?.sku_variante || '').toLowerCase();
       const colorNombre = (item.variante?.color?.nombre || '').toLowerCase();
       const tallaCodigo = (item.variante?.talla?.codigo || '').toLowerCase();
+      const tallaDesc = (item.variante?.talla?.descripcion || '').toLowerCase();
+      const barcode = (item.variante?.codigo_barras || '').toLowerCase();
 
       const matchesSearch = !term ||
         prendaNombre.includes(term) ||
         prendaSKU.includes(term) ||
+        prendaDesc.includes(term) ||
         varianteSKU.includes(term) ||
         colorNombre.includes(term) ||
-        tallaCodigo.includes(term);
+        tallaCodigo.includes(term) ||
+        tallaDesc.includes(term) ||
+        barcode.includes(term) ||
+        term === String(item.variante?.prenda_id) ||
+        term === String(item.variante_id);
 
       if (!matchesSearch) return false;
 

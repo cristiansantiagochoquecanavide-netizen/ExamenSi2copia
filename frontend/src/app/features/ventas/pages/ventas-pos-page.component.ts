@@ -101,10 +101,12 @@ type TabPOS = 'POS' | 'HISTORIAL';
                   type="text"
                   class="search-input"
                   placeholder="Buscar por prenda, modelo o SKU..."
-                  [(ngModel)]="busquedaTexto"
+                  [ngModel]="busquedaTexto()"
+                  (ngModelChange)="busquedaTexto.set($event)"
+                  (keyup.escape)="busquedaTexto.set('')"
                 />
-                @if (busquedaTexto) {
-                  <button type="button" class="btn-clear-search" (click)="busquedaTexto = ''">&times;</button>
+                @if (busquedaTexto()) {
+                  <button type="button" class="btn-clear-search" (click)="busquedaTexto.set('')">&times;</button>
                 }
               </div>
 
@@ -113,8 +115,8 @@ type TabPOS = 'POS' | 'HISTORIAL';
                 <button
                   type="button"
                   class="cat-pill"
-                  [class.active]="categoriaFiltroId === null"
-                  (click)="categoriaFiltroId = null"
+                  [class.active]="categoriaFiltroId() === null"
+                  (click)="categoriaFiltroId.set(null)"
                 >
                   TODAS
                 </button>
@@ -122,8 +124,8 @@ type TabPOS = 'POS' | 'HISTORIAL';
                   <button
                     type="button"
                     class="cat-pill"
-                    [class.active]="categoriaFiltroId === cat.id"
-                    (click)="categoriaFiltroId = cat.id"
+                    [class.active]="categoriaFiltroId() === cat.id"
+                    (click)="categoriaFiltroId.set(cat.id)"
                   >
                     {{ cat.nombre }}
                   </button>
@@ -1735,8 +1737,8 @@ export class VentasPosPageComponent implements OnInit {
 
   // Filters
   sucursalSeleccionadaId: number = 0;
-  busquedaTexto: string = '';
-  categoriaFiltroId: number | null = null;
+  busquedaTexto = signal<string>('');
+  categoriaFiltroId = signal<number | null>(null);
 
   // POS Ticket & Cart
   ticketItems: ItemTicket[] = [];
@@ -1764,13 +1766,20 @@ export class VentasPosPageComponent implements OnInit {
   });
 
   readonly prendasFiltradas = computed(() => {
-    const q = this.busquedaTexto.toLowerCase().trim();
+    const q = this.busquedaTexto().toLowerCase().trim();
+    const catId = this.categoriaFiltroId();
     return this.prendas().filter(p => {
-      const matchCat = this.categoriaFiltroId === null || p.categoria_id === this.categoriaFiltroId;
+      const matchCat = catId === null || p.categoria_id === catId;
       const matchText = !q ||
-        p.nombre.toLowerCase().includes(q) ||
-        p.sku.toLowerCase().includes(q) ||
-        p.variantes.some(v => v.sku_variante.toLowerCase().includes(q));
+        (p.nombre && p.nombre.toLowerCase().includes(q)) ||
+        (p.sku && p.sku.toLowerCase().includes(q)) ||
+        (p.descripcion && p.descripcion.toLowerCase().includes(q)) ||
+        (p.categoria?.nombre && p.categoria.nombre.toLowerCase().includes(q)) ||
+        (p.variantes || []).some(v =>
+          (v.sku_variante && v.sku_variante.toLowerCase().includes(q)) ||
+          (v.talla?.codigo && v.talla.codigo.toLowerCase().includes(q)) ||
+          (v.color?.nombre && v.color.nombre.toLowerCase().includes(q))
+        );
       return matchCat && matchText;
     });
   });

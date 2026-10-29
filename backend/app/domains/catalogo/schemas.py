@@ -161,7 +161,20 @@ class PrendaSimpleResponse(BaseSchema):
     sku: str
     nombre: str
     precio_base: Decimal
+    descripcion: Optional[str] = None
     activo: bool
+
+class PrendaVarianteSimpleResponse(BaseSchema):
+    id: int
+    prenda_id: int
+    talla_id: int
+    color_id: int
+    sku_variante: str
+    codigo_barras: Optional[str] = None
+    activo: bool
+    talla: Optional[TallaResponse] = None
+    color: Optional[ColorResponse] = None
+    prenda: Optional[PrendaSimpleResponse] = None
 
 class InventarioStockResponse(BaseSchema):
     id: int
@@ -171,6 +184,7 @@ class InventarioStockResponse(BaseSchema):
     cantidad_reservada: int
     stock_minimo: int
     updated_at: datetime
+    variante: Optional[PrendaVarianteSimpleResponse] = None
 
 class PrendaVarianteResponse(BaseSchema):
     id: int
