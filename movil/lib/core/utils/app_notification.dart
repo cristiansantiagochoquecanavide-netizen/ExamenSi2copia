@@ -71,4 +71,50 @@ class AppNotification {
       rootScaffoldMessengerKey.currentState?.hideCurrentSnackBar();
     });
   }
+
+  static void showError(
+    String message, {
+    String? title,
+    Duration duration = const Duration(seconds: 4),
+  }) {
+    final state = rootScaffoldMessengerKey.currentState;
+    if (state == null) return;
+
+    state.clearSnackBars();
+
+    state.showSnackBar(
+      SnackBar(
+        duration: duration,
+        backgroundColor: const Color(0xFF991B1B),
+        behavior: SnackBarBehavior.floating,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (title != null) ...[
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.3,
+                ),
+              ),
+              const SizedBox(height: 3),
+            ],
+            Text(
+              message,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

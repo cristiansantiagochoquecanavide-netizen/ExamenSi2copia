@@ -252,3 +252,64 @@ async def cancelar_transferencia(
     )
 
 
+
+
+# ----------------- CU11, CU12, CU13: LOGÍSTICA MULTI-SUCURSAL Y TRASPASOS EN DOS FASES -----------------
+from fastapi import Query
+from app.core.tenant import get_optional_tenant_context, TenantContext
+from app.domains.usuarios.routers import get_optional_current_user
+from app.domains.inventario.schemas import (
+    StockSucursalItem, TraspasoCreateRequest, RecepcionTraspasoRequest, TraspasoActionResponse
+)
+from app.domains.inventario.services import TraspasoService
+
+
+@router.get("/sucursales-stock", response_model=List[StockSucursalItem], summary="Consultar Stock Multi-sucursal (CU11)")
+async def consultar_stock_multisucursal(
+    variante_id: int = Query(..., description="ID de la variante textil a consultar"),
+    request: Request = None,
+    current_user: Optional[Usuario] = Depends(get_optional_current_user),
+    tenant_ctx: Optional[TenantContext] = Depends(get_optional_tenant_context),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    CU11: Consultar Disponibilidad de Inventario Multi-sucursal.
+    Permite al vendedor y cliente ver el stock disponible en todas las sucursales del tenant.
+    """
+    empresa_id = (tenant_ctx.empresa_id if tenant_ctx else None) or (current_user.empresa_id if current_user else None)
+    return await TraspasoService.consultar_stock_multisucursal(db, variante_id, empresa_id)
+
+
+@router.post("/traspasos", status_code=status.HTTP_201_CREATED, summary="Solicitar y Despachar Traspaso Fase 1 (CU12)")
+async def solicitar_y_despachar_traspaso(
+    traspaso: TraspasoCreateRequest,
+    request: Request,
+    current_user: Optional[Usuario] = Depends(get_optional_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    CU12: Fase 1 del Traspaso.
+    - Valida que sucursal_origen_id <> sucursal_destino_id.
+    - Valida stock suficiente en origen.
+    - Descuenta del disponible de origen y genera orden en estado 'EN_TRANSITO'.
+    """
+    ip = request.client.host if request.client else None
+    return await TraspasoService.solicitar_y_despachar_traspaso(db, traspaso, current_user, ip)
+
+
+@router.post("/traspasos/{traspaso_id}/recepcionar", summary="Confirmar Recepción de Traspaso Fase 2 (CU13)")
+async def confirmar_recepcion_traspaso(
+    traspaso_id: int,
+    recepcion: RecepcionTraspasoRequest,
+    request: Request,
+    current_user: Optional[Usuario] = Depends(get_optional_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    CU13: Fase 2 del Traspaso.
+    - Valida que el traspaso esté en estado 'EN_TRANSITO'.
+    - Suma las cantidades recibidas al inventario disponible de destino.
+    - Actualiza el estado a 'RECEPCIONADO'.
+    """
+    ip = request.client.host if request.client else None
+    return await TraspasoService.confirmar_recepcion_traspaso(db, traspaso_id, recepcion, current_user, ip)

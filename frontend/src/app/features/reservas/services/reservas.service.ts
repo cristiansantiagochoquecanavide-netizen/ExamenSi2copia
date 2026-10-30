@@ -5,12 +5,14 @@ import { Observable } from 'rxjs';
 import {
   Reserva, ReservaCreate, AsignarProbadorRequest, FinalizarPruebaRequest
 } from '../models/reservas.models';
+import { LocalOfflineStorageService } from '../../../core/services/local-offline-storage.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReservasService {
   private readonly http = inject(HttpClient);
+  private readonly offlineStorage = inject(LocalOfflineStorageService);
   private readonly baseUrl = `${environment.apiUrl}/reservas`;
 
   getStatus(): Observable<any> {
@@ -54,6 +56,20 @@ export class ReservasService {
     return this.http.post<Reserva>(`${this.baseUrl}/${id}/expirar`, {
       motivo: motivo || 'No show del cliente en probador'
     });
+  }
+
+  // ----------------- CU14: RESERVAS OFFLINE PARA PROBADOR FÍSICO (SIN PAGO) -----------------
+  registrarReservaProbadorOffline(datos: {
+    prenda_id: number;
+    nombre_prenda: string;
+    talla: string;
+    hora_ensayo: string;
+  }): Observable<string> {
+    return this.offlineStorage.registrarReservaProbadorOffline(datos);
+  }
+
+  obtenerReservasProbadorOffline() {
+    return this.offlineStorage.obtenerReservasOffline();
   }
 }
 

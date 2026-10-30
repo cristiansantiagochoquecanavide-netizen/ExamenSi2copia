@@ -187,3 +187,38 @@ class CancelarTransferenciaRequest(BaseModel):
     motivo: Optional[str] = None
 
 
+
+
+# ----------------- CU11, CU12, CU13: INVENTARIO MULTI-SUCURSAL Y TRASPASOS -----------------
+class StockSucursalItem(BaseModel):
+    sucursal_id: int
+    nombre_sucursal: str
+    direccion: str
+    telefono: Optional[str] = None
+    stock_disponible: int
+
+class ItemTraspasoCreate(BaseModel):
+    producto_variante_id: int
+    cantidad: int = Field(gt=0, description="Cantidad a transferir (debe ser mayor a cero)")
+
+class TraspasoCreateRequest(BaseModel):
+    sucursal_origen_id: int
+    sucursal_destino_id: int
+    motivo: Optional[str] = None
+    items: List[ItemTraspasoCreate] = Field(..., min_length=1)
+
+class ItemRecepcionConfirm(BaseModel):
+    producto_variante_id: int
+    cantidad_recibida: int = Field(ge=0, description="Cantidad efectivamente recibida")
+
+class RecepcionTraspasoRequest(BaseModel):
+    observaciones_recepcion: Optional[str] = None
+    items_confirmados: Optional[List[ItemRecepcionConfirm]] = None
+
+class TraspasoActionResponse(BaseModel):
+    codigo_traspaso: Optional[str] = None
+    traspaso_id: Optional[int] = None
+    sucursal_origen_id: Optional[int] = None
+    sucursal_destino_id: Optional[int] = None
+    estado: str
+    mensaje: str

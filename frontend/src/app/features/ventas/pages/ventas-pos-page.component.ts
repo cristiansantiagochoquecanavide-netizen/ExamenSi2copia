@@ -61,6 +61,19 @@ type TabPOS = 'POS' | 'HISTORIAL';
             <span class="cashier-role">{{ authService.currentUser()?.rol?.nombre || 'CAJERO' }}</span>
             <span class="cashier-name">{{ authService.currentUser()?.nombre }} {{ authService.currentUser()?.apellido }}</span>
           </div>
+
+          <!-- CU15: BOTÓN / INDICADOR DE CONTINGENCIA OFFLINE -->
+          <button 
+            type="button" 
+            class="offline-toggle-btn"
+            [style.background]="simularOffline() ? '#78350f' : '#064e3b'"
+            [style.color]="simularOffline() ? '#fef08a' : '#86efac'"
+            [style.border]="simularOffline() ? '1px solid #f59e0b' : '1px solid #10b981'"
+            style="padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px;"
+            (click)="toggleModoOffline()"
+            title="Haga clic para alternar entre modo En Línea y Modo Contingencia Offline">
+            <span>{{ simularOffline() ? '⚡ OFFLINE / CONTINGENCIA (CU15)' : '● EN LÍNEA' }}</span>
+          </button>
           <div class="nav-tabs-switch">
             <button
               type="button"
@@ -1725,6 +1738,7 @@ export class VentasPosPageComponent implements OnInit {
 
   // View state
   readonly activeTab = signal<TabPOS>('POS');
+  readonly simularOffline = signal<boolean>(false);
   readonly sucursales = signal<Sucursal[]>([]);
   readonly prendas = signal<Prenda[]>([]);
   readonly stockSucursal = signal<InventarioStock[]>([]);
@@ -1803,6 +1817,17 @@ export class VentasPosPageComponent implements OnInit {
   readonly totalRecaudadoDia = computed(() =>
     this.ventasDelDia().reduce((acc, v) => acc + (v.total || 0), 0)
   );
+
+  toggleModoOffline(): void {
+    this.simularOffline.update(v => !v);
+    if (this.simularOffline()) {
+      this.feedbackMsg.set('⚠️ Modo Contingencia OFFLINE activado. Las ventas en efectivo se guardarán localmente con UUIDv4.');
+      this.feedbackIsError.set(false);
+    } else {
+      this.feedbackMsg.set('🟢 Conexión restablecida. Modo En Línea activo.');
+      this.feedbackIsError.set(false);
+    }
+  }
 
   ngOnInit(): void {
     this.loadCatalogAndBranches();
@@ -1939,6 +1964,32 @@ export class VentasPosPageComponent implements OnInit {
       detalles: detallesPayload,
       pago: pagoPayload
     };
+
+    // CU15: Si la terminal opera sin conexión y el pago es en EFECTIVO, registrar venta en contingencia local IndexedDB con UUIDv4
+    if ((this.simularOffline() || (typeof navigator !== 'undefined' && !navigator.onLine)) && this.metodoPago === 'EFECTIVO') {
+      this.isSubmitting.set(true);
+      const itemsOffline = this.ticketItems.map(it => ({
+        variante_id: it.variante_id,
+        nombre: it.prenda_nombre,
+        cantidad: it.cantidad,
+        precio: it.precio_unitario
+      }));
+      this.ventasService.registrarVentaContadoOffline({
+        monto_total: this.totalTicket(),
+        items: itemsOffline
+      }).subscribe({
+        next: (uuid) => {
+          this.isSubmitting.set(false);
+          this.showFeedback(`[CONTINGENCIA OFFLINE] Venta en efectivo registrada localmente con UUID: ${uuid.substring(0, 8)}...`);
+          this.nuevaVentaTrasRecibo();
+        },
+        error: () => {
+          this.isSubmitting.set(false);
+          this.showFeedback('Error guardando venta contingente en IndexedDB.', true);
+        }
+      });
+      return;
+    }
 
     this.isSubmitting.set(true);
     this.ventasService.registrarVentaPOS(payload).subscribe({

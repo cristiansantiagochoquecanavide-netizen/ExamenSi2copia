@@ -58,7 +58,21 @@ async def obtener_recomendaciones(
             usuario_id=usuario_id, limit=limit, ocasion=ocasion, sector=sector
         )
         pref = await service.obtener_preferencias(usuario_id) if usuario_id else None
-        outfits = await service.generar_outfits_destacados([])
+
+        from sqlalchemy import select
+        from sqlalchemy.orm import selectinload
+        from app.domains.catalogo.models import Prenda
+
+        query = select(Prenda).options(
+            selectinload(Prenda.categoria),
+            selectinload(Prenda.temporada),
+            selectinload(Prenda.multimedia),
+            selectinload(Prenda.calificaciones)
+        ).where(Prenda.activo == True)
+        res = await db.execute(query)
+        todas = list(res.scalars().all())
+        outfits = await service.generar_outfits_destacados(todas, ocasion=ocasion)
+
         return DashboardRecomendacionesResponse(
             usuario_id=usuario_id,
             usuario_nombre=usuario_nombre,

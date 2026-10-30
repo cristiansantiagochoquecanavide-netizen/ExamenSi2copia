@@ -29,13 +29,13 @@ interface LineaTransferenciaForm {
         </div>
         <div class="hero-main-row">
           <div>
-            <h1 class="hero-title">Transferencias de Stock</h1>
+            <h1 class="hero-title">Traspasos de Stock Multi-Sucursal (CU12 &amp; CU13)</h1>
             <p class="hero-description">
-              Rebalanceo y redistribución de mercadería entre tiendas físicas de diferentes ciudades. Control simétrico de Kardex y validación de existencias en tiempo real.
+              Rebalanceo y redistribución de mercadería entre tiendas físicas (Fase 1: Despacho a EN_TRÁNSITO por Encargado Origen; Fase 2: Recepción Conforme por Encargado Destino).
             </p>
           </div>
           <button type="button" class="btn-gold" (click)="openNuevaTransferenciaModal()">
-            + NUEVA TRANSFERENCIA
+            + NUEVO TRASPASO (CU12)
           </button>
         </div>
 
@@ -188,8 +188,8 @@ interface LineaTransferenciaForm {
                         Ver Detalle
                       </button>
                       @if (t.estado === 'EN_TRANSITO') {
-                        <button type="button" class="btn-action-receive" (click)="recibirTransferencia(t)">
-                          Recibir
+                        <button type="button" class="btn-action-receive" (click)="recibirTransferencia(t)" title="Confirmar recepción física conforme (CU13)">
+                          Recibir Conforme (CU13)
                         </button>
                         <button type="button" class="btn-action-cancel" (click)="cancelarTransferencia(t)">
                           Anular
@@ -405,7 +405,7 @@ interface LineaTransferenciaForm {
                   class="btn-submit"
                   [disabled]="isSubmitting() || lineasTransferencia.length === 0"
                 >
-                  {{ isSubmitting() ? 'DESPACHANDO...' : 'AUTORIZAR Y DESPACHAR TRASLADO' }}
+                  {{ isSubmitting() ? 'DESPACHANDO...' : 'AUTORIZAR Y DESPACHAR TRASPASO (CU12: EN_TRÁNSITO)' }}
                 </button>
               </div>
             </form>

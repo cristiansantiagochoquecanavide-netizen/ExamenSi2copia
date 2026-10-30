@@ -9,12 +9,14 @@ import {
   VentaOnlineCheckoutRequest, ActualizarEstadoEnvioRequest, EnvioPedido,
   Promocion, PromocionCreate, PromocionUpdate, ValidarCuponRequest, ValidarCuponResponse
 } from '../models/ventas.models';
+import { LocalOfflineStorageService } from '../../../core/services/local-offline-storage.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class VentasService {
   private readonly http = inject(HttpClient);
+  private readonly offlineStorage = inject(LocalOfflineStorageService);
   private readonly baseUrl = `${environment.apiUrl}/ventas`;
 
   getStatus(): Observable<any> {
@@ -131,6 +133,18 @@ export class VentasService {
 
   deletePromocion(id: number): Observable<any> {
     return this.http.delete(`${this.baseUrl}/promociones/${id}`);
+  }
+
+  // ----------------- CU15: REGISTRAR VENTA DE CONTADO OFFLINE (EFECTIVO) -----------------
+  registrarVentaContadoOffline(datos: {
+    monto_total: number;
+    items: Array<{ variante_id: number; nombre: string; cantidad: number; precio: number }>;
+  }): Observable<string> {
+    return this.offlineStorage.registrarVentaContadoOffline(datos);
+  }
+
+  obtenerVentasOffline() {
+    return this.offlineStorage.obtenerVentasOffline();
   }
 }
 

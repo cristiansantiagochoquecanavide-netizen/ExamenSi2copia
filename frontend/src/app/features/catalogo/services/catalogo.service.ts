@@ -203,6 +203,13 @@ export class CatalogoService {
   eliminarCalificacion(calificacionId: number): Observable<{ mensaje: string; exito: boolean }> {
     return this.http.delete<{ mensaje: string; exito: boolean }>(`${this.baseUrl}/calificaciones/${calificacionId}`);
   }
+
+  // ==========================================
+  // CU08: SINCRONIZACIÓN DE CATÁLOGO OFFLINE
+  // ==========================================
+  sincronizarCatalogoOffline(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/sincronizar-local`);
+  }
 }
 
 

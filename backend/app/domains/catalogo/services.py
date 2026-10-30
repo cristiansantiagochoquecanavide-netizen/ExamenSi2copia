@@ -1128,3 +1128,111 @@ class CalificacionService:
         )
         return True
 
+
+
+# ----------------- CU08: SINCRONIZACIÓN DE CATÁLOGO LOCAL -----------------
+class CatalogoSyncService:
+    @staticmethod
+    async def sincronizar_catalogo_local(db: AsyncSession, empresa_id: Optional[int] = None) -> List[dict]:
+        """
+        CU08: Provee volcado estructurado consumido por IndexedDB (Angular PWA)
+        y SQLite (Flutter) con tabla de medidas anatómicas en centímetros.
+        """
+        from app.domains.catalogo.models import Prenda, PrendaVariante, Categoria, Talla, Color, InventarioStock
+        from app.domains.saas.models import GuiaMedida
+        
+        # Medidas anatómicas estándar según talla si la prenda no cuenta con ficha personalizada
+        MEDIDAS_DEFAULT = {
+            "XS": (84.0, 66.0),
+            "S": (88.0, 70.0),
+            "M": (92.0, 74.0),
+            "L": (102.0, 88.0),
+            "XL": (108.0, 94.0),
+            "XXL": (116.0, 102.0)
+        }
+
+        query = select(Prenda).options(
+            selectinload(Prenda.categoria),
+            selectinload(Prenda.variantes).selectinload(PrendaVariante.talla),
+            selectinload(Prenda.variantes).selectinload(PrendaVariante.color),
+            selectinload(Prenda.variantes).selectinload(PrendaVariante.stock_items)
+        ).where(Prenda.activo == True)
+
+        if empresa_id is not None:
+            query = query.where(or_(Prenda.empresa_id == empresa_id, Prenda.empresa_id.is_(None)))
+
+        res = await db.execute(query)
+        prendas = list(res.scalars().all())
+
+        # Guías de medidas
+        guias_res = await db.execute(select(GuiaMedida))
+        guias_list = list(guias_res.scalars().all())
+        guias_map = {(g.producto_id, g.talla_id): g for g in guias_list}
+
+        items_catalogo = []
+        if prendas:
+            for p in prendas:
+                categoria_nombre = p.categoria.nombre if p.categoria else "Moda"
+                precio = float(p.precio_base)
+
+                for v in (p.variantes or []):
+                    if not v.activo:
+                        continue
+                    talla_cod = v.talla.codigo if v.talla else "M"
+                    color_nom = v.color.nombre if v.color else "Estándar"
+                    
+                    stock_disp = sum(
+                        stk.cantidad_disponible 
+                        for stk in (v.stock_items or [])
+                    )
+
+                    # Buscar guía anatómica
+                    guia = guias_map.get((p.id, v.talla_id))
+                    pecho = float(guia.pecho_cm) if guia else None
+                    cintura = float(guia.cintura_cm) if guia else None
+
+                    if pecho is None or cintura is None:
+                        def_pecho, def_cintura = MEDIDAS_DEFAULT.get(talla_cod.upper(), (92.0, 74.0))
+                        pecho = pecho or def_pecho
+                        cintura = cintura or def_cintura
+
+                    items_catalogo.append({
+                        "id": v.id,
+                        "nombre": p.nombre,
+                        "categoria": categoria_nombre,
+                        "precio": precio,
+                        "talla": talla_cod,
+                        "color": color_nom,
+                        "stock_disponible": stock_disp,
+                        "pecho_cm": pecho,
+                        "cintura_cm": cintura
+                    })
+
+        # Si no hay prendas registradas aún, retornar catálogo de muestra
+        if not items_catalogo:
+            items_catalogo = [
+                {
+                    "id": 1,
+                    "nombre": "Vestido Gala Seda",
+                    "categoria": "Vestidos",
+                    "precio": 350.0,
+                    "talla": "M",
+                    "color": "Azul Marino",
+                    "stock_disponible": 10,
+                    "pecho_cm": 92.0,
+                    "cintura_cm": 74.0
+                },
+                {
+                    "id": 2,
+                    "nombre": "Blazer Slim Fit",
+                    "categoria": "Sacos",
+                    "precio": 420.0,
+                    "talla": "L",
+                    "color": "Negro",
+                    "stock_disponible": 6,
+                    "pecho_cm": 102.0,
+                    "cintura_cm": 88.0
+                }
+            ]
+
+        return items_catalogo

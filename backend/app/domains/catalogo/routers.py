@@ -527,3 +527,23 @@ async def virtual_try_on(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error en el pipeline de Virtual Try-On: {exc}",
         )
+
+
+
+# ----------------- CU08: CATÁLOGO LOCAL SYNC PARA CLIENTES OFFLINE -----------------
+from app.domains.catalogo.schemas import PrendaSyncItem
+from app.domains.catalogo.services import CatalogoSyncService
+
+@router.get("/sincronizar-local", response_model=List[PrendaSyncItem], summary="Descargar Catálogo Local para Offline (CU08)")
+async def sincronizar_catalogo_local(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    tenant_ctx: Optional[TenantContext] = Depends(get_optional_tenant_context)
+):
+    """
+    CU08: Descargar y Almacenar Catálogo en Memoria Local.
+    Provee el volcado estructurado consumido por IndexedDB (Angular PWA)
+    y SQLite (Flutter) para garantizar navegación fuera de línea.
+    """
+    empresa_id = tenant_ctx.empresa_id if tenant_ctx else None
+    return await CatalogoSyncService.sincronizar_catalogo_local(db, empresa_id)

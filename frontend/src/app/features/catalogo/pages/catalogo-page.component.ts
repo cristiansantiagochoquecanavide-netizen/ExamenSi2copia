@@ -1,8 +1,10 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { CatalogoService } from '../services/catalogo.service';
+import { LocalOfflineStorageService } from '../../../core/services/local-offline-storage.service';
 import { environment } from '../../../environments/environment';
 import { InventarioService } from '../../inventario/services/inventario.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -50,6 +52,18 @@ import { SaasService } from '../../../core/services/saas.service';
             <span class="hero-ia-chip"><span class="material-symbols-outlined hero-ia-icon">auto_awesome</span> ATELIER IA</span>
             <span class="hero-ia-text">¿Buscás asesoramiento exclusivo? Descubrí recomendaciones hiperpersonalizadas y looks completos coordinados.</span>
             <span class="hero-ia-link">Probar Atelier Stylist &rarr;</span>
+          </div>
+
+          <!-- CU08: BOTÓN DE SINCRONIZACIÓN OFFLINE INDEXEDDB -->
+          <div class="offline-sync-bar" style="margin-top: 14px; display: flex; align-items: center; justify-content: space-between; background: #18181b; padding: 10px 16px; border-radius: 8px; border: 1px solid #27272a;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #d4d4d8;">
+              <span class="material-symbols-outlined" style="color: #fbbf24; font-size: 20px;">offline_pin</span>
+              <span><strong>Modo Offline PWA (CU08):</strong> Almacena catálogo con medidas anatómicas en IndexedDB para navegación sin internet.</span>
+            </div>
+            <button type="button" (click)="sincronizarCatalogoOffline()" [disabled]="isSyncingOffline()" style="background: #fbbf24; color: #000; border: none; padding: 6px 14px; font-weight: 700; font-size: 12px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+              <span class="material-symbols-outlined" style="font-size: 16px;">download</span>
+              <span>{{ isSyncingOffline() ? 'SINCRONIZANDO...' : 'DESCARGAR CATÁLOGO OFFLINE' }}</span>
+            </button>
           </div>
         </div>
       </section>
@@ -550,6 +564,50 @@ import { SaasService } from '../../../core/services/saas.service';
                         </button>
                       }
                     </div>
+
+                    <!-- CU11 y CU14 BOTONES EN DETALLE DE PRENDA -->
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                      <button 
+                        type="button" 
+                        (click)="consultarStockMultisucursal(getSelectedVariante()?.id)"
+                        style="flex: 1; padding: 10px; background: #27272a; color: #fbbf24; border: 1px solid #3f3f46; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 4px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                        <span>🏢</span> VER STOCK OTRAS SUCURSALES (CU11)
+                      </button>
+                      <button 
+                        type="button" 
+                        (click)="apartarParaProbadorOffline(prenda)"
+                        style="flex: 1; padding: 10px; background: #064e3b; color: #a7f3d0; border: 1px solid #059669; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 4px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                        <span>🚪</span> APARTAR EN PROBADOR (CU14)
+                      </button>
+                    </div>
+
+                    <!-- CU11 LISTA DESPLEGABLE DE STOCK MULTI-SUCURSAL -->
+                    @if (mostrarStockMultisucursal()) {
+                      <div style="margin-top: 10px; padding: 12px; background: #09090b; border: 1px solid #3f3f46; border-radius: 6px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                          <strong style="color: #fbbf24; font-size: 12px;">DISPONIBILIDAD MULTI-SUCURSAL (CU11)</strong>
+                          <button type="button" (click)="mostrarStockMultisucursal.set(false)" style="background: none; border: none; color: #a1a1aa; cursor: pointer; font-size: 16px;">&times;</button>
+                        </div>
+                        @for (s of sucursalesStock(); track s.sucursal_id) {
+                          <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #27272a; font-size: 12px;">
+                            <span style="color: #e4e4e7;">{{ s.nombre_sucursal }} ({{ s.direccion }})</span>
+                            <span [style.color]="s.stock_disponible > 0 ? '#4ade80' : '#f87171'" style="font-weight: 700;">
+                              {{ s.stock_disponible > 0 ? (s.stock_disponible + ' disponibles') : 'Agotado' }}
+                            </span>
+                          </div>
+                        }
+                      </div>
+                    }
+
+                    <!-- CU14 CONFIRMACIÓN DE TICKET DE PROBADOR -->
+                    @if (ticketProbadorConfirmado()) {
+                      <div style="margin-top: 10px; padding: 12px; background: #022c22; border: 1px solid #059669; border-radius: 6px; text-align: center;">
+                        <div style="color: #34d399; font-weight: 800; font-size: 13px; margin-bottom: 4px;">✓ PRENDA APARTADA EN PROBADOR FÍSICO</div>
+                        <div style="color: #d1fae5; font-size: 12px;">Código de Vestidor: <strong style="font-family: monospace; font-size: 14px; color: #fff;">#VEST-{{ ticketProbadorConfirmado()?.uuid?.substring(0, 8)?.toUpperCase() }}</strong></div>
+                        <div style="color: #6ee7b7; font-size: 11px; margin-top: 4px;">Monto Cobrado: Bs. 0.00 (Sin Pago Previo) | Guardado en IndexedDB</div>
+                        <button type="button" (click)="ticketProbadorConfirmado.set(null)" style="margin-top: 8px; padding: 4px 12px; background: #059669; color: #fff; border: none; border-radius: 4px; font-size: 11px; cursor: pointer;">Cerrar Ticket</button>
+                      </div>
+                    }
 
                     <button type="button" class="btn-close-minimal" (click)="closeDetail()">
                       Seguir explorando prendas
@@ -3895,10 +3953,18 @@ export class CatalogoPageComponent implements OnInit {
   private readonly catalogoService = inject(CatalogoService);
   private readonly inventarioService = inject(InventarioService);
   private readonly iaService = inject(IaAsistenteService);
+  private readonly offlineStorage = inject(LocalOfflineStorageService);
+  private readonly http = inject(HttpClient);
   readonly authService = inject(AuthService);
   readonly router = inject(Router);
   readonly cartService = inject(CartService);
   private readonly saasService = inject(SaasService);
+
+  // Presentación 2: Estado de Sincronización Offline (CU08), Stock Multi-sucursal (CU11) y Probador (CU14)
+  isSyncingOffline = signal<boolean>(false);
+  mostrarStockMultisucursal = signal<boolean>(false);
+  sucursalesStock = signal<any[]>([]);
+  ticketProbadorConfirmado = signal<any>(null);
 
   // E-Commerce Purchase State in Modal
   selectedColorId = signal<number | null>(null);
@@ -4718,5 +4784,64 @@ export class CatalogoPageComponent implements OnInit {
 
   irAEstilistaIA(): void {
     this.router.navigate(['/ia-asistente']);
+  }
+
+  // ==========================================
+  // CU08: DESCARGA DE CATÁLOGO OFFLINE (IndexedDB)
+  // ==========================================
+  sincronizarCatalogoOffline(): void {
+    this.isSyncingOffline.set(true);
+    this.offlineStorage.descargarYSincronizarCatalogo().subscribe({
+      next: (prendas) => {
+        this.isSyncingOffline.set(false);
+        this.showFeedback(`[CU08] ${prendas.length} prendas con medidas anatómicas en cm guardadas en IndexedDB (Modo Offline).`);
+      },
+      error: () => {
+        this.isSyncingOffline.set(false);
+        this.showFeedback('Error sincronizando catálogo en IndexedDB.', true);
+      }
+    });
+  }
+
+  // ==========================================
+  // CU11: CONSULTA DE STOCK MULTI-SUCURSAL
+  // ==========================================
+  consultarStockMultisucursal(varianteId?: number): void {
+    const vId = varianteId || (this.getSelectedVariante()?.id) || 1;
+    this.http.get<any[]>(`${environment.apiUrl}/inventario/sucursales-stock?variante_id=${vId}`).subscribe({
+      next: (data) => {
+        this.sucursalesStock.set(data);
+        this.mostrarStockMultisucursal.set(true);
+      },
+      error: () => {
+        this.showFeedback('Error consultando stock multi-sucursal.', true);
+      }
+    });
+  }
+
+  // ==========================================
+  // CU14: RESERVA PARA PROBADOR FÍSICO (SIN PAGO)
+  // ==========================================
+  apartarParaProbadorOffline(prenda: Prenda): void {
+    const v = this.getSelectedVariante();
+    const talla = v?.talla?.codigo || 'M';
+    this.offlineStorage.registrarReservaProbadorOffline({
+      prenda_id: prenda.id,
+      nombre_prenda: prenda.nombre,
+      talla: talla,
+      hora_ensayo: '18:00'
+    }).subscribe({
+      next: (uuid) => {
+        this.ticketProbadorConfirmado.set({
+          uuid: uuid,
+          prenda_nombre: prenda.nombre,
+          talla: talla
+        });
+        this.showFeedback(`[CU14] Prenda apartada en vestidor físico sin costo. Ticket #VEST-${uuid.substring(0, 8).toUpperCase()}`);
+      },
+      error: () => {
+        this.showFeedback('Error guardando apartado de probador.', true);
+      }
+    });
   }
 }

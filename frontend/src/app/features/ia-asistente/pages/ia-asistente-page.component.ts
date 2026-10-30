@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { environment } from '../../../../environments/environment';
 import { IaAsistenteService } from '../services/ia-asistente.service';
 import {
   DashboardRecomendaciones,
@@ -106,7 +107,7 @@ import { AuthService } from '../../../core/services/auth.service';
                   @for (prenda of outfit.prendas; track prenda.id) {
                     <div class="outfit-item-card">
                       <div class="item-img-wrapper">
-                        <img [src]="prenda.imagen_url || 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=400&q=80'" [alt]="prenda.nombre" />
+                        <img [src]="resolveImageUrl(prenda.imagen_url)" [alt]="prenda.nombre" (error)="onImgError($event)" />
                         <span class="item-role-tag">{{ prenda.etiqueta_ia }}</span>
                       </div>
                       <div class="item-meta">
@@ -157,9 +158,10 @@ import { AuthService } from '../../../core/services/auth.service';
                 <!-- Imagen de la Prenda -->
                 <div class="card-img-container">
                   <img
-                    [src]="prenda.imagen_url || 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=600&q=80'"
+                    [src]="resolveImageUrl(prenda.imagen_url)"
                     [alt]="prenda.nombre"
                     loading="lazy"
+                    (error)="onImgError($event)"
                   />
                 </div>
 
@@ -367,7 +369,7 @@ import { AuthService } from '../../../core/services/auth.service';
                 <div class="look-items-list">
                   @for (item of outfitModalData()!.prendas; track item.id) {
                     <div class="look-item-box">
-                      <img [src]="item.imagen_url || 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=300&q=80'" [alt]="item.nombre" />
+                      <img [src]="resolveImageUrl(item.imagen_url)" [alt]="item.nombre" (error)="onImgError($event)" />
                       <div class="item-info">
                         <span class="item-tag">{{ item.etiqueta_ia }}</span>
                         <strong>{{ item.nombre }}</strong>
@@ -1399,6 +1401,27 @@ export class IaAsistentePageComponent implements OnInit {
         this.cargando.set(false);
       }
     });
+  }
+
+  resolveImageUrl(url?: string | null): string {
+    if (!url || url.trim() === '') {
+      return 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=600&q=80';
+    }
+    const clean = url.trim();
+    if (clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('data:') || clean.startsWith('blob:')) {
+      return clean;
+    }
+    const backendOrigin = (environment.apiUrl || '').replace(/\/api\/v1\/?$/, '');
+    if (clean.startsWith('/static/')) return `${backendOrigin}${clean}`;
+    if (clean.startsWith('static/')) return `${backendOrigin}/${clean}`;
+    return `${backendOrigin}/${clean}`;
+  }
+
+  onImgError(event: Event): void {
+    const el = event.target as HTMLImageElement;
+    if (el) {
+      el.src = 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=600&q=80';
+    }
   }
 
   seleccionarOcasion(ocasionId: string): void {

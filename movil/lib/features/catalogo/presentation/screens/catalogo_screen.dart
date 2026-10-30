@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/widgets/atelier_scaffold.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/app_notification.dart';
 import '../../data/repositories/catalogo_repository.dart';
 import '../../domain/models/catalogo_models.dart';
 import '../widgets/prenda_detail_modal.dart';
@@ -25,6 +26,27 @@ class _CatalogoScreenState extends State<CatalogoScreen> {
   String? _tenantNombre;
   String? _planCodigo;
   final List<String> _sectores = ['TODAS', 'MUJERES', 'HOMBRES', 'UNISEX'];
+  bool _isSyncing = false;
+
+  Future<void> _syncOfflineCatalog() async {
+    setState(() => _isSyncing = true);
+    try {
+      final count = await _repository.syncCatalogToLocalStorage();
+      if (mounted) {
+        AppNotification.showSuccess(
+          'Catálogo offline sincronizado: $count prendas con medidas guardadas en SQLite (CU08)',
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        AppNotification.showError('Error al sincronizar offline: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSyncing = false);
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -201,6 +223,34 @@ class _CatalogoScreenState extends State<CatalogoScreen> {
                         focusedBorder: const OutlineInputBorder(
                           borderRadius: BorderRadius.zero,
                           borderSide: BorderSide(color: Colors.black, width: 1.5),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // CU08: Botón Sincronización Catálogo Offline (SQLite)
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _isSyncing ? null : _syncOfflineCatalog,
+                        icon: _isSyncing
+                            ? const SizedBox(
+                                width: 14,
+                                height: 14,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF92400E)),
+                              )
+                            : const Icon(Icons.download_for_offline_outlined, size: 16),
+                        label: Text(
+                          _isSyncing ? 'SINCRONIZANDO CON SQLITE...' : 'DESCARGAR CATÁLOGO OFFLINE (CU08)',
+                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.5),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFEF3C7),
+                          foregroundColor: const Color(0xFF92400E),
+                          elevation: 0,
+                          side: const BorderSide(color: Color(0xFFF59E0B)),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
                         ),
                       ),
                     ),

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../core/storage/local_storage_helper.dart';
 import '../../domain/models/catalogo_models.dart';
 
 class CatalogoRepository {
@@ -117,5 +118,27 @@ class CatalogoRepository {
     } catch (e) {
       throw Exception('Error en Virtual Try-On: $e');
     }
+  }
+
+  // ==========================================
+  // CU08: CATÁLOGO LOCAL EN SQLITE (sqflite)
+  // ==========================================
+  Future<List<Map<String, dynamic>>> syncCatalogToLocalStorage() async {
+    try {
+      final response = await _apiClient.dio.get('/catalogo/sincronizar-local');
+      if (response.statusCode == 200) {
+        final List<dynamic> rawList = response.data as List<dynamic>;
+        final items = rawList.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+        await LocalStorageHelper.instance.cacheCatalog(items);
+        return items;
+      }
+      return await LocalStorageHelper.instance.getLocalCatalog();
+    } catch (_) {
+      return await LocalStorageHelper.instance.getLocalCatalog();
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getLocalCatalog() async {
+    return await LocalStorageHelper.instance.getLocalCatalog();
   }
 }

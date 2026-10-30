@@ -127,3 +127,7 @@ class DetalleTransferenciaStock(Base):
 
     transferencia: Mapped["TransferenciaStock"] = relationship("TransferenciaStock", back_populates="detalles")
     variante: Mapped["PrendaVariante"] = relationship("app.domains.catalogo.models.PrendaVariante", lazy="selectin")
+
+
+# ----------------- REUTILIZACIÓN MODELOS MÓDULO 9 (CU12, CU13) -----------------
+from app.domains.saas.models import TraspasoInventario, DetalleTraspaso

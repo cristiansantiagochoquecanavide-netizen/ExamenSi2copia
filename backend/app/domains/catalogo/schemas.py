@@ -305,3 +305,16 @@ class VtonTryOnResponse(BaseModel):
     ancho_hombros_px: int
     mensaje: str
 
+
+
+# ----------------- CU08: CATÁLOGO LOCAL SYNC SCHEMA -----------------
+class PrendaSyncItem(BaseModel):
+    id: int
+    nombre: str = Field(default="")
+    categoria: str = Field(default="")
+    precio: float
+    talla: str
+    color: str
+    stock_disponible: int
+    pecho_cm: Optional[float] = None
+    cintura_cm: Optional[float] = None

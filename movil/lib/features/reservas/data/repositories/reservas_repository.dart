@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../core/storage/local_storage_helper.dart';
 import '../../domain/models/reservas_models.dart';
 
 class ReservasRepository {
@@ -127,5 +128,22 @@ class ReservasRepository {
       }
       throw Exception('Error al cancelar reserva: ${e.message}');
     }
+  }
+
+  // ==========================================
+  // CU14: RESERVAS OFFLINE PARA PROBADOR (SIN PAGO)
+  // ==========================================
+  Future<String> saveOfflineFittingReservation({
+    required int prendaId,
+    required String horaEnsayo,
+  }) async {
+    return await LocalStorageHelper.instance.recordOfflineFittingReservation(
+      prendaId: prendaId,
+      horaEnsayo: horaEnsayo,
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> getOfflineReservations() async {
+    return await LocalStorageHelper.instance.getOfflineFittingReservations();
   }
 }

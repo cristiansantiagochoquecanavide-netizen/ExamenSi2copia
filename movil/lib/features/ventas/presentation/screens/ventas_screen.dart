@@ -890,6 +890,74 @@ class _CheckoutModalState extends State<_CheckoutModal> {
     }
   }
 
+  // CU15: Procesamiento de Venta de Contado en Contingencia Offline (SQLite con UUIDv4)
+  Future<void> _submitOfflineCheckout() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final items = widget.cartService.items
+          .map((i) => {
+                'variante_id': i.varianteId,
+                'cantidad': i.cantidad,
+                'precio_unitario': i.prenda.precioBase,
+                'nombre': i.prenda.nombre,
+              })
+          .toList();
+
+      final offlineUuid = await _repository.saveOfflineCashSale(
+        montoTotal: widget.cartService.total,
+        items: items,
+      );
+
+      final codigoVenta = 'VTA-OFF-${offlineUuid.substring(0, 8).toUpperCase()}';
+      final ventaOffline = VentaResponseModel(
+        id: 0,
+        codigoVenta: codigoVenta,
+        clienteNombre: _nombreCtrl.text.trim().isEmpty ? 'Cliente Mostrador' : _nombreCtrl.text.trim(),
+        subtotal: widget.cartService.total,
+        descuento: 0.0,
+        costoEnvio: 0.0,
+        total: widget.cartService.total,
+        estado: 'REGISTRADO_OFFLINE',
+        createdAt: DateTime.now().toUtc().toIso8601String(),
+        envio: EnvioResponseModel(
+          id: 0,
+          tipoEntrega: 'TIENDA_FISICA',
+          direccionLinea1: 'Retiro en Mostrador',
+          ciudad: 'Santa Cruz',
+          codigoSeguimiento: 'OFFLINE-$offlineUuid',
+          estadoEnvio: 'ENTREGADO_EN_TIENDA',
+          costoEnvio: 0.0,
+        ),
+      );
+
+      if (mounted) {
+        widget.cartService.clear();
+        widget.onSuccess();
+        setState(() {
+          _isLoading = false;
+          _createdVenta = ventaOffline;
+          _step = _CheckoutStep.success;
+        });
+
+        AppNotification.showSuccess(
+          'Venta en efectivo guardada en SQLite con UUIDv4 ($codigoVenta). Idempotencia garantizada (CU15)',
+          title: 'Cobro Offline Registrado',
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Error al registrar venta local: $e';
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -992,7 +1060,7 @@ class _CheckoutModalState extends State<_CheckoutModal> {
           const SizedBox(height: 20),
 
           // Pasarela de Pagos Selector
-          const Text('SELECCIONAR PASARELA DE PAGO', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+          const Text('SELECCIONAR MÉTODO / PASARELA DE PAGO', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
           const SizedBox(height: 10),
           Row(
             children: [
@@ -1003,23 +1071,23 @@ class _CheckoutModalState extends State<_CheckoutModal> {
                     _errorMessage = null;
                   }),
                   child: Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                     decoration: BoxDecoration(
                       color: _metodoPago == 'QR_SIMPLE' ? const Color(0xFFF3F4F6) : Colors.white,
                       border: Border.all(color: _metodoPago == 'QR_SIMPLE' ? Colors.black : const Color(0xFFD1D5DB), width: _metodoPago == 'QR_SIMPLE' ? 1.5 : 1.0),
                     ),
                     child: const Column(
                       children: [
-                        Icon(Icons.qr_code_2, size: 28),
+                        Icon(Icons.qr_code_2, size: 24),
                         SizedBox(height: 4),
-                        Text('QR Simple', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
-                        Text('Libélula Bolivia', style: TextStyle(fontSize: 10, color: AppTheme.mutedColor)),
+                        Text('QR Simple', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11)),
+                        Text('Libélula', style: TextStyle(fontSize: 9, color: AppTheme.mutedColor)),
                       ],
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Expanded(
                 child: InkWell(
                   onTap: () => setState(() {
@@ -1027,17 +1095,41 @@ class _CheckoutModalState extends State<_CheckoutModal> {
                     _errorMessage = null;
                   }),
                   child: Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                     decoration: BoxDecoration(
                       color: _metodoPago == 'TARJETA' ? const Color(0xFFF3F4F6) : Colors.white,
                       border: Border.all(color: _metodoPago == 'TARJETA' ? Colors.black : const Color(0xFFD1D5DB), width: _metodoPago == 'TARJETA' ? 1.5 : 1.0),
                     ),
                     child: const Column(
                       children: [
-                        Icon(Icons.credit_card, size: 28),
+                        Icon(Icons.credit_card, size: 24),
                         SizedBox(height: 4),
-                        Text('Tarjeta Crédito', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
-                        Text('Stripe Sandbox', style: TextStyle(fontSize: 10, color: AppTheme.mutedColor)),
+                        Text('Tarjeta', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11)),
+                        Text('Stripe', style: TextStyle(fontSize: 9, color: AppTheme.mutedColor)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: InkWell(
+                  onTap: () => setState(() {
+                    _metodoPago = 'EFECTIVO_OFFLINE';
+                    _errorMessage = null;
+                  }),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: _metodoPago == 'EFECTIVO_OFFLINE' ? const Color(0xFFFEF3C7) : Colors.white,
+                      border: Border.all(color: _metodoPago == 'EFECTIVO_OFFLINE' ? const Color(0xFFD97706) : const Color(0xFFD1D5DB), width: _metodoPago == 'EFECTIVO_OFFLINE' ? 1.5 : 1.0),
+                    ),
+                    child: const Column(
+                      children: [
+                        Icon(Icons.payments_outlined, size: 24, color: Color(0xFF92400E)),
+                        SizedBox(height: 4),
+                        Text('Efectivo', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11, color: Color(0xFF92400E))),
+                        Text('Offline CU15', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFFB45309))),
                       ],
                     ),
                   ),
@@ -1045,6 +1137,40 @@ class _CheckoutModalState extends State<_CheckoutModal> {
               ),
             ],
           ),
+
+          // CU15: Banner informativo de Contingencia Offline en Efectivo
+          if (_metodoPago == 'EFECTIVO_OFFLINE') ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFFBEB),
+                border: Border.all(color: const Color(0xFFFDE68A)),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.offline_bolt, color: Color(0xFFD97706), size: 26),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'MODO CONTINGENCIA OFFLINE (CU15)',
+                          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Color(0xFF92400E)),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          'Cobro en efectivo guardado localmente en SQLite con UUIDv4 para sincronización asíncrona segura sin duplicidad.',
+                          style: TextStyle(fontSize: 10, color: Color(0xFF78350F), height: 1.3),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
 
           // Formulario Dinámico de Tarjeta de Crédito (Stripe Sandbox)
           if (_metodoPago == 'TARJETA') ...[
@@ -1147,9 +1273,11 @@ class _CheckoutModalState extends State<_CheckoutModal> {
           ElevatedButton(
             onPressed: _isLoading
                 ? null
-                : (_metodoPago == 'QR_SIMPLE' ? _generateAndShowQR : _submitCardCheckout),
+                : (_metodoPago == 'QR_SIMPLE'
+                    ? _generateAndShowQR
+                    : (_metodoPago == 'TARJETA' ? _submitCardCheckout : _submitOfflineCheckout)),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black,
+              backgroundColor: _metodoPago == 'EFECTIVO_OFFLINE' ? const Color(0xFFD97706) : Colors.black,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
@@ -1157,7 +1285,11 @@ class _CheckoutModalState extends State<_CheckoutModal> {
             child: _isLoading
                 ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                 : Text(
-                    _metodoPago == 'QR_SIMPLE' ? 'PAGAR CON QR SIMPLE' : 'CONFIRMAR PAGO CON TARJETA',
+                    _metodoPago == 'QR_SIMPLE'
+                        ? 'PAGAR CON QR SIMPLE'
+                        : (_metodoPago == 'TARJETA'
+                            ? 'CONFIRMAR PAGO CON TARJETA'
+                            : 'REGISTRAR COBRO EN EFECTIVO (CU15)'),
                     style: const TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1.0),
                   ),
           ),
@@ -1422,7 +1554,14 @@ class _CheckoutModalState extends State<_CheckoutModal> {
                 const Divider(height: 16, color: Color(0xFFE5E7EB)),
                 _buildReceiptRow('Destinatario:', _nombreCtrl.text.trim()),
                 const SizedBox(height: 6),
-                _buildReceiptRow('Método:', _metodoPago == 'QR_SIMPLE' ? 'QR Simple (Libélula)' : 'Tarjeta de Crédito'),
+                _buildReceiptRow(
+                  'Método:',
+                  _metodoPago == 'QR_SIMPLE'
+                      ? 'QR Simple (Libélula)'
+                      : (_metodoPago == 'TARJETA'
+                          ? 'Tarjeta de Crédito'
+                          : 'Efectivo Contado (Contingencia Offline CU15)'),
+                ),
                 const SizedBox(height: 6),
                 _buildReceiptRow('Código de Envío:', tracking, isHighlight: true),
                 const Divider(height: 16, color: Color(0xFFE5E7EB)),

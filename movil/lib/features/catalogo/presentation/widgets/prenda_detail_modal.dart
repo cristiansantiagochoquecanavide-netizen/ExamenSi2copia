@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/routes/app_router.dart';
 import '../../../../core/utils/app_notification.dart';
+import '../../../../core/network/api_client.dart';
+import '../../../../core/storage/local_storage_helper.dart';
 import '../../../../shared/services/cart_service.dart';
 import '../../../reservas/domain/models/reservas_models.dart';
 import '../../domain/models/catalogo_models.dart';
@@ -29,6 +31,54 @@ class _PrendaDetailModalState extends State<PrendaDetailModal> {
   ColorModel? _selectedColor;
   late final PageController _imagePageController;
   int _currentImageIndex = 0;
+  bool _isLoadingStock = false;
+  List<dynamic>? _stockSucursales;
+  String? _stockError;
+
+  PrendaVarianteModel _getCurrentVariante() {
+    return widget.prenda.variantes.firstWhere(
+      (v) =>
+          (_selectedTalla == null || v.tallaId == _selectedTalla!.id) &&
+          (_selectedColor == null || v.colorId == _selectedColor!.id),
+      orElse: () => widget.prenda.variantes.isNotEmpty
+          ? widget.prenda.variantes.first
+          : PrendaVarianteModel(
+              id: widget.prenda.id,
+              prendaId: widget.prenda.id,
+              tallaId: _selectedTalla?.id ?? 0,
+              colorId: _selectedColor?.id ?? 0,
+              skuVariante: widget.prenda.sku,
+              activo: true,
+            ),
+    );
+  }
+
+  Future<void> _fetchStockSucursales() async {
+    setState(() {
+      _isLoadingStock = true;
+      _stockError = null;
+    });
+    try {
+      final v = _getCurrentVariante();
+      final res = await ApiClient().dio.get(
+        '/inventario/sucursales-stock',
+        queryParameters: {'variante_id': v.id},
+      );
+      if (mounted) {
+        setState(() {
+          _stockSucursales = res.data is List ? (res.data as List) : [];
+          _isLoadingStock = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _stockError = 'No se pudo consultar stock en red. Verifique conexión.';
+          _isLoadingStock = false;
+        });
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -569,20 +619,96 @@ class _PrendaDetailModalState extends State<PrendaDetailModal> {
                   ),
                   const SizedBox(height: 10),
 
+                  // CU11: Botón Consulta de Stock Multi-sucursal en Tiempo Real
                   ElevatedButton.icon(
-                    onPressed: () {
-                      final added = ReservasDraftService.instance.addPrenda(prenda);
-                      Navigator.pop(context);
-                      if (added) {
+                    onPressed: _isLoadingStock ? null : _fetchStockSucursales,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1E293B),
+                      foregroundColor: const Color(0xFFFDE68A),
+                      side: const BorderSide(color: Color(0xFFF59E0B)),
+                      padding: const EdgeInsets.symmetric(vertical: 13),
+                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                    ),
+                    icon: _isLoadingStock
+                        ? const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFFDE68A)),
+                          )
+                        : const Icon(Icons.storefront_outlined, size: 18),
+                    label: Text(
+                      _isLoadingStock ? 'CONSULTANDO EXISTENCIAS...' : 'VER STOCK OTRAS SUCURSALES (CU11)',
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, letterSpacing: 0.8),
+                    ),
+                  ),
+                  if (_stockSucursales != null) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1F5F9),
+                        border: Border.all(color: const Color(0xFFCBD5E1)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'EXISTENCIAS MULTI-SUCURSAL EN TIEMPO REAL:',
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                          ),
+                          const SizedBox(height: 6),
+                          ..._stockSucursales!.map((item) {
+                            final sucursal = item['sucursal_nombre'] ?? 'Sucursal';
+                            final ciudad = item['ciudad_nombre'] ?? '';
+                            final stock = item['stock_actual'] ?? 0;
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 2.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('• $sucursal ($ciudad)', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+                                  Text(
+                                    '$stock uds',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: stock > 0 ? const Color(0xFF166534) : const Color(0xFF991B1B),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                  ],
+                  if (_stockError != null) ...[
+                    const SizedBox(height: 6),
+                    Text(_stockError!, style: const TextStyle(fontSize: 10, color: Color(0xFFDC2626))),
+                  ],
+                  const SizedBox(height: 10),
+
+                  // CU14: Reserva en Probador Físico sin Pago Previo con Guardado en SQLite
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      final horaActual = '${DateTime.now().hour.toString().padLeft(2, '0')}:${DateTime.now().minute.toString().padLeft(2, '0')}';
+                      
+                      // Guardar en SQLite local sin pago monetario previo (CU14)
+                      final resUuid = await LocalStorageHelper.instance.recordOfflineFittingReservation(
+                        prendaId: prenda.id,
+                        horaEnsayo: horaActual,
+                      );
+                      
+                      final ticket = 'VEST-${resUuid.substring(0, 8).toUpperCase()}';
+                      ReservasDraftService.instance.addPrenda(prenda);
+                      if (context.mounted) {
+                        Navigator.pop(context);
                         AppNotification.showSuccess(
-                          '"${prenda.nombre}" agregada a tu cita de probador (${ReservasDraftService.instance.selectedPrendas.length}/3)',
+                          'Prenda apartada para probador físico en SQLite (UUID: $ticket). 0 pago previo (CU14)',
                         );
-                      } else {
-                        AppNotification.showSuccess(
-                          'Ya tenés el límite de 3 prendas para tu cita de probador',
-                        );
+                        appRouter.go('/reservas');
                       }
-                      appRouter.go('/reservas');
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFF3F4F6),
@@ -593,7 +719,7 @@ class _PrendaDetailModalState extends State<PrendaDetailModal> {
                     ),
                     icon: const Icon(Icons.event_seat_outlined, size: 20),
                     label: const Text(
-                      'RESERVAR EN PROBADOR FÍSICO',
+                      'RESERVAR EN PROBADOR FÍSICO (CU14)',
                       style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1.0),
                     ),
                   ),

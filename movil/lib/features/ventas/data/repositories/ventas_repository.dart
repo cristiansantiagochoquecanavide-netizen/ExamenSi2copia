@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../core/storage/local_storage_helper.dart';
 import '../../domain/models/ventas_models.dart';
 
 class VentasRepository {
@@ -125,5 +126,22 @@ class VentasRepository {
       }
       throw Exception('Error al crear promoción: ${e.message}');
     }
+  }
+
+  // ==========================================
+  // CU15: REGISTRO DE VENTA DE CONTADO OFFLINE (EFECTIVO)
+  // ==========================================
+  Future<String> saveOfflineCashSale({
+    required double montoTotal,
+    required List<Map<String, dynamic>> items,
+  }) async {
+    return await LocalStorageHelper.instance.recordOfflineCashSale(
+      montoTotal: montoTotal,
+      items: items,
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> getOfflineSales() async {
+    return await LocalStorageHelper.instance.getOfflineSales();
   }
 }

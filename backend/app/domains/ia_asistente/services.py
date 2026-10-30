@@ -86,15 +86,25 @@ class IaasistenteService:
     # 2. MOTOR HÍBRIDO DE RECOMENDACIONES IA
     # =========================================================================
     def _extraer_imagen(self, prenda: Prenda) -> Optional[str]:
-        if not prenda.multimedia:
-            return None
-        for m in prenda.multimedia:
-            if m.tipo == "IMAGEN" and m.es_portada:
-                return m.url
-        for m in prenda.multimedia:
-            if m.tipo == "IMAGEN":
-                return m.url
-        return None
+        if prenda.multimedia:
+            for m in prenda.multimedia:
+                if m.tipo == "IMAGEN" and m.es_portada and m.url:
+                    return m.url
+            for m in prenda.multimedia:
+                if m.tipo == "IMAGEN" and m.url:
+                    return m.url
+
+        # Fallback de alta costura según categoría si la prenda no tiene fotos cargadas
+        cat = (prenda.categoria.nombre if prenda.categoria else "").lower()
+        if "vestido" in cat:
+            return "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=600&q=80"
+        elif "camisa" in cat or "blusa" in cat:
+            return "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&fit=crop&w=600&q=80"
+        elif "pantalon" in cat:
+            return "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=600&q=80"
+        elif "short" in cat or "shores" in cat:
+            return "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?auto=format&fit=crop&w=600&q=80"
+        return "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=600&q=80"
 
     def _construir_item(self, prenda: Prenda, match_score: int, motivo: str, etiqueta: str) -> RecomendacionPrendaItem:
         return RecomendacionPrendaItem(
@@ -196,8 +206,8 @@ class IaasistenteService:
             categorias_compradas, prendas_interactuadas = await self.obtener_historial_compras_y_reservas(usuario_id)
 
         # 3. Determinar parámetros efectivos
-        filtro_sector = (sector or (pref.sector_preferido if pref else None) or "UNISEX").upper()
-        filtro_ocasion = (ocasion or (pref.ocasion_frecuente if pref else None) or "CASUAL").upper()
+        filtro_sector = (sector or (pref.sector_preferido if pref else None) or "TODOS").upper()
+        filtro_ocasion = (ocasion or (pref.ocasion_frecuente if pref else None) or "TODAS").upper()
 
         scored_items: List[Tuple[int, RecomendacionPrendaItem]] = []
 
@@ -213,149 +223,222 @@ class IaasistenteService:
 
         sec_objetivo = normalizar_sector(filtro_sector)
 
+        def evaluar_ocasion(oc: str, texto: str, cat: str) -> Tuple[bool, int, str]:
+            t = texto.lower()
+            c = cat.lower()
+
+            if oc == "GALA":
+                gala_kw = ["gala", "noche", "seda", "vestido", "elegante", "editorial", "volado", "volados", "gasa", "fiesta", "abullonada", "acampanado", "midi"]
+                anti_gala = ["short", "shores", "bermuda", "jogger", "buzo", "drill", "skater", "cargo", "deportivo"]
+                if any(w in t for w in anti_gala):
+                    return False, -40, "Pieza informal no adecuada para códigos de gala"
+                if any(w in t for w in gala_kw) or "vestido" in c or "blusa" in c:
+                    return True, 35, "Pieza de alta costura idónea para galas y veladas elegantes"
+                return False, -20, "Sin atributos formales para gala"
+
+            elif oc in ("FORMAL_OFICINA", "FORMAL"):
+                formal_kw = ["sartorial", "blazer", "oficina", "pantalon", "pantalón", "formal", "camisa", "hilo", "ejecutivo", "wide leg", "clásica", "clasica", "drill", "acanalada"]
+                anti_formal = ["short", "shores", "jogger", "buzo", "graffiti", "streetwear", "bomber"]
+                if any(w in t for w in anti_formal):
+                    return False, -40, "Corte demasiado relajado para oficina formal"
+                if any(w in t for w in formal_kw) or "camisa" in c or "pantalones" in c:
+                    return True, 35, "Alineado a códigos ejecutivos elegantes con corte sartorial de oficina"
+                return False, -20, "Estilo no prioritario para oficina"
+
+            elif oc == "COCTEL":
+                coctel_kw = ["coctel", "cóctel", "vestido", "blusa", "volado", "elegante", "fiesta", "acampanada", "abullonada", "fresca", "hilo"]
+                anti_coctel = ["buzo", "jogger", "frisado", "cargo", "streetwear"]
+                if any(w in t for w in anti_coctel):
+                    return False, -40, "Prenda no alineada al código cóctel"
+                if any(w in t for w in coctel_kw) or "vestidos" in c or "blusas" in c:
+                    return True, 35, "Diseño fluido y distinguido, perfecto para eventos y cócteles"
+                return False, -20, "Estilo fuera del rango de cóctel"
+
+            elif oc == "CASUAL":
+                casual_kw = ["casual", "polera", "camisa", "short", "shores", "algodón", "algodon", "espandex", "acanalada", "verano", "fresca", "manga corta", "hilo", "confort"]
+                anti_casual = ["gala", "abullonada", "sartorial"]
+                if any(w in t for w in anti_casual):
+                    return False, -30, "Prenda de etiqueta no óptima para uso casual"
+                if any(w in t for w in casual_kw) or "poleras" in c or "shores" in c:
+                    return True, 35, "Confort premium y versatilidad casual de temporada"
+                return False, -15, "Estilo secundario para casual"
+
+            elif oc == "URBANO":
+                urbano_kw = ["drill", "cargo", "oversized", "urbano", "jogger", "streetwear", "hoodie", "bomber", "grafiti", "graffiti", "wide leg", "frisa", "frisado", "bolsillos"]
+                anti_urbano = ["volado", "volados", "gasa", "acampanado"]
+                if any(w in t for w in anti_urbano):
+                    return False, -40, "Estética clásica no alineada a streetwear urbano"
+                if any(w in t for w in urbano_kw):
+                    return True, 35, "Estética urbana vanguardista con corte moderno y silueta street"
+                return False, -25, "Prenda tradicional sin corte urbano"
+
+            # TODAS u otras ocasiones
+            return True, 10, "Pieza destacada de la colección de temporada"
+
         for p in prendas:
-            score = 65  # Base score
-            motivos = []
             p_sec = normalizar_sector(p.categoria.sector if p.categoria else "UNISEX")
             cat_nombre = (p.categoria.nombre if p.categoria else "Indumentaria").lower()
             cat_desc = (p.categoria.descripcion if p.categoria and p.categoria.descripcion else "").lower()
             temp_nombre = p.temporada.nombre if p.temporada else "Colección Actual"
             texto_completo = f"{p.nombre} {p.descripcion} {cat_nombre} {cat_desc}".lower()
 
-            # A. Afinidad de Sector (Silueta)
+            # Base score diferenciada según modo de filtrado
+            es_filtro_estricto = filtro_ocasion not in ("TODAS", "")
+            score = 55 if es_filtro_estricto else 70
+            motivos = []
+
+            # 1. Ocasión de Uso (Criterio Primario con Evaluación Precisa)
+            es_match_ocasion, delta_ocasion, motivo_ocasion = evaluar_ocasion(filtro_ocasion, texto_completo, cat_nombre)
+            score += delta_ocasion
+            if es_match_ocasion:
+                motivos.append(motivo_ocasion)
+
+            # 2. Afinidad de Sector (Silueta)
             if sec_objetivo in ("TODOS", "UNISEX"):
-                score += 15
+                score += 10
             elif p_sec == sec_objetivo:
-                score += 30  # Coincidencia directa con silueta elegida (MUJERES o HOMBRES)
+                score += 20
                 motivos.append(f"Corte y silueta adaptados para {sec_objetivo.lower()}")
             elif p_sec == "UNISEX":
-                score += 5   # Unisex tiene cabida secundaria
+                score += 5
             else:
-                score -= 50  # Si busca MUJER y la prenda es de HOMBRE, penalización estricta
+                score -= 35
 
-            # B. Presupuesto (+10 pts)
+            # 3. Presupuesto
             if pref and pref.presupuesto_max:
                 if p.precio_base <= pref.presupuesto_max:
-                    score += 10
-                    motivos.append("Se ajusta perfectamente a tu rango de presupuesto")
+                    score += 5
                 else:
-                    score -= 15
+                    score -= 10
 
-            # C. Afinidad con Historial de Compras y Reservas (+15 pts)
-            if p.categoria_id in categorias_compradas:
-                score += 15
-                motivos.append(f"Afinidad alta con tus compras y elecciones previas en {p.categoria.nombre if p.categoria else ''}")
-            elif p.id in prendas_interactuadas:
-                score += 10
-                motivos.append("Seleccionado por tu interés en prendas de esta silueta")
-
-            # D. Ocasión de Uso (+25 pts / -30 pts)
-            if filtro_ocasion == "GALA":
-                palabras_gala = ["gala", "noche", "seda", "vestido", "elegante", "editorial", "volado", "volados", "gasa", "fiesta", "abullonada"]
-                palabras_informales = ["short", "bermuda", "jogger", "buzo", "drill", "skater", "cargo"]
-                if any(w in texto_completo for w in palabras_gala) or "vestido" in cat_nombre or "blusa" in cat_nombre:
-                    score += 25
-                    motivos.append("Pieza de alta costura idónea para galas y veladas elegantes")
-                elif any(w in texto_completo for w in palabras_informales):
-                    score -= 30  # Ropa informal desciende fuertemente en gala
-            elif filtro_ocasion in ("FORMAL_OFICINA", "FORMAL"):
-                if any(w in texto_completo for w in ["sartorial", "blazer", "oficina", "pantalon", "pantalón", "formal"]):
-                    score += 25
-                    motivos.append("Alineado a tu estilo ejecutivo formal y cortes sartoriales")
-            elif filtro_ocasion == "COCTEL":
-                if any(w in texto_completo for w in ["coctel", "cóctel", "vestido", "blusa", "volado", "elegante"]):
-                    score += 25
-                    motivos.append("Corte sofisticado óptimo para ocasiones de cóctel")
-            elif filtro_ocasion == "CASUAL":
-                if any(w in texto_completo for w in ["casual", "polera", "camisa", "short", "algodón"]):
-                    score += 20
-                    motivos.append("Confort premium y versatilidad casual de temporada")
-            elif filtro_ocasion == "URBANO":
-                if any(w in texto_completo for w in ["drill", "cargo", "oversized", "urbano", "jogger", "streetwear"]):
-                    score += 25
-                    motivos.append("Estilo urbano vanguardista con corte moderno")
-
-            # E. Temporada Activa (+10 pts)
+            # 4. Temporada Activa
             if p.temporada and p.temporada.activo:
-                score += 10
-                if not motivos:
-                    motivos.append(f"Pieza protagónica de la colección {temp_nombre}")
+                score += 5
 
-            # F. Calificaciones Altas del CU18 (+10 pts)
+            # 5. Calificaciones Altas del CU18
             rating = p.rating_promedio
             if rating and rating >= 4.5:
-                score += 10
-                motivos.append(f"Excelencia ratificada con {rating}★ por compradoras verificadas")
+                score += 5
 
-            # Normalizar score a 65..99
-            final_score = min(99, max(65, score))
-
-            # Definir Etiqueta limpia (sin porcentaje hardcodeado duplicado)
-            if final_score >= 95:
+            # Normalizar score
+            if es_filtro_estricto and es_match_ocasion:
+                final_score = min(99, max(92, score))
                 etiqueta = "MATCH PERFECTO"
-            elif p.categoria_id in categorias_compradas:
-                etiqueta = "BASADO EN TUS COMPRAS"
-            elif rating and rating >= 4.8:
-                etiqueta = f"TOP RATED {rating}★"
-            elif p.temporada and p.temporada.activo:
-                etiqueta = "TENDENCIA DE TEMPORADA"
+            elif es_filtro_estricto and not es_match_ocasion:
+                final_score = min(75, max(40, score))
+                etiqueta = "SELECCIÓN SECUNDARIA"
             else:
-                etiqueta = "SELECCIÓN ATELIER IA"
+                final_score = min(99, max(70, score))
+                etiqueta = "MATCH PERFECTO" if final_score >= 95 else "TENDENCIA DE TEMPORADA"
 
-            motivo_final = motivos[0] if motivos else f"Recomendación estilística personalizada para la ocasión {filtro_ocasion.lower()}"
+            motivo_final = motivos[0] if motivos else (motivo_ocasion if es_match_ocasion else f"Selección curada para ocasión {filtro_ocasion.lower()}")
             item = self._construir_item(p, final_score, motivo_final, etiqueta)
             scored_items.append((final_score, item))
 
-        # Ordenar por score descendente
+        # Ordenar por score descendente (las que coinciden con la ocasión siempre encabezan la lista)
         scored_items.sort(key=lambda x: x[0], reverse=True)
         return [item for _, item in scored_items[:limit]]
 
     # =========================================================================
     # 3. OUTFITS COMPLETOS ("COMPLETA TU LOOK")
     # =========================================================================
-    async def generar_outfits_destacados(self, prendas_catalogo: List[Prenda]) -> List[OutfitSugeridoResponse]:
-        """Crea 2-3 combinaciones estilísticas elegantes y coherentes."""
+    async def generar_outfits_destacados(
+        self, prendas_catalogo: List[Prenda], ocasion: Optional[str] = None
+    ) -> List[OutfitSugeridoResponse]:
+        """Crea 2-3 combinaciones estilísticas elegantes y coherentes basadas en las prendas reales."""
         outfits: List[OutfitSugeridoResponse] = []
         if len(prendas_catalogo) < 2:
             return outfits
 
-        # Buscar prendas icónicas para armar conjuntos
-        vestido_noir = next((p for p in prendas_catalogo if "seda noir" in p.nombre.lower()), None)
-        blazer_milano = next((p for p in prendas_catalogo if "sartorial milano" in p.nombre.lower()), None)
-        blusa_seda = next((p for p in prendas_catalogo if "camisa" in p.nombre.lower() or "blusa" in p.nombre.lower() or "seda" in p.nombre.lower()), None)
+        oc_filtro = (ocasion or "TODAS").upper()
 
-        # Look 1: Gala Nocturna & Sartorial
-        if vestido_noir and blazer_milano:
-            p1 = self._construir_item(vestido_noir, 98, "Pieza central del conjunto", "PRENDA BASE")
-            p2 = self._construir_item(blazer_milano, 96, "Contraste estructurado de sastrería italiana", "COMPLEMENTO")
-            total = float(vestido_noir.precio_base + blazer_milano.precio_base)
+        # Look 1: Urbano Vanguardia (Chaqueta Cargo + Jogger/Wide Leg)
+        chaqueta_cargo = next((p for p in prendas_catalogo if "cargo" in p.nombre.lower() or "bomber" in p.nombre.lower() or "hoodie" in p.nombre.lower()), None)
+        jogger = next((p for p in prendas_catalogo if "jogger" in p.nombre.lower() or "wide leg" in p.nombre.lower() or "buzo" in p.nombre.lower()), None)
+        if chaqueta_cargo and jogger and oc_filtro in ("TODAS", "URBANO"):
+            p1 = self._construir_item(chaqueta_cargo, 98, "Pieza urbana de corte contemporáneo", "PRENDA BASE")
+            p2 = self._construir_item(jogger, 96, "Equilibrio streetwear con silueta relajada", "COMPLEMENTO")
+            total = float(chaqueta_cargo.precio_base + jogger.precio_base)
             outfits.append(OutfitSugeridoResponse(
-                id="look-gala-noir",
-                nombre_look="Ensemble Gala Noir & Milano",
-                descripcion_estilo="Fusión de la fluidez etérea de la seda Noir con la precisión geométrica de la sastrería italiana Milano.",
-                ocasion="Gala y Noches de Gala",
+                id="look-urbano-vanguardia",
+                nombre_look="Streetwear Avant-Garde & Cargo",
+                descripcion_estilo="Combinación de estética utilitaria y silueta oversized para un estilo de vanguardia urbana.",
+                ocasion="Urbano Vanguardia",
                 prendas=[p1, p2],
-                precio_total=total,
+                precio_total=round(total, 2),
                 ahorro_estimado=round(total * 0.10, 2),
                 match_score=98
             ))
 
-        # Look 2: Ejecutivo de Alta Costura
-        prendas_restantes = [p for p in prendas_catalogo if p.id not in (vestido_noir.id if vestido_noir else 0, blazer_milano.id if blazer_milano else 0)]
-        if blazer_milano and prendas_restantes:
-            comp = prendas_restantes[0]
-            p1 = self._construir_item(blazer_milano, 95, "Pieza de autoridad sartorial", "PRENDA BASE")
-            p2 = self._construir_item(comp, 93, "Acompañamiento armónico y sofisticado", "COMPLEMENTO")
-            total = float(blazer_milano.precio_base + comp.precio_base)
+        # Look 2: Gala & Noche (Vestido Acampanado + Blusa de Gasa)
+        vestidos = [p for p in prendas_catalogo if "vestido" in (p.categoria.nombre if p.categoria else "").lower()]
+        vestido = vestidos[0] if vestidos else None
+        blusa_elegante = next((p for p in prendas_catalogo if "gasa" in p.nombre.lower() or "volado" in p.nombre.lower() or "abullonada" in p.nombre.lower()), None)
+        if vestido and blusa_elegante and oc_filtro in ("TODAS", "GALA", "COCTEL"):
+            p1 = self._construir_item(vestido, 99, "Vestido de silueta refinada", "PRENDA PRINCIPAL")
+            p2 = self._construir_item(blusa_elegante, 95, "Toque etéreo con caída suave", "COMPLEMENTO")
+            total = float(vestido.precio_base + blusa_elegante.precio_base)
             outfits.append(OutfitSugeridoResponse(
-                id="look-executive-chic",
-                nombre_look="Sartorial Executive Chic",
-                descripcion_estilo="Silueta contemporánea pensada para presentaciones de alto impacto o cenas formales.",
-                ocasion="Formal & Negocios",
+                id="look-gala-elegance",
+                nombre_look="Ensemble Gala & Veladas de Alta Costura",
+                descripcion_estilo="Armonía sofisticada de texturas finas diseñada para destacar en eventos formales y galas.",
+                ocasion="Gala & Noche",
                 prendas=[p1, p2],
-                precio_total=total,
+                precio_total=round(total, 2),
+                ahorro_estimado=round(total * 0.12, 2),
+                match_score=99
+            ))
+
+        # Look 3: Formal & Oficina (Camisa de Hilo/Drill + Pantalón Wide Leg)
+        camisa_hilo = next((p for p in prendas_catalogo if "camisa" in p.nombre.lower() or "drill" in p.nombre.lower()), None)
+        pantalon_wide = next((p for p in prendas_catalogo if "wide leg" in p.nombre.lower() or "pantalon" in p.nombre.lower()), None)
+        if camisa_hilo and pantalon_wide and oc_filtro in ("TODAS", "FORMAL_OFICINA", "FORMAL"):
+            p1 = self._construir_item(camisa_hilo, 96, "Camisería de autor estructurada", "PRENDA BASE")
+            p2 = self._construir_item(pantalon_wide, 94, "Corte sartorial elegante de oficina", "COMPLEMENTO")
+            total = float(camisa_hilo.precio_base + pantalon_wide.precio_base)
+            outfits.append(OutfitSugeridoResponse(
+                id="look-sartorial-oficina",
+                nombre_look="Sartorial Executive Atelier",
+                descripcion_estilo="Sastrería contemporánea de líneas limpias concebida para entornos corporativos y juntas ejecutivas.",
+                ocasion="Formal & Oficina",
+                prendas=[p1, p2],
+                precio_total=round(total, 2),
                 ahorro_estimado=round(total * 0.08, 2),
+                match_score=96
+            ))
+
+        # Look 4: Casual de Lujo (Polera Clásica + Bermuda/Short Clásico)
+        polera = next((p for p in prendas_catalogo if "polera" in p.nombre.lower()), None)
+        short = next((p for p in prendas_catalogo if "short" in p.nombre.lower() or "shores" in (p.categoria.nombre if p.categoria else "").lower()), None)
+        if polera and short and oc_filtro in ("TODAS", "CASUAL"):
+            p1 = self._construir_item(polera, 97, "Polera de algodón premium peinado", "PRENDA BASE")
+            p2 = self._construir_item(short, 93, "Bermuda clásica con acabados de alta costura", "COMPLEMENTO")
+            total = float(polera.precio_base + short.precio_base)
+            outfits.append(OutfitSugeridoResponse(
+                id="look-casual-resort",
+                nombre_look="Casual Resort & Weekend Luxe",
+                descripcion_estilo="Máximo confort y frescura estival con acabados de lujo para días de descanso y salidas casuales.",
+                ocasion="Casual de Lujo",
+                prendas=[p1, p2],
+                precio_total=round(total, 2),
+                ahorro_estimado=round(total * 0.05, 2),
                 match_score=95
+            ))
+
+        # Fallback si ninguna de las combinaciones específicas coincidió
+        if not outfits and len(prendas_catalogo) >= 2:
+            p1 = self._construir_item(prendas_catalogo[0], 95, "Prenda destacada de la colección", "PRENDA BASE")
+            p2 = self._construir_item(prendas_catalogo[1], 92, "Combinación armónica de temporada", "COMPLEMENTO")
+            total = float(prendas_catalogo[0].precio_base + prendas_catalogo[1].precio_base)
+            outfits.append(OutfitSugeridoResponse(
+                id="look-atelier-signature",
+                nombre_look="Look Signature Atelier",
+                descripcion_estilo="Ensemble curado por el motor de estilismo para equilibrar tonalidad y volumen.",
+                ocasion="Estilo Versátil",
+                prendas=[p1, p2],
+                precio_total=round(total, 2),
+                ahorro_estimado=round(total * 0.08, 2),
+                match_score=94
             ))
 
         return outfits
