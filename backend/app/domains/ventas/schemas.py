@@ -440,3 +440,66 @@ class UsoPromocionResponse(BaseVentasSchema):
 
 
 
+
+
+# ----------------- CU19 & CU20: NOTAS DE DEVOLUCIÓN POR CAMBIO DE TALLA -----------------
+class ValidarCambioGarantiaResponse(BaseModel):
+    venta_id: int
+    codigo_venta: str
+    fecha_venta: datetime
+    dias_transcurridos: int
+    plazo_maximo_dias: int
+    garantia_vigente: bool
+    permite_cambio_talla: bool
+    admite_reembolso_dinero: bool = False  # RN07
+    mensaje: str
+    sucursal_id: int
+    sucursal_nombre: str
+    cliente_nombre: str
+    items: List[VentaParaDevolucionItem]
+
+
+class ItemNotaDevolucionCreate(BaseModel):
+    variante_devuelta_id: int
+    cantidad_devuelta: int = Field(1, gt=0)
+    variante_entregada_id: int
+    cantidad_entregada: int = Field(1, gt=0)
+    diferencia_monetaria: float = Field(0.0, description='RN07: Estrictamente 0.00 (sin reintegro monetario)')
+
+
+class NotaDevolucionFormalCreate(BaseModel):
+    venta_id: int
+    sucursal_id: int
+    motivo: str = Field(..., description='TALLA_CHICA, TALLA_GRANDE, DESAJUSTE_MEDIDA_ANATOMICA, DEFECTO_FABRICA')
+    observaciones: Optional[str] = None
+    detalles: List[ItemNotaDevolucionCreate] = Field(..., min_length=1)
+
+
+class DetalleNotaDevolucionFormalResponse(BaseModel):
+    id: int
+    variante_devuelta_id: int
+    prenda_devuelta_nombre: Optional[str] = None
+    talla_devuelta: Optional[str] = None
+    cantidad_devuelta: int
+    variante_entregada_id: int
+    prenda_entregada_nombre: Optional[str] = None
+    talla_entregada: Optional[str] = None
+    cantidad_entregada: int
+    diferencia_monetaria: float
+
+
+class NotaDevolucionFormalResponse(BaseModel):
+    id: int
+    codigo_devolucion: str
+    venta_id: int
+    codigo_venta: str
+    sucursal_id: int
+    sucursal_nombre: Optional[str] = None
+    cliente_id: Optional[int] = None
+    cliente_nombre: Optional[str] = None
+    motivo: str
+    estado: str
+    diferencia_monetaria: float = 0.0
+    observaciones: Optional[str] = None
+    fecha_hora: datetime
+    detalles: List[DetalleNotaDevolucionFormalResponse] = []

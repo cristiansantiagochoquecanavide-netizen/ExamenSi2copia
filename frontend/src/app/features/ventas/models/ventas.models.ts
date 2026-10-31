@@ -336,3 +336,90 @@ export interface ValidarCuponResponse {
 }
 
 
+// ----------------- CU19 & CU20: NOTAS DE DEVOLUCIÓN POR CAMBIO DE TALLA -----------------
+export interface ValidarCambioGarantiaResponse {
+  venta_id: number;
+  codigo_venta: string;
+  fecha_venta: string;
+  dias_transcurridos: number;
+  plazo_maximo_dias: number;
+  garantia_vigente: boolean;
+  permite_cambio_talla: boolean;
+  admite_reembolso_dinero: boolean; // RN07
+  mensaje: string;
+  sucursal_id: number;
+  sucursal_nombre: string;
+  cliente_nombre: string;
+  items: VentaParaDevolucionItem[];
+}
+
+export interface ItemNotaDevolucionCreate {
+  variante_devuelta_id: number;
+  cantidad_devuelta: number;
+  variante_entregada_id: number;
+  cantidad_entregada: number;
+  diferencia_monetaria: number; // RN07: siempre 0.00
+}
+
+export interface NotaDevolucionFormalCreate {
+  venta_id: number;
+  sucursal_id: number;
+  motivo: string;
+  observaciones?: string;
+  detalles: ItemNotaDevolucionCreate[];
+}
+
+export interface DetalleNotaDevolucionFormalResponse {
+  id: number;
+  variante_devuelta_id: number;
+  prenda_devuelta_nombre?: string;
+  talla_devuelta?: string;
+  cantidad_devuelta: number;
+  variante_entregada_id: number;
+  prenda_entregada_nombre?: string;
+  talla_entregada?: string;
+  cantidad_entregada: number;
+  diferencia_monetaria: number;
+}
+
+export interface NotaDevolucionFormalResponse {
+  id: number;
+  codigo_devolucion: string;
+  venta_id: number;
+  codigo_venta: string;
+  sucursal_id: number;
+  sucursal_nombre?: string;
+  cliente_id?: number | null;
+  cliente_nombre?: string;
+  motivo: string;
+  estado: string;
+  diferencia_monetaria: number;
+  observaciones?: string;
+  fecha_hora: string;
+  detalles: DetalleNotaDevolucionFormalResponse[];
+}
+
+// ----------------- CU17: CONFLICTOS DE INVENTARIO -----------------
+export interface ConflictoInventarioResponse {
+  id: number;
+  sincronizacion_id: number;
+  uuid_operacion?: string;
+  sucursal_id: number;
+  sucursal_nombre?: string;
+  producto_variante_id: number;
+  prenda_nombre?: string;
+  talla?: string;
+  color?: string;
+  cantidad_solicitada: number;
+  stock_disponible_servidor: number;
+  estado_resolucion: 'PENDIENTE_RESOLUCION' | 'RESUELTO' | string;
+  fecha_deteccion: string;
+  fecha_resolucion?: string | null;
+  resuelto_por_usuario_id?: number | null;
+}
+
+export interface ResolverConflictoRequest {
+  accion: 'TRASPASO_INMEDIATO' | 'ADMITIR_SALDO_NEGATIVO' | 'ANULAR_VENTA' | string;
+  observaciones: string;
+  sucursal_proveedora_id?: number | null;
+}

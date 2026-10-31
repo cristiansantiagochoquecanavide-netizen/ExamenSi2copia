@@ -13,6 +13,7 @@ from app.domains.ia_asistente.routers import router as ia_asistente_router
 from app.domains.notificaciones.routers import router as notificaciones_router
 from app.domains.reportes.routers import router as reportes_router
 from app.domains.saas.routers import router as saas_router
+from app.domains.sincronizacion.routers import router as sincronizacion_router
 
 
 @asynccontextmanager
@@ -85,6 +86,7 @@ app.include_router(ventas_router, prefix=settings.API_V1_STR)
 app.include_router(ia_asistente_router, prefix=settings.API_V1_STR)
 app.include_router(notificaciones_router, prefix=settings.API_V1_STR)
 app.include_router(reportes_router, prefix=settings.API_V1_STR)
+app.include_router(sincronizacion_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/", tags=["Root"])

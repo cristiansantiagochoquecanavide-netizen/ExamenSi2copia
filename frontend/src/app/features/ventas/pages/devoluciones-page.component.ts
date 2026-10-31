@@ -7,7 +7,9 @@ import { InventarioService } from '../../inventario/services/inventario.service'
 import { AuthService } from '../../../core/services/auth.service';
 import {
   VentaParaDevolucionResponse, VentaParaDevolucionItem,
-  DevolucionCreate, DetalleDevolucionCreate, DevolucionResponse, VentaResponse
+  DevolucionCreate, DetalleDevolucionCreate, DevolucionResponse, VentaResponse,
+  ValidarCambioGarantiaResponse, NotaDevolucionFormalCreate, NotaDevolucionFormalResponse,
+  ConflictoInventarioResponse, ResolverConflictoRequest
 } from '../models/ventas.models';
 import { Prenda, PrendaVariante } from '../../catalogo/models/catalogo.models';
 import { Sucursal } from '../../inventario/models/inventario.models';
@@ -48,21 +50,31 @@ interface ItemDevolucionRow {
         </div>
       </div>
 
-      <!-- TABS NAVEGACIÓN -->
+      <!-- TABS NAVEGACIÓN (PRESENTACIÓN 2: CU16-CU20) -->
       <div class="tabs-bar">
         <button
           type="button"
           class="tab-btn"
           [class.active]="tabActiva() === 'nueva'"
           (click)="tabActiva.set('nueva')">
-          <span class="tab-dot">&bull;</span> NUEVA DEVOLUCIÓN O CAMBIO
+          <span class="tab-dot">&bull;</span> NUEVA NOTA DE DEVOLUCIÓN (CU19 / CU20)
         </button>
         <button
           type="button"
           class="tab-btn"
           [class.active]="tabActiva() === 'historial'"
           (click)="cargarHistorial(); tabActiva.set('historial')">
-          <span class="tab-dot">&bull;</span> HISTORIAL DE OPERACIONES ({{ historial().length }})
+          <span class="tab-dot">&bull;</span> NOTAS EMITIDAS DEV-YYYY ({{ historialNotas().length }})
+        </button>
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="tabActiva() === 'conflictos'"
+          (click)="cargarConflictos(); tabActiva.set('conflictos')">
+          <span class="tab-dot">&bull;</span> CONFLICTOS DE INVENTARIO (CU17)
+          @if (conflictosPendientesCount() > 0) {
+            <span class="conflicts-badge">{{ conflictosPendientesCount() }}</span>
+          }
         </button>
       </div>
 
@@ -137,25 +149,34 @@ interface ItemDevolucionRow {
                   </div>
                 </div>
 
-                <!-- SELECTOR DE OPERACIÓN GENERAL -->
-                <div class="operation-type-selector">
-                  <div class="op-option" [class.selected]="tipoOperacion() === 'DEVOLUCION'" (click)="tipoOperacion.set('DEVOLUCION')">
-                    <div class="op-radio">
-                      <div class="op-radio-dot" *ngIf="tipoOperacion() === 'DEVOLUCION'"></div>
-                    </div>
-                    <div>
-                      <strong class="op-title">DEVOLUCIÓN PURA (Reembolso de Dinero)</strong>
-                      <p class="op-desc">El cliente reintegra prendas y se le devuelve el importe a su favor.</p>
+                <!-- CU19: BANNER DE VIGENCIA DE GARANTÍA (RN06) & REGLA RN07 -->
+                @if (garantiaInfo(); as g) {
+                  <div class="garantia-banner-card" [class.garantia-vencida]="!g.garantia_vigente" [class.garantia-aprobada]="g.garantia_vigente">
+                    <div class="garantia-icon">{{ g.garantia_vigente ? '🛡️' : '⚠️' }}</div>
+                    <div class="garantia-info">
+                      <div class="garantia-header-flex">
+                        <span class="garantia-title">
+                          {{ g.garantia_vigente ? 'GARANTÍA VIGENTE (CU19 / RN06)' : 'PLAZO DE GARANTÍA EXPIRADO (RN06)' }}
+                        </span>
+                        <span class="garantia-badge-days">
+                          {{ g.dias_transcurridos }} de {{ g.plazo_maximo_dias }} días transcurridos
+                        </span>
+                      </div>
+                      <p class="garantia-text">{{ g.mensaje }}</p>
+                      <div class="regla-rn07-tag">
+                        <strong>Regla RN07 Inmutable:</strong> Prohibición estricta de reembolso monetario en efectivo. Operación exclusiva de cambio físico de prenda por ajuste de talla o medida anatómica con balance en Bs. 0.00.
+                      </div>
                     </div>
                   </div>
+                }
 
-                  <div class="op-option" [class.selected]="tipoOperacion() === 'CAMBIO'" (click)="tipoOperacion.set('CAMBIO')">
-                    <div class="op-radio">
-                      <div class="op-radio-dot" *ngIf="tipoOperacion() === 'CAMBIO'"></div>
-                    </div>
+                <!-- SELECTOR DE OPERACIÓN CONFORME A RN07 -->
+                <div class="operation-type-selector single-op">
+                  <div class="op-option selected">
+                    <div class="op-radio"><div class="op-radio-dot"></div></div>
                     <div>
-                      <strong class="op-title">CAMBIO DE PRENDA (Talla / Color / Modelo)</strong>
-                      <p class="op-desc">El cliente entrega prendas y retira otras; se liquida la diferencia de precio.</p>
+                      <strong class="op-title">CAMBIO DE PRENDA POR MEDIDA ANATÓMICA / TALLA (CU20 / RN07 / RN08)</strong>
+                      <p class="op-desc">Reingreso atómico al stock vendible, entrega de nueva variante y balance financiero en Bs. 0.00.</p>
                     </div>
                   </div>
                 </div>
@@ -304,19 +325,24 @@ interface ItemDevolucionRow {
                 </div>
               </div>
 
-              <!-- MÉTODO DE PAGO / REEMBOLSO -->
-              @if (diferencia() !== 0 || totalDevuelto() > 0) {
-                <div class="tender-section">
-                  <label class="field-label">
-                    {{ diferencia() > 0 ? 'Método de Cobro de la Diferencia:' : 'Modalidad de Reembolso:' }}
-                  </label>
-                  <select class="select-luxury" [(ngModel)]="metodoReembolso">
-                    <option value="EFECTIVO">Efectivo en Caja</option>
-                    <option value="TARJETA">Tarjeta de Débito / Crédito</option>
-                    <option value="SALDO_FAVOR">Nota de Crédito / Saldo a Favor</option>
-                  </select>
+              <!-- MOTIVO DE CAMBIO Y REGLA RN07 -->
+              <div class="tender-section">
+                <label class="field-label">Motivo del Desajuste (CU19):</label>
+                <select class="select-luxury" [(ngModel)]="motivoSeleccionado">
+                  <option value="TALLA_CHICA">Talla Chica (ajuste anatómico ajustado)</option>
+                  <option value="TALLA_GRANDE">Talla Grande (holgado)</option>
+                  <option value="DESAJUSTE_MEDIDA_ANATOMICA">Desajuste de Medida Anatómica (pecho/cintura/cadera)</option>
+                  <option value="DEFECTO_FABRICA">Defecto de Costura o Fabricación</option>
+                </select>
+              </div>
+
+              <div class="balance-cero-card">
+                <div class="balance-cero-icon">⚖️</div>
+                <div>
+                  <strong>Balance Financiero: $0.00 USD (Bs. 0.00)</strong>
+                  <p class="rn07-note">Regla RN07: Prohibido reembolso en efectivo. Solo cambio físico por talla equivalente.</p>
                 </div>
-              }
+              </div>
 
               <div class="obs-section">
                 <label class="field-label">Observaciones:</label>
@@ -454,6 +480,124 @@ interface ItemDevolucionRow {
                     </div>
                   </div>
                 }
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+
+      <!-- TAB 3: CONFLICTOS DE CONSISTENCIA DE INVENTARIO (CU17) -->
+      @if (tabActiva() === 'conflictos') {
+        <div class="card-noir history-card">
+          <div class="history-header">
+            <div>
+              <h3 class="card-title">Arbitraje de Conflictos de Inventario (CU17)</h3>
+              <p class="card-desc">Colisiones de stock detectadas en el servidor central durante ventas de contingencia fuera de línea</p>
+            </div>
+            <button type="button" class="btn-gold" (click)="cargarConflictos()">Actualizar</button>
+          </div>
+
+          @if (conflictos().length === 0) {
+            <div class="empty-state">
+              <span class="empty-icon" style="font-size: 2.5rem;">✅</span>
+              <p>No existen discrepancias de inventario pendientes. El stock central es 100% consistente.</p>
+            </div>
+          } @else {
+            <div class="table-wrapper">
+              <table class="luxury-table">
+                <thead>
+                  <tr>
+                    <th>ID / Fecha</th>
+                    <th>Prenda &amp; Talla</th>
+                    <th>Sucursal</th>
+                    <th class="text-center">Cant. Solicitada Offline</th>
+                    <th class="text-center">Stock Servidor Central</th>
+                    <th>Estado</th>
+                    <th>Acción Arbitral</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (c of conflictos(); track c.id) {
+                    <tr>
+                      <td>
+                        <strong>#{{ c.id }}</strong>
+                        <span class="sub-sku">{{ c.fecha_deteccion | date:'dd/MM/yyyy HH:mm' }}</span>
+                      </td>
+                      <td>
+                        <strong>{{ c.prenda_nombre }}</strong>
+                        <span class="badge-attr">{{ c.talla }}</span>
+                        <span class="badge-attr">{{ c.color }}</span>
+                      </td>
+                      <td>{{ c.sucursal_nombre }}</td>
+                      <td class="text-center col-strong" style="color: #ff6b6b;">{{ c.cantidad_solicitada }} uds</td>
+                      <td class="text-center">
+                        <span class="badge-disp zero">{{ c.stock_disponible_servidor }} uds</span>
+                      </td>
+                      <td>
+                        <span class="ticket-status-badge" [style.background]="c.estado_resolucion === 'RESUELTO' ? '#15803d' : '#854d0e'">
+                          {{ c.estado_resolucion }}
+                        </span>
+                      </td>
+                      <td>
+                        @if (c.estado_resolucion === 'RESUELTO') {
+                          <span style="color: #4ade80; font-size: 0.85rem; font-weight: 600;">✓ Conciliado</span>
+                        } @else {
+                          <button type="button" class="btn-tag" (click)="abrirModalResolucion(c)">
+                            Resolver Conflicto
+                          </button>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- MODAL RESOLUCIÓN DE CONFLICTO (CU17) -->
+      @if (mostrarModalResolucion() && conflictoSeleccionado(); as c) {
+        <div class="modal-overlay" (click)="cerrarModalResolucion()">
+          <div class="modal-content" style="max-width: 520px;" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3 class="modal-title">Arbitraje de Discrepancia #{{ c.id }}</h3>
+              <button type="button" class="btn-close-modal" (click)="cerrarModalResolucion()">&times;</button>
+            </div>
+            <div style="padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem;">
+              <p style="font-size: 0.9rem; color: #a3a3a3;">
+                Prenda: <strong style="color: #fff;">{{ c.prenda_nombre }} (Talla {{ c.talla }})</strong><br/>
+                Vendido Offline: <strong style="color: #ff6b6b;">{{ c.cantidad_solicitada }} uds</strong> | Stock Servidor: <strong style="color: #fbbf24;">{{ c.stock_disponible_servidor }} uds</strong>
+              </p>
+
+              <div>
+                <label class="field-label">Seleccione la Estrategia de Conciliación:</label>
+                <select class="select-luxury" [(ngModel)]="accionResolucion">
+                  <option value="TRASPASO_INMEDIATO">1. Solicitar Traspaso Inmediato desde otra Sucursal (CU12)</option>
+                  <option value="ADMITIR_SALDO_NEGATIVO">2. Admitir Saldo Negativo Temporal hasta Reposición</option>
+                  <option value="ANULAR_VENTA">3. Anular Transacción (si la prenda no fue retirada)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="field-label">Justificación Formal Obligatoria (Kardex):</label>
+                <textarea
+                  class="textarea-luxury"
+                  rows="2"
+                  placeholder="Ingrese el motivo de la conciliación técnica..."
+                  [(ngModel)]="observacionResolucion"></textarea>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.5rem;">
+                <button type="button" class="btn-tag" (click)="cerrarModalResolucion()">Cancelar</button>
+                <button
+                  type="button"
+                  class="btn-gold"
+                  [disabled]="resolviendoConflicto() || !observacionResolucion.trim()"
+                  (click)="ejecutarResolucionConflicto()">
+                  {{ resolviendoConflicto() ? 'Conciliando...' : 'Aplicar Arbitraje' }}
+                </button>
               </div>
             </div>
           </div>
@@ -1492,8 +1636,22 @@ export class DevolucionesPageComponent implements OnInit {
   private readonly inventarioService = inject(InventarioService);
   private readonly authService = inject(AuthService);
 
-  // Estados reactivos
-  tabActiva = signal<'nueva' | 'historial'>('nueva');
+  // Estados reactivos (Presentación 2)
+  tabActiva = signal<'nueva' | 'historial' | 'conflictos'>('nueva');
+  garantiaInfo = signal<ValidarCambioGarantiaResponse | null>(null);
+  notaFormalActiva = signal<NotaDevolucionFormalResponse | null>(null);
+  historialNotas = signal<NotaDevolucionFormalResponse[]>([]);
+  conflictos = signal<ConflictoInventarioResponse[]>([]);
+  conflictoSeleccionado = signal<ConflictoInventarioResponse | null>(null);
+  mostrarModalResolucion = signal<boolean>(false);
+  resolviendoConflicto = signal<boolean>(false);
+  accionResolucion = 'TRASPASO_INMEDIATO';
+  observacionResolucion = '';
+
+  conflictosPendientesCount = computed(() => {
+    return this.conflictos().filter(c => c.estado_resolucion === 'PENDIENTE_RESOLUCION').length;
+  });
+
   sucursales = signal<Sucursal[]>([]);
   sucursalSeleccionadaId = signal<number>(2);
 
@@ -1632,12 +1790,31 @@ export class DevolucionesPageComponent implements OnInit {
     this.buscando.set(true);
     this.errorBusqueda.set(null);
     this.ventaCargada.set(null);
+    this.garantiaInfo.set(null);
 
-    this.ventasService.buscarVentaPorCodigo(this.codigoBusqueda.trim()).subscribe({
-      next: (res) => {
+    // CU19: Validar ticket previo y plazos de garantía (RN06)
+    this.ventasService.validarSolicitudCambio(this.codigoBusqueda.trim()).subscribe({
+      next: (gRes) => {
         this.buscando.set(false);
-        this.ventaCargada.set(res);
-        const rows: ItemDevolucionRow[] = res.items.map(item => ({
+        this.garantiaInfo.set(gRes);
+        this.tipoOperacion.set('CAMBIO');
+
+        const vResponse: VentaParaDevolucionResponse = {
+          id: gRes.venta_id,
+          codigo_venta: gRes.codigo_venta,
+          sucursal_id: gRes.sucursal_id,
+          sucursal_nombre: gRes.sucursal_nombre,
+          fecha: gRes.fecha_venta,
+          cliente_nombre: gRes.cliente_nombre,
+          cliente_nit: '0',
+          total: 0 as any,
+          estado: 'PAGADA',
+          cajero_nombre: 'Cajero',
+          items: gRes.items
+        };
+        this.ventaCargada.set(vResponse);
+
+        const rows: ItemDevolucionRow[] = gRes.items.map(item => ({
           item,
           cantidadDevolver: 0,
           condicion: 'APTO_PARA_VENTA',
@@ -1723,27 +1900,128 @@ export class DevolucionesPageComponent implements OnInit {
       }))
     };
 
-    this.ventasService.registrarDevolucion(payload).subscribe({
-      next: (res) => {
+    // CU20: Emisión formal de Nota de Devolución con balance atómico Bs. 0.00 (RN07, RN08)
+    const payloadFormal: NotaDevolucionFormalCreate = {
+      venta_id: venta.id,
+      sucursal_id: this.sucursalSeleccionadaId(),
+      motivo: this.motivoSeleccionado,
+      observaciones: this.observaciones || undefined,
+      detalles: itemsAProcesar.map(r => ({
+        variante_devuelta_id: r.item.variante_id,
+        cantidad_devuelta: r.cantidadDevolver,
+        variante_entregada_id: r.varianteCambioId!,
+        cantidad_entregada: r.cantidadCambio || 1,
+        diferencia_monetaria: 0.0 // RN07
+      }))
+    };
+
+    this.ventasService.emitirNotaDevolucionFormal(payloadFormal).subscribe({
+      next: (resNota) => {
         this.procesando.set(false);
-        this.comprobanteActivo.set(res);
+        this.notaFormalActiva.set(resNota);
+        // Generar comprobante visual compatible
+        const cCompat: any = {
+          id: resNota.id,
+          codigo: resNota.codigo_devolucion,
+          tipo: 'CAMBIO',
+          motivo: resNota.motivo,
+          estado: resNota.estado,
+          total_devuelto: 0,
+          total_nuevo: 0,
+          diferencia: 0,
+          observaciones: resNota.observaciones,
+          created_at: resNota.fecha_hora,
+          venta: {
+            codigo_venta: resNota.codigo_venta,
+            cliente_nombre: resNota.cliente_nombre || 'Cliente Presencial'
+          },
+          detalles: resNota.detalles.map(d => ({
+            cantidad_devuelta: d.cantidad_devuelta,
+            precio_unitario_devuelto: 0,
+            subtotal_devuelto: 0,
+            condicion_prenda: 'APTO_PARA_VENTA',
+            cantidad_cambio: d.cantidad_entregada,
+            precio_unitario_cambio: 0,
+            subtotal_cambio: 0,
+            diferencia_linea: 0,
+            variante_devuelta: {
+              sku_variante: `DEV-${d.variante_devuelta_id}`,
+              prenda: { nombre: d.prenda_devuelta_nombre || 'Prenda Devuelta' },
+              talla: { nombre: d.talla_devuelta || 'Talla' }
+            },
+            variante_cambio: {
+              sku_variante: `ENT-${d.variante_entregada_id}`,
+              prenda: { nombre: d.prenda_entregada_nombre || 'Nueva Prenda' },
+              talla: { nombre: d.talla_entregada || 'Talla' }
+            }
+          }))
+        };
+        this.comprobanteActivo.set(cCompat);
         this.cargarStockSucursal();
-        this.buscarTicket(); // Refrescar saldo del ticket
+        this.cargarHistorial();
+        this.buscarTicket();
       },
       error: (err) => {
         this.procesando.set(false);
-        this.errorOperacion.set(err.error?.detail || 'Error al procesar la devolución o cambio');
+        this.errorOperacion.set(err.error?.detail || 'Error al emitir la Nota de Devolución');
       }
     });
   }
 
   cargarHistorial(): void {
     const sucId = this.sucursalSeleccionadaId();
-    this.ventasService.getDevoluciones(sucId, this.filtroTipo || undefined).subscribe({
-      next: (res) => this.historial.set(res),
-      error: (err: any) => console.error('Error cargando historial', err)
+    this.ventasService.getNotasDevolucionFormales(sucId).subscribe({
+      next: (notas) => this.historialNotas.set(notas),
+      error: (err: any) => console.error('Error cargando notas DEV-YYYY', err)
+    });
+    this.cargarConflictos();
+  }
+
+  cargarConflictos(): void {
+    const sucId = this.sucursalSeleccionadaId();
+    this.ventasService.getConflictosInventario(sucId).subscribe({
+      next: (res) => this.conflictos.set(res),
+      error: (err: any) => console.error('Error cargando conflictos', err)
     });
   }
+
+  abrirModalResolucion(conflicto: ConflictoInventarioResponse): void {
+    this.conflictoSeleccionado.set(conflicto);
+    this.accionResolucion = 'TRASPASO_INMEDIATO';
+    this.observacionResolucion = '';
+    this.mostrarModalResolucion.set(true);
+  }
+
+  cerrarModalResolucion(): void {
+    this.mostrarModalResolucion.set(false);
+    this.conflictoSeleccionado.set(null);
+  }
+
+  ejecutarResolucionConflicto(): void {
+    const c = this.conflictoSeleccionado();
+    if (!c || !this.observacionResolucion.trim()) return;
+
+    this.resolviendoConflicto.set(true);
+    const payload: ResolverConflictoRequest = {
+      accion: this.accionResolucion,
+      observaciones: this.observacionResolucion.trim(),
+      sucursal_proveedora_id: this.accionResolucion === 'TRASPASO_INMEDIATO' ? 2 : undefined
+    };
+
+    this.ventasService.resolverConflicto(c.id, payload).subscribe({
+      next: () => {
+        this.resolviendoConflicto.set(false);
+        this.cerrarModalResolucion();
+        this.cargarConflictos();
+        this.cargarStockSucursal();
+      },
+      error: (err) => {
+        this.resolviendoConflicto.set(false);
+        alert(err.error?.detail || 'Error al dirimir el conflicto de inventario');
+      }
+    });
+  }
+
 
   verRecibo(dev: DevolucionResponse): void {
     this.comprobanteActivo.set(dev);

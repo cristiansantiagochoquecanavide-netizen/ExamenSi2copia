@@ -16,7 +16,8 @@ from app.domains.ventas.schemas import (
     QRGenerarResponse, WebhookPagoPayload, PagoIniciarResponse,
     VentaOnlineCheckoutRequest, ActualizarEstadoEnvioRequest, EnvioPedidoResponse,
     PromocionCreate, PromocionUpdate, PromocionResponse,
-    ValidarCuponRequest, ValidarCuponResponse
+    ValidarCuponRequest, ValidarCuponResponse,
+    ValidarCambioGarantiaResponse, NotaDevolucionFormalCreate, NotaDevolucionFormalResponse
 )
 
 router = APIRouter(
@@ -404,3 +405,58 @@ async def obtener_venta(
 
 
 
+
+
+# ----------------- CU19 & CU20: NOTAS DE DEVOLUCIÓN POR CAMBIO DE TALLA (RN06, RN07, RN08) -----------------
+@router.get(
+    "/devoluciones/validar-cambio/{codigo_venta}",
+    response_model=ValidarCambioGarantiaResponse,
+    summary="Validar Solicitud de Cambio de Prenda por Medida (CU19 / RN06)"
+)
+async def validar_solicitud_cambio(
+    codigo_venta: str,
+    current_user: Usuario = Depends(require_permissions("ventas:read")),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    CU19: Validar ticket previo, cálculo de días transcurridos y vigencia de garantía (RN06).
+    """
+    emp_id = getattr(current_user, 'empresa_id', 1) or 1
+    return await VentasService.validar_solicitud_cambio(db, codigo_venta, emp_id)
+
+
+@router.post(
+    "/devoluciones/nota-cambio-talla",
+    response_model=NotaDevolucionFormalResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Emitir Nota de Devolución Oficial con Balance Atómico (CU20 / RN07 / RN08)"
+)
+async def emitir_nota_devolucion_formal(
+    data: NotaDevolucionFormalCreate,
+    request: Request,
+    current_user: Usuario = Depends(require_permissions("ventas:write")),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    CU20: Emisión formal de Nota de Devolución DEV-YYYY-NNNN.
+    - Prohibición estricta de reembolso monetario (RN07: saldo Bs. 0.00).
+    - Doble balance atómico de stock (RN08: +1 devuelto a stock, -1 nueva talla entregada).
+    """
+    ip = request.client.host if request.client else None
+    return await VentasService.emitir_nota_devolucion_formal(db, data, current_user, ip)
+
+
+@router.get(
+    "/devoluciones/notas-lista",
+    response_model=List[NotaDevolucionFormalResponse],
+    summary="Listar Notas de Devolución Emitidas (CU20)"
+)
+async def listar_notas_devolucion_formales(
+    sucursal_id: Optional[int] = None,
+    limit: int = 50,
+    offset: int = 0,
+    current_user: Usuario = Depends(require_permissions("ventas:read")),
+    db: AsyncSession = Depends(get_db)
+):
+    emp_id = getattr(current_user, 'empresa_id', 1) or 1
+    return await VentasService.listar_notas_devolucion_formales(db, sucursal_id, emp_id, limit, offset)

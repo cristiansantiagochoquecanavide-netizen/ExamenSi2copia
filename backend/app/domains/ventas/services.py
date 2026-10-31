@@ -1,7 +1,7 @@
 """Capa de Servicio (Lógica de Negocio) para el dominio de Ventas y Pagos."""
 from datetime import datetime, timezone, date, timedelta
 from decimal import Decimal
-from typing import List, Optional
+from typing import List, Optional, Any
 from fastapi import HTTPException, status
 from sqlalchemy import select, and_, desc, cast, Date, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -1793,3 +1793,316 @@ class VentasService:
 
 
 
+
+
+    # =========================================================================
+    # CU19: VALIDAR SOLICITUD DE CAMBIO POR MEDIDA (REGLA RN06)
+    # =========================================================================
+    @staticmethod
+    async def validar_solicitud_cambio(
+        db: AsyncSession,
+        codigo_venta: str,
+        empresa_id: Optional[int] = 1
+    ) -> dict:
+        from app.domains.saas.models import PoliticaGarantia
+        
+        # 1. Buscar venta original
+        query = select(Venta).options(
+            selectinload(Venta.sucursal),
+            selectinload(Venta.detalles).selectinload(DetalleVenta.variante).selectinload(PrendaVariante.prenda),
+            selectinload(Venta.detalles).selectinload(DetalleVenta.variante).selectinload(PrendaVariante.talla),
+            selectinload(Venta.detalles).selectinload(DetalleVenta.variante).selectinload(PrendaVariante.color)
+        ).where(Venta.codigo_venta == codigo_venta.strip())
+        
+        res = await db.execute(query)
+        venta = res.scalar_one_or_none()
+        if not venta:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Ticket o venta '{codigo_venta}' no encontrado.")
+        
+        if venta.estado != "PAGADA":
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Solo ventas formalmente PAGADAS admiten solicitudes de cambio de talla.")
+
+        # 2. Consultar política de garantía del tenant (RN06)
+        stmt_pol = select(PoliticaGarantia).where(PoliticaGarantia.empresa_id == (empresa_id or 1))
+        res_pol = await db.execute(stmt_pol)
+        politica = res_pol.scalar_one_or_none()
+        plazo_max = politica.plazo_dias_cambio if politica else 7
+
+        # 3. Calcular diferencia temporal
+        ahora = datetime.now(timezone.utc)
+        dias_transcurridos = max(0, (ahora.date() - venta.created_at.date()).days)
+        vigente = dias_transcurridos <= plazo_max
+
+        mensaje = (
+            f"Garantía vigente: han transcurrido {dias_transcurridos} de {plazo_max} días permitidos. Solicitud de cambio autorizada."
+            if vigente else
+            f"Plazo de garantía expirado: han transcurrido {dias_transcurridos} días y la política corporativa permite hasta {plazo_max} días."
+        )
+
+        items_resultado = []
+        for det in venta.detalles:
+            v = det.variante
+            sku = v.sku_variante if v else f"VAR-{det.variante_id}"
+            p_nombre = v.prenda.nombre if v and v.prenda else "Prenda Textil"
+            t_nombre = v.talla.codigo if v and v.talla else "Talla"
+            c_nombre = v.color.nombre if v and v.color else "Color"
+
+            items_resultado.append({
+                "detalle_id": det.id,
+                "variante_id": det.variante_id,
+                "sku": sku,
+                "prenda_nombre": p_nombre,
+                "talla": t_nombre,
+                "color": c_nombre,
+                "precio_unitario": det.precio_unitario,
+                "cantidad_comprada": det.cantidad,
+                "cantidad_ya_devuelta": 0,
+                "cantidad_disponible_devolucion": det.cantidad
+            })
+
+        return {
+            "venta_id": venta.id,
+            "codigo_venta": venta.codigo_venta,
+            "fecha_venta": venta.created_at,
+            "dias_transcurridos": dias_transcurridos,
+            "plazo_maximo_dias": plazo_max,
+            "garantia_vigente": vigente,
+            "permite_cambio_talla": True,
+            "admite_reembolso_dinero": False,
+            "mensaje": mensaje,
+            "sucursal_id": venta.sucursal_id,
+            "sucursal_nombre": venta.sucursal.nombre if venta.sucursal else "Sucursal Central",
+            "cliente_nombre": venta.cliente_nombre,
+            "items": items_resultado
+        }
+
+    # =========================================================================
+    # CU20: EMITIR NOTA DE DEVOLUCIÓN FORMAL (REGLAS RN07 Y RN08)
+    # =========================================================================
+    @staticmethod
+    async def emitir_nota_devolucion_formal(
+        db: AsyncSession,
+        data,
+        usuario: Usuario,
+        ip: Optional[str] = None
+    ) -> dict:
+        from app.domains.saas.models import NotaDevolucion, DetalleNotaDevolucion, PoliticaGarantia
+        
+        # 1. Validar venta
+        query_v = select(Venta).options(
+            selectinload(Venta.sucursal),
+            selectinload(Venta.detalles)
+        ).where(Venta.id == data.venta_id)
+        res_v = await db.execute(query_v)
+        venta = res_v.scalar_one_or_none()
+        if not venta:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Venta original no encontrada.")
+
+        # 2. Validar regla RN06: Plazo de garantía
+        emp_id = getattr(usuario, 'empresa_id', None) or 1
+        stmt_pol = select(PoliticaGarantia).where(PoliticaGarantia.empresa_id == emp_id)
+        res_pol = await db.execute(stmt_pol)
+        politica = res_pol.scalar_one_or_none()
+        plazo_max = politica.plazo_dias_cambio if politica else 7
+
+        ahora = datetime.now(timezone.utc)
+        dias_transcurridos = max(0, (ahora.date() - venta.created_at.date()).days)
+        if dias_transcurridos > plazo_max:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Plazo de garantía expirado: han transcurrido {dias_transcurridos} días y la política corporativa permite hasta {plazo_max} días."
+            )
+
+        # 3. Validar regla RN07: Prohibición estricta de reembolso monetario
+        for det in data.detalles:
+            if det.diferencia_monetaria != 0.0:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Regla de Negocio RN07: Prohibido reintegro de dinero en notas de devolución por cambio de talla. Saldo debe ser Bs. 0.00."
+                )
+
+        # 4. Transacción atómica de balance de inventario (RN08)
+        detalles_creados = []
+        for det in data.detalles:
+            # a. Reingresar la variante devuelta al stock vendible de la sucursal (+1)
+            stmt_st_dev = select(InventarioStock).where(
+                and_(
+                    InventarioStock.variante_id == det.variante_devuelta_id,
+                    InventarioStock.sucursal_id == data.sucursal_id
+                )
+            )
+            res_st_dev = await db.execute(stmt_st_dev)
+            st_dev = res_st_dev.scalar_one_or_none()
+            if st_dev:
+                cant_ant_dev = st_dev.cantidad_disponible
+                st_dev.cantidad_disponible += det.cantidad_devuelta
+                st_dev.updated_at = ahora
+                
+                mov_dev = MovimientoInventario(
+                    stock_id=st_dev.id,
+                    tipo_movimiento="DEVOLUCION",
+                    cantidad=det.cantidad_devuelta,
+                    cantidad_anterior=cant_ant_dev,
+                    cantidad_nueva=st_dev.cantidad_disponible,
+                    motivo=f"Reingreso por cambio de prenda/talla - Venta #{venta.id}",
+                    usuario_id=usuario.id
+                )
+                db.add(mov_dev)
+
+            # b. Descontar la nueva talla entregada del stock de la sucursal (-1)
+            stmt_st_ent = select(InventarioStock).where(
+                and_(
+                    InventarioStock.variante_id == det.variante_entregada_id,
+                    InventarioStock.sucursal_id == data.sucursal_id
+                )
+            )
+            res_st_ent = await db.execute(stmt_st_ent)
+            st_ent = res_st_ent.scalar_one_or_none()
+            if not st_ent or st_ent.cantidad_disponible < det.cantidad_entregada:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Stock insuficiente en sucursal para la nueva talla solicitada (Variante ID {det.variante_entregada_id}). Solicite un traspaso (CU12)."
+                )
+            
+            cant_ant_ent = st_ent.cantidad_disponible
+            st_ent.cantidad_disponible -= det.cantidad_entregada
+            st_ent.updated_at = ahora
+
+            mov_ent = MovimientoInventario(
+                stock_id=st_ent.id,
+                tipo_movimiento="AJUSTE_NEGATIVO",
+                cantidad=det.cantidad_entregada,
+                cantidad_anterior=cant_ant_ent,
+                cantidad_nueva=st_ent.cantidad_disponible,
+                motivo=f"Entrega de nueva talla por cambio - Venta #{venta.id}",
+                usuario_id=usuario.id
+            )
+            db.add(mov_ent)
+
+        # 5. Generar correlativo oficial DEV-YYYY-NNNN
+        correlativo = f"DEV-{ahora.year}-{venta.id:04d}-{data.sucursal_id:02d}"
+
+        nota = NotaDevolucion(
+            codigo_devolucion=correlativo,
+            empresa_id=emp_id,
+            venta_id=venta.id,
+            sucursal_id=data.sucursal_id,
+            usuario_id=usuario.id,
+            cliente_id=venta.cliente_id,
+            motivo=data.motivo,
+            estado="COMPLETADA",
+            observaciones=data.observaciones or "Cambio de prenda física por ajuste de talla. Reembolso Bs. 0.00.",
+            fecha_hora=ahora
+        )
+        db.add(nota)
+        await db.flush()
+
+        for det in data.detalles:
+            d_nota = DetalleNotaDevolucion(
+                nota_devolucion_id=nota.id,
+                variante_devuelta_id=det.variante_devuelta_id,
+                cantidad_devuelta=det.cantidad_devuelta,
+                variante_entregada_id=det.variante_entregada_id,
+                cantidad_entregada=det.cantidad_entregada,
+                diferencia_monetaria=Decimal("0.00")
+            )
+            db.add(d_nota)
+            detalles_creados.append(d_nota)
+
+        await db.commit()
+
+        # Armar respuesta con nombres descriptivos
+        detalles_resp = []
+        for d in detalles_creados:
+            stmt_v_dev = select(PrendaVariante).options(selectinload(PrendaVariante.prenda), selectinload(PrendaVariante.talla)).where(PrendaVariante.id == d.variante_devuelta_id)
+            stmt_v_ent = select(PrendaVariante).options(selectinload(PrendaVariante.prenda), selectinload(PrendaVariante.talla)).where(PrendaVariante.id == d.variante_entregada_id)
+            r_dev = await db.execute(stmt_v_dev)
+            r_ent = await db.execute(stmt_v_ent)
+            v_dev = r_dev.scalar_one_or_none()
+            v_ent = r_ent.scalar_one_or_none()
+
+            detalles_resp.append({
+                "id": d.id,
+                "variante_devuelta_id": d.variante_devuelta_id,
+                "prenda_devuelta_nombre": v_dev.prenda.nombre if v_dev and v_dev.prenda else "Prenda Devuelta",
+                "talla_devuelta": v_dev.talla.codigo if v_dev and v_dev.talla else "-",
+                "cantidad_devuelta": d.cantidad_devuelta,
+                "variante_entregada_id": d.variante_entregada_id,
+                "prenda_entregada_nombre": v_ent.prenda.nombre if v_ent and v_ent.prenda else "Nueva Prenda",
+                "talla_entregada": v_ent.talla.codigo if v_ent and v_ent.talla else "-",
+                "cantidad_entregada": d.cantidad_entregada,
+                "diferencia_monetaria": 0.0
+            })
+
+        return {
+            "id": nota.id,
+            "codigo_devolucion": nota.codigo_devolucion,
+            "venta_id": nota.venta_id,
+            "codigo_venta": venta.codigo_venta,
+            "sucursal_id": nota.sucursal_id,
+            "sucursal_nombre": venta.sucursal.nombre if venta.sucursal else "Sucursal",
+            "cliente_id": nota.cliente_id,
+            "cliente_nombre": venta.cliente_nombre,
+            "motivo": nota.motivo,
+            "estado": nota.estado,
+            "diferencia_monetaria": 0.0,
+            "observaciones": nota.observaciones,
+            "fecha_hora": nota.fecha_hora,
+            "detalles": detalles_resp
+        }
+
+    @staticmethod
+    async def listar_notas_devolucion_formales(
+        db: AsyncSession,
+        sucursal_id: Optional[int] = None,
+        empresa_id: Optional[int] = 1,
+        limit: int = 50,
+        offset: int = 0
+    ) -> list:
+        from app.domains.saas.models import NotaDevolucion, DetalleNotaDevolucion
+        query = select(NotaDevolucion).options(
+            selectinload(NotaDevolucion.detalles)
+        ).order_by(NotaDevolucion.fecha_hora.desc()).limit(limit).offset(offset)
+
+        if sucursal_id:
+            query = query.where(NotaDevolucion.sucursal_id == sucursal_id)
+        if empresa_id:
+            query = query.where(NotaDevolucion.empresa_id == empresa_id)
+
+        res = await db.execute(query)
+        notas = res.scalars().all()
+
+        resultado = []
+        for n in notas:
+            stmt_v = select(Venta).where(Venta.id == n.venta_id)
+            res_v = await db.execute(stmt_v)
+            v = res_v.scalar_one_or_none()
+
+            detalles_list = []
+            for d in n.detalles:
+                detalles_list.append({
+                    "id": d.id,
+                    "variante_devuelta_id": d.variante_devuelta_id,
+                    "cantidad_devuelta": d.cantidad_devuelta,
+                    "variante_entregada_id": d.variante_entregada_id,
+                    "cantidad_entregada": d.cantidad_entregada,
+                    "diferencia_monetaria": float(d.diferencia_monetaria)
+                })
+
+            resultado.append({
+                "id": n.id,
+                "codigo_devolucion": n.codigo_devolucion,
+                "venta_id": n.venta_id,
+                "codigo_venta": v.codigo_venta if v else f"VTA-{n.venta_id}",
+                "sucursal_id": n.sucursal_id,
+                "sucursal_nombre": v.sucursal.nombre if v and v.sucursal else None,
+                "cliente_id": n.cliente_id,
+                "cliente_nombre": v.cliente_nombre if v else "Cliente",
+                "motivo": n.motivo,
+                "estado": n.estado,
+                "diferencia_monetaria": 0.0,
+                "observaciones": n.observaciones,
+                "fecha_hora": n.fecha_hora,
+                "detalles": detalles_list
+            })
+        return resultado

@@ -223,6 +223,18 @@
       </nav>
 
     <div class="user-auth-zone">
+      <!-- CU16: Estado de Conectividad y Sincronización Offline por Lotes -->
+      <div
+        class="sync-offline-pill"
+        [class.is-offline]="!(offlineService.isOnline$ | async)"
+        (click)="sincronizarLoteOffline()"
+        title="Sincronización Offline (CU16). Clic para sincronizar lote con el servidor central.">
+        <span class="sync-dot" [class.sync-pulse]="((offlineService.pendingCount$ | async) || 0) > 0"></span>
+        <span class="sync-text">{{ (offlineService.isOnline$ | async) ? 'ONLINE' : 'OFFLINE' }}</span>
+        @if (((offlineService.pendingCount$ | async) || 0) > 0) {
+          <span class="sync-pending-badge">{{ offlineService.pendingCount$ | async }}</span>
+        }
+      </div>
       <!-- CU21: Centro de Notificaciones & Alertas -->
       <app-notification-bell />
 

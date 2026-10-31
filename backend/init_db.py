@@ -26,6 +26,7 @@ MIGRATION_STATEMENTS = [
     "ALTER TABLE IF EXISTS bitacora_auditoria ADD COLUMN IF NOT EXISTS empresa_id INT REFERENCES empresa(id);",
     "ALTER TABLE IF EXISTS inventario_stock ADD COLUMN IF NOT EXISTS stock_en_transito INT NOT NULL DEFAULT 0;",
     "ALTER TABLE IF EXISTS token_blacklist ALTER COLUMN token TYPE TEXT;",
+    "ALTER TABLE IF EXISTS nota_devolucion ALTER COLUMN cliente_id DROP NOT NULL;",
 
     # Índices recomendados para rendimiento multitenant
     "CREATE INDEX IF NOT EXISTS ix_prendas_empresa_id ON prendas (empresa_id);",

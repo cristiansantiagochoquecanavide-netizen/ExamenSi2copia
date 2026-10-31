@@ -7,7 +7,9 @@ import {
   DevolucionCreate, DevolucionResponse, VentaParaDevolucionResponse,
   PagoElectronicoCreate, ConfirmarPagoRequest, PagoIniciarResponse, PagoResponse,
   VentaOnlineCheckoutRequest, ActualizarEstadoEnvioRequest, EnvioPedido,
-  Promocion, PromocionCreate, PromocionUpdate, ValidarCuponRequest, ValidarCuponResponse
+  Promocion, PromocionCreate, PromocionUpdate, ValidarCuponRequest, ValidarCuponResponse,
+  ValidarCambioGarantiaResponse, NotaDevolucionFormalCreate, NotaDevolucionFormalResponse,
+  ConflictoInventarioResponse, ResolverConflictoRequest
 } from '../models/ventas.models';
 import { LocalOfflineStorageService } from '../../../core/services/local-offline-storage.service';
 
@@ -146,7 +148,37 @@ export class VentasService {
   obtenerVentasOffline() {
     return this.offlineStorage.obtenerVentasOffline();
   }
+
+      // ==========================================
+  // CU19 & CU20: NOTAS DE DEVOLUCIÓN POR CAMBIO DE TALLA
+  // ==========================================
+  validarSolicitudCambio(codigo: string): Observable<ValidarCambioGarantiaResponse> {
+    return this.http.get<ValidarCambioGarantiaResponse>(this.baseUrl + '/devoluciones/validar-cambio/' + encodeURIComponent(codigo));
+  }
+
+  emitirNotaDevolucionFormal(data: NotaDevolucionFormalCreate): Observable<NotaDevolucionFormalResponse> {
+    return this.http.post<NotaDevolucionFormalResponse>(this.baseUrl + '/devoluciones/nota-cambio-talla', data);
+  }
+
+  getNotasDevolucionFormales(sucursalId?: number): Observable<NotaDevolucionFormalResponse[]> {
+    let params = new HttpParams();
+    if (sucursalId) params = params.set('sucursal_id', sucursalId.toString());
+    return this.http.get<NotaDevolucionFormalResponse[]>(this.baseUrl + '/devoluciones/notas-lista', { params });
+  }
+
+  // ==========================================
+  // CU17: CONFLICTOS DE INVENTARIO
+  // ==========================================
+  getConflictosInventario(sucursalId?: number, estado?: string): Observable<ConflictoInventarioResponse[]> {
+    let params = new HttpParams();
+    if (sucursalId) params = params.set('sucursal_id', sucursalId.toString());
+    if (estado) params = params.set('estado_resolucion', estado);
+    const syncUrl = this.baseUrl.replace('/ventas', '') + '/sincronizacion/conflictos';
+    return this.http.get<ConflictoInventarioResponse[]>(syncUrl, { params });
+  }
+
+  resolverConflicto(conflictoId: number, data: ResolverConflictoRequest): Observable<any> {
+    const syncUrl = this.baseUrl.replace('/ventas', '') + '/sincronizacion/conflictos/' + conflictoId + '/resolver';
+    return this.http.put<any>(syncUrl, data);
+  }
 }
-
-
-
