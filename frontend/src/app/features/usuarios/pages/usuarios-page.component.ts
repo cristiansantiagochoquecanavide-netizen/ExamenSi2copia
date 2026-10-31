@@ -916,8 +916,6 @@ import { Sucursal } from '../../inventario/models/inventario.models';
       background: #262626;
       transform: translateY(-1px);
     }
-      background: #262626;
-    }
   `]
 })
 export class UsuariosPageComponent implements OnInit {
