@@ -1798,21 +1798,23 @@ export class VentasPosPageComponent implements OnInit {
     });
   });
 
-  readonly subtotalTicket = computed(() =>
-    this.ticketItems.reduce((acc, it) => acc + (it.subtotal || 0), 0)
-  );
+  subtotalTicket(): number {
+    return this.ticketItems.reduce((acc, it) => acc + (it.subtotal || 0), 0);
+  }
 
-  readonly totalTicket = computed(() => {
+  totalTicket(): number {
     const sub = this.subtotalTicket();
     const desc = Math.min(this.descuentoMonto || 0, sub);
     return Math.max(0, sub - desc);
-  });
+  }
 
-  readonly cambioVuelto = computed(() => {
+  cambioVuelto(): number {
     if (this.metodoPago !== 'EFECTIVO') return 0;
-    const pagado = this.montoEntregado || this.totalTicket();
+    const pagado = (this.montoEntregado !== null && this.montoEntregado !== undefined && this.montoEntregado > 0)
+      ? this.montoEntregado
+      : this.totalTicket();
     return pagado - this.totalTicket();
-  });
+  }
 
   readonly totalRecaudadoDia = computed(() =>
     this.ventasDelDia().reduce((acc, v) => acc + (v.total || 0), 0)
