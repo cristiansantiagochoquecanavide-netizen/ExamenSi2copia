@@ -1978,8 +1978,7 @@ export class DevolucionesPageComponent implements OnInit {
   }
 
   cargarConflictos(): void {
-    const sucId = this.sucursalSeleccionadaId();
-    this.ventasService.getConflictosInventario(sucId).subscribe({
+    this.ventasService.getConflictosInventario().subscribe({
       next: (res) => this.conflictos.set(res),
       error: (err: any) => console.error('Error cargando conflictos', err)
     });
