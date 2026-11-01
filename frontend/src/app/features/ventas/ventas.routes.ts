@@ -11,6 +11,11 @@ export const VENTAS_ROUTES: Routes = [
     component: VentasPosPageComponent
   },
   {
+    path: 'pos',
+    redirectTo: '',
+    pathMatch: 'full'
+  },
+  {
     path: 'checkout',
     component: CheckoutEcommercePageComponent
   },
