@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../shared/widgets/atelier_scaffold.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../data/repositories/inventario_repository.dart';
@@ -91,7 +92,23 @@ class _InventarioScreenState extends State<InventarioScreen> {
                 'Consulta de disponibilidad física entre tiendas en tiempo real (CU11 - Vendedor / Cliente).',
                 style: TextStyle(fontSize: 12, color: AppTheme.mutedColor, height: 1.4),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 14),
+
+              // Botón de acceso a CU17 (Conflictos de Inventario)
+              OutlinedButton.icon(
+                onPressed: () => context.go('/conflictos'),
+                icon: const Icon(Icons.rule_folder_outlined, size: 16),
+                label: const Text(
+                  'RESOLVER CONFLICTOS DE INVENTARIO (CU17)',
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFFD1D5DB)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                ),
+              ),
+              const SizedBox(height: 16),
 
               // Buscador de Variante / Prenda
               Container(

@@ -10,6 +10,9 @@ import '../../features/ventas/presentation/screens/ventas_screen.dart';
 import '../../features/ia_asistente/presentation/screens/ia_asistente_screen.dart';
 import '../../features/notificaciones/presentation/screens/notificaciones_screen.dart';
 import '../../features/reportes/presentation/screens/reportes_screen.dart';
+import '../../features/ventas/presentation/screens/sincronizacion_screen.dart';
+import '../../features/inventario/presentation/screens/conflictos_screen.dart';
+import '../../features/ventas/presentation/screens/devoluciones_screen.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -56,6 +59,19 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/reportes',
       builder: (context, state) => const ReportesScreen(),
+    ),
+    // Presentación 2: CU16, CU17, CU19
+    GoRoute(
+      path: '/sincronizacion',
+      builder: (context, state) => const SincronizacionScreen(),
+    ),
+    GoRoute(
+      path: '/conflictos',
+      builder: (context, state) => const ConflictosScreen(),
+    ),
+    GoRoute(
+      path: '/devoluciones',
+      builder: (context, state) => const DevolucionesScreen(),
     ),
   ],
 );

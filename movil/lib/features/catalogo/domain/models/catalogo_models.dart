@@ -33,6 +33,8 @@ class TallaModel {
   final int orden;
   final bool activo;
 
+  String get nombre => codigo;
+
   const TallaModel({
     required this.id,
     required this.codigo,

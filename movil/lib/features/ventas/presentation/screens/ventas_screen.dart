@@ -155,6 +155,51 @@ class _VentasScreenState extends State<VentasScreen> with SingleTickerProviderSt
       currentRoute: '/ventas',
       child: Column(
         children: [
+          // Banner de Operaciones Postventa y Offline (Presentación 2)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: const BoxDecoration(
+              color: Color(0xFFFAFAFA),
+              border: Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => context.go('/devoluciones'),
+                    icon: const Icon(Icons.assignment_return_outlined, size: 14),
+                    label: const Text(
+                      'CAMBIOS TALLA (CU19)',
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                      side: const BorderSide(color: Color(0xFFD1D5DB)),
+                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => context.go('/sincronizacion'),
+                    icon: const Icon(Icons.sync_outlined, size: 14),
+                    label: const Text(
+                      'SYNC OFFLINE (CU16)',
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
           // Tab Header
           Container(
             decoration: const BoxDecoration(

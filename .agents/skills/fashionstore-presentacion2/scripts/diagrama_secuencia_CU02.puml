@@ -1,0 +1,94 @@
+@startuml
+skinparam responseMessageBelowArrow false
+skinparam sequenceMessageAlign center
+skinparam boxPadding 10
+skinparam participantPadding 15
+skinparam sequenceGroupBorderThickness 1.5
+skinparam sequenceGroupBorderColor #4CAF50
+skinparam sequenceGroupFontSize 11
+skinparam sequenceGroupFontColor #2E7D32
+skinparam sequenceGroupHeaderFontStyle bold
+
+skinparam sequence {
+    LifeLineBorderColor #00838F
+    LifeLineBackgroundColor #E0F7FA
+    GroupBackgroundColor transparent
+    GroupBodyBackgroundColor transparent
+    ArrowColor #37474F
+    ArrowFontSize 11
+    ActorBorderColor #FBC02D
+    ActorBackgroundColor #FFF9C4
+}
+
+actor "Superadministrador SaaS" as Actor #FFF9C4
+participant "UI_RegistroTenant" as UI #B2EBF2
+participant "ControladorTenant" as Ctrl #B2EBF2
+participant "PlanSuscripcion" as Plan #B2EBF2
+participant "Empresa" as Empresa #B2EBF2
+participant "Suscripcion" as Suscrip #B2EBF2
+participant "Usuario" as Usuario #B2EBF2
+participant "BitacoraAuditoria" as Auditoria #B2EBF2
+
+autonumber 1
+
+Actor -> UI: solicitarRegistroEmpresa(datosEmpresa)
+activate UI
+
+opt verificacionPreviaSubdominio == true
+    UI -> Ctrl: verificarDisponibilidadSubdominio(subdominio, plan_id)
+    activate Ctrl
+    Ctrl -> Empresa: validarUnicidadSubdominio(subdominio)
+    activate Empresa
+    Empresa --> Ctrl: subdominioDisponible: bool()
+    deactivate Empresa
+    Ctrl -> Plan: consultarLimitesPermitidos(plan_id)
+    activate Plan
+    Plan --> Ctrl: planActivo: bool()
+    deactivate Plan
+    Ctrl --> UI: 200 OK (subdominioYPlanValidos)
+    deactivate Ctrl
+    UI --> Actor: mostrarDisponibilidadSubdominio(valido=true)
+end
+
+Actor -> UI: confirmarCreacionTenant()
+UI -> Ctrl: procesarRegistroTenant(datosValidados)
+activate Ctrl
+
+Ctrl -> Empresa: validarUnicidadSubdominioYNit(subdominio, nit)
+activate Empresa
+Empresa --> Ctrl: datosDisponibles: bool()
+deactivate Empresa
+
+Ctrl -> Plan: validarPlanActivo(plan_id)
+activate Plan
+Plan --> Ctrl: planConfirmado: PlanSuscripcion()
+deactivate Plan
+
+alt subdominioDisponible == true && nitDisponible == true && plan.activo == true
+    Ctrl -> Empresa: crearRegistroEmpresa(datos)
+    activate Empresa
+    Empresa --> Ctrl: nuevaEmpresa: Empresa (id, subdominio)
+    deactivate Empresa
+
+    Ctrl -> Suscrip: crearSuscripcionInicial(empresa_id, plan_id, 365_dias)
+    activate Suscrip
+    Suscrip --> Ctrl: suscripcionActiva: Suscripcion (id, estado='ACTIVA')
+    deactivate Suscrip
+
+    Ctrl -> Usuario: crearUsuarioAdminTenant(datosAdmin, passwordHash)
+    activate Usuario
+    Usuario --> Ctrl: adminCreado: Usuario (id, rol='ADMINISTRADOR')
+    deactivate Usuario
+
+    Ctrl -> Auditoria: registrarEventoAuditoria('ALTA_TENANT', empresa_id)
+    activate Auditoria
+    Auditoria --> Ctrl: auditoriaRegistrada: bool()
+    deactivate Auditoria
+
+    Ctrl --> UI: 201 Created (empresaResponse)
+    deactivate Ctrl
+    UI --> Actor: notificarResultadoRegistro('Tenant registrado exitosamente')
+    deactivate UI
+end
+
+@enduml

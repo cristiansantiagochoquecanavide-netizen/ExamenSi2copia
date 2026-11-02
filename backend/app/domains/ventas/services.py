@@ -1979,8 +1979,18 @@ class VentasService:
             )
             db.add(mov_ent)
 
-        # 5. Generar correlativo oficial DEV-YYYY-NNNN
-        correlativo = f"DEV-{ahora.year}-{venta.id:04d}-{data.sucursal_id:02d}"
+        # 5. Generar correlativo oficial único DEV-YYYY-...
+        stmt_count = select(func.count(NotaDevolucion.id)).where(NotaDevolucion.empresa_id == emp_id)
+        res_count = await db.execute(stmt_count)
+        next_seq = (res_count.scalar() or 0) + 1
+        correlativo = f"DEV-{ahora.year}-{venta.id:04d}-{data.sucursal_id:02d}-{next_seq:02d}"
+
+        # Garantizar unicidad absoluta ante posibles secuencias previas
+        collision_check = await db.execute(select(NotaDevolucion).where(NotaDevolucion.codigo_devolucion == correlativo))
+        while collision_check.scalar_one_or_none():
+            next_seq += 1
+            correlativo = f"DEV-{ahora.year}-{venta.id:04d}-{data.sucursal_id:02d}-{next_seq:02d}"
+            collision_check = await db.execute(select(NotaDevolucion).where(NotaDevolucion.codigo_devolucion == correlativo))
 
         nota = NotaDevolucion(
             codigo_devolucion=correlativo,

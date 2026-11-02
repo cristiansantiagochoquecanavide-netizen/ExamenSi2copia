@@ -46,6 +46,11 @@ class AtelierScaffold extends StatelessWidget {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.sync_outlined, color: Colors.black),
+            tooltip: 'Sincronización Offline (CU16)',
+            onPressed: () => context.go('/sincronizacion'),
+          ),
+          IconButton(
             icon: const Icon(Icons.notifications_outlined, color: Colors.black),
             tooltip: 'Alertas & Notificaciones',
             onPressed: () => context.go('/notificaciones'),

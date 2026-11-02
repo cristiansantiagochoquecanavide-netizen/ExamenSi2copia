@@ -1,0 +1,179 @@
+# ==============================================================================
+# SCRIPT DE ACTUALIZACION DIAGRAMA DE ROBUSTEZ CU06 CON PROVEEDOR
+# ==============================================================================
+
+if ([IntPtr]::Size -eq 8) {
+    & "$env:SystemRoot\SysWOW64\WindowsPowerShell\v1.0\powershell.exe" -ExecutionPolicy Bypass -File $MyInvocation.MyCommand.Path @args
+    exit $LASTEXITCODE
+}
+
+$eapPath = "C:\Users\HP\Documents\SI2\2doParcial\diagramas_2doparcial.eap"
+$outImgCu06 = "C:\Users\HP\Documents\SI2\2doParcial\diagrama_robustez_CU06.png"
+
+$conn = New-Object System.Data.OleDb.OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=$eapPath")
+$conn.Open()
+
+function Get-NextId([string]$table, [string]$col) {
+    $cmd = $conn.CreateCommand()
+    $cmd.CommandText = "SELECT MAX($col) FROM $table"
+    $val = $cmd.ExecuteScalar()
+    if ($null -eq $val -or [DBNull]::Value.Equals($val)) { return 1 }
+    return [int]$val + 1
+}
+
+function New-GuidStr {
+    return "{" + [System.Guid]::NewGuid().ToString().ToUpper() + "}"
+}
+
+function Ensure-Object([string]$name, [string]$type, [string]$stereo, [int]$pkgId) {
+    $cmd = $conn.CreateCommand()
+    $cmd.CommandText = "SELECT Object_ID FROM t_object WHERE [Name] = '$name' AND Package_ID = $pkgId"
+    $val = $cmd.ExecuteScalar()
+    if ($null -ne $val -and -not [DBNull]::Value.Equals($val)) {
+        if ($stereo) {
+            $cmd.CommandText = "UPDATE t_object SET Stereotype = '$stereo' WHERE Object_ID = " + [int]$val
+            $cmd.ExecuteNonQuery() | Out-Null
+        }
+        return [int]$val
+    }
+    $objId = Get-NextId "t_object" "Object_ID"
+    $guid = New-GuidStr
+    $cmd.CommandText = @"
+INSERT INTO t_object (
+    [Object_ID], [Object_Type], [Diagram_ID], [Name], [Author], [Version], 
+    [Package_ID], [Complexity], [Backcolor], [BorderWidth], [Fontcolor], 
+    [Bordercolor], [CreatedDate], [ModifiedDate], [Status], [Abstract], 
+    [Scope], [Stereotype], [ea_guid], [IsActive], [IsLeaf], [IsRoot], [IsSpec]
+) VALUES (
+    $objId, '$type', 0, '$name', 'Grupo 6', '1.0',
+    $pkgId, '1', -1, -1, -1,
+    -1, NOW(), NOW(), 'Proposed', '0',
+    'Public', '$stereo', '$guid', False, False, False, False
+)
+"@
+    $cmd.ExecuteNonQuery() | Out-Null
+    return $objId
+}
+
+try {
+    $pkgId = 13 # 3.2. Diagramas de robustez (P2)
+    $diagName = "Diagrama de robustez CU06"
+
+    $cmd = $conn.CreateCommand()
+    $cmd.CommandText = "SELECT Diagram_ID, ea_guid FROM t_diagram WHERE [Name] = '$diagName' AND Package_ID = $pkgId"
+    $reader = $cmd.ExecuteReader()
+    $diagId = 0
+    if ($reader.Read()) {
+        $diagId = [int]$reader["Diagram_ID"]
+    }
+    $reader.Close()
+
+    $cmd.CommandText = "UPDATE t_diagram SET [cx] = 2800, [cy] = 1400 WHERE Diagram_ID = $diagId"
+    $cmd.ExecuteNonQuery() | Out-Null
+    $cmd.CommandText = "DELETE FROM t_diagramobjects WHERE Diagram_ID = $diagId"
+    $cmd.ExecuteNonQuery() | Out-Null
+    $cmd.CommandText = "DELETE FROM t_diagramlinks WHERE DiagramID = $diagId"
+    $cmd.ExecuteNonQuery() | Out-Null
+
+    # Elementos BCE incluyendo Proveedor
+    $idActor = Ensure-Object "Administrador del Tenant" "Actor" "" $pkgId
+    $idBoundary = Ensure-Object "UI_GestionCatalogoPrendas" "Class" "boundary" $pkgId
+    $idControl = Ensure-Object "CatalogoPrendaController" "Class" "control" $pkgId
+    $idPrenda = Ensure-Object "Prenda" "Class" "entity" $pkgId
+    $idProveedor = Ensure-Object "Proveedor" "Class" "entity" $pkgId
+    $idVariante = Ensure-Object "PrendaVariante" "Class" "entity" $pkgId
+    $idGuiaMedida = Ensure-Object "GuiaMedida" "Class" "entity" $pkgId
+    $idMultimedia = Ensure-Object "PrendaMultimedia" "Class" "entity" $pkgId
+    $idBitacora = Ensure-Object "BitacoraAuditoria" "Class" "entity" $pkgId
+
+    # Layout amplio con 6 entidades
+    $layout = @(
+        @{ Id = $idActor;       L = 60;   T = -300; R = 150;  B = -410; Seq = 1 },
+        @{ Id = $idBoundary;    L = 400;  T = -315; R = 490;  B = -395; Seq = 2 },
+        @{ Id = $idControl;     L = 920;  T = -315; R = 1010; B = -395; Seq = 3 },
+        @{ Id = $idPrenda;      L = 1850; T = -40;  R = 1940; B = -120; Seq = 4 },
+        @{ Id = $idProveedor;   L = 1850; T = -150; R = 1940; B = -230; Seq = 5 },
+        @{ Id = $idVariante;    L = 1850; T = -260; R = 1940; B = -340; Seq = 6 },
+        @{ Id = $idGuiaMedida;  L = 1850; T = -370; R = 1940; B = -450; Seq = 7 },
+        @{ Id = $idMultimedia;  L = 1850; T = -480; R = 1940; B = -560; Seq = 8 },
+        @{ Id = $idBitacora;    L = 1850; T = -590; R = 1940; B = -670; Seq = 9 }
+    )
+
+    foreach ($item in $layout) {
+        $instId = Get-NextId "t_diagramobjects" "Instance_ID"
+        $oid = $item.Id; $l = $item.L; $t = $item.T; $r = $item.R; $b = $item.B; $seq = $item.Seq
+        $cmd.CommandText = @"
+INSERT INTO t_diagramobjects (
+    [Diagram_ID], [Object_ID], [RectTop], [RectLeft], [RectRight], [RectBottom], [Sequence], [Instance_ID]
+) VALUES (
+    $diagId, $oid, $t, $l, $r, $b, $seq, $instId
+)
+"@
+        $cmd.ExecuteNonQuery() | Out-Null
+    }
+
+    function Add-ConnectorMsg([int]$src, [int]$dst, [string]$msg, [int]$targetDiagId) {
+        $cmd = $conn.CreateCommand()
+        $cmd.CommandText = "SELECT Connector_ID FROM t_connector WHERE Start_Object_ID = $src AND End_Object_ID = $dst"
+        $cid = $cmd.ExecuteScalar()
+        if ($null -eq $cid -or [DBNull]::Value.Equals($cid)) {
+            $cid = Get-NextId "t_connector" "Connector_ID"
+            $guid = New-GuidStr
+            $cmd.CommandText = @"
+INSERT INTO t_connector (
+    [Connector_ID], [Name], [Direction], [Notes], [Connector_Type],
+    [SourceAccess], [DestAccess], [Start_Object_ID], [End_Object_ID], [RouteStyle], [LineColor],
+    [ea_guid], [SourceIsNavigable], [DestIsNavigable], [IsRoot], [IsLeaf], [IsSpec],
+    [SourceStyle], [DestStyle]
+) VALUES (
+    $cid, '$msg', 'Source -> Destination', '$msg', 'Association',
+    'Public', 'Public', $src, $dst, 3, -1,
+    '$guid', False, True, False, False, False,
+    'Navigable=Unspecified;', 'Navigable=Navigable;'
+)
+"@
+            $cmd.ExecuteNonQuery() | Out-Null
+        } else {
+            $cid = [int]$cid
+            $cmd.CommandText = "UPDATE t_connector SET [Name] = '$msg', [Notes] = '$msg', [Connector_Type] = 'Association', [Direction] = 'Source -> Destination' WHERE Connector_ID = $cid"
+            $cmd.ExecuteNonQuery() | Out-Null
+        }
+
+        $instId = Get-NextId "t_diagramlinks" "Instance_ID"
+        $geo = "EDGE=2;=;LLT=;LMT=;LMB=;LRT=;LRB=;IRHS=;ILHS=;"
+        $style = "Mode=3;Color=-1;LWidth=0;"
+        $cmd.CommandText = "INSERT INTO t_diagramlinks ([DiagramID], [ConnectorID], [Geometry], [Style], [Hidden], [Instance_ID]) VALUES ($targetDiagId, $cid, '$geo', '$style', False, $instId)"
+        $cmd.ExecuteNonQuery() | Out-Null
+        return $cid
+    }
+
+    # Conectores y mensajes para CU06 con Proveedor
+    $c1 = Add-ConnectorMsg $idActor $idBoundary "1: registrarPrenda(datosPrenda, variantes)`n2: configurarGuiaMedidas(prenda_id, datosMedidas)`n3: actualizarPreciosPrenda(prenda_id, nuevoPrecio)" $diagId
+    $c2 = Add-ConnectorMsg $idBoundary $idControl "1.1: procesarAltaPrenda(datosPrenda)`n2.1: procesarGuiaMedidas(prenda_id, datosMedidas)`n3.1: procesarActualizacionPrenda(prenda_id, nuevoPrecio)" $diagId
+    $c3 = Add-ConnectorMsg $idControl $idPrenda "1.1.1: validarUnicidadSku(sku)`n1.1.3: crearRegistroPrenda(datosPrenda, empresa_id)`n3.1.1: findById(prenda_id)`n3.1.2: actualizarPrecioBase(nuevoPrecio)" $diagId
+    $c4 = Add-ConnectorMsg $idControl $idProveedor "1.1.2: validarProveedorActivo(proveedor_id)" $diagId
+    $c5 = Add-ConnectorMsg $idControl $idVariante "1.1.4: crearVariantes(talla_id, color_id, sku_var)" $diagId
+    $c6 = Add-ConnectorMsg $idControl $idGuiaMedida "2.1.1: registrarMedidasCm(producto_id, talla_id, medidas)" $diagId
+    $c7 = Add-ConnectorMsg $idControl $idMultimedia "1.1.5: registrarRecursoMultimedia(prenda_id, url, tipo)" $diagId
+    $c8 = Add-ConnectorMsg $idControl $idBitacora "1.1.6: registrarAuditoria(ALTA_PRENDA)`n2.1.2: registrarAuditoria(REGISTRO_GUIA_MEDIDA)`n3.1.3: registrarAuditoria(ACTUALIZAR_PRECIO_PRENDA)" $diagId
+
+    Write-Host "Conectores y mensajes enlazados exitosamente para CU06 con Proveedor." -ForegroundColor Green
+
+} finally {
+    $conn.Close()
+}
+
+$ea = New-Object -ComObject "EA.App"
+$repo = $ea.Repository
+$opened = $repo.OpenFile($eapPath)
+$project = $repo.GetProjectInterface()
+$diagCu06 = $repo.GetDiagramByID($diagId)
+$project.PutDiagramImageToFile($diagCu06.DiagramGUID, $outImgCu06, 1)
+$repo.CloseFile()
+$repo.Exit()
+[System.Runtime.Interopservices.Marshal]::ReleaseComObject($repo) | Out-Null
+[System.Runtime.Interopservices.Marshal]::ReleaseComObject($ea) | Out-Null
+[System.GC]::Collect()
+[System.GC]::WaitForPendingFinalizers()
+
+Write-Host "Diagrama CU06 actualizado y re-exportado exitosamente a: $outImgCu06" -ForegroundColor Green

@@ -4,6 +4,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/storage/local_storage_helper.dart';
 import '../../domain/models/ventas_models.dart';
+import '../../domain/models/devolucion_models.dart';
 
 class VentasRepository {
   final ApiClient _apiClient;
@@ -143,5 +144,84 @@ class VentasRepository {
 
   Future<List<Map<String, dynamic>>> getOfflineSales() async {
     return await LocalStorageHelper.instance.getOfflineSales();
+  }
+
+  // ==========================================
+  // CU19: Validar Solicitud de Cambio de Prenda por Medida (RN06)
+  // ==========================================
+  Future<ValidarCambioGarantiaModel> validarSolicitudCambio(String codigoVenta) async {
+    try {
+      final options = await _getAuthOptions();
+      final cleanCode = codigoVenta.trim().toUpperCase();
+      final response = await _apiClient.dio.get(
+        '/ventas/devoluciones/validar-cambio/$cleanCode',
+        options: options,
+      );
+
+      if (response.statusCode == 200) {
+        return ValidarCambioGarantiaModel.fromJson(response.data as Map<String, dynamic>);
+      }
+      throw Exception('Ticket no encontrado o no elegible (${response.statusCode})');
+    } on DioException catch (e) {
+      if (e.response?.data != null && e.response!.data is Map) {
+        final d = e.response!.data as Map;
+        if (d.containsKey('detail')) throw Exception(d['detail']);
+      }
+      throw Exception('Error al validar solicitud de cambio: ${e.message}');
+    }
+  }
+
+  // ==========================================
+  // CU20: Emitir Nota de Devolución Oficial con Balance Atómico (RN07, RN08)
+  // ==========================================
+  Future<NotaDevolucionResponseModel> emitirNotaDevolucionFormal(NotaDevolucionFormalInput input) async {
+    try {
+      final options = await _getAuthOptions();
+      final response = await _apiClient.dio.post(
+        '/ventas/devoluciones/nota-cambio-talla',
+        data: input.toJson(),
+        options: options,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return NotaDevolucionResponseModel.fromJson(response.data as Map<String, dynamic>);
+      }
+      throw Exception('Error al emitir nota de devolución (${response.statusCode})');
+    } on DioException catch (e) {
+      if (e.response?.data != null && e.response!.data is Map) {
+        final d = e.response!.data as Map;
+        if (d.containsKey('detail')) throw Exception(d['detail']);
+      }
+      throw Exception('Error al emitir nota de devolución: ${e.message}');
+    }
+  }
+
+  // ==========================================
+  // CU20: Listar Notas de Devolución Oficiales Emitidas
+  // ==========================================
+  Future<List<NotaDevolucionResponseModel>> listarNotasDevolucionFormales({int? sucursalId}) async {
+    try {
+      final options = await _getAuthOptions();
+      final queryParams = <String, dynamic>{};
+      if (sucursalId != null) queryParams['sucursal_id'] = sucursalId;
+
+      final response = await _apiClient.dio.get(
+        '/ventas/devoluciones/notas-lista',
+        queryParameters: queryParams,
+        options: options,
+      );
+
+      if (response.data is List) {
+        final list = response.data as List<dynamic>;
+        return list.map((item) => NotaDevolucionResponseModel.fromJson(item as Map<String, dynamic>)).toList();
+      }
+      return [];
+    } on DioException catch (e) {
+      if (e.response?.data != null && e.response!.data is Map) {
+        final d = e.response!.data as Map;
+        if (d.containsKey('detail')) throw Exception(d['detail']);
+      }
+      throw Exception('Error al listar notas de devolución: ${e.message}');
+    }
   }
 }

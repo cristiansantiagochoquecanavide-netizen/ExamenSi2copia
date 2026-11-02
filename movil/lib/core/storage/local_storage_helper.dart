@@ -157,4 +157,85 @@ class LocalStorageHelper {
     final db = await instance.database;
     return await db.query('offline_sales');
   }
+
+  // ====================================================
+  // CU16: Métodos para Sincronización Batch Offline
+  // ====================================================
+
+  /// Retorna el conteo total de transacciones offline pendientes
+  Future<int> getPendingOperationsCount() async {
+    final db = await instance.database;
+    final sales = await db.query('offline_sales', where: "estado != 'SINCRONIZADO'");
+    final reservations = await db.query('offline_reservations', where: "estado != 'SINCRONIZADO'");
+    return sales.length + reservations.length;
+  }
+
+  /// Construye el lote de transacciones estructuradas para el endpoint POST /sincronizacion/offline
+  Future<List<Map<String, dynamic>>> buildBatchTransactions({int sucursalId = 1}) async {
+    final db = await instance.database;
+    final List<Map<String, dynamic>> lote = [];
+
+    // 1. Ventas offline
+    final sales = await db.query('offline_sales', where: "estado != 'SINCRONIZADO'");
+    for (var s in sales) {
+      List<dynamic> items = [];
+      try {
+        final rawJson = s['items_json'] as String?;
+        if (rawJson != null && rawJson.isNotEmpty) {
+          items = jsonDecode(rawJson) as List<dynamic>;
+        }
+      } catch (_) {}
+
+      lote.add({
+        'uuid_operacion': s['uuid'] as String,
+        'tipo_operacion': 'VENTA_LOCAL',
+        'fecha_registro_local': s['fecha_registro'] as String,
+        'payload_json': {
+          'sucursal_id': sucursalId,
+          'monto_total': s['monto_total'],
+          'metodo_pago': s['metodo_pago'] ?? 'EFECTIVO',
+          'cliente_nombre': 'Cliente Móvil Presencial (Offline)',
+          'cliente_nit': '0',
+          'items': items,
+        },
+      });
+    }
+
+    // 2. Reservas offline
+    final reservations = await db.query('offline_reservations', where: "estado != 'SINCRONIZADO'");
+    for (var r in reservations) {
+      lote.add({
+        'uuid_operacion': r['uuid'] as String,
+        'tipo_operacion': 'RESERVA_LOCAL',
+        'fecha_registro_local': r['fecha_registro'] as String,
+        'payload_json': {
+          'sucursal_id': sucursalId,
+          'prenda_id': r['prenda_id'],
+          'hora_ensayo': r['hora_ensayo'],
+          'requiere_pago': (r['requiere_pago'] as int? ?? 0) == 1,
+        },
+      });
+    }
+
+    return lote;
+  }
+
+  /// Elimina de SQLite las operaciones que ya fueron sincronizadas o confirmadas
+  Future<void> deleteSyncedOperations(List<String> uuids) async {
+    if (uuids.isEmpty) return;
+    final db = await instance.database;
+    final placeholders = List.filled(uuids.length, '?').join(',');
+
+    await db.transaction((txn) async {
+      await txn.delete('offline_sales', where: 'uuid IN ($placeholders)', whereArgs: uuids);
+      await txn.delete('offline_reservations', where: 'uuid IN ($placeholders)', whereArgs: uuids);
+    });
+  }
+
+  /// Limpia todas las operaciones offline locales (para reinicio de pruebas)
+  Future<void> clearAllOfflineOperations() async {
+    final db = await instance.database;
+    await db.delete('offline_sales');
+    await db.delete('offline_reservations');
+  }
 }
