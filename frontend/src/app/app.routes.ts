@@ -43,6 +43,16 @@ export const routes: Routes = [
     loadChildren: () => import('./features/reportes/reportes.routes').then(m => m.REPORTES_ROUTES)
   },
   {
+    path: 'ia-reportes',
+    redirectTo: 'dashboard/ia-reportes',
+    pathMatch: 'full'
+  },
+  {
+    path: 'machine-learning',
+    redirectTo: 'dashboard/machine-learning',
+    pathMatch: 'full'
+  },
+  {
     path: 'reportes',
     redirectTo: 'dashboard',
     pathMatch: 'full'

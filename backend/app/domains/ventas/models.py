@@ -13,6 +13,7 @@ class Venta(Base):
     __tablename__ = "ventas"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    empresa_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, index=True)  # Multitenant ID
     codigo_venta: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
     sucursal_id: Mapped[int] = mapped_column(Integer, ForeignKey("sucursales.id"), nullable=False, index=True)
     usuario_id: Mapped[int] = mapped_column(Integer, ForeignKey("usuarios.id"), nullable=False, index=True)  # Cajero

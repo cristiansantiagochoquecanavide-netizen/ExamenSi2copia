@@ -205,8 +205,14 @@
             <span class="dropdown-chevron">&#9662;</span>
           </button>
           <div class="dropdown-menu">
-            <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()">
+            <a routerLink="/dashboard" [routerLinkActiveOptions]="{exact: true}" routerLinkActive="active" (click)="closeMobileMenu()">
               <span class="menu-icon">&bull;</span> Dashboard Ejecutivo &amp; KPIs
+            </a>
+            <a routerLink="/dashboard/ia-reportes" routerLinkActive="active" (click)="closeMobileMenu()">
+              <span class="menu-icon">&bull;</span> Reportes IA &amp; Exportación (CU21/22)
+            </a>
+            <a routerLink="/dashboard/machine-learning" routerLinkActive="active" (click)="closeMobileMenu()">
+              <span class="menu-icon">&bull;</span> Machine Learning Comercial (CU23)
             </a>
             <a routerLink="/ia-asistente" routerLinkActive="active" (click)="closeMobileMenu()">
               <span class="menu-icon">&bull;</span> Atelier Stylist (IA)

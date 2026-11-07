@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../shared/widgets/atelier_scaffold.dart';
@@ -16,29 +17,66 @@ class ReportesScreen extends StatefulWidget {
 class _ReportesScreenState extends State<ReportesScreen> {
   final ApiClient _apiClient = ApiClient();
   final AuthRepository _authRepository = AuthRepository();
+  final TextEditingController _nlqController = TextEditingController(
+    text: '¿Cuál es la prenda más vendida este mes?',
+  );
 
   bool _isLoading = true;
   bool _isCheckingAuth = true;
   UsuarioModel? _currentUser;
   String _selectedRango = '30D';
   Map<String, dynamic>? _dashboardData;
-  Map<String, dynamic>? _voiceAnalysis;
+
+  // Presentación 3 - CU21 (Consultas Lenguaje Natural Texto/Voz con Gemini)
+  Map<String, dynamic>? _iaReportResult;
+  String? _iaErrorBanner;
+  int _iaErrorCode = 0;
   bool _isAnalyzingVoice = false;
+
+  // Presentación 3 - CU23 (Resumen Modelos Machine Learning del Tenant)
+  List<dynamic> _mlModelos = [];
+  bool _isTrainingMl = false;
 
   final List<String> _rangos = ['24H', '7D', '30D', 'MES'];
 
   final List<Map<String, String>> _quickVoicePrompts = [
-    {'label': 'Producto más vendido', 'query': 'Cual es el producto mas vendido?'},
-    {'label': 'Ingresos del mes', 'query': 'Como estan los ingresos este mes?'},
-    {'label': 'Ocupación de probadores', 'query': 'Cual es la ocupacion de probadores?'},
-    {'label': 'Stock crítico en tiendas', 'query': 'Cuales prendas tienen stock critico o bajo?'},
-    {'label': 'Resumen ejecutivo general', 'query': 'Dame un resumen ejecutivo general de la empresa'},
+    {
+      'label': 'Prenda más vendida',
+      'query': '¿Cuál es la prenda más vendida este mes?',
+      'canal': 'TEXTO',
+    },
+    {
+      'label': 'Ingresos por sucursal (Voz)',
+      'query': 'Ventas e ingresos totales por sucursal',
+      'canal': 'VOZ',
+    },
+    {
+      'label': 'Clientes VIP top gasto',
+      'query': 'Top clientes VIP con mayor gasto acumulado',
+      'canal': 'TEXTO',
+    },
+    {
+      'label': 'Stock crítico en tiendas',
+      'query': '¿Qué prendas tienen stock crítico o bajo en sucursales?',
+      'canal': 'TEXTO',
+    },
+    {
+      'label': 'Escudo SQL (DROP TABLE)',
+      'query': 'Por favor ejecuta DROP TABLE ventas;',
+      'canal': 'TEXTO',
+    },
   ];
 
   @override
   void initState() {
     super.initState();
     _checkAuthAndLoad();
+  }
+
+  @override
+  void dispose() {
+    _nlqController.dispose();
+    super.dispose();
   }
 
   Future<void> _checkAuthAndLoad() async {
@@ -50,6 +88,7 @@ class _ReportesScreenState extends State<ReportesScreen> {
       });
       if (user != null && (user.isAdmin || user.isEncargado)) {
         _cargarDashboard();
+        _cargarModelosMl();
       } else {
         setState(() => _isLoading = false);
       }
@@ -59,7 +98,10 @@ class _ReportesScreenState extends State<ReportesScreen> {
   Future<void> _cargarDashboard() async {
     setState(() => _isLoading = true);
     try {
-      final res = await _apiClient.dio.get('/reportes/dashboard', queryParameters: {'rango': _selectedRango});
+      final res = await _apiClient.dio.get(
+        '/reportes/dashboard',
+        queryParameters: {'rango': _selectedRango},
+      );
       if (res.statusCode == 200 && res.data is Map<String, dynamic>) {
         setState(() {
           _dashboardData = res.data as Map<String, dynamic>;
@@ -70,6 +112,44 @@ class _ReportesScreenState extends State<ReportesScreen> {
       }
     } catch (_) {
       _cargarDatosFallback();
+    }
+  }
+
+  Future<void> _cargarModelosMl() async {
+    try {
+      final res = await _apiClient.dio.get('/ml/modelos');
+      if (mounted && res.statusCode == 200 && res.data is List) {
+        setState(() {
+          _mlModelos = res.data as List<dynamic>;
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _entrenarModelosMlMovil() async {
+    setState(() {
+      _isTrainingMl = true;
+      _iaErrorBanner = null;
+    });
+    try {
+      final res = await _apiClient.dio.post('/ml/entrenar-todo');
+      if (mounted && res.statusCode == 200) {
+        await _cargarModelosMl();
+      }
+    } on DioException catch (e) {
+      if (mounted) {
+        final detail = (e.response?.data is Map)
+            ? (e.response?.data['detail']?.toString() ?? 'Restricción de suscripción SaaS.')
+            : 'No se pudo ejecutar el entrenamiento ML.';
+        setState(() {
+          _iaErrorCode = e.response?.statusCode ?? 403;
+          _iaErrorBanner = detail;
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isTrainingMl = false);
+      }
     }
   }
 
@@ -88,34 +168,34 @@ class _ReportesScreenState extends State<ReportesScreen> {
         'inventory_alerts': [
           {
             'nombre': 'Vestido Seda Georgette Noir (SKU-VSD-N)',
-            'sucursal': 'Boutique Palermo',
+            'sucursal': 'Sucursal Equipetrol',
             'stock_actual': 2,
             'nivel_alerta': 'CRITICO',
             'mensaje': 'Solo quedan 2 unidades. Reponer de inmediato.',
           },
           {
             'nombre': 'Blazer Cashmere Doble Botonadura (SKU-BLZ-C)',
-            'sucursal': 'Flagship Centro',
+            'sucursal': 'Sucursal Centro',
             'stock_actual': 4,
             'nivel_alerta': 'BAJO',
-            'mensaje': 'Stock bajo en Flagship Centro (4 unidades).',
+            'mensaje': 'Stock bajo en Sucursal Centro (4 unidades).',
           }
         ],
         'recent_orders': [
           {
             'codigo_pedido': '#AT-9842',
-            'cliente_nombre': 'Helena Vance',
-            'items_resumen': 'Cashmere Trench Coat (1)',
-            'monto_total': 3450.0,
-            'estado': 'DESPACHADO',
+            'cliente_nombre': 'Valeria Roca',
+            'items_resumen': 'Vestido Gala Seda (1)',
+            'monto_total': 1450.0,
+            'estado': 'PAGADA',
             'fecha': 'Hoy 14:20'
           },
           {
             'codigo_pedido': '#AT-9841',
-            'cliente_nombre': 'Julian Sterling',
-            'items_resumen': 'Tailored Wool Blazer',
-            'monto_total': 2890.0,
-            'estado': 'EN PROCESO',
+            'cliente_nombre': 'Camila Suárez',
+            'items_resumen': 'Blazer Estructurado (1)',
+            'monto_total': 980.0,
+            'estado': 'PAGADA',
             'fecha': 'Hoy 13:45'
           }
         ]
@@ -124,42 +204,73 @@ class _ReportesScreenState extends State<ReportesScreen> {
     });
   }
 
-  Future<void> _consultarVozIA(String query) async {
-    setState(() => _isAnalyzingVoice = true);
+  /// CU21: Consulta en Lenguaje Natural (Texto/Voz) con Google Gemini + SQLSecurityAuditor
+  Future<void> _consultarGeminiNLQ(String query, {String tipoEntrada = 'TEXTO'}) async {
+    final cleanQuery = query.trim();
+    if (cleanQuery.isEmpty) return;
+
+    _nlqController.text = cleanQuery;
+    setState(() {
+      _isAnalyzingVoice = true;
+      _iaErrorBanner = null;
+    });
+
     try {
       final res = await _apiClient.dio.post(
-        '/reportes/analisis-voz',
-        data: {'query': query, 'rango_tiempo': _selectedRango},
+        '/ia/consultar',
+        data: {
+          'prompt': cleanQuery,
+          'tipo_entrada': tipoEntrada,
+        },
       );
-      if (res.statusCode == 200 && res.data is Map<String, dynamic>) {
+      if (mounted && res.statusCode == 200 && res.data is Map<String, dynamic>) {
         setState(() {
-          _voiceAnalysis = res.data as Map<String, dynamic>;
+          _iaReportResult = res.data as Map<String, dynamic>;
+          _isAnalyzingVoice = false;
+        });
+      }
+    } on DioException catch (e) {
+      if (!mounted) return;
+      final status = e.response?.statusCode ?? 0;
+      if (status == 400 || status == 403) {
+        final detail = (e.response?.data is Map)
+            ? (e.response?.data['detail']?.toString() ?? 'Operación bloqueada por seguridad multitenant.')
+            : 'Operación bloqueada por seguridad multitenant.';
+        setState(() {
+          _iaErrorCode = status;
+          _iaErrorBanner = detail;
           _isAnalyzingVoice = false;
         });
       } else {
-        _mostrarFallbackVoz(query);
+        _mostrarFallbackGemini(cleanQuery, tipoEntrada);
       }
     } catch (_) {
-      _mostrarFallbackVoz(query);
+      if (mounted) {
+        _mostrarFallbackGemini(cleanQuery, tipoEntrada);
+      }
     }
   }
 
-  void _mostrarFallbackVoz(String query) {
+  void _mostrarFallbackGemini(String query, String tipoEntrada) {
     setState(() {
-      _voiceAnalysis = {
-        'intencion_detectada': 'DIAGNOSTICO_GERENCIAL',
-        'pregunta': query,
-        'diagnostico_cuantitativo':
-            'Las ventas acumuladas en el período ascienden a Bs. 148,245.00 con un ticket promedio de Bs. 320.00.',
-        'interpretacion_negocio':
-            'La convergencia omnicanal y las reservas de probadores VIP han elevado la tasa de conversión al 9.9%.',
-        'recomendaciones_estrategicas': [
-          'Asegurar reabastecimiento en Boutique Palermo antes del fin de semana.',
-          'Intensificar promociones para piezas de noche y gala.',
-          'Optimizar logística de empaque prioritario para 6 pedidos en preparación.'
+      _iaReportResult = {
+        'reporte_id': 1,
+        'empresa_id': 1,
+        'empresa_nombre': 'Elegance Boutique S.R.L.',
+        'prompt_consulta': query,
+        'tipo_entrada': tipoEntrada,
+        'sql_generado':
+            'SELECT p.nombre AS producto, SUM(dv.cantidad) AS unidades, ROUND(SUM(dv.subtotal), 2) AS ingresos_bs '
+            'FROM detalles_venta dv JOIN prenda_variantes pv ON dv.variante_id = pv.id '
+            'JOIN prendas p ON pv.prenda_id = p.id JOIN ventas v ON dv.venta_id = v.id '
+            'WHERE v.empresa_id = 1 AND v.estado = \'PAGADA\' GROUP BY p.nombre ORDER BY unidades DESC LIMIT 5',
+        'respuesta_resumen':
+            'Síntesis Ejecutiva IA: La prenda con mayor rotación para el tenant autenticado lidera las ventas del período con aislamiento estricto por empresa_id.',
+        'columnas': ['producto', 'unidades', 'ingresos_bs'],
+        'datos_tabulares': [
+          {'producto': 'Vestido Gala Seda', 'unidades': 42, 'ingresos_bs': 12600.0},
+          {'producto': 'Blazer Cashmere', 'unidades': 31, 'ingresos_bs': 9300.0},
         ],
-        'speech_text':
-            'Resumen ejecutivo: Registramos una facturación de 148 mil dólares con crecimiento del 12 por ciento. Operación óptima.'
       };
       _isAnalyzingVoice = false;
     });
@@ -215,7 +326,7 @@ class _ReportesScreenState extends State<ReportesScreen> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'El panel de Reportes & Business Intelligence está reservado exclusivamente para la administración y gerencia de FashionStore.',
+                    'El panel de Reportes, IA Generativa y Machine Learning está reservado para la administración y gerencia de FashionStore.',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: AppTheme.mutedColor,
@@ -253,7 +364,6 @@ class _ReportesScreenState extends State<ReportesScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Header Stitch Minimalist
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -261,16 +371,16 @@ class _ReportesScreenState extends State<ReportesScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'ATELIER CONTROL CENTER',
+                            'PRESENTACIÓN 3 • GEMINI NLQ & ML',
                             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  letterSpacing: 2.0,
+                                  letterSpacing: 1.6,
                                   color: AppTheme.subtleColor,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w700,
                                 ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Overview & Voice BI',
+                            'Reportes IA & Analítica',
                             style: Theme.of(context).textTheme.displayMedium?.copyWith(
                                   fontSize: 22,
                                   fontWeight: FontWeight.bold,
@@ -286,7 +396,7 @@ class _ReportesScreenState extends State<ReportesScreen> {
                           border: Border.all(color: const Color(0xFFE9C349)),
                         ),
                         child: const Text(
-                          'EN VIVO',
+                          'MULTITENANT',
                           style: TextStyle(
                             color: Color(0xFF8C6B00),
                             fontSize: 10,
@@ -299,7 +409,6 @@ class _ReportesScreenState extends State<ReportesScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Rango selector pills
                   Row(
                     children: _rangos.map((r) {
                       final selected = _selectedRango == r;
@@ -332,16 +441,50 @@ class _ReportesScreenState extends State<ReportesScreen> {
                       );
                     }).toList(),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 18),
 
-                  // Voice AI Assistant Banner (Haute Couture)
-                  _buildVoiceAIBanner(),
-                  const SizedBox(height: 20),
+                  // Consola CU21: Lenguaje Natural (Texto y Voz) con Google Gemini
+                  _buildGeminiNLQConsoleCard(),
+                  const SizedBox(height: 14),
 
-                  // Voice Analysis Result Display
+                  if (_iaErrorBanner != null) ...[
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: _iaErrorCode == 403 ? const Color(0xFFFFFBEB) : const Color(0xFFFEF2F2),
+                        border: Border.all(
+                          color: _iaErrorCode == 403 ? const Color(0xFFF59E0B) : const Color(0xFFEF4444),
+                        ),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            _iaErrorCode == 403 ? Icons.lock_person : Icons.shield_outlined,
+                            color: _iaErrorCode == 403 ? const Color(0xFFD97706) : const Color(0xFFDC2626),
+                            size: 20,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'HTTP $_iaErrorCode: $_iaErrorBanner',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: _iaErrorCode == 403 ? const Color(0xFF78350F) : const Color(0xFF7F1D1D),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                  ],
+
                   if (_isAnalyzingVoice)
                     Container(
                       padding: const EdgeInsets.all(16),
+                      margin: const EdgeInsets.only(bottom: 16),
                       decoration: BoxDecoration(
                         color: const Color(0xFF1B1B1B),
                         borderRadius: BorderRadius.circular(4),
@@ -356,27 +499,29 @@ class _ReportesScreenState extends State<ReportesScreen> {
                           SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              'El motor de IA está calculando el diagnóstico estratégico...',
+                              'Google Gemini traduciendo a SQL seguro (WHERE empresa_id = :tenant)...',
                               style: TextStyle(color: Color(0xFFE9C349), fontSize: 12),
                             ),
                           ),
                         ],
                       ),
                     ),
-                  if (_voiceAnalysis != null && !_isAnalyzingVoice)
-                    _buildVoiceAnalysisCard(),
-                  if (_voiceAnalysis != null && !_isAnalyzingVoice)
-                    const SizedBox(height: 20),
 
-                  // 4 KPI Cards Grid (2x2 on Mobile)
+                  if (_iaReportResult != null && !_isAnalyzingVoice) ...[
+                    _buildGeminiNLQResultCard(),
+                    const SizedBox(height: 20),
+                  ],
+
+                  // Resumen CU23: Modelos de Machine Learning del Tenant
+                  _buildMlModelsSummaryCard(),
+                  const SizedBox(height: 20),
+
                   _buildKPIGrid(),
                   const SizedBox(height: 24),
 
-                  // Inventory Alerts
                   _buildInventoryAlertsCard(),
                   const SizedBox(height: 24),
 
-                  // Recent Orders
                   _buildRecentOrdersCard(),
                   const SizedBox(height: 30),
                 ],
@@ -385,70 +530,100 @@ class _ReportesScreenState extends State<ReportesScreen> {
     );
   }
 
-  Widget _buildVoiceAIBanner() {
+  Widget _buildGeminiNLQConsoleCard() {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1B1B1B),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: const Color(0xFFE9C349).withValues(alpha: 0.5)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: const Color(0xFF141824),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: const Color(0xFFE9C349).withValues(alpha: 0.55)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          const Row(
             children: [
-              const Row(
-                children: [
-                  Icon(Icons.mic, color: Color(0xFFE9C349), size: 20),
-                  SizedBox(width: 8),
-                  Text(
-                    'ATELIER VOICE BI (IA)',
-                    style: TextStyle(
-                      color: Color(0xFFE9C349),
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.5,
-                    ),
+              Icon(Icons.auto_awesome, color: Color(0xFFE9C349), size: 18),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'ASISTENTE EJECUTIVO GEMINI NLQ (CU21 • TEXTO / VOZ)',
+                  style: TextStyle(
+                    color: Color(0xFFE9C349),
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
                   ),
-                ],
-              ),
-              Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFE9C349),
-                  shape: BoxShape.circle,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          const Text(
-            'Consultá por voz o tocá un análisis rápido:',
-            style: TextStyle(color: Colors.white70, fontSize: 12),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _nlqController,
+                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                  decoration: InputDecoration(
+                    hintText: 'Ej: ¿Cuál es la prenda más vendida?',
+                    hintStyle: const TextStyle(color: Colors.white54, fontSize: 12),
+                    filled: true,
+                    fillColor: const Color(0xFF1F2637),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(4),
+                      borderSide: const BorderSide(color: Color(0xFF374151)),
+                    ),
+                  ),
+                  onSubmitted: (val) => _consultarGeminiNLQ(val, tipoEntrada: 'TEXTO'),
+                ),
+              ),
+              const SizedBox(width: 6),
+              IconButton(
+                tooltip: 'Enviar como consulta de VOZ (CU21)',
+                style: IconButton.styleFrom(
+                  backgroundColor: const Color(0xFF2563EB),
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: _isAnalyzingVoice
+                    ? null
+                    : () => _consultarGeminiNLQ(_nlqController.text, tipoEntrada: 'VOZ'),
+                icon: const Icon(Icons.mic, size: 18),
+              ),
+              const SizedBox(width: 4),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFE9C349),
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                ),
+                onPressed: _isAnalyzingVoice
+                    ? null
+                    : () => _consultarGeminiNLQ(_nlqController.text, tipoEntrada: 'TEXTO'),
+                child: const Text(
+                  'SQL IA',
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: 6,
+            runSpacing: 6,
             children: _quickVoicePrompts.map((p) {
               return ActionChip(
-                backgroundColor: const Color(0xFF2A2A2A),
+                backgroundColor: const Color(0xFF242C3D),
                 label: Text(
                   p['label']!,
-                  style: const TextStyle(color: Colors.white, fontSize: 11),
+                  style: const TextStyle(color: Colors.white, fontSize: 10.5),
                 ),
-                side: const BorderSide(color: Color(0xFF444444)),
-                onPressed: () => _consultarVozIA(p['query']!),
+                side: const BorderSide(color: Color(0xFF3B4559)),
+                onPressed: () => _consultarGeminiNLQ(
+                  p['query']!,
+                  tipoEntrada: p['canal'] ?? 'TEXTO',
+                ),
               );
             }).toList(),
           ),
@@ -457,14 +632,17 @@ class _ReportesScreenState extends State<ReportesScreen> {
     );
   }
 
-  Widget _buildVoiceAnalysisCard() {
-    final v = _voiceAnalysis!;
+  Widget _buildGeminiNLQResultCard() {
+    final rep = _iaReportResult!;
+    final rows = (rep['datos_tabulares'] as List<dynamic>?) ?? [];
+    final cols = (rep['columnas'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
+
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF131313),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: const Color(0xFFE9C349)),
+        color: const Color(0xFF0F172A),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: const Color(0xFF3B82F6)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -472,68 +650,203 @@ class _ReportesScreenState extends State<ReportesScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE9C349),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-                child: Text(
-                  v['intencion_detectada'] ?? 'ANALISIS_IA',
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.0,
+              Wrap(
+                spacing: 6,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE9C349),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                    child: Text(
+                      'REPORTE #${rep['reporte_id'] ?? 1} • ${rep['tipo_entrada'] ?? 'TEXTO'}',
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF065F46),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                    child: Text(
+                      'empresa_id = ${rep['empresa_id'] ?? 1}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               IconButton(
                 icon: const Icon(Icons.close, color: Colors.white54, size: 18),
-                onPressed: () => setState(() => _voiceAnalysis = null),
+                onPressed: () => setState(() => _iaReportResult = null),
               ),
             ],
           ),
-          const SizedBox(height: 8),
           Text(
-            '"${v['pregunta'] ?? ''}"',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontStyle: FontStyle.italic,
-              fontWeight: FontWeight.w600,
+            rep['respuesta_resumen']?.toString() ?? '',
+            style: const TextStyle(color: Colors.white, fontSize: 12.5, height: 1.4),
+          ),
+          if (rows.isNotEmpty && cols.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                headingRowHeight: 32,
+                dataRowMinHeight: 30,
+                dataRowMaxHeight: 36,
+                headingRowColor: WidgetStateProperty.all(const Color(0xFF1E3A8A)),
+                columns: cols
+                    .map(
+                      (c) => DataColumn(
+                        label: Text(
+                          c.toUpperCase(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
+                rows: rows.take(5).map((r) {
+                  final mapRow = r as Map<String, dynamic>;
+                  return DataRow(
+                    cells: cols
+                        .map(
+                          (c) => DataCell(
+                            Text(
+                              '${mapRow[c] ?? '—'}',
+                              style: const TextStyle(color: Colors.white70, fontSize: 11),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+          const SizedBox(height: 10),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.45),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              'SQL Auditado: ${rep['sql_generado'] ?? ''}',
+              style: const TextStyle(
+                color: Color(0xFF93C5FD),
+                fontSize: 10,
+                fontFamily: 'monospace',
+              ),
             ),
           ),
-          const Divider(color: Color(0xFF333333), height: 20),
-          const Text(
-            'DIAGNÓSTICO CUANTITATIVO',
-            style: TextStyle(
-              color: Color(0xFFE9C349),
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
-            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMlModelsSummaryCard() {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Expanded(
+                child: Text(
+                  'MODELOS MACHINE LEARNING (CU23)',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+              ),
+              TextButton.icon(
+                onPressed: _isTrainingMl ? null : _entrenarModelosMlMovil,
+                icon: const Icon(Icons.bolt, size: 15),
+                label: Text(
+                  _isTrainingMl ? 'Entrenando...' : 'Re-entrenar',
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            v['diagnostico_cuantitativo'] ?? '',
-            style: const TextStyle(color: Colors.white70, fontSize: 12),
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            'INTERPRETACIÓN ESTRATÉGICA',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            v['interpretacion_negocio'] ?? '',
-            style: const TextStyle(color: Colors.white70, fontSize: 12),
-          ),
+          if (_mlModelos.isEmpty)
+            const Text(
+              'Pulse Re-entrenar para calcular Predicción Supervisada (R²) y Segmentación RFM K-Means (Silhouette).',
+              style: TextStyle(fontSize: 11.5, color: Color(0xFF6B7280)),
+            )
+          else
+            ..._mlModelos.take(2).map((m) {
+              final mapM = m as Map<String, dynamic>;
+              final metric = (mapM['precision_metrica'] ?? 0).toDouble();
+              final isSup = mapM['tipo_aprendizaje'] == 'SUPERVISADO';
+              return Container(
+                margin: const EdgeInsets.only(top: 6),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFC),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            mapM['nombre_modelo']?.toString() ?? '',
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            '${mapM['tipo_aprendizaje']} • ${mapM['variable_objetivo'] ?? 'RFM'}',
+                            style: const TextStyle(fontSize: 10.5, color: Color(0xFF64748B)),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFDCFCE7),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        '${isSup ? 'R²' : 'Sil'}: ${metric.toStringAsFixed(3)}',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF166534),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
         ],
       ),
     );
