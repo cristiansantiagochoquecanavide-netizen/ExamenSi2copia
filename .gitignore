@@ -65,3 +65,12 @@ Thumbs.db
 *.sw?
 
 *.apk
+
+# Enterprise Architect & diagramas locales
+*.eap
+*.eapx
+*.qea
+*.feap
+Modelo_de_Dominio_Completo.png
+build_complete_domain_model.ps1
+
