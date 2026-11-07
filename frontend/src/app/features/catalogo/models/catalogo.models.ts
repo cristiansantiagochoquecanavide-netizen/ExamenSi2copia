@@ -258,3 +258,30 @@ export interface CatalogoState {
   name?: string;
   status: 'active' | 'inactive' | 'pending';
 }
+
+// ----------------- CU09: DIFUSIÓN DE NOVEDADES DE CATÁLOGO -----------------
+export interface DifusionCatalogoCreate {
+  titulo_campana: string;
+  mensaje_personalizado: string;
+  canal_envio: 'WHATSAPP' | 'EMAIL' | 'OMNICANAL' | 'SMS' | string;
+  segmento_objetivo: 'TODOS' | 'VIP' | 'FRECUENTES' | 'EN_RIESGO' | 'NUEVOS' | string;
+  prendas_destacadas?: string | null;
+  programar_fecha?: string | null;
+}
+
+export interface DifusionCatalogoResponse {
+  id: number;
+  empresa_id?: number | null;
+  titulo_campana: string;
+  mensaje_personalizado: string;
+  canal_envio: string;
+  segmento_objetivo: string;
+  prendas_destacadas?: string | null;
+  total_destinatarios: number;
+  tasa_apertura_estimada: number;
+  estado: string;
+  fecha_envio: string;
+  creado_por_id?: number | null;
+  created_at: string;
+}
+

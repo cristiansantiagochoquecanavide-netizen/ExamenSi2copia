@@ -88,3 +88,34 @@ export interface ReservaExpirarRequest {
   motivo?: string | null;
 }
 
+// ----------------- CU25: TRAZABILIDAD Y CICLO DE VIDA DE RESERVAS -----------------
+export interface HitoTrazabilidadItem {
+  etiqueta: string;
+  descripcion: string;
+  completado: boolean;
+  fecha_hora?: string | null;
+  icono: string;
+  color_hex: string;
+}
+
+export interface ReservaTrazabilidadResponse {
+  id: number;
+  codigo_reserva: string;
+  qr_token?: string | null;
+  qr_svg?: string | null;
+  cliente_nombre: string;
+  cliente_email?: string | null;
+  sucursal_nombre: string;
+  sucursal_direccion?: string | null;
+  fecha_reserva: string;
+  hora_estimada: string;
+  estado: string;
+  esta_expirada: boolean;
+  tiempo_restante_minutos?: number | null;
+  probador_asignado?: string | null;
+  observaciones?: string | null;
+  hitos: HitoTrazabilidadItem[];
+  detalles: DetalleReserva[];
+  acciones_disponibles: string[];
+}
+

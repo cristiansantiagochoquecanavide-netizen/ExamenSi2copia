@@ -10,6 +10,12 @@ export const RESERVAS_ROUTES: Routes = [
   {
     path: 'gestion',
     component: ReservasGestionPageComponent
+  },
+  {
+    path: 'trazabilidad',
+    loadComponent: () =>
+      import('./pages/reserva-trazabilidad-page.component').then(
+        m => m.ReservaTrazabilidadPageComponent
+      )
   }
 ];
-

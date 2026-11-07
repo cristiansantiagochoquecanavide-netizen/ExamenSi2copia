@@ -4,7 +4,7 @@ Enrutadores FastAPI para Presentación 3:
 - /api/v1/ml  -> CU23 (Entrenamiento y Evaluación de Modelos de Machine Learning)
 """
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,6 +21,8 @@ from app.domains.analitica_ia.schemas import (
     MLRFMTrainResponse,
     MLEntrenarTodoResponse,
     ModeloMLPersistedItem,
+    DashboardAnaliticoMLResponse,
+    ProyeccionesStockResponse,
 )
 from app.domains.analitica_ia.services import GeminiNLPService, TenantIASubscriptionGuard
 from app.domains.analitica_ia.export_service import ReportExportService
@@ -278,3 +280,42 @@ async def listar_modelos_ml(
         )
         for m in modelos
     ]
+
+
+# ==============================================================================
+# ENDPOINTS CU24: DASHBOARD ANALÍTICO Y PREDICCIONES DE STOCK A 7 DÍAS
+# ==============================================================================
+
+@ml_router.get(
+    "/dashboard",
+    response_model=DashboardAnaliticoMLResponse,
+    summary="Consultar Dashboard Ejecutivo y Métricas Matemáticas de ML (CU24)",
+)
+async def obtener_dashboard_ml(
+    tenant: TenantContext = Depends(get_current_tenant_context),
+    db: AsyncSession = Depends(get_db),
+):
+    await TenantIASubscriptionGuard.obtener_empresa_y_validar_ia(
+        db=db, empresa_id=tenant.empresa_id, require_ia_plan=True
+    )
+    ml_service = MachineLearningService(db=db)
+    return await ml_service.obtener_dashboard_analitico(tenant_id=tenant.empresa_id)
+
+
+@ml_router.get(
+    "/proyecciones-stock",
+    response_model=ProyeccionesStockResponse,
+    summary="Consultar Proyecciones de Demanda Textil a 7 Días y Alertas de Quiebre (CU24)",
+)
+async def obtener_proyecciones_stock(
+    sucursal_id: Optional[int] = Query(None, description="Filtro opcional por ID de sucursal"),
+    tenant: TenantContext = Depends(get_current_tenant_context),
+    db: AsyncSession = Depends(get_db),
+):
+    await TenantIASubscriptionGuard.obtener_empresa_y_validar_ia(
+        db=db, empresa_id=tenant.empresa_id, require_ia_plan=True
+    )
+    ml_service = MachineLearningService(db=db)
+    return await ml_service.obtener_proyecciones_stock(
+        tenant_id=tenant.empresa_id, sucursal_id=sucursal_id
+    )

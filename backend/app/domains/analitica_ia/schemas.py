@@ -150,3 +150,53 @@ class ModeloMLPersistedItem(BaseModel):
     activo: bool
 
     model_config = ConfigDict(from_attributes=True)
+
+
+# ==============================================================================
+# 3. CONTRATOS CU24: DASHBOARD ANALÍTICO Y PREDICCIONES DE STOCK
+# ==============================================================================
+
+class ProyeccionStockDetalladaItem(BaseModel):
+    variante_id: int
+    prenda_nombre: str
+    sku: str
+    talla: str
+    color: str
+    sucursal_id: int
+    sucursal_nombre: str
+    stock_disponible: int
+    demanda_estimada_7d: int
+    balance_estimado: int
+    estado_stock: str = Field(..., description='QUIEBRE_INMINENTE | STOCK_MINIMO | STOCK_OPTIMO')
+    dias_cobertura: float
+    requiere_traspaso: bool
+    sugerencia_accion: str
+
+
+class ProyeccionesStockResponse(BaseModel):
+    empresa_id: int
+    fecha_calculo: datetime
+    total_items_analizados: int
+    total_quiebres: int
+    total_alertas_reposicion: int
+    items: List[ProyeccionStockDetalladaItem]
+
+
+class DistribucionSegmentoItem(BaseModel):
+    cluster_id: int
+    nombre_perfil: str
+    cantidad_clientes: int
+    porcentaje: float
+    accion_sugerida: str
+    color_hex: str
+
+
+class DashboardAnaliticoMLResponse(BaseModel):
+    empresa_id: int
+    fecha_consulta: datetime
+    kpis: Dict[str, Any]
+    modelo_demanda: Optional[Dict[str, Any]] = None
+    modelo_rfm: Optional[Dict[str, Any]] = None
+    distribucion_rfm: List[DistribucionSegmentoItem] = Field(default_factory=list)
+    curva_tendencia_7d: List[Dict[str, Any]] = Field(default_factory=list)
+    proyecciones_destacadas: List[ProyeccionStockDetalladaItem] = Field(default_factory=list)

@@ -108,6 +108,56 @@ export interface MLEntrenarTodoResponse {
   no_supervisado_rfm: MLRFMTrainResponse;
 }
 
+
+export interface DistribucionSegmentoItem {
+  segmento: string;
+  clientes_count: number;
+  porcentaje: number;
+  color_hex: string;
+}
+
+export interface TendenciaDemandaItem {
+  dia: string;
+  demanda_estimada: number;
+  limite_seguridad: number;
+}
+
+export interface DashboardAnaliticoMLResponse {
+  empresa_id: number;
+  precision_r2_demanda: number;
+  silhouette_score_rfm: number;
+  quiebres_inminentes_count: number;
+  alertas_stock_minimo_count: number;
+  total_variantes_evaluadas: number;
+  distribucion_rfm: DistribucionSegmentoItem[];
+  curva_tendencia_7d: TendenciaDemandaItem[];
+  recomendaciones_ia: string[];
+}
+
+export interface ProyeccionStockDetalladaItem {
+  variante_id: number;
+  sku: string;
+  prenda_nombre: string;
+  talla: string;
+  color: string;
+  sucursal_id: number;
+  sucursal_nombre: string;
+  stock_disponible: number;
+  demanda_proyectada_7d: number;
+  dias_de_cobertura: number;
+  estado_riesgo: 'QUIEBRE_INMINENTE' | 'STOCK_MINIMO' | 'STOCK_SUFICIENTE';
+  accion_sugerida: string;
+  rotacion_semanal_estimada: number;
+}
+
+export interface ProyeccionesStockResponse {
+  empresa_id: number;
+  total_analizadas: number;
+  quiebres_inminentes: number;
+  en_alerta_minimo: number;
+  items: ProyeccionStockDetalladaItem[];
+}
+
 export interface ModeloMLPersistedItem {
   id: number;
   empresa_id: number;
@@ -330,5 +380,26 @@ export class FashionAiMlService {
     if (this.synth) {
       this.synth.cancel();
     }
+  }
+
+  // =========================================================================
+  // CU24: DASHBOARD ANALÍTICO Y PREDICCIONES DE STOCK A 7 DÍAS
+  // =========================================================================
+  obtenerDashboardAnalitico(overrideTenantId?: number): Observable<DashboardAnaliticoMLResponse> {
+    return this.http.get<DashboardAnaliticoMLResponse>(
+      `${this.apiUrl}/ml/dashboard`,
+      { headers: this.buildHeaders(overrideTenantId) }
+    );
+  }
+
+  obtenerProyeccionesStock(sucursalId?: number, overrideTenantId?: number): Observable<ProyeccionesStockResponse> {
+    let url = `${this.apiUrl}/ml/proyecciones-stock`;
+    if (sucursalId) {
+      url += `?sucursal_id=${sucursalId}`;
+    }
+    return this.http.get<ProyeccionesStockResponse>(
+      url,
+      { headers: this.buildHeaders(overrideTenantId) }
+    );
   }
 }

@@ -96,3 +96,33 @@ class FinalizarPruebaRequest(BaseModel):
 class ReservaExpirarRequest(BaseModel):
     motivo: Optional[str] = "No show del cliente en probador"
 
+
+# ----------------- CU25: TRAZABILIDAD Y ESTADO DE RESERVAS -----------------
+class HitoTrazabilidadItem(BaseModel):
+    etiqueta: str
+    descripcion: str
+    completado: bool
+    fecha_hora: Optional[datetime] = None
+    icono: str = "schedule"
+    color_hex: str = "#6b7280"
+
+
+class ReservaTrazabilidadResponse(BaseModel):
+    id: int
+    codigo_reserva: str
+    qr_token: Optional[str] = None
+    qr_svg: Optional[str] = None
+    cliente_nombre: str
+    cliente_email: Optional[str] = None
+    sucursal_nombre: str
+    sucursal_direccion: Optional[str] = None
+    fecha_reserva: date
+    hora_estimada: str
+    estado: str
+    esta_expirada: bool = False
+    tiempo_restante_minutos: Optional[int] = None
+    probador_asignado: Optional[str] = None
+    observaciones: Optional[str] = None
+    hitos: List[HitoTrazabilidadItem] = []
+    detalles: List[DetalleReservaResponse] = []
+    acciones_disponibles: List[str] = []

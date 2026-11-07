@@ -318,3 +318,29 @@ class PrendaSyncItem(BaseModel):
     stock_disponible: int
     pecho_cm: Optional[float] = None
     cintura_cm: Optional[float] = None
+
+# ----------------- CU09: DIFUSIÓN DE NOVEDADES DE CATÁLOGO -----------------
+class DifusionCatalogoCreate(BaseModel):
+    titulo_campana: str = Field(..., min_length=3, max_length=150, description="Título o asunto de la campaña")
+    mensaje_personalizado: str = Field(..., min_length=5, description="Cuerpo del mensaje publicitario o catálogo")
+    canal_envio: str = Field("OMNICANAL", pattern="^(WHATSAPP|EMAIL|OMNICANAL|SMS)$")
+    segmento_objetivo: str = Field("TODOS", pattern="^(TODOS|VIP|FRECUENTES|EN_RIESGO|NUEVOS)$")
+    prendas_destacadas: Optional[str] = Field(None, description="Prendas o SKUs destacados en la difusión")
+    programar_fecha: Optional[datetime] = None
+
+
+class DifusionCatalogoResponse(BaseSchema):
+    id: int
+    empresa_id: Optional[int] = None
+    titulo_campana: str
+    mensaje_personalizado: str
+    canal_envio: str
+    segmento_objetivo: str
+    prendas_destacadas: Optional[str] = None
+    total_destinatarios: int = 0
+    tasa_apertura_estimada: float = 78.5
+    estado: str = "ENVIADA"
+    fecha_envio: datetime
+    creado_por_id: Optional[int] = None
+    created_at: datetime
+

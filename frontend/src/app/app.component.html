@@ -66,6 +66,9 @@
         <a routerLink="/reservas" class="client-nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()">
           <span class="material-symbols-outlined nav-icon">event_available</span> Reservar Probador
         </a>
+        <a routerLink="/reservas/trazabilidad" class="client-nav-link" routerLinkActive="active" (click)="closeMobileMenu()">
+          <span class="material-symbols-outlined nav-icon">qr_code_scanner</span> Trazabilidad (CU25)
+        </a>
         <a routerLink="/ventas/checkout" class="client-nav-link" routerLinkActive="active" (click)="closeMobileMenu()">
           <span class="material-symbols-outlined nav-icon">shopping_bag</span> Bolsa &amp; Pedidos
         </a>
@@ -128,6 +131,9 @@
             </a>
             <a routerLink="/catalogo/parametros" routerLinkActive="active" (click)="closeMobileMenu()">
               <span class="menu-icon">&bull;</span> Parámetros de Moda
+            </a>
+            <a routerLink="/catalogo/difusion" routerLinkActive="active" (click)="closeMobileMenu()">
+              <span class="menu-icon">&bull;</span> Difusión Novedades (CU09)
             </a>
           </div>
         </div>
@@ -195,6 +201,9 @@
             <a routerLink="/reservas/gestion" routerLinkActive="active" (click)="closeMobileMenu()">
               <span class="menu-icon">&bull;</span> Control de Citas &amp; Pases QR
             </a>
+            <a routerLink="/reservas/trazabilidad" routerLinkActive="active" (click)="closeMobileMenu()">
+              <span class="menu-icon">&bull;</span> Trazabilidad de Apartados (CU25)
+            </a>
           </div>
         </div>
 
@@ -212,7 +221,7 @@
               <span class="menu-icon">&bull;</span> Reportes IA &amp; Exportación (CU21/22)
             </a>
             <a routerLink="/dashboard/machine-learning" routerLinkActive="active" (click)="closeMobileMenu()">
-              <span class="menu-icon">&bull;</span> Machine Learning Comercial (CU23)
+              <span class="menu-icon">&bull;</span> Predicciones Stock &amp; ML (CU24/23)
             </a>
             <a routerLink="/ia-asistente" routerLinkActive="active" (click)="closeMobileMenu()">
               <span class="menu-icon">&bull;</span> Atelier Stylist (IA)

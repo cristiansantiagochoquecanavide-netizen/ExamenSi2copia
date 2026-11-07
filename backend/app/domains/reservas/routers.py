@@ -11,7 +11,8 @@ from app.domains.usuarios.routers import get_current_user, get_optional_current_
 from app.domains.reservas.services import ReservasService
 from app.domains.reservas.schemas import (
     ReservasStatusResponse, ReservaCreate, ReservaResponse, ReservaCancelarRequest,
-    AsignarProbadorRequest, FinalizarPruebaRequest, ReservaExpirarRequest
+    AsignarProbadorRequest, FinalizarPruebaRequest, ReservaExpirarRequest,
+    ReservaTrazabilidadResponse
 )
 
 router = APIRouter(
@@ -182,4 +183,17 @@ async def marcar_expirada(
 ):
     ip = request.client.host if request.client else None
     return await ReservasService.marcar_expirada(db, reserva_id, data, current_user, ip)
+
+# ----------------- CU25: CONSULTAR TRAZABILIDAD Y ESTADO DE RESERVAS -----------------
+@router.get(
+    "/{identificador}/trazabilidad",
+    response_model=ReservaTrazabilidadResponse,
+    summary="Consultar Trazabilidad y Estado de Reserva (CU25)"
+)
+async def consultar_trazabilidad(
+    identificador: str,
+    current_user: Optional[Usuario] = Depends(get_optional_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    return await ReservasService.obtener_trazabilidad(db, identificador, current_user)
 

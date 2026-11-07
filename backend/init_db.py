@@ -36,6 +36,9 @@ MIGRATION_STATEMENTS = [
     "CREATE INDEX IF NOT EXISTS ix_ventas_empresa_id ON ventas (empresa_id);",
     "CREATE INDEX IF NOT EXISTS ix_reservas_empresa_id ON reservas (empresa_id);",
     "CREATE INDEX IF NOT EXISTS ix_bitacora_auditoria_empresa_id ON bitacora_auditoria (empresa_id);",
+    "CREATE TABLE IF NOT EXISTS difusion_catalogo (id SERIAL PRIMARY KEY, empresa_id INT REFERENCES empresa(id), titulo_campana VARCHAR(150) NOT NULL, mensaje_personalizado TEXT NOT NULL, canal_envio VARCHAR(50) NOT NULL DEFAULT 'OMNICANAL', segmento_objetivo VARCHAR(50) NOT NULL DEFAULT 'TODOS', prendas_destacadas TEXT, total_destinatarios INT NOT NULL DEFAULT 0, tasa_apertura_estimada DOUBLE PRECISION NOT NULL DEFAULT 78.5, estado VARCHAR(30) NOT NULL DEFAULT 'ENVIADA', fecha_envio TIMESTAMP WITH TIME ZONE DEFAULT NOW(), creado_por_id INT REFERENCES usuarios(id), created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(), updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW());",
+    "CREATE INDEX IF NOT EXISTS ix_difusion_catalogo_empresa_id ON difusion_catalogo (empresa_id);",
+
 ]
 
 COMPATIBILITY_VIEWS = """

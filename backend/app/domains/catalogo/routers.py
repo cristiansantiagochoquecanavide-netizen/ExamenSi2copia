@@ -547,3 +547,39 @@ async def sincronizar_catalogo_local(
     """
     empresa_id = tenant_ctx.empresa_id if tenant_ctx else None
     return await CatalogoSyncService.sincronizar_catalogo_local(db, empresa_id)
+
+# ----------------- CU09: DIFUNDIR NOVEDADES DE CATÁLOGO A CLIENTES -----------------
+from app.domains.catalogo.schemas import DifusionCatalogoCreate, DifusionCatalogoResponse
+from app.domains.catalogo.services import DifusionCatalogoService
+
+@router.post(
+    "/difundir",
+    response_model=DifusionCatalogoResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Difundir Novedades de Catálogo a Clientes (CU09)"
+)
+async def difundir_novedades_catalogo(
+    data: DifusionCatalogoCreate,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: Optional[Usuario] = Depends(get_optional_current_user),
+    tenant_ctx: Optional[TenantContext] = Depends(get_optional_tenant_context)
+):
+    ip = request.client.host if request.client else None
+    tenant_id = tenant_ctx.empresa_id if tenant_ctx else (current_user.empresa_id if current_user else 1)
+    return await DifusionCatalogoService.difundir_novedades(db, data, current_user, ip, tenant_id)
+
+@router.get(
+    "/difusiones",
+    response_model=List[DifusionCatalogoResponse],
+    summary="Listar Campañas de Difusión de Catálogo (CU09)"
+)
+async def listar_difusiones_catalogo(
+    limit: int = 50,
+    offset: int = 0,
+    db: AsyncSession = Depends(get_db),
+    tenant_ctx: Optional[TenantContext] = Depends(get_optional_tenant_context)
+):
+    tenant_id = tenant_ctx.empresa_id if tenant_ctx else None
+    return await DifusionCatalogoService.listar_difusiones(db, tenant_id, limit, offset)
+

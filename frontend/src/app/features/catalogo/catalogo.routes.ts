@@ -15,6 +15,12 @@ export const CATALOGO_ROUTES: Routes = [
   {
     path: 'parametros',
     component: ParametrosModaPageComponent
+  },
+  {
+    path: 'difusion',
+    loadComponent: () =>
+      import('./pages/catalogo-difusion-page.component').then(
+        m => m.CatalogoDifusionPageComponent
+      )
   }
 ];
-

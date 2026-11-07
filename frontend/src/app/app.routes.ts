@@ -58,6 +58,21 @@ export const routes: Routes = [
     pathMatch: 'full'
   },
   {
+    path: 'trazabilidad',
+    redirectTo: 'reservas/trazabilidad',
+    pathMatch: 'full'
+  },
+  {
+    path: 'difusion',
+    redirectTo: 'catalogo/difusion',
+    pathMatch: 'full'
+  },
+  {
+    path: 'predicciones',
+    redirectTo: 'dashboard/machine-learning',
+    pathMatch: 'full'
+  },
+  {
     path: 'landing',
     loadComponent: () => import('./landing-page/landing-page.component').then(m => m.LandingPageComponent)
   },

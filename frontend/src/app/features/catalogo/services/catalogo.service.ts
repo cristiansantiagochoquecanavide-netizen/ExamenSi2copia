@@ -22,6 +22,8 @@ import {
   Calificacion,
   CalificacionCreate,
   ListadoCalificacionesResponse,
+  DifusionCatalogoCreate,
+  DifusionCatalogoResponse,
   Sucursal
 } from '../models/catalogo.models';
 
@@ -209,6 +211,19 @@ export class CatalogoService {
   // ==========================================
   sincronizarCatalogoOffline(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/sincronizar-local`);
+  }
+
+  // ==========================================
+  // CU09: DIFUSIÓN DE NOVEDADES DE CATÁLOGO A CLIENTES
+  // ==========================================
+  difundirNovedades(data: DifusionCatalogoCreate): Observable<DifusionCatalogoResponse> {
+    return this.http.post<DifusionCatalogoResponse>(`${this.baseUrl}/difundir`, data);
+  }
+
+  listarDifusiones(limit: number = 50, offset: number = 0): Observable<DifusionCatalogoResponse[]> {
+    return this.http.get<DifusionCatalogoResponse[]>(`${this.baseUrl}/difusiones`, {
+      params: { limit, offset }
+    });
   }
 }
 

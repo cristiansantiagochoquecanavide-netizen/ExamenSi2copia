@@ -189,3 +189,23 @@ class CalificacionPrenda(Base):
 
     prenda: Mapped["Prenda"] = relationship("Prenda", back_populates="calificaciones")
     usuario: Mapped["app.domains.usuarios.models.Usuario"] = relationship("app.domains.usuarios.models.Usuario", lazy="selectin")
+
+# ----------------- CU09: DIFUSIÓN DE NOVEDADES DE CATÁLOGO -----------------
+class DifusionCatalogo(Base):
+    __tablename__ = "difusion_catalogo"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    empresa_id: Mapped[Optional[int]] = mapped_column(ForeignKey("empresa.id"), nullable=True, index=True)
+    titulo_campana: Mapped[str] = mapped_column(String(150), nullable=False)
+    mensaje_personalizado: Mapped[str] = mapped_column(Text, nullable=False)
+    canal_envio: Mapped[str] = mapped_column(String(50), default="OMNICANAL", nullable=False)  # WHATSAPP, EMAIL, OMNICANAL, SMS
+    segmento_objetivo: Mapped[str] = mapped_column(String(50), default="TODOS", nullable=False)  # TODOS, VIP, FRECUENTES, EN_RIESGO, NUEVOS
+    prendas_destacadas: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON o lista de SKUs/nombres
+    total_destinatarios: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    tasa_apertura_estimada: Mapped[float] = mapped_column(Float, default=78.5, nullable=False)
+    estado: Mapped[str] = mapped_column(String(30), default="ENVIADA", nullable=False)  # BORRADOR, PROGRAMADA, ENVIADA
+    fecha_envio: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    creado_por_id: Mapped[Optional[int]] = mapped_column(ForeignKey("usuarios.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+

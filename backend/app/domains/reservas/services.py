@@ -1,5 +1,5 @@
 """Capa de Servicio (Lógica de Negocio) para el dominio de Reservas de Prendas (CU13)."""
-from datetime import datetime, date, timezone
+from datetime import datetime, date, timezone, timedelta
 from decimal import Decimal
 import io
 import json
@@ -717,3 +717,207 @@ class ReservasService:
         reserva_actualizada = await ReservasService.obtener_reserva_por_id(db, reserva.id)
         return ReservasService._formatear_reserva(reserva_actualizada)
 
+    @staticmethod
+    async def obtener_trazabilidad(
+        db: AsyncSession,
+        identificador: str,
+        current_user: Optional[Usuario] = None,
+    ) -> dict:
+        """
+        CU25: Consultar la trazabilidad completa, línea de tiempo y estado del ciclo de vida
+        de una reserva de probador. Aplica auto-expiración y liberación atómica de stock si venció.
+        """
+        stmt = (
+            select(Reserva)
+            .options(
+                selectinload(Reserva.cliente),
+                selectinload(Reserva.sucursal),
+                selectinload(Reserva.detalles).selectinload(DetalleReserva.variante).selectinload(PrendaVariante.prenda),
+                selectinload(Reserva.detalles).selectinload(DetalleReserva.variante).selectinload(PrendaVariante.talla),
+                selectinload(Reserva.detalles).selectinload(DetalleReserva.variante).selectinload(PrendaVariante.color),
+            )
+        )
+        if identificador.isdigit():
+            stmt = stmt.where(Reserva.id == int(identificador))
+        else:
+            stmt = stmt.where(Reserva.codigo_reserva == identificador.strip())
+
+        res = await db.execute(stmt)
+        reserva = res.scalar_one_or_none()
+
+        if not reserva:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Reserva con identificador '{identificador}' no encontrada en el sistema.",
+            )
+
+        # Evaluar auto-expiración frente al reloj del servidor
+        ahora = datetime.now(timezone.utc)
+        try:
+            time_parts = [int(p) for p in reserva.hora_estimada.split(":")]
+            hora_obj = datetime.now(timezone.utc).replace(hour=time_parts[0], minute=time_parts[1], second=0, microsecond=0).time()
+        except Exception:
+            hora_obj = datetime.now(timezone.utc).time()
+
+        fecha_cita = datetime.combine(reserva.fecha_reserva, hora_obj).replace(tzinfo=timezone.utc)
+        tolerancia_limite = fecha_cita + timedelta(hours=2)
+
+        esta_expirada = False
+        if reserva.estado in ["PENDIENTE", "CONFIRMADA"] and ahora > tolerancia_limite:
+            reserva.estado = "EXPIRADA"
+            esta_expirada = True
+            for det in reserva.detalles:
+                res_stock = await db.execute(
+                    select(InventarioStock).where(
+                        and_(
+                            InventarioStock.variante_id == det.variante_id,
+                            InventarioStock.sucursal_id == reserva.sucursal_id,
+                        )
+                    )
+                )
+                stock_item = res_stock.scalar_one_or_none()
+                if stock_item:
+                    stock_item.cantidad_disponible += det.cantidad
+                    stock_item.cantidad_reservada = max(0, stock_item.cantidad_reservada - det.cantidad)
+            await db.commit()
+            await db.refresh(reserva)
+
+        tiempo_restante_min = None
+        if reserva.estado in ["PENDIENTE", "CONFIRMADA"]:
+            diff = (tolerancia_limite - ahora).total_seconds() / 60
+            tiempo_restante_min = max(0, int(diff))
+
+        hitos = [
+            {
+                "etiqueta": "1. Reserva Emitida & Apartado",
+                "descripcion": f"Prendas apartadas sin pago previo para la sucursal {reserva.sucursal.nombre if reserva.sucursal else 'Tienda'}.",
+                "completado": True,
+                "fecha_hora": reserva.created_at,
+                "icono": "bookmark",
+                "color_hex": "#c5a880",
+            },
+            {
+                "etiqueta": "2. Preparación en Mostrador",
+                "descripcion": "El personal de tienda aparta las prendas físicas en el mostrador para el ensayo.",
+                "completado": reserva.estado in ["CONFIRMADA", "EN_PROBADOR", "COMPLETADA"],
+                "fecha_hora": reserva.updated_at if reserva.estado != "PENDIENTE" else None,
+                "icono": "inventory_2",
+                "color_hex": "#3b82f6",
+            },
+            {
+                "etiqueta": "3. Ingreso a Probador Físico",
+                "descripcion": f"Asignado a: {reserva.probador_asignado or 'Cabina de Ensayo'}" if reserva.probador_asignado else "Cliente ingresa a cabina para prueba de talle y calce.",
+                "completado": reserva.estado in ["EN_PROBADOR", "COMPLETADA"],
+                "fecha_hora": reserva.updated_at if reserva.estado in ["EN_PROBADOR", "COMPLETADA"] else None,
+                "icono": "checkroom",
+                "color_hex": "#8b5cf6",
+            },
+        ]
+
+        if reserva.estado == "COMPLETADA":
+            hitos.append({
+                "etiqueta": "4. Compra Concluida en Caja",
+                "descripcion": "Prendas probadas con éxito y facturadas en Punto de Venta POS.",
+                "completado": True,
+                "fecha_hora": reserva.updated_at,
+                "icono": "shopping_bag",
+                "color_hex": "#10b981",
+            })
+        elif reserva.estado == "EXPIRADA":
+            hitos.append({
+                "etiqueta": "4. Vencimiento del Plazo de Gracia",
+                "descripcion": "Reserva expirada por inasistencia. Stock liberado automáticamente al inventario vendible.",
+                "completado": True,
+                "fecha_hora": reserva.updated_at,
+                "icono": "timer_off",
+                "color_hex": "#6b7280",
+            })
+        elif reserva.estado == "CANCELADA":
+            hitos.append({
+                "etiqueta": "4. Cancelación Voluntaria",
+                "descripcion": "El apartado fue cancelado y las prendas retornadas de inmediato al inventario de la sucursal.",
+                "completado": True,
+                "fecha_hora": reserva.updated_at,
+                "icono": "cancel",
+                "color_hex": "#ef4444",
+            })
+        else:
+            hitos.append({
+                "etiqueta": "4. Decisión de Compra en Caja",
+                "descripcion": "Pendiente de facturación final en caja o devolución de prendas no adquiridas a mostrador.",
+                "completado": False,
+                "fecha_hora": None,
+                "icono": "hourglass_empty",
+                "color_hex": "#9ca3af",
+            })
+
+        acciones = []
+        if reserva.estado in ["PENDIENTE", "CONFIRMADA"]:
+            acciones.extend(["CANCELAR_RESERVA", "ASIGNAR_PROBADOR"])
+        elif reserva.estado == "EN_PROBADOR":
+            acciones.extend(["FINALIZAR_PRUEBA_POS", "LIBERAR_A_PERCHA"])
+
+        detalles_resp = [
+            {
+                "id": d.id,
+                "reserva_id": d.reserva_id,
+                "variante_id": d.variante_id,
+                "cantidad": d.cantidad,
+                "precio_unitario": d.precio_unitario,
+                "subtotal": d.subtotal,
+                "probada": d.probada,
+                "comprada": d.comprada,
+                "variante": {
+                    "id": d.variante.id,
+                    "prenda_id": d.variante.prenda_id,
+                    "talla_id": d.variante.talla_id,
+                    "color_id": d.variante.color_id,
+                    "sku_variante": d.variante.sku_variante,
+                    "codigo_barras": d.variante.codigo_barras,
+                    "precio_ajustado": d.variante.precio_ajustado,
+                    "stock_minimo": d.variante.stock_minimo,
+                    "activo": d.variante.activo,
+                    "prenda": {
+                        "id": d.variante.prenda.id,
+                        "sku": d.variante.prenda.sku,
+                        "nombre": d.variante.prenda.nombre,
+                        "precio_base": d.variante.prenda.precio_base,
+                        "categoria_id": d.variante.prenda.categoria_id,
+                    } if d.variante and d.variante.prenda else None,
+                    "talla": {
+                        "id": d.variante.talla.id,
+                        "codigo": d.variante.talla.codigo,
+                        "nombre": d.variante.talla.nombre,
+                    } if d.variante and d.variante.talla else None,
+                    "color": {
+                        "id": d.variante.color.id,
+                        "nombre": d.variante.color.nombre,
+                        "codigo_hex": d.variante.color.codigo_hex,
+                    } if d.variante and d.variante.color else None,
+                } if d.variante else None,
+            }
+            for d in reserva.detalles
+        ]
+
+        qr_svg_str = ReservasService._generar_svg_qr(reserva.qr_token) if reserva.qr_token else None
+
+        return {
+            "id": reserva.id,
+            "codigo_reserva": reserva.codigo_reserva,
+            "qr_token": reserva.qr_token,
+            "qr_svg": qr_svg_str,
+            "cliente_nombre": f"{reserva.cliente.nombre} {reserva.cliente.apellido}" if reserva.cliente else "Cliente Presencial",
+            "cliente_email": reserva.cliente.email if reserva.cliente else None,
+            "sucursal_nombre": reserva.sucursal.nombre if reserva.sucursal else "Sucursal Centro",
+            "sucursal_direccion": reserva.sucursal.direccion if reserva.sucursal else "Av. Principal",
+            "fecha_reserva": reserva.fecha_reserva,
+            "hora_estimada": reserva.hora_estimada,
+            "estado": reserva.estado,
+            "esta_expirada": esta_expirada or (reserva.estado == "EXPIRADA"),
+            "tiempo_restante_minutos": tiempo_restante_min,
+            "probador_asignado": reserva.probador_asignado,
+            "observaciones": reserva.observaciones,
+            "hitos": hitos,
+            "detalles": detalles_resp,
+            "acciones_disponibles": acciones,
+        }

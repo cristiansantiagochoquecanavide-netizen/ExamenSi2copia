@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 import {
-  Reserva, ReservaCreate, AsignarProbadorRequest, FinalizarPruebaRequest
+  Reserva, ReservaCreate, AsignarProbadorRequest, FinalizarPruebaRequest, ReservaTrazabilidadResponse
 } from '../models/reservas.models';
 import { LocalOfflineStorageService } from '../../../core/services/local-offline-storage.service';
 
@@ -70,6 +70,11 @@ export class ReservasService {
 
   obtenerReservasProbadorOffline() {
     return this.offlineStorage.obtenerReservasOffline();
+  }
+
+  // ----------------- CU25: TRAZABILIDAD Y CICLO DE VIDA DE RESERVAS -----------------
+  getTrazabilidad(identificador: string | number): Observable<ReservaTrazabilidadResponse> {
+    return this.http.get<ReservaTrazabilidadResponse>(`${this.baseUrl}/${encodeURIComponent(String(identificador))}/trazabilidad`);
   }
 }
 
