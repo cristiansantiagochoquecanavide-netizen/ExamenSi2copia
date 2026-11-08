@@ -1,28 +1,26 @@
 <div class="storefront-container landing-container">
-  <!-- Top Navigation Bar (Shared Minimalist Header) -->
+  <!-- Top Navigation Bar (SaaS Minimalist Header) -->
   <header class="top-nav">
     <div class="nav-content">
-      <a routerLink="/landing" class="brand-logo">
-        FASHIONSTORE
+      <a routerLink="/" class="brand-logo">
+        FASHIONSTORE <span class="saas-pill">SAAS</span>
       </a>
 
       <nav class="nav-menu" [class.open]="mobileMenuOpen">
-        <a routerLink="/catalogo" class="nav-item">Colección</a>
-        <a routerLink="/landing" class="nav-item active">Vestidor AR</a>
-        <a routerLink="/catalogo" class="nav-item">Novedades</a>
-        <a (click)="openSessionModal()" class="nav-item cursor-pointer">Acerca</a>
+        <a (click)="scrollToSection('planes-saas')" class="nav-item cursor-pointer">Planes & Precios</a>
+        <a (click)="scrollToSection('caracteristicas-saas')" class="nav-item cursor-pointer">Solución SaaS</a>
+        <a (click)="scrollToSection('piezas-ar')" class="nav-item cursor-pointer">Probador Virtual AR</a>
+        <a routerLink="/catalogo" class="nav-item">Catálogo Demo</a>
       </nav>
 
       <div class="nav-actions">
-        <button type="button" class="icon-btn" aria-label="Buscar" (click)="explorarTienda()">
-          <span class="material-symbols-outlined">search</span>
+        <button type="button" class="btn-text-nav" routerLink="/login">
+          <span class="material-symbols-outlined nav-icon">person</span>
+          <span>Ingreso Boutique</span>
         </button>
-        <button type="button" class="icon-btn" aria-label="Cuenta" routerLink="/login">
-          <span class="material-symbols-outlined">person</span>
-        </button>
-        <button type="button" class="icon-btn bag-btn" aria-label="Bolsa de compra" routerLink="/catalogo">
-          <span class="material-symbols-outlined">shopping_bag</span>
-          <span class="bag-dot"></span>
+        <button type="button" class="btn-cta-nav" routerLink="/saas">
+          <span>Registrar Empresa</span>
+          <span class="material-symbols-outlined nav-arrow">arrow_forward</span>
         </button>
         <button type="button" class="mobile-toggle-btn" aria-label="Menú" (click)="toggleMobileMenu()">
           <span class="material-symbols-outlined">{{ mobileMenuOpen ? 'close' : 'menu' }}</span>
@@ -32,7 +30,7 @@
   </header>
 
   <main>
-    <!-- HERO SECTION -->
+    <!-- HERO SECTION (SaaS Platform Focus) -->
     <section class="hero-section">
       <div class="hero-wrapper">
         <div class="hero-grid">
@@ -40,42 +38,47 @@
           <div class="hero-narrative">
             <div class="tech-badge">
               <span class="pulse-indicator"></span>
-              <span class="tech-badge-label">SARTORIAL TECH STUDIO &bull; 2025</span>
+              <span class="tech-badge-label">ECOSISTEMA SAAS MULTITENANT &bull; RETAIL 2026</span>
             </div>
 
             <div class="title-block">
               <h1 class="main-title">
-                Vestidores de <span class="bold-line">Realidad Aumentada</span>
+                La plataforma SaaS integral para <span class="bold-line">cadenas y boutiques de moda</span>
               </h1>
               <p class="main-description">
-                Experimenta la caída orgánica de la seda, el peso de la lana virgen y una simulación milimétrica de cada prenda sobre tu propia silueta antes de concebir tu orden.
+                Administra inventario multisucursal, ventas en punto físico con sincronización offline, probadores virtuales inteligentes por IA y predicciones de demanda en una sola nube multitenant.
               </p>
             </div>
 
             <!-- Action Cluster -->
             <div class="action-cluster">
-              <a (click)="explorarTienda()" class="btn-primary-cta" role="button">
-                Explorar tienda
-              </a>
-              <button type="button" class="btn-secondary-action" (click)="openArModal()">
-                <span>Lanzar Escáner 3D</span>
+              <button type="button" class="btn-primary-cta" (click)="scrollToSection('planes-saas')">
+                <span class="material-symbols-outlined">loyalty</span>
+                <span>Ver Planes y Precios</span>
+              </button>
+              <button type="button" class="btn-secondary-action" routerLink="/saas">
+                <span>Registrar Boutique</span>
                 <span class="material-symbols-outlined">arrow_forward</span>
+              </button>
+              <button type="button" class="btn-outline-action" routerLink="/catalogo">
+                <span class="material-symbols-outlined">storefront</span>
+                <span>Ver Catálogo en Vivo</span>
               </button>
             </div>
 
-            <!-- Spec Micro Indicators -->
+            <!-- Spec Micro Indicators (SaaS Metrics) -->
             <div class="micro-indicators">
               <div class="indicator-item">
-                <p class="indicator-val">0.2<span class="unit">mm</span></p>
-                <p class="indicator-label">Tolerancia Textil</p>
+                <p class="indicator-val">100<span class="unit">%</span></p>
+                <p class="indicator-label">Aislamiento Multitenant</p>
               </div>
               <div class="indicator-item">
-                <p class="indicator-val">60<span class="unit">fps</span></p>
-                <p class="indicator-label">Render Cinético</p>
+                <p class="indicator-val">&lt; 80<span class="unit">ms</span></p>
+                <p class="indicator-label">FastAPI Async API</p>
               </div>
               <div class="indicator-item">
-                <p class="indicator-val">100%</p>
-                <p class="indicator-label">Alta Fidelidad</p>
+                <p class="indicator-val">Offline<span class="unit">+</span></p>
+                <p class="indicator-label">Sincronización PWA POS</p>
               </div>
             </div>
           </div>
@@ -85,21 +88,21 @@
             <div class="image-frame group">
               <img
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYol-RVh89k_pIiGjtDbYZnKU1ssCufEXp08ssdCj-Q5w-hiKcQ09SnDzNLRK3HsWx20FT27gy94Gaqqo0BkQx_R52PwoXbvF18KP4YJmCIY1YnOc0odUGboz8BnJAbhJ7xkk3X7EyVIR4Hug472eBiKURodPK4zitOH7Zo8dkY3dVJFLSQXjYLKD5uMpIlaU8Wz2eJoAGgsfHzk9bVKdF0yPOHskqbKQOLxaAkKRmOSZ0D5QVXWJEk5iX4rFXb_1Q8xzU8oS8qrE"
-                alt="Alta Costura Vestidor AR Colección"
+                alt="FashionStore SaaS Cloud Retail"
                 class="hero-photo"
               />
               <!-- Floating Spatial Anchor Badge -->
               <div class="spatial-badge">
                 <div class="spatial-info">
                   <div class="spatial-icon-box">
-                    <span class="material-symbols-outlined">view_in_ar</span>
+                    <span class="material-symbols-outlined">cloud_done</span>
                   </div>
                   <div>
-                    <p class="spatial-title">Abrigo Sculptural No. 04</p>
-                    <p class="spatial-sub">Lana cashmere pura &bull; Draping virtual activo</p>
+                    <p class="spatial-title">FashionStore Cloud v1.0</p>
+                    <p class="spatial-sub">Base de datos aislada &bull; PostgreSQL 16 Multitenant</p>
                   </div>
                 </div>
-                <span class="spatial-status">Activo</span>
+                <span class="spatial-status">SaaS Activo</span>
               </div>
             </div>
           </div>
@@ -107,64 +110,173 @@
       </div>
     </section>
 
-    <!-- ANATOMÍA DEL VESTIDOR (3-column feature grid) -->
-    <section class="anatomy-section">
+    <!-- SECTION: PLANES DE SUSCRIPCIÓN SAAS (CU01 - PRICING GRID) -->
+    <section class="pricing-section" id="planes-saas">
+      <div class="section-wrapper">
+        <div class="pricing-header">
+          <div class="pricing-badge-wrapper">
+            <span class="section-pretitle">PLANES & TARIFAS MULTITENANT</span>
+          </div>
+          <h2 class="section-title">
+            Planes diseñados para cada etapa de tu marca
+          </h2>
+          <p class="pricing-subtext">
+            Desde boutiques emergentes hasta grandes firmas de retail con franquicias y múltiples puntos de venta. Facturación mensual en dólares, sin contratos de permanencia obligatoria.
+          </p>
+        </div>
+
+        <!-- Pricing Cards Grid -->
+        <div class="pricing-grid">
+          @for (plan of planes; track plan.id) {
+            <article class="pricing-card" [class.featured-card]="plan.codigo === 'INTERMEDIO'" [class.vip-card]="plan.codigo === 'VIP'">
+              <!-- Card Header -->
+              <div class="card-top">
+                @if (plan.codigo === 'INTERMEDIO') {
+                  <span class="popular-tag">MÁS POPULAR &bull; RECOMENDADO</span>
+                } @else if (plan.codigo === 'VIP') {
+                  <span class="vip-tag">ENTERPRISE &bull; CORPORATIVO</span>
+                } @else {
+                  <span class="standard-tag">PLAN INICIAL</span>
+                }
+
+                <h3 class="plan-name">{{ plan.nombre }}</h3>
+                <p class="plan-desc">{{ plan.descripcion }}</p>
+
+                <div class="price-container">
+                  <span class="currency">$</span>
+                  <span class="price-val">{{ plan.precio_mensual | number:'1.2-2' }}</span>
+                  <span class="period">/ mes</span>
+                </div>
+
+                <div class="branch-allowance">
+                  <span class="material-symbols-outlined branch-icon">store</span>
+                  <span>{{ plan.limite_sucursales > 100 ? 'Sucursales Ilimitadas' : 'Hasta ' + plan.limite_sucursales + ' sucursales físicas' }}</span>
+                </div>
+              </div>
+
+              <!-- Feature List -->
+              <div class="features-list">
+                <p class="features-title">Incluye en este plan:</p>
+                <ul>
+                  @for (feat of getPlanFeatures(plan); track feat.text) {
+                    <li [class.disabled-feat]="!feat.included">
+                      <span class="material-symbols-outlined feat-check" [class.active-check]="feat.included">
+                        {{ feat.included ? 'check_circle' : 'cancel' }}
+                      </span>
+                      <span class="feat-label">{{ feat.text }}</span>
+                    </li>
+                  }
+                </ul>
+              </div>
+
+              <!-- Card Action Button -->
+              <div class="card-footer">
+                <button
+                  type="button"
+                  class="btn-plan-action"
+                  [class.btn-featured]="plan.codigo === 'INTERMEDIO'"
+                  [class.btn-vip]="plan.codigo === 'VIP'"
+                  (click)="seleccionarPlan(plan)"
+                >
+                  <span>{{ plan.codigo === 'VIP' ? 'Suscribir Plan VIP' : 'Elegir ' + plan.nombre }}</span>
+                  <span class="material-symbols-outlined">arrow_forward</span>
+                </button>
+              </div>
+            </article>
+          }
+        </div>
+
+        <!-- Trust & Security Banner -->
+        <div class="trust-strip">
+          <div class="trust-item">
+            <span class="material-symbols-outlined">shield</span>
+            <span>Aislamiento estricto por Tenant (empresa_id)</span>
+          </div>
+          <div class="trust-item">
+            <span class="material-symbols-outlined">autorenew</span>
+            <span>Cambio de plan y actualización en tiempo real</span>
+          </div>
+          <div class="trust-item">
+            <span class="material-symbols-outlined">wifi_off</span>
+            <span>Soporte offline para cajas de cobro sin caídas</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ANATOMÍA DEL SISTEMA SAAS (4-column feature grid) -->
+    <section class="anatomy-section" id="caracteristicas-saas">
       <div class="section-wrapper">
         <div class="anatomy-header">
           <div>
-            <span class="section-pretitle">Ingeniería Digital</span>
+            <span class="section-pretitle">Arquitectura y Módulos</span>
             <h2 class="section-title">
-              La anatomía del <span class="font-medium">vestidor contemporáneo</span>
+              Potencia cada área de tu <span class="font-medium">negocio de moda</span>
             </h2>
           </div>
           <p class="anatomy-subtext">
-            Eliminamos la incertidumbre de talla mediante sensores de profundidad y algoritmos de tensión física de fibra.
+            Diseñado bajo Arquitectura Limpia Modular (apps/) para garantizar alta cohesión, bajo acoplamiento y máxima disponibilidad en tiendas físicas y virtuales.
           </p>
         </div>
 
         <div class="anatomy-grid">
-          <!-- Pillar 1 -->
+          <!-- Pillar 1: Multi-Tenant & SaaS -->
+          <article class="pillar-card">
+            <div class="pillar-content">
+              <span class="material-symbols-outlined pillar-icon">domain</span>
+              <span class="pillar-step">01 / Gestión SaaS</span>
+              <h3 class="pillar-heading">Multitenant & Sucursales</h3>
+              <p class="pillar-desc">
+                Crea empresas, asigna cuotas de sucursales según plan y gestiona políticas de cambio y garantías centralizadas.
+              </p>
+            </div>
+            <div class="pillar-footer">
+              <span class="pillar-badge">CU01 &bull; CU02</span>
+            </div>
+          </article>
+
+          <!-- Pillar 2: POS & Offline -->
+          <article class="pillar-card">
+            <div class="pillar-content">
+              <span class="material-symbols-outlined pillar-icon">point_of_sale</span>
+              <span class="pillar-step">02 / Ventas & POS</span>
+              <h3 class="pillar-heading">Cobro Rápido & Modo Offline</h3>
+              <p class="pillar-desc">
+                Factura incluso sin internet. La aplicación almacena operaciones localmente y las sincroniza con resolución de conflictos.
+              </p>
+            </div>
+            <div class="pillar-footer">
+              <span class="pillar-badge">CU06 &bull; CU24 &bull; CU25</span>
+            </div>
+          </article>
+
+          <!-- Pillar 3: Probadores & IA Concierge -->
           <article class="pillar-card">
             <div class="pillar-content">
               <span class="material-symbols-outlined pillar-icon">view_in_ar</span>
-              <span class="pillar-step">01 / Tecnología Láser</span>
-              <h3 class="pillar-heading">Prueba Virtual Instantánea</h3>
+              <span class="pillar-step">03 / Experiencia Smart</span>
+              <h3 class="pillar-heading">Probador Virtual VTON & IA</h3>
               <p class="pillar-desc">
-                Reflejo cinético en tiempo real. Visualiza cómo responde el tejido ante el movimiento natural de tus pasos, giros y caídas de luz ambiental.
+                Simulación virtual de prendas sobre siluetas de clientes, recomendaciones por estilo y chatbot concierge 24/7.
               </p>
             </div>
             <div class="pillar-footer">
-              <span class="pillar-badge">3D Mirror Sync</span>
+              <span class="pillar-badge">CU09 &bull; CU18</span>
             </div>
           </article>
 
-          <!-- Pillar 2 -->
+          <!-- Pillar 4: Machine Learning & Analytics -->
           <article class="pillar-card">
             <div class="pillar-content">
-              <span class="material-symbols-outlined pillar-icon">straighten</span>
-              <span class="pillar-step">02 / Calibración</span>
-              <h3 class="pillar-heading">Precisión Biométrica</h3>
+              <span class="material-symbols-outlined pillar-icon">analytics</span>
+              <span class="pillar-step">04 / Inteligencia</span>
+              <h3 class="pillar-heading">Predicciones ML de Demanda</h3>
               <p class="pillar-desc">
-                Mapeo volumétrico milimétrico del torso, hombros y extremidades. Reemplaza las tablas de medidas estandarizadas por un patrón estrictamente personalizado.
+                Modelos de machine learning que proyectan ventas, rotación de tallas y alertas preventivas de agotamiento de stock.
               </p>
             </div>
             <div class="pillar-footer">
-              <span class="pillar-badge">Custom Body Map</span>
-            </div>
-          </article>
-
-          <!-- Pillar 3 -->
-          <article class="pillar-card">
-            <div class="pillar-content">
-              <span class="material-symbols-outlined pillar-icon">diamond</span>
-              <span class="pillar-step">03 / Pasarela</span>
-              <h3 class="pillar-heading">Colección Alta Costura</h3>
-              <p class="pillar-desc">
-                Acceso exclusivo a prendas de desfile y ediciones limitadas directamente digitalizadas desde el taller de París para su ensayo en casa.
-              </p>
-            </div>
-            <div class="pillar-footer">
-              <span class="pillar-badge">Runway Archive</span>
+              <span class="pillar-badge">CU22</span>
             </div>
           </article>
         </div>
@@ -176,8 +288,8 @@
       <div class="section-wrapper">
         <div class="curated-header">
           <div>
-            <span class="section-pretitle">Pre-Lanzamiento</span>
-            <h2 class="section-title">Piezas Disponibles para AR</h2>
+            <span class="section-pretitle">Showroom Virtual</span>
+            <h2 class="section-title">Prendas con Probador Virtual 3D</h2>
           </div>
           <div class="carousel-nav">
             <button type="button" class="nav-circle-btn" aria-label="Anterior" (click)="prevSlide()">
@@ -194,7 +306,7 @@
             <article class="ar-card">
               <div class="ar-card-media">
                 <img [src]="piece.imageUrl" [alt]="piece.name" class="ar-card-img" />
-                <span class="ar-pill">AR READY</span>
+                <span class="ar-pill">AR & VTON READY</span>
                 <button
                   type="button"
                   class="wishlist-btn"
@@ -211,12 +323,12 @@
                   <h3 class="ar-card-title">{{ piece.name }}</h3>
                   <p class="ar-card-material">{{ piece.material }}</p>
                 </div>
-                <p class="ar-card-price">€ {{ piece.price | number:'1.0-0' }}</p>
+                <p class="ar-card-price">$ {{ piece.price | number:'1.0-0' }}</p>
               </div>
 
               <button type="button" class="ar-try-btn" (click)="openArModal(piece)">
                 <span class="material-symbols-outlined">view_in_ar</span>
-                <span>Probar en AR</span>
+                <span>Probar con Simulador</span>
               </button>
             </article>
           }
@@ -229,13 +341,18 @@
       <div class="section-wrapper">
         <div class="vip-box">
           <div class="vip-text">
-            <span class="vip-pretitle">CITA PRIVADA</span>
-            <h3 class="vip-title">¿Deseas una sesión guiada con un estilista virtual?</h3>
-            <p class="vip-desc">Disfruta de asesoramiento de caída y colorimetría en vivo dentro del vestidor AR.</p>
+            <span class="vip-pretitle">EMPIEZA HOY MISMO</span>
+            <h3 class="vip-title">¿Listo para transformar la gestión de tus tiendas?</h3>
+            <p class="vip-desc">Registra tu empresa en menos de dos minutos y comienza a utilizar el punto de venta, inventario e inteligencia artificial.</p>
           </div>
-          <button type="button" class="btn-vip" (click)="openSessionModal()">
-            Reservar Sesión
-          </button>
+          <div class="vip-actions">
+            <button type="button" class="btn-vip" routerLink="/saas">
+              Registrar Mi Empresa
+            </button>
+            <button type="button" class="btn-vip-secondary" (click)="scrollToSection('planes-saas')">
+              Comparar Planes
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -245,17 +362,17 @@
   <footer class="store-footer">
     <div class="footer-wrapper">
       <div class="footer-brand">
-        <span class="brand-name">FASHIONSTORE</span>
+        <span class="brand-name">FASHIONSTORE SAAS</span>
         <span class="sep">|</span>
-        <p class="copy">&copy; 2025 FashionStore. Experiencia de lujo aumentada.</p>
+        <p class="copy">&copy; 2026 FashionStore Cloud. Sistemas de Información II.</p>
       </div>
 
       <div class="footer-links">
-        <a href="#privacidad">Privacidad</a>
-        <a href="#terminos">Términos y Condiciones</a>
-        <a href="#atencion">Atención al Cliente</a>
-        <a routerLink="/landing" class="active-link">Vestidores AR</a>
-        <a href="#sostenibilidad">Sostenibilidad</a>
+        <a (click)="scrollToSection('planes-saas')" class="cursor-pointer">Planes de Suscripción</a>
+        <a routerLink="/saas">Administración SaaS</a>
+        <a routerLink="/catalogo">Catálogo de Prendas</a>
+        <a routerLink="/login">Acceso Boutique</a>
+        <a href="http://localhost:8000/docs" target="_blank">Swagger API</a>
       </div>
     </div>
   </footer>
@@ -266,7 +383,7 @@
       <div class="ar-modal-box" (click)="$event.stopPropagation()">
         <header class="modal-header">
           <div class="modal-title-group">
-            <span class="modal-pretitle">SIMULACIÓN VIRTUAL AR &bull; 60 FPS</span>
+            <span class="modal-pretitle">SIMULACIÓN VIRTUAL VTON &bull; 60 FPS</span>
             <h3 class="modal-title">{{ selectedArPiece.name }}</h3>
           </div>
           <button type="button" class="modal-close-btn" (click)="closeArModal()">
@@ -293,8 +410,8 @@
               <p class="tel-val">{{ selectedArPiece.drapeDetail }}</p>
             </div>
             <div class="telemetry-box">
-              <span class="tel-label">Precio Exclusivo</span>
-              <p class="tel-price">€ {{ selectedArPiece.price | number:'1.0-0' }}</p>
+              <span class="tel-label">Precio Referencial</span>
+              <p class="tel-price">$ {{ selectedArPiece.price | number:'1.0-0' }}</p>
             </div>
 
             <div class="modal-action-row">
@@ -318,7 +435,7 @@
         <header class="modal-header">
           <div class="modal-title-group">
             <span class="modal-pretitle">ATELIER PRIVADO</span>
-            <h3 class="modal-title">Reserva tu Sesión AR Personalizada</h3>
+            <h3 class="modal-title">Reserva tu Sesión Personalizada</h3>
           </div>
           <button type="button" class="modal-close-btn" (click)="closeSessionModal()">
             <span class="material-symbols-outlined">close</span>
@@ -332,7 +449,7 @@
             </p>
             <div class="form-group">
               <label>Fecha sugerida</label>
-              <input type="date" value="2025-10-15" class="minimal-input" />
+              <input type="date" value="2026-11-15" class="minimal-input" />
             </div>
             <div class="form-group">
               <label>Prenda de interés prioritario</label>

@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'catalogo',
+    loadComponent: () => import('./landing-page/landing-page.component').then(m => m.LandingPageComponent),
     pathMatch: 'full'
   },
   {
@@ -74,7 +74,8 @@ export const routes: Routes = [
   },
   {
     path: 'landing',
-    loadComponent: () => import('./landing-page/landing-page.component').then(m => m.LandingPageComponent)
+    redirectTo: '',
+    pathMatch: 'full'
   },
   {
     path: '**',

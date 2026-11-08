@@ -1225,3 +1225,410 @@
     }
   }
 }
+
+/* =========================================================
+   SAAS EXTENSIONS & PRICING GRID (CU01)
+   ========================================================= */
+.saas-pill {
+  display: inline-block;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  background: #111827;
+  color: #ffffff;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  vertical-align: middle;
+  margin-left: 6px;
+  font-weight: 700;
+}
+
+.btn-text-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  padding: 0.55rem 1.1rem;
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1f2937;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  .nav-icon {
+    font-size: 1.1rem;
+  }
+
+  &:hover {
+    border-color: #111827;
+    background: #f9fafb;
+    color: #000000;
+  }
+}
+
+.btn-cta-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #111827;
+  border: 1px solid #111827;
+  color: #ffffff;
+  padding: 0.55rem 1.25rem;
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  .nav-arrow {
+    font-size: 1.1rem;
+    transition: transform 0.2s;
+  }
+
+  &:hover {
+    background: #000000;
+    .nav-arrow {
+      transform: translateX(3px);
+    }
+  }
+}
+
+.btn-outline-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #111827;
+  padding: 0.9rem 1.6rem;
+  border-radius: 9999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #111827;
+    background: #f9fafb;
+  }
+}
+
+/* PRICING SECTION */
+.pricing-section {
+  padding: 6.5rem 0;
+  background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+  .pricing-header {
+    text-align: center;
+    max-width: 760px;
+    margin: 0 auto 4rem auto;
+
+    .pricing-badge-wrapper {
+      margin-bottom: 0.8rem;
+    }
+
+    .section-title {
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: #111827;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    .pricing-subtext {
+      font-size: 1.05rem;
+      color: #6b7280;
+      line-height: 1.6;
+    }
+  }
+
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    align-items: stretch;
+    margin-bottom: 3.5rem;
+  }
+
+  .pricing-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.1);
+      border-color: #d1d5db;
+    }
+
+    &.featured-card {
+      border: 2px solid #111827;
+      box-shadow: 0 20px 35px -8px rgba(17, 24, 39, 0.15);
+      position: relative;
+
+      .popular-tag {
+        position: absolute;
+        top: -14px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #111827;
+        color: #ffffff;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        padding: 5px 14px;
+        border-radius: 9999px;
+        white-space: nowrap;
+      }
+    }
+
+    &.vip-card {
+      border: 1px solid #10b981;
+      background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+
+      .vip-tag {
+        display: inline-block;
+        background: #d1fae5;
+        color: #065f46;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        padding: 4px 10px;
+        border-radius: 9999px;
+        margin-bottom: 1rem;
+      }
+    }
+
+    .standard-tag {
+      display: inline-block;
+      background: #f3f4f6;
+      color: #4b5563;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      margin-bottom: 1rem;
+    }
+
+    .plan-name {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #111827;
+      margin-bottom: 0.5rem;
+    }
+
+    .plan-desc {
+      font-size: 0.9rem;
+      color: #6b7280;
+      line-height: 1.5;
+      margin-bottom: 1.75rem;
+      min-height: 48px;
+    }
+
+    .price-container {
+      display: flex;
+      align-items: baseline;
+      gap: 0.25rem;
+      margin-bottom: 1rem;
+
+      .currency {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #111827;
+      }
+
+      .price-val {
+        font-size: 3.2rem;
+        font-weight: 900;
+        color: #111827;
+        letter-spacing: -0.03em;
+        line-height: 1;
+      }
+
+      .period {
+        font-size: 0.92rem;
+        color: #6b7280;
+        font-weight: 500;
+      }
+    }
+
+    .branch-allowance {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: #f3f4f6;
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 2rem;
+
+      .branch-icon {
+        font-size: 1.1rem;
+        color: #111827;
+      }
+    }
+
+    .features-list {
+      border-top: 1px solid #f3f4f6;
+      padding-top: 1.5rem;
+      margin-bottom: 2rem;
+      flex-grow: 1;
+
+      .features-title {
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #9ca3af;
+        margin-bottom: 1rem;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+
+        li {
+          display: flex;
+          align-items: flex-start;
+          gap: 0.65rem;
+          font-size: 0.88rem;
+          color: #374151;
+          line-height: 1.4;
+
+          .feat-check {
+            font-size: 1.2rem;
+            color: #d1d5db;
+            flex-shrink: 0;
+            margin-top: -1px;
+
+            &.active-check {
+              color: #10b981;
+            }
+          }
+
+          &.disabled-feat {
+            color: #9ca3af;
+            text-decoration: line-through;
+          }
+        }
+      }
+    }
+
+    .btn-plan-action {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background: #ffffff;
+      border: 1.5px solid #111827;
+      color: #111827;
+      padding: 0.95rem;
+      border-radius: 12px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #111827;
+        color: #ffffff;
+      }
+
+      &.btn-featured {
+        background: #111827;
+        color: #ffffff;
+
+        &:hover {
+          background: #000000;
+        }
+      }
+
+      &.btn-vip {
+        background: #059669;
+        border-color: #059669;
+        color: #ffffff;
+
+        &:hover {
+          background: #047857;
+        }
+      }
+    }
+  }
+
+  .trust-strip {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #4b5563;
+
+      .material-symbols-outlined {
+        color: #10b981;
+        font-size: 1.25rem;
+      }
+    }
+  }
+}
+
+.vip-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+
+  .btn-vip-secondary {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: #ffffff;
+    padding: 0.9rem 1.75rem;
+    border-radius: 9999px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: #ffffff;
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .pricing-section {
+    .pricing-grid {
+      grid-template-columns: 1fr;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+}

@@ -1,6 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
+import { SaasService, PlanSuscripcionModel } from '../core/services/saas.service';
 
 export interface ArPiece {
   id: string;
@@ -21,10 +22,50 @@ export interface ArPiece {
   templateUrl: './landing-page.component.html',
   styleUrl: './landing-page.component.scss'
 })
-export class LandingPageComponent {
+export class LandingPageComponent implements OnInit {
   private readonly router = inject(Router);
+  private readonly saasService = inject(SaasService);
 
-  // Carrusel de piezas AR
+  // Planes de Suscripción SaaS (CU01)
+  planes: PlanSuscripcionModel[] = [
+    {
+      id: 1,
+      codigo: 'BASICO',
+      nombre: 'Plan Básico Emprendedor',
+      descripcion: 'Ideal para boutiques emergentes con hasta 2 sucursales físicas y ventas omnicanal.',
+      precio_mensual: 29.99,
+      limite_sucursales: 2,
+      permite_ia: false,
+      permite_offline: false,
+      activo: true
+    },
+    {
+      id: 2,
+      codigo: 'INTERMEDIO',
+      nombre: 'Plan Profesional Multitienda',
+      descripcion: 'Para marcas en expansión con hasta 10 sucursales, sincronización offline en tiendas y concierge IA.',
+      precio_mensual: 79.99,
+      limite_sucursales: 10,
+      permite_ia: true,
+      permite_offline: true,
+      activo: true
+    },
+    {
+      id: 3,
+      codigo: 'VIP',
+      nombre: 'Plan Corporativo VIP',
+      descripcion: 'Cadena omnicanal de alto volumen con sucursales ilimitadas, IA generativa VTON y analítica ML.',
+      precio_mensual: 199.99,
+      limite_sucursales: 999,
+      permite_ia: true,
+      permite_offline: true,
+      activo: true
+    }
+  ];
+
+  cargandoPlanes = false;
+
+  // Carrusel de piezas de exhibición / probador virtual
   curatedPieces: ArPiece[] = [
     {
       id: 'ar-01',
@@ -77,6 +118,83 @@ export class LandingPageComponent {
   isSessionModalOpen = false;
   sessionConfirmed = false;
   mobileMenuOpen = false;
+
+  ngOnInit(): void {
+    this.cargarPlanes();
+  }
+
+  cargarPlanes(): void {
+    this.cargandoPlanes = true;
+    this.saasService.getPlanes().subscribe({
+      next: (data) => {
+        if (data && data.length > 0) {
+          this.planes = data;
+        }
+        this.cargandoPlanes = false;
+      },
+      error: () => {
+        this.cargandoPlanes = false;
+      }
+    });
+  }
+
+  getPlanFeatures(plan: PlanSuscripcionModel): { icon: string; text: string; included: boolean }[] {
+    const isVip = plan.codigo === 'VIP';
+    
+    return [
+      {
+        icon: 'storefront',
+        text: plan.limite_sucursales > 100 ? 'Sucursales ilimitadas' : `Hasta ${plan.limite_sucursales} sucursales físicas`,
+        included: true
+      },
+      {
+        icon: 'point_of_sale',
+        text: 'Punto de Venta POS & Catálogo digital',
+        included: true
+      },
+      {
+        icon: 'inventory_2',
+        text: 'Control de inventario multialmacén',
+        included: true
+      },
+      {
+        icon: 'sync_problem',
+        text: 'Sincronización móvil offline (PWA)',
+        included: plan.permite_offline
+      },
+      {
+        icon: 'smart_toy',
+        text: 'Asistente IA Concierge de ventas',
+        included: plan.permite_ia
+      },
+      {
+        icon: 'styler',
+        text: 'Probador Virtual VTON con IA generativa',
+        included: isVip
+      },
+      {
+        icon: 'trending_up',
+        text: 'Modelos predictivos Machine Learning',
+        included: isVip
+      },
+      {
+        icon: 'verified_user',
+        text: 'Aislamiento Multitenant & Auditoría',
+        included: true
+      }
+    ];
+  }
+
+  seleccionarPlan(plan: PlanSuscripcionModel): void {
+    this.router.navigate(['/saas'], { queryParams: { planId: plan.id, codigo: plan.codigo } });
+  }
+
+  scrollToSection(sectionId: string): void {
+    const el = document.getElementById(sectionId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
 
   explorarTienda(): void {
     this.router.navigate(['/catalogo']);
