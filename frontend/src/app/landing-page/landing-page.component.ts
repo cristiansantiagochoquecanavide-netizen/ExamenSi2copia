@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, AfterViewInit, OnDestroy, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { SaasService, PlanSuscripcionModel } from '../core/services/saas.service';
@@ -15,17 +15,6 @@ export interface ArPiece {
   wishlist?: boolean;
 }
 
-export interface VideoShowcaseCategory {
-  id: string;
-  label: string;
-  tag: string;
-  headline: string;
-  description: string;
-  videoSrc: string;
-  badgeText: string;
-  icon: string;
-}
-
 @Component({
   selector: 'app-landing-page',
   standalone: true,
@@ -33,45 +22,14 @@ export interface VideoShowcaseCategory {
   templateUrl: './landing-page.component.html',
   styleUrl: './landing-page.component.scss'
 })
-export class LandingPageComponent implements OnInit {
+export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly saasService = inject(SaasService);
+  private readonly elRef = inject(ElementRef);
 
-  // Categorías de demostración con video en loop (Elegante, Urbana, Calzado)
-  activeVideoCategory = 'elegante';
-
-  readonly videoCategories: VideoShowcaseCategory[] = [
-    {
-      id: 'elegante',
-      label: 'Sastrería & Elegante',
-      tag: 'ALTA COSTURA & VESTIDOS',
-      headline: 'Boutiques de Alta Costura & Sastrería Fina',
-      description: 'Ideal para ateliers y firmas de alta costura que requieren simulación virtual milimétrica de caída textil, drapeado 3D y probadores virtuales de lujo.',
-      videoSrc: 'assets/videos/runway_elegante.mp4',
-      badgeText: 'Draping 3D & Seda / Lana',
-      icon: 'diamond'
-    },
-    {
-      id: 'urbana',
-      label: 'Streetwear & Urbana',
-      tag: 'STREETWEAR & CASUAL',
-      headline: 'Marcas de Moda Urbana & Streetwear Contemporáneo',
-      description: 'Diseñado para tiendas de alto tráfico: cobro rápido en punto de venta físico, sincronización offline para ferias y pop-up stores, y difusión en redes sociales.',
-      videoSrc: 'assets/videos/moda_urbana.mp4',
-      badgeText: 'POS Offline & Colecciones Flash',
-      icon: 'local_fire_department'
-    },
-    {
-      id: 'calzado',
-      label: 'Sneakers & Calzado',
-      tag: 'SNEAKERS & CALZADO',
-      headline: 'Boutiques de Calzado, Zapatillas & Accesorios',
-      description: 'Gestión avanzada de stock multialmacén por talle y color, reservas previas en probadores físicos y predicción analítica de demanda con Machine Learning.',
-      videoSrc: 'assets/videos/calzado_sneakers.mp4',
-      badgeText: 'Matriz de Tallas & Predicción ML',
-      icon: 'steps'
-    }
-  ];
+  // Tema dinámico de color según scroll
+  currentTheme: 'theme-noir' | 'theme-urban' | 'theme-sport' | 'theme-light' = 'theme-noir';
+  private observer: IntersectionObserver | null = null;
 
   // Planes de Suscripción SaaS (CU01)
   planes: PlanSuscripcionModel[] = [
@@ -170,6 +128,62 @@ export class LandingPageComponent implements OnInit {
     this.cargarPlanes();
   }
 
+  ngAfterViewInit(): void {
+    this.iniciarScrollObserver();
+    this.asegurarVideosSilenciados();
+  }
+
+  ngOnDestroy(): void {
+    if (this.observer) {
+      this.observer.disconnect();
+    }
+  }
+
+  private iniciarScrollObserver(): void {
+    if (typeof IntersectionObserver === 'undefined') return;
+
+    const sections = [
+      { id: 'hero-section', theme: 'theme-noir' as const },
+      { id: 'story-elegante', theme: 'theme-noir' as const },
+      { id: 'story-urbano', theme: 'theme-urban' as const },
+      { id: 'story-running', theme: 'theme-sport' as const },
+      { id: 'planes-saas', theme: 'theme-light' as const }
+    ];
+
+    this.observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          const match = sections.find(s => s.id === entry.target.id);
+          if (match) {
+            this.currentTheme = match.theme;
+          }
+        }
+      }
+    }, {
+      root: null,
+      threshold: 0.35
+    });
+
+    for (const item of sections) {
+      const el = this.elRef.nativeElement.querySelector(`#${item.id}`);
+      if (el) {
+        this.observer.observe(el);
+      }
+    }
+  }
+
+  private asegurarVideosSilenciados(): void {
+    const videos: NodeListOf<HTMLVideoElement> = this.elRef.nativeElement.querySelectorAll('video');
+    videos.forEach(v => {
+      v.muted = true;
+      v.defaultMuted = true;
+      v.volume = 0;
+      v.play().catch(() => {
+        // Autoplay policy handled silently
+      });
+    });
+  }
+
   cargarPlanes(): void {
     this.cargandoPlanes = true;
     this.saasService.getPlanes().subscribe({
@@ -183,14 +197,6 @@ export class LandingPageComponent implements OnInit {
         this.cargandoPlanes = false;
       }
     });
-  }
-
-  setVideoCategory(catId: string): void {
-    this.activeVideoCategory = catId;
-  }
-
-  get currentVideoCategory(): VideoShowcaseCategory {
-    return this.videoCategories.find(c => c.id === this.activeVideoCategory) || this.videoCategories[0];
   }
 
   getPlanFeatures(plan: PlanSuscripcionModel): { icon: string; text: string; included: boolean }[] {
