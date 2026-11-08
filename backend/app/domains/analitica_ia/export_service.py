@@ -55,6 +55,7 @@ class ReportExportService:
             leftMargin=36,
             topMargin=36,
             bottomMargin=42,
+            pageCompression=0,
             title=f"Reporte IA #{reporte_dict.get('reporte_id', 1)}",
         )
 
@@ -66,7 +67,7 @@ class ReportExportService:
             parent=styles["Heading1"],
             fontName="Helvetica-Bold",
             fontSize=16,
-            textColor=colors.HexColor("#1E3A8A"),
+            textColor=colors.HexColor("#17243A"),
             spaceAfter=3,
         )
         subtitle_style = ParagraphStyle(
@@ -74,29 +75,44 @@ class ReportExportService:
             parent=styles["Normal"],
             fontName="Helvetica",
             fontSize=8.5,
-            textColor=colors.HexColor("#4B5563"),
+            textColor=colors.HexColor("#64748B"),
             spaceAfter=8,
         )
-        section_label = ParagraphStyle(
-            "SectionLabel",
+        query_label_style = ParagraphStyle(
+            "QueryLabel",
             parent=styles["Normal"],
             fontName="Helvetica-Bold",
             fontSize=9.5,
-            textColor=colors.HexColor("#111827"),
-            spaceBefore=6,
+            leading=13,
+            textColor=colors.HexColor("#17243A"),
             spaceAfter=4,
         )
-        summary_style = ParagraphStyle(
+        summary_title_style = ParagraphStyle(
+            "SummaryTitle",
+            parent=styles["Normal"],
+            fontName="Helvetica-Bold",
+            fontSize=8,
+            leading=10,
+            textColor=colors.HexColor("#9A7738"),
+            spaceAfter=3,
+        )
+        summary_text_style = ParagraphStyle(
             "SummaryText",
             parent=styles["Normal"],
             fontName="Helvetica",
-            fontSize=9.5,
+            fontSize=9,
             leading=13.5,
             alignment=TA_JUSTIFY,
-            textColor=colors.HexColor("#1F2937"),
-            backColor=colors.HexColor("#EFF6FF"),
-            borderPadding=8,
-            spaceAfter=14,
+            textColor=colors.HexColor("#202938"),
+        )
+        table_label_style = ParagraphStyle(
+            "TableLabel",
+            parent=styles["Normal"],
+            fontName="Helvetica-Bold",
+            fontSize=9.5,
+            leading=13,
+            textColor=colors.HexColor("#17243A"),
+            spaceAfter=6,
         )
         cell_left = ParagraphStyle(
             "CellLeft",
@@ -105,7 +121,7 @@ class ReportExportService:
             fontSize=8,
             leading=10,
             alignment=TA_LEFT,
-            textColor=colors.HexColor("#1F2937"),
+            textColor=colors.HexColor("#202938"),
         )
         cell_right = ParagraphStyle(
             "CellRight",
@@ -114,13 +130,13 @@ class ReportExportService:
             fontSize=8,
             leading=10,
             alignment=TA_RIGHT,
-            textColor=colors.HexColor("#111827"),
+            textColor=colors.HexColor("#17243A"),
         )
 
         # 1. Encabezado Institucional del Tenant
         empresa_nombre = empresa_info.get("razon_social", "FashionStore SaaS")
         nit = empresa_info.get("nit", "1029384756")
-        direccion = empresa_info.get("direccion_fiscal") or "Plataforma Corporativa Multitenant Bolivia"
+        direccion = empresa_info.get("direccion_fiscal") or "Plataforma Corporativa Bolivia"
         tenant_id = empresa_info.get("id", 1)
         fecha_emision = datetime.now().strftime("%d/%m/%Y %H:%M")
 
@@ -128,32 +144,53 @@ class ReportExportService:
         elements.append(
             Paragraph(
                 f"<b>NIT:</b> {nit} &nbsp;|&nbsp; <b>Dirección:</b> {direccion}<br/>"
-                f"<b>Emisión:</b> {fecha_emision} &nbsp;|&nbsp; <b>Aislamiento Multitenant:</b> Empresa ID #{tenant_id} "
-                f"&nbsp;|&nbsp; <b>Reporte IA:</b> #{reporte_dict.get('reporte_id', 1)}",
+                f"<b>Emisión:</b> {fecha_emision} &nbsp;|&nbsp; <b>Reporte Ejecutivo:</b> #{reporte_dict.get('reporte_id', 1)}",
                 subtitle_style,
             )
         )
-        elements.append(HRFlowable(width="100%", thickness=1.2, color=colors.HexColor("#1E3A8A"), spaceAfter=10))
+        elements.append(HRFlowable(width="100%", thickness=1.2, color=colors.HexColor("#17243A"), spaceAfter=10))
 
-        # 2. Pregunta y Síntesis Ejecutiva de Google Gemini
+        # 2. Pregunta y Síntesis Ejecutiva (Estructurada en Tabla sin desbordamiento ni solapamiento)
         prompt_text = str(reporte_dict.get("prompt_consulta", "")).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
         tipo_entrada = reporte_dict.get("tipo_entrada", "TEXTO")
         resumen_texto = str(reporte_dict.get("respuesta_resumen", "")).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
         elements.append(
             Paragraph(
-                f"<b>Consulta en Lenguaje Natural (Canal: {tipo_entrada}):</b> <i>\"{prompt_text}\"</i>",
-                section_label,
+                f"<b>Consulta formulada ({tipo_entrada}):</b> <font color='#202938'><i>\"{prompt_text}\"</i></font>",
+                query_label_style,
             )
         )
-        elements.append(Paragraph(f"<b>Síntesis Analítica (Google Gemini):</b><br/>{resumen_texto}", summary_style))
+        elements.append(Spacer(1, 6))
+
+        # Cuadro de Síntesis Ejecutiva con borde dorado champán y fondo limpio
+        synthesis_content = [
+            Paragraph("SÍNTESIS EJECUTIVA", summary_title_style),
+            Paragraph(resumen_texto, summary_text_style),
+        ]
+        synthesis_table = Table([[synthesis_content]], colWidths=[540], hAlign="LEFT")
+        synthesis_table.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#FBFBFD")),
+                    ("BOX", (0, 0), (-1, -1), 0.75, colors.HexColor("#E5E9F0")),
+                    ("LINELEFT", (0, 0), (0, -1), 3.5, colors.HexColor("#C6A56B")),
+                    ("TOPPADDING", (0, 0), (-1, -1), 8),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 12),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+                ]
+            )
+        )
+        elements.append(synthesis_table)
+        elements.append(Spacer(1, 12))
 
         # 3. Tabla de Datos Estructurada con Efecto Cebra y Alineación Monetaria
         columnas: List[str] = reporte_dict.get("columnas", [])
         datos: List[Dict[str, Any]] = reporte_dict.get("datos_tabulares", [])
 
         if columnas and datos:
-            elements.append(Paragraph("<b>Detalle Tabular de Operaciones Verificadas:</b>", section_label))
+            elements.append(Paragraph("<b>Detalle de Resultados:</b>", table_label_style))
             header_row = [c.replace("_", " ").upper() for c in columnas]
             table_data: List[List[Any]] = [header_row]
 
@@ -174,15 +211,15 @@ class ReportExportService:
             t.setStyle(
                 TableStyle(
                     [
-                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1E3A8A")),
-                        ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#17243A")),
+                        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
                         ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                        ("FONTSIZE", (0, 0), (-1, 0), 8.5),
+                        ("FONTSIZE", (0, 0), (-1, 0), 8),
                         ("BOTTOMPADDING", (0, 0), (-1, 0), 7),
                         ("TOPPADDING", (0, 0), (-1, 0), 7),
                         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#D1D5DB")),
-                        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F3F4F6")]),
+                        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#E5E9F0")),
+                        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F8F9FC")]),
                         ("BOTTOMPADDING", (0, 1), (-1, -1), 5),
                         ("TOPPADDING", (0, 1), (-1, -1), 5),
                     ]
@@ -190,27 +227,15 @@ class ReportExportService:
             )
             elements.append(t)
 
-        # 4. Traza de Auditoría SQL Read-Only
-        sql_gen = str(reporte_dict.get("sql_generado", "")).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-        if sql_gen:
-            elements.append(Spacer(1, 14))
-            elements.append(
-                Paragraph(
-                    f"<font size=7.5 color='#4B5563'><b>Sentencia SQL Auditada (Read-Only Multitenant):</b><br/>"
-                    f"<font name='Courier'>{sql_gen}</font></font>",
-                    styles["Normal"],
-                )
-            )
-
-        # Pie de página dinámico con numeración
+        # Pie de página dinámico elegante sin leyendas de depuración ni códigos internos
         def draw_footer(canvas, doc_obj):
             canvas.saveState()
             canvas.setFont("Helvetica", 7.5)
-            canvas.setFillColor(colors.HexColor("#6B7280"))
+            canvas.setFillColor(colors.HexColor("#64748B"))
             canvas.drawString(
                 36,
                 22,
-                f"FashionStore SaaS Multitenant (INF412) | Certificación Aislamiento Tenant #{tenant_id} ({empresa_nombre})",
+                f"FashionStore • {empresa_nombre} | Reporte Ejecutivo",
             )
             canvas.drawRightString(576, 22, f"Página {doc_obj.page}")
             canvas.restoreState()
@@ -235,14 +260,14 @@ class ReportExportService:
         max_col = max(len(columnas), 4)
         last_col_letter = get_column_letter(max_col)
 
-        navy_fill = PatternFill(start_color="1E3A8A", end_color="1E3A8A", fill_type="solid")
-        header_fill = PatternFill(start_color="2563EB", end_color="2563EB", fill_type="solid")
+        navy_fill = PatternFill(start_color="17243A", end_color="17243A", fill_type="solid")
+        header_fill = PatternFill(start_color="17243A", end_color="17243A", fill_type="solid")
         zebra_fill = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
-        total_fill = PatternFill(start_color="E0E7FF", end_color="E0E7FF", fill_type="solid")
+        total_fill = PatternFill(start_color="E5E9F0", end_color="E5E9F0", fill_type="solid")
 
         white_bold = Font(name="Calibri", size=10.5, bold=True, color="FFFFFF")
         title_font = Font(name="Calibri", size=13, bold=True, color="FFFFFF")
-        total_font = Font(name="Calibri", size=10.5, bold=True, color="1E3A8A")
+        total_font = Font(name="Calibri", size=10.5, bold=True, color="17243A")
         thin_border = Border(
             left=Side(style="thin", color="CBD5E1"),
             right=Side(style="thin", color="CBD5E1"),
@@ -255,7 +280,7 @@ class ReportExportService:
         cell_a1 = ws["A1"]
         empresa_nombre = empresa_info.get("razon_social", "FashionStore SaaS")
         nit = empresa_info.get("nit", "1029384756")
-        cell_a1.value = f"{empresa_nombre} (NIT: {nit}) — REPORTE ANALÍTICO IA"
+        cell_a1.value = f"{empresa_nombre} (NIT: {nit}) — REPORTE EJECUTIVO"
         cell_a1.font = title_font
         cell_a1.fill = navy_fill
         cell_a1.alignment = Alignment(horizontal="center", vertical="center")
@@ -270,7 +295,7 @@ class ReportExportService:
         ws["A2"].font = Font(name="Calibri", size=10, italic=True, bold=True, color="1F2937")
 
         ws.merge_cells(f"A3:{last_col_letter}3")
-        ws["A3"] = f"Síntesis Gemini: {reporte_dict.get('respuesta_resumen', '')}"
+        ws["A3"] = f"Síntesis Ejecutiva: {reporte_dict.get('respuesta_resumen', '')}"
         ws["A3"].font = Font(name="Calibri", size=10, color="374151")
         ws["A3"].alignment = Alignment(wrap_text=True, vertical="center")
         ws.row_dimensions[3].height = 28

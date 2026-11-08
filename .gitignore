@@ -70,7 +70,10 @@ Thumbs.db
 *.eap
 *.eapx
 *.qea
+*.qeax
 *.feap
+*.ldb
+*.laccdb
 Modelo_de_Dominio_Completo.png
 build_complete_domain_model.ps1
 

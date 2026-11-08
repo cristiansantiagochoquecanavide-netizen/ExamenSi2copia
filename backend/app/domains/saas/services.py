@@ -576,7 +576,7 @@ class SuscripcionService:
         return await SuscripcionService.consultar_estado_cuenta(db, empresa_id)
 
     @staticmethod
-    async def cambiar_plan(db: AsyncSession, empresa_id: int, nuevo_plan_id: int) -> Dict[str, Any]:
+    async def cambiar_plan(db: AsyncSession, empresa_id: int, nuevo_plan_id: int, user_id: Optional[int] = None) -> Dict[str, Any]:
         # Validar nuevo plan
         nuevo_plan = await db.get(PlanSuscripcion, nuevo_plan_id)
         if not nuevo_plan or not nuevo_plan.activo:
@@ -607,4 +607,37 @@ class SuscripcionService:
         await db.commit()
         await db.refresh(suscripcion)
 
-        return await SuscripcionService.consultar_estado_cuenta(db, empresa_id)
+        res = await SuscripcionService.consultar_estado_cuenta(db, empresa_id)
+
+        if user_id:
+            try:
+                from app.core.security import create_access_token
+                from app.domains.usuarios.models import Usuario, Rol
+                from app.domains.saas.models import Empresa
+                from sqlalchemy.orm import selectinload
+
+                u_res = await db.execute(
+                    select(Usuario).options(selectinload(Usuario.rol).selectinload(Rol.permisos)).where(Usuario.id == user_id)
+                )
+                usuario = u_res.scalar_one_or_none()
+                if usuario:
+                    emp = await db.get(Empresa, empresa_id)
+                    token_payload = {
+                        "sub": str(usuario.id),
+                        "email": usuario.email,
+                        "rol": usuario.rol.nombre if usuario.rol else "CLIENTE",
+                        "sucursal_id": usuario.sucursal_id,
+                        "empresa_id": empresa_id,
+                        "nombre_empresa": emp.razon_social if emp else "FashionStore",
+                        "subdominio": emp.subdominio if emp else "elegance",
+                        "plan_codigo": nuevo_plan.codigo,
+                        "permite_offline": bool(nuevo_plan.permite_offline),
+                        "permite_ia": bool(nuevo_plan.permite_ia),
+                        "permisos": [p.codigo for p in usuario.rol.permisos] if usuario.rol else []
+                    }
+                    res["access_token"] = create_access_token(token_payload)
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+
+        return res

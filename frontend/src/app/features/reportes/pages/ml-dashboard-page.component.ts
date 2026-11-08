@@ -7,7 +7,8 @@ import {
   FashionAiMlService,
   MLDemandaTrainResponse,
   MLRFMTrainResponse,
-  ModeloMLPersistedItem
+  ModeloMLPersistedItem,
+  ProyeccionStockItem
 } from '../services/fashion-ai-ml.service';
 
 @Component({
@@ -19,132 +20,165 @@ import {
       <div class="ml-container">
 
         <!-- =============================================================== -->
-        <!-- CABECERA EJECUTIVA Y CONTROLES DE HIPERPARÁMETROS (CU23)        -->
+        <!-- ENCABEZADO EJECUTIVO ELEGANTE Y COMPACTO                        -->
         <!-- =============================================================== -->
         <header class="ml-hero-header">
-          <div class="hero-left">
-            <div class="eyebrow-row">
-              <span class="eyebrow-pill">PRESENTACIÓN 3 &bull; CU23</span>
-              <span class="sklearn-pill">Scikit-Learn / NumPy Analytical Pipeline</span>
+          <div class="hero-main">
+            <div class="header-icon-badge">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                <line x1="12" y1="22.08" x2="12" y2="12"/>
+              </svg>
             </div>
-            <h1 class="hero-title">Laboratorio de Machine Learning Comercial</h1>
-            <p class="hero-subtitle">
-              Entrenamiento y evaluación en tiempo real de modelos predictivos sobre transacciones de PostgreSQL
-              del tenant activo: <strong>Predicción Supervisada de Demanda</strong> (MAE, RMSE, R&sup2; &ge; 0.70) y
-              <strong>Segmentación No Supervisada RFM con K-Means</strong> (Silhouette Score &amp; Curva del Codo WCSS).
-            </p>
+            <div class="header-titles">
+              <h1 class="header-title">Laboratorio de Machine Learning</h1>
+              <p class="header-subtitle">Modelos predictivos de demanda y segmentación inteligente de clientes para tu boutique.</p>
+            </div>
           </div>
 
-          <div class="hero-right">
-            <div class="nav-links-bar">
-              <a routerLink="/dashboard" class="btn-nav-outline">&larr; Dashboard BI</a>
-              <a routerLink="/dashboard/ia-reportes" class="btn-nav-gold">Asistente IA &amp; Exportación (CU21/22) &rarr;</a>
+          <div class="header-controls">
+            <!-- Indicador discreto de Tienda y Plan Activo -->
+            <div class="tenant-status-pill" [title]="'Empresa: ' + authService.currentTenant().nombreEmpresa">
+              <span class="tenant-dot"></span>
+              <span class="tenant-name">{{ authService.currentTenant().nombreEmpresa }}</span>
+              <span class="tenant-plan-tag" [class.vip]="authService.currentTenant().planCodigo === 'VIP'">
+                {{ authService.currentTenant().planCodigo }}
+              </span>
             </div>
 
-            <div class="tenant-switch-mini">
-              <span class="lbl">TENANT:</span>
-              <button
-                type="button"
-                class="t-btn"
-                [class.active]="activeTenantId() === 1"
-                (click)="cambiarTenant(1)">
-                Elegance Boutique (#1)
-              </button>
-              <button
-                type="button"
-                class="t-btn urban"
-                [class.active]="activeTenantId() === 2"
-                (click)="cambiarTenant(2)">
-                Urban Style (#2 - Básico)
-              </button>
+            <!-- Botones de Navegación del Módulo -->
+            <div class="header-nav-group">
+              <a routerLink="/dashboard" class="btn-nav-subtle">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="7" height="9"/>
+                  <rect x="14" y="3" width="7" height="5"/>
+                  <rect x="14" y="12" width="7" height="9"/>
+                  <rect x="3" y="16" width="7" height="5"/>
+                </svg>
+                <span>Dashboard BI</span>
+              </a>
+              <a routerLink="/dashboard/ia-reportes" class="btn-nav-accent">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                </svg>
+                <span>Asistente de Reportes IA</span>
+              </a>
             </div>
           </div>
         </header>
 
-        <!-- Barra de Hiperparámetros y Disparo de Entrenamiento -->
+        <!-- =============================================================== -->
+        <!-- CONSOLA DE HIPERPARÁMETROS Y ENTRENAMIENTO                      -->
+        <!-- =============================================================== -->
         <section class="hyperparams-bar">
-          <div class="param-group">
-            <label>Algoritmo Supervisado</label>
-            <select [(ngModel)]="algoritmoDemanda" class="param-select">
-              <option value="RandomForestRegressor">RandomForestRegressor (Ensamble)</option>
-              <option value="RidgeRegression">RidgeRegression (Lineal L2)</option>
-            </select>
-          </div>
+          <div class="params-inputs-row">
+            <div class="param-group">
+              <label>Algoritmo Predictivo</label>
+              <select [(ngModel)]="algoritmoDemanda" class="param-select">
+                <option value="RandomForestRegressor">Random Forest (Ensamble)</option>
+                <option value="RidgeRegression">Ridge Regression (Lineal L2)</option>
+              </select>
+            </div>
 
-          <div class="param-group">
-            <label>Ventana Histórica</label>
-            <select [(ngModel)]="diasHistorico" class="param-select">
-              <option [ngValue]="60">Últimos 60 días</option>
-              <option [ngValue]="90">Últimos 90 días</option>
-              <option [ngValue]="120">Últimos 120 días</option>
-            </select>
-          </div>
+            <div class="param-group">
+              <label>Ventana Histórica</label>
+              <select [(ngModel)]="diasHistorico" class="param-select">
+                <option [ngValue]="60">Últimos 60 días</option>
+                <option [ngValue]="90">Últimos 90 días</option>
+                <option [ngValue]="120">Últimos 120 días</option>
+              </select>
+            </div>
 
-          <div class="param-group">
-            <label>Clusters RFM (K-Means)</label>
-            <select [(ngModel)]="numClustersRfm" class="param-select">
-              <option [ngValue]="2">k = 2 segmentos</option>
-              <option [ngValue]="3">k = 3 segmentos (Recomendado)</option>
-              <option [ngValue]="4">k = 4 segmentos</option>
-              <option [ngValue]="5">k = 5 segmentos</option>
-            </select>
+            <div class="param-group">
+              <label>Grupos Clientes (K-Means)</label>
+              <select [(ngModel)]="numClustersRfm" class="param-select">
+                <option [ngValue]="2">2 segmentos comerciales</option>
+                <option [ngValue]="3">3 segmentos (Recomendado)</option>
+                <option [ngValue]="4">4 segmentos comerciales</option>
+                <option [ngValue]="5">5 segmentos comerciales</option>
+              </select>
+            </div>
           </div>
 
           <div class="train-buttons-group">
             <button
               type="button"
-              class="btn-train-secondary"
+              class="btn-train-subtle"
               [disabled]="isTraining()"
               (click)="entrenarSoloDemanda()">
-              Entrenar Demanda
+              <span>Entrenar Demanda</span>
             </button>
             <button
               type="button"
-              class="btn-train-secondary"
+              class="btn-train-subtle"
               [disabled]="isTraining()"
               (click)="entrenarSoloRfm()">
-              Entrenar K-Means RFM
+              <span>Entrenar Clientes</span>
             </button>
             <button
               type="button"
-              class="btn-train-all"
+              class="btn-train-primary"
               [disabled]="isTraining()"
               (click)="entrenarPipelineCompleto()">
-              {{ isTraining() ? 'Entrenando Modelos...' : 'Re-entrenar Pipeline Completo' }}
+              @if (isTraining()) {
+                <span class="spinner-sm"></span>
+                <span>Entrenando Modelos...</span>
+              } @else {
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 4 23 10 17 10"/>
+                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                </svg>
+                <span>Re-entrenar Modelos</span>
+              }
             </button>
           </div>
         </section>
 
+        <!-- Banner de Restricción o Error -->
         @if (errorBanner()) {
-          <div class="ml-error-banner">
-            <strong>Restricción SaaS / ML (HTTP {{ errorStatus() }}):</strong> {{ errorBanner() }}
-          </div>
+          <section class="ml-error-banner">
+            <div class="error-icon-box">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+            </div>
+            <div class="error-text">
+              <strong class="error-heading">Acceso no disponible en el plan actual:</strong>
+              <p class="error-msg">{{ errorBanner() }}</p>
+            </div>
+          </section>
         }
 
         <!-- =============================================================== -->
-        <!-- SECCIÓN 1: APRENDIZAJE SUPERVISADO - PREDICCIÓN DE DEMANDA      -->
+        <!-- SECCIÓN 1: PREDICCIÓN DE DEMANDA DE STOCK                       -->
         <!-- =============================================================== -->
         @if (demandaModel(); as sup) {
           <section class="paradigm-section">
             <div class="paradigm-header">
-              <div>
-                <span class="paradigm-tag supervised">APRENDIZAJE SUPERVISADO &bull; REGRESIÓN</span>
-                <h2>{{ sup.nombre_modelo }} (Modelo #{{ sup.modelo_id }})</h2>
+              <div class="paradigm-title-block">
+                <span class="paradigm-tag supervised">PREDICCIÓN DE DEMANDA</span>
+                <h2 class="paradigm-name">{{ sup.nombre_modelo }} <span class="model-id">#{{ sup.modelo_id }}</span></h2>
               </div>
-              <span class="target-tag">Variable Objetivo: <code>{{ sup.variable_objetivo }}</code></span>
+              <div class="target-indicator">
+                <span class="target-lbl">Variable Objetivo:</span>
+                <span class="target-pill">{{ sup.variable_objetivo }}</span>
+              </div>
             </div>
 
-            <!-- 3 Tarjetas de Métricas Matemáticas (R2, MAE, RMSE) -->
+            <!-- Tarjetas de Métricas de Calidad del Modelo -->
             <div class="metrics-trio-grid">
-              <article class="metric-card highlight-r2">
+              <article class="metric-card">
                 <div class="m-top">
-                  <span class="m-name">COEFICIENTE DE DETERMINACIÓN (R&sup2;)</span>
+                  <span class="m-name">PRECISIÓN DEL MODELO (R²)</span>
                   <span class="m-status-pill" [class.ok]="sup.precision_r2 >= 0.70">
-                    {{ sup.precision_r2 >= 0.70 ? 'META >= 0.70 CUMPLIDA' : 'BAJO UMBRAL' }}
+                    {{ sup.precision_r2 >= 0.70 ? 'Excelente (≥ 70%)' : 'Aceptable' }}
                   </span>
                 </div>
-                <div class="m-value">{{ sup.precision_r2 | number:'1.4-4' }}</div>
-                <div class="m-foot">Varianza explicada sobre partición Test (20%)</div>
+                <div class="m-value">{{ (sup.precision_r2 * 100) | number:'1.1-1' }}%</div>
+                <div class="m-foot">Porcentaje de variabilidad de ventas explicada</div>
               </article>
 
               <article class="metric-card">
@@ -153,66 +187,140 @@ import {
                   <span class="m-unit">prendas/día</span>
                 </div>
                 <div class="m-value">{{ sup.mae | number:'1.2-2' }}</div>
-                <div class="m-foot">Desviación lineal promedio de pronóstico</div>
+                <div class="m-foot">Desviación promedio en unidades por prenda</div>
               </article>
 
               <article class="metric-card">
                 <div class="m-top">
-                  <span class="m-name">RAÍZ DEL ERROR CUADRÁTICO MEDIO (RMSE)</span>
+                  <span class="m-name">ERROR CUADRÁTICO (RMSE)</span>
                   <span class="m-unit">prendas/día</span>
                 </div>
                 <div class="m-value">{{ sup.rmse | number:'1.2-2' }}</div>
-                <div class="m-foot">Penalización cuadrática ante picos de fin de semana</div>
+                <div class="m-foot">Sensibilidad ante picos de demanda estacionales</div>
               </article>
             </div>
 
-            <!-- Grilla Media Supervisado: Curva Real vs Predicho + Importancia de Variables -->
+            <!-- Gráfico Comparativo + Importancia de Variables -->
             <div class="sup-visuals-grid">
               <article class="chart-card">
                 <div class="chart-card-head">
-                  <h3>Validación Cruzada: Demanda Real vs. Predicción del Modelo</h3>
+                  <div class="chart-title-wrap">
+                    <h3 class="card-title">Comparativa: Demanda Real vs. Predicción</h3>
+                    @if (hoveredDemanda(); as h) {
+                      <div class="hover-demanda-tooltip">
+                        <span class="h-sample">Muestra #{{ h.indice }}:</span>
+                        <span class="h-real">Real <b>{{ h.demanda_real }} uds</b></span>
+                        <span class="h-sep">&bull;</span>
+                        <span class="h-pred">Pred <b>{{ h.demanda_predicha }} uds</b></span>
+                        <span class="h-diff" [class.diff-up]="h.demanda_predicha >= h.demanda_real" [class.diff-down]="h.demanda_predicha < h.demanda_real">
+                          ({{ h.demanda_predicha >= h.demanda_real ? '+' : '' }}{{ (h.demanda_predicha - h.demanda_real) | number:'1.1-1' }})
+                        </span>
+                      </div>
+                    }
+                  </div>
                   <div class="legend-inline">
-                    <span><i class="lg-dot real"></i> Demanda Real</span>
-                    <span><i class="lg-dot pred"></i> Demanda Predicha</span>
+                    <span><i class="lg-dot real"></i> Real</span>
+                    <span><i class="lg-dot pred"></i> Predicha</span>
                   </div>
                 </div>
 
-                <svg class="svg-chart" viewBox="0 0 640 220">
-                  <line x1="45" y1="25" x2="620" y2="25" stroke="#f1f5f9" stroke-width="1" />
-                  <line x1="45" y1="105" x2="620" y2="105" stroke="#f1f5f9" stroke-width="1" />
-                  <line x1="45" y1="185" x2="620" y2="185" stroke="#cbd5e1" stroke-width="1.4" />
+                <div class="chart-svg-container">
+                  <svg class="svg-chart" viewBox="0 0 640 232">
+                    <!-- Cuadrícula horizontal y coordenadas del Eje Y -->
+                    <text x="45" y="14" text-anchor="end" font-size="8" font-weight="700" fill="#94A3B8">UDS</text>
+                    <text x="45" y="29" text-anchor="end" font-size="9" font-weight="600" fill="#64748B">{{ demandaMaxVal() }}</text>
+                    <line x1="50" y1="25" x2="620" y2="25" stroke="#E5E9F0" stroke-width="1" stroke-dasharray="4,4" />
 
-                  <polyline
-                    [attr.points]="demandaRealPolyline()"
-                    fill="none"
-                    stroke="#0f172a"
-                    stroke-width="2.6"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                  <polyline
-                    [attr.points]="demandaPredPolyline()"
-                    fill="none"
-                    stroke="#2563eb"
-                    stroke-width="2.6"
-                    stroke-dasharray="5,3"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
+                    <text x="45" y="109" text-anchor="end" font-size="9" font-weight="600" fill="#64748B">{{ demandaMidVal() }}</text>
+                    <line x1="50" y1="105" x2="620" y2="105" stroke="#E5E9F0" stroke-width="1" stroke-dasharray="4,4" />
 
-                  @for (pt of demandaCoords(); track pt.indice) {
-                    <circle [attr.cx]="pt.x" [attr.cy]="pt.yReal" r="3.8" fill="#0f172a" />
-                    <circle [attr.cx]="pt.x" [attr.cy]="pt.yPred" r="3.8" fill="#2563eb" />
-                    <text [attr.x]="pt.x" y="204" text-anchor="middle" font-size="9" fill="#64748b">
-                      {{ pt.etiqueta }}
+                    <text x="45" y="189" text-anchor="end" font-size="9" font-weight="600" fill="#64748B">0</text>
+                    <line x1="50" y1="185" x2="620" y2="185" stroke="#CBD5E1" stroke-width="1.4" />
+
+                    <!-- Línea de Demanda Real (Azul Noche) -->
+                    <polyline
+                      [attr.points]="demandaRealPolyline()"
+                      fill="none"
+                      stroke="#17243A"
+                      stroke-width="2.6"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+
+                    <!-- Línea de Demanda Predicha (Dorado Champán Punteado) -->
+                    <polyline
+                      [attr.points]="demandaPredPolyline()"
+                      fill="none"
+                      stroke="#C6A56B"
+                      stroke-width="2.6"
+                      stroke-dasharray="6,4"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+
+                    <!-- Marcas y Coordenadas del Eje X -->
+                    @for (pt of demandaCoords(); track pt.indice) {
+                      <!-- Guía vertical interactiva al hacer hover -->
+                      @if (hoveredDemanda()?.indice === pt.indice) {
+                        <line [attr.x1]="pt.x" y1="25" [attr.x2]="pt.x" y2="185" stroke="#C6A56B" stroke-width="1.2" stroke-dasharray="3,3" />
+                      }
+
+                      <!-- Tick del eje X -->
+                      <line [attr.x1]="pt.x" y1="185" [attr.x2]="pt.x" y2="190" stroke="#CBD5E1" stroke-width="1.2" />
+
+                      <!-- Coordenada limpia del punto: #1, #2, #3... sin superposición -->
+                      <text
+                        [attr.x]="pt.x"
+                        y="202"
+                        text-anchor="middle"
+                        font-size="9"
+                        [attr.font-weight]="hoveredDemanda()?.indice === pt.indice ? '800' : '600'"
+                        [attr.fill]="hoveredDemanda()?.indice === pt.indice ? '#17243A' : '#64748B'"
+                        style="cursor: pointer;"
+                        (mouseenter)="hoveredDemanda.set(pt)"
+                        (mouseleave)="hoveredDemanda.set(null)">
+                        #{{ pt.indice }}
+                      </text>
+
+                      <!-- Puntos interactivos con tooltip y borde blanco para evitar mezcla -->
+                      <circle
+                        class="chart-point"
+                        [attr.cx]="pt.x"
+                        [attr.cy]="pt.yReal"
+                        [attr.r]="hoveredDemanda()?.indice === pt.indice ? 6 : 4.5"
+                        fill="#17243A"
+                        stroke="#FFFFFF"
+                        stroke-width="1.5"
+                        (mouseenter)="hoveredDemanda.set(pt)"
+                        (mouseleave)="hoveredDemanda.set(null)">
+                        <title>Muestra #{{ pt.indice }} — Demanda Real: {{ pt.demanda_real }} unidades</title>
+                      </circle>
+
+                      <circle
+                        class="chart-point"
+                        [attr.cx]="pt.x"
+                        [attr.cy]="pt.yPred"
+                        [attr.r]="hoveredDemanda()?.indice === pt.indice ? 6 : 4.5"
+                        fill="#C6A56B"
+                        stroke="#FFFFFF"
+                        stroke-width="1.5"
+                        (mouseenter)="hoveredDemanda.set(pt)"
+                        (mouseleave)="hoveredDemanda.set(null)">
+                        <title>Muestra #{{ pt.indice }} — Demanda Predicha: {{ pt.demanda_predicha }} unidades</title>
+                      </circle>
+                    }
+
+                    <!-- Título del Eje X -->
+                    <text x="335" y="222" text-anchor="middle" font-size="9.5" font-weight="600" fill="#64748B">
+                      Muestras del Conjunto de Prueba (#1 al #{{ demandaCoords().length }})
                     </text>
-                  }
-                </svg>
+                  </svg>
+                </div>
               </article>
 
               <article class="chart-card">
                 <div class="chart-card-head">
-                  <h3>Importancia de Variables Predictoras</h3>
+                  <h3 class="card-title">Factores Clave de Demanda</h3>
                 </div>
                 <div class="feature-bars">
                   @for (feat of sup.importancia_variables; track feat.variable) {
@@ -230,36 +338,94 @@ import {
               </article>
             </div>
 
-            <!-- Proyección Operativa de Stock a 7 Días por SKU -->
+            <!-- =========================================================== -->
+            <!-- TABLA INTERACTIVA DE PROYECCIÓN DE STOCK (COLOR PIEL / NUDE) -->
+            <!-- =========================================================== -->
             <article class="projection-table-card">
-              <div class="chart-card-head">
-                <h3>Pronóstico de Demanda a 7 Días y Alerta Preventiva de Quiebre de Stock</h3>
-                <span class="sub-note">Inferencia directa sobre catálogo e inventario actual del tenant</span>
+              <div class="table-interactive-toolbar">
+                <div class="toolbar-title-block">
+                  <h3 class="card-title">Pronóstico de Stock a 7 Días y Alerta de Quiebre</h3>
+                  <span class="sub-note">Cálculo predictivo sobre inventario y rotación por SKU</span>
+                </div>
+
+                <!-- Controles Interactivos: Filtros de Riesgo y Buscador -->
+                <div class="toolbar-actions-block">
+                  <div class="filter-pills-row">
+                    <button
+                      type="button"
+                      class="filter-pill"
+                      [class.is-active]="filtroRiesgo() === 'TODOS'"
+                      (click)="filtroRiesgo.set('TODOS')">
+                      Todos ({{ sup.proyecciones_stock.length }})
+                    </button>
+                    <button
+                      type="button"
+                      class="filter-pill pill-risk"
+                      [class.is-active]="filtroRiesgo() === 'RIESGO'"
+                      (click)="filtroRiesgo.set('RIESGO')">
+                      Alto Riesgo
+                    </button>
+                    <button
+                      type="button"
+                      class="filter-pill pill-safe"
+                      [class.is-active]="filtroRiesgo() === 'OPTIMO'"
+                      (click)="filtroRiesgo.set('OPTIMO')">
+                      Stock Óptimo
+                    </button>
+                  </div>
+
+                  <div class="search-mini-box">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="11" cy="11" r="8"/>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input
+                      type="text"
+                      [ngModel]="busquedaPrenda()"
+                      (ngModelChange)="busquedaPrenda.set($event)"
+                      placeholder="Buscar prenda o tienda..."
+                    />
+                  </div>
+                </div>
               </div>
-              <div class="table-wrap">
-                <table class="ml-table">
+
+              <!-- Contenedor Responsive con Cabecera "Color Piel" Elegante -->
+              <div class="table-responsive-wrapper">
+                <table class="saas-table skin-tone-table">
                   <thead>
                     <tr>
                       <th>PRENDA / SKU</th>
-                      <th>TALLA</th>
+                      <th class="col-center">TALLA</th>
                       <th>SUCURSAL</th>
-                      <th class="num">STOCK ACTUAL</th>
-                      <th class="num">DEMANDA PROYECTADA (7D)</th>
-                      <th>RIESGO DE QUIEBRE</th>
+                      <th class="cell-right">STOCK ACTUAL</th>
+                      <th class="cell-right">DEMANDA PROYECTADA (7D)</th>
+                      <th class="col-center">ESTADO DE QUIEBRE</th>
                     </tr>
                   </thead>
                   <tbody>
-                    @for (item of sup.proyecciones_stock; track $index) {
-                      <tr>
-                        <td class="bold">{{ item.prenda }}</td>
-                        <td><span class="size-badge">{{ item.talla }}</span></td>
+                    @for (item of proyeccionesFiltradas(); track $index) {
+                      <tr class="interactive-row">
+                        <td class="cell-bold">{{ item.prenda }}</td>
+                        <td class="col-center">
+                          <span class="size-badge">{{ item.talla }}</span>
+                        </td>
                         <td>{{ item.sucursal }}</td>
-                        <td class="num">{{ item.stock_actual }} uds.</td>
-                        <td class="num highlight-val">{{ item.demanda_proyectada_7d }} uds.</td>
-                        <td>
-                          <span class="risk-pill" [ngClass]="getRiskClass(item.riesgo_quiebre)">
-                            {{ item.riesgo_quiebre }}
+                        <td class="cell-right font-numeric" [class.negative-stock]="item.stock_actual <= 0">
+                          {{ formatStockQty(item.stock_actual) }}
+                        </td>
+                        <td class="cell-right font-numeric font-highlight">
+                          {{ item.demanda_proyectada_7d }} uds.
+                        </td>
+                        <td class="col-center">
+                          <span class="risk-badge" [ngClass]="getRiskClass(item.riesgo_quiebre)">
+                            {{ formatRiskLabel(item.riesgo_quiebre) }}
                           </span>
+                        </td>
+                      </tr>
+                    } @empty {
+                      <tr>
+                        <td colspan="6" class="empty-table-cell">
+                          No se encontraron prendas que coincidan con el filtro aplicado.
                         </td>
                       </tr>
                     }
@@ -271,120 +437,127 @@ import {
         }
 
         <!-- =============================================================== -->
-        <!-- SECCIÓN 2: APRENDIZAJE NO SUPERVISADO - SEGMENTACIÓN RFM K-MEANS-->
+        <!-- SECCIÓN 2: SEGMENTACIÓN DE CLIENTES (RFM K-MEANS)               -->
         <!-- =============================================================== -->
         @if (rfmModel(); as rfm) {
           <section class="paradigm-section">
             <div class="paradigm-header">
-              <div>
-                <span class="paradigm-tag unsupervised">APRENDIZAJE NO SUPERVISADO &bull; CLUSTERING K-MEANS++</span>
-                <h2>{{ rfm.nombre_modelo }} (Modelo #{{ rfm.modelo_id }})</h2>
+              <div class="paradigm-title-block">
+                <span class="paradigm-tag unsupervised">SEGMENTACIÓN DE CLIENTES</span>
+                <h2 class="paradigm-name">{{ rfm.nombre_modelo }} <span class="model-id">#{{ rfm.modelo_id }}</span></h2>
               </div>
-              <span class="target-tag">Normalización: <code>StandardScaler (Z-Score R, F, M)</code></span>
+              <div class="target-indicator">
+                <span class="target-lbl">Estrategia:</span>
+                <span class="target-pill">Clustering K-Means (RFM)</span>
+              </div>
             </div>
 
-            <!-- 3 Tarjetas de Métricas No Supervisadas -->
+            <!-- Métricas de Clustering -->
             <div class="metrics-trio-grid">
-              <article class="metric-card highlight-sil">
+              <article class="metric-card">
                 <div class="m-top">
-                  <span class="m-name">COEFICIENTE DE SILUETA (SILHOUETTE SCORE)</span>
+                  <span class="m-name">COEFICIENTE DE SILUETA</span>
                   <span class="m-status-pill" [class.ok]="rfm.silhouette_score > 0.25">
-                    {{ rfm.silhouette_score > 0.25 ? 'SEPARACIÓN ÓPTIMA (> 0.25)' : 'SOLAPADO' }}
+                    {{ rfm.silhouette_score > 0.25 ? 'Separación Óptima' : 'Solapado' }}
                   </span>
                 </div>
-                <div class="m-value">{{ rfm.silhouette_score | number:'1.4-4' }}</div>
-                <div class="m-foot">Cohesión intra-cluster vs. separación inter-cluster [-1, +1]</div>
+                <div class="m-value">{{ rfm.silhouette_score | number:'1.3-3' }}</div>
+                <div class="m-foot">Calidad de separación entre perfiles de compra</div>
               </article>
 
               <article class="metric-card">
                 <div class="m-top">
                   <span class="m-name">INERCIA INTRA-CLUSTER (WCSS)</span>
-                  <span class="m-unit">k = {{ rfm.num_clusters }}</span>
+                  <span class="m-unit">{{ rfm.num_clusters }} grupos</span>
                 </div>
-                <div class="m-value">{{ rfm.inercia_wcss | number:'1.2-2' }}</div>
-                <div class="m-foot">Suma de distancias cuadráticas al centroide más cercano</div>
+                <div class="m-value">{{ rfm.inercia_wcss | number:'1.0-0' }}</div>
+                <div class="m-foot">Compacidad y coherencia interna del segmento</div>
               </article>
 
               <article class="metric-card">
                 <div class="m-top">
-                  <span class="m-name">UNIVERSO RFM SEGMENTADO</span>
-                  <span class="m-unit">Tenant #{{ rfm.empresa_id }}</span>
+                  <span class="m-name">CLIENTES ANALIZADOS</span>
+                  <span class="m-unit">Activos</span>
                 </div>
                 <div class="m-value">{{ rfm.total_clientes_analizados }}</div>
-                <div class="m-foot">Clientes únicos con historial de compras pagadas</div>
+                <div class="m-foot">Clientes únicos con historial de compras</div>
               </article>
             </div>
 
-            <!-- Gráficos SVG No Supervisados: Scatter Plot RFM + Curva del Codo (Elbow) -->
+            <!-- Gráficos de Segmentos: Dispersión RFM + Método del Codo -->
             <div class="sup-visuals-grid">
               <article class="chart-card">
                 <div class="chart-card-head">
-                  <h3>Mapa de Dispersión RFM (Frecuencia vs. Gasto Acumulado Bs.)</h3>
-                  <span class="sub-note">Coloreado según asignación de centroide K-Means</span>
+                  <h3 class="card-title">Mapa de Clientes: Frecuencia vs. Gasto (Bs.)</h3>
+                  <span class="sub-note">Puntos coloreados por segmento de valor</span>
                 </div>
-                <svg class="svg-chart" viewBox="0 0 640 230">
-                  <line x1="55" y1="20" x2="55" y2="195" stroke="#cbd5e1" stroke-width="1.4" />
-                  <line x1="55" y1="195" x2="615" y2="195" stroke="#cbd5e1" stroke-width="1.4" />
-                  <text x="335" y="220" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">
-                    Frecuencia de Compras (N° Transacciones) &rarr;
-                  </text>
-                  <text x="16" y="110" text-anchor="middle" font-size="10" font-weight="700" fill="#475569" transform="rotate(-90, 16, 110)">
-                    Valor Monetario (Bs.) &rarr;
-                  </text>
+                <div class="chart-svg-container">
+                  <svg class="svg-chart" viewBox="0 0 640 230">
+                    <line x1="55" y1="20" x2="55" y2="195" stroke="#CBD5E1" stroke-width="1.4" />
+                    <line x1="55" y1="195" x2="615" y2="195" stroke="#CBD5E1" stroke-width="1.4" />
+                    <text x="335" y="220" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">
+                      Frecuencia de Compras (Transacciones) &rarr;
+                    </text>
+                    <text x="16" y="110" text-anchor="middle" font-size="10" font-weight="700" fill="#475569" transform="rotate(-90, 16, 110)">
+                      Gasto Acumulado (Bs.) &rarr;
+                    </text>
 
-                  @for (pt of rfmScatterCoords(); track $index) {
-                    <circle
-                      [attr.cx]="pt.cx"
-                      [attr.cy]="pt.cy"
-                      r="5.2"
-                      [attr.fill]="pt.color"
-                      fill-opacity="0.82"
-                      stroke="#ffffff"
-                      stroke-width="1.2">
-                      <title>{{ pt.cliente }} — {{ pt.segmento }} (F={{ pt.frecuencia_compras }}, Bs. {{ pt.monto_total_bs }})</title>
-                    </circle>
-                  }
-                </svg>
+                    @for (pt of rfmScatterCoords(); track $index) {
+                      <circle
+                        [attr.cx]="pt.cx"
+                        [attr.cy]="pt.cy"
+                        r="5.5"
+                        [attr.fill]="pt.color"
+                        fill-opacity="0.85"
+                        stroke="#FFFFFF"
+                        stroke-width="1.2">
+                        <title>{{ pt.cliente }} — {{ pt.segmento }} ({{ pt.frecuencia_compras }} compras, Bs. {{ pt.monto_total_bs }})</title>
+                      </circle>
+                    }
+                  </svg>
+                </div>
               </article>
 
               <article class="chart-card">
                 <div class="chart-card-head">
-                  <h3>Método del Codo (Elbow Curve WCSS)</h3>
-                  <span class="sub-note">Evaluación k = 2..6</span>
+                  <h3 class="card-title">Curva de Optimización (Método del Codo)</h3>
+                  <span class="sub-note">Evaluación de k = 2..6 clusters</span>
                 </div>
-                <svg class="svg-chart" viewBox="0 0 360 220">
-                  <line x1="45" y1="25" x2="45" y2="185" stroke="#cbd5e1" stroke-width="1.4" />
-                  <line x1="45" y1="185" x2="335" y2="185" stroke="#cbd5e1" stroke-width="1.4" />
+                <div class="chart-svg-container">
+                  <svg class="svg-chart" viewBox="0 0 360 220">
+                    <line x1="45" y1="25" x2="45" y2="185" stroke="#CBD5E1" stroke-width="1.4" />
+                    <line x1="45" y1="185" x2="335" y2="185" stroke="#CBD5E1" stroke-width="1.4" />
 
-                  <polyline
-                    [attr.points]="elbowPolyline()"
-                    fill="none"
-                    stroke="#7c3aed"
-                    stroke-width="2.6"
-                    stroke-linecap="round"
-                  />
-
-                  @for (ek of elbowCoords(); track ek.k) {
-                    <circle
-                      [attr.cx]="ek.x"
-                      [attr.cy]="ek.y"
-                      [attr.r]="ek.k === rfm.num_clusters ? 6.5 : 4"
-                      [attr.fill]="ek.k === rfm.num_clusters ? '#dc2626' : '#7c3aed'"
-                      stroke="#ffffff"
-                      stroke-width="1.5"
+                    <polyline
+                      [attr.points]="elbowPolyline()"
+                      fill="none"
+                      stroke="#C6A56B"
+                      stroke-width="2.6"
+                      stroke-linecap="round"
                     />
-                    <text [attr.x]="ek.x" y="203" text-anchor="middle" font-size="10" font-weight="700" fill="#334155">
-                      k={{ ek.k }}
-                    </text>
-                    <text [attr.x]="ek.x" [attr.y]="ek.y - 10" text-anchor="middle" font-size="9" fill="#64748b">
-                      {{ ek.wcss | number:'1.0-0' }}
-                    </text>
-                  }
-                </svg>
+
+                    @for (ek of elbowCoords(); track ek.k) {
+                      <circle
+                        [attr.cx]="ek.x"
+                        [attr.cy]="ek.y"
+                        [attr.r]="ek.k === rfm.num_clusters ? 6.5 : 4"
+                        [attr.fill]="ek.k === rfm.num_clusters ? '#087F6D' : '#C6A56B'"
+                        stroke="#FFFFFF"
+                        stroke-width="1.5"
+                      />
+                      <text [attr.x]="ek.x" y="203" text-anchor="middle" font-size="10" font-weight="700" fill="#202938">
+                        k={{ ek.k }}
+                      </text>
+                      <text [attr.x]="ek.x" [attr.y]="ek.y - 10" text-anchor="middle" font-size="9" font-weight="600" fill="#64748B">
+                        {{ ek.wcss | number:'1.0-0' }}
+                      </text>
+                    }
+                  </svg>
+                </div>
               </article>
             </div>
 
-            <!-- Tarjetas Semánticas de Segmentos de Clientes -->
+            <!-- Tarjetas de Perfiles de Clientes -->
             <div class="clusters-cards-grid">
               @for (cl of rfm.perfiles_clusters; track cl.cluster) {
                 <article class="cluster-profile-card" [style.border-top-color]="cl.color_hex">
@@ -394,22 +567,23 @@ import {
                     <span class="cl-count">{{ cl.cantidad_clientes }} clientes</span>
                   </div>
                   <div class="cl-kpis">
-                    <div>
+                    <div class="kpi-mini">
                       <span class="k-lbl">Recencia Media</span>
                       <span class="k-val">{{ cl.recencia_dias | number:'1.1-1' }} días</span>
                     </div>
-                    <div>
+                    <div class="kpi-mini">
                       <span class="k-lbl">Frecuencia</span>
-                      <span class="k-val">{{ cl.frecuencia_compras | number:'1.1-1' }} compras</span>
+                      <span class="k-val">{{ cl.frecuencia_compras | number:'1.1-1' }} pedidos</span>
                     </div>
-                    <div>
-                      <span class="k-lbl">Ticket Acumulado</span>
+                    <div class="kpi-mini">
+                      <span class="k-lbl">Gasto Medio</span>
                       <span class="k-val">Bs. {{ cl.gasto_medio_bs | number:'1.0-0' }}</span>
                     </div>
                   </div>
-                  <p class="cl-action">
-                    <strong>Estrategia Comercial:</strong> {{ cl.accion_sugerida }}
-                  </p>
+                  <div class="cl-action-box">
+                    <strong class="action-tag">Estrategia recomendada:</strong>
+                    <p class="action-body">{{ cl.accion_sugerida }}</p>
+                  </div>
                 </article>
               }
             </div>
@@ -417,40 +591,55 @@ import {
         }
 
         <!-- =============================================================== -->
-        <!-- BITÁCORA DE MODELOS PERSISTIDOS EN POSTGRESQL                   -->
+        <!-- HISTORIAL DE MODELOS PERSISTIDOS (COLOR PIEL / NUDE)            -->
         <!-- =============================================================== -->
         <section class="projection-table-card">
-          <div class="chart-card-head">
-            <h3>Registro de Auditoría en Base de Datos (Tabla <code>modelo_analitico_ml</code>)</h3>
-            <span class="sub-note">{{ persistedModels().length }} ejecuciones registradas para Tenant #{{ activeTenantId() }}</span>
+          <div class="table-interactive-toolbar">
+            <div class="toolbar-title-block">
+              <h3 class="card-title">Historial de Modelos Entrenados</h3>
+              <span class="sub-note">{{ persistedModels().length }} ejecuciones registradas para esta empresa</span>
+            </div>
           </div>
-          <div class="table-wrap">
-            <table class="ml-table">
+
+          <div class="table-responsive-wrapper">
+            <table class="saas-table skin-tone-table">
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>NOMBRE DEL MODELO</th>
-                  <th>PARADIGMA</th>
-                  <th>VARIABLE OBJETIVO</th>
-                  <th class="num">MÉTRICA PRINCIPAL</th>
-                  <th>FECHA ENTRENAMIENTO</th>
-                  <th>ESTADO</th>
+                  <th>MODELO</th>
+                  <th>TIPO</th>
+                  <th>OBJETIVO</th>
+                  <th class="cell-right">MÉTRICA</th>
+                  <th>FECHA</th>
+                  <th class="col-center">ESTADO</th>
                 </tr>
               </thead>
               <tbody>
                 @for (m of persistedModels(); track m.id) {
                   <tr>
-                    <td class="bold">#{{ m.id }}</td>
-                    <td>{{ m.nombre_modelo }}</td>
+                    <td class="cell-bold">#{{ m.id }}</td>
+                    <td class="cell-bold">{{ m.nombre_modelo }}</td>
                     <td>
                       <span class="paradigm-mini" [class.sup]="m.tipo_aprendizaje === 'SUPERVISADO'">
-                        {{ m.tipo_aprendizaje }}
+                        {{ m.tipo_aprendizaje === 'SUPERVISADO' ? 'Supervisado' : 'Clustering' }}
                       </span>
                     </td>
                     <td><code>{{ m.variable_objetivo || 'Cluster RFM' }}</code></td>
-                    <td class="num bold">{{ m.precision_metrica | number:'1.4-4' }}</td>
-                    <td>{{ m.fecha_entrenamiento | date:'dd/MM/yyyy HH:mm' }}</td>
-                    <td><span class="active-dot-pill">{{ m.activo ? 'ACTIVO' : 'HISTÓRICO' }}</span></td>
+                    <td class="cell-right font-numeric font-highlight">
+                      {{ m.precision_metrica !== null && m.precision_metrica !== undefined ? (m.precision_metrica | number:'1.4-4') : '—' }}
+                    </td>
+                    <td>{{ m.fecha_entrenamiento | date:'dd MMM yyyy, HH:mm' }}</td>
+                    <td class="col-center">
+                      <span class="active-dot-pill">
+                        <i class="dot-online"></i> Activo
+                      </span>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="7" class="empty-table-cell">
+                      Aún no hay modelos entrenados registrados en la base de datos.
+                    </td>
                   </tr>
                 }
               </tbody>
@@ -462,531 +651,1099 @@ import {
     </div>
   `,
   styles: [`
-    .ml-page-shell {
-      background: #f4f6f9;
-      min-height: calc(100vh - 70px);
-      padding: 1.75rem 2rem 3.5rem;
-      color: #0f172a;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    /* ==========================================================================
+       SISTEMA DE DISEÑO FASHIONSTORE: LABORATORIO DE MACHINE LEARNING
+       Paleta: #F8F9FC (Fondo) | #17243A (Primario) | #202938 (Texto)
+               #C6A56B (Dorado Champán) | #F4EBE1 (Color Piel / Nude Elegante)
+       ========================================================================== */
+
+    :host {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      background: #F8F9FC;
     }
+
+    .ml-page-shell {
+      background: #F8F9FC;
+      min-height: calc(100vh - 70px);
+      padding: 1.5rem 1.75rem 3rem;
+      color: #202938;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      box-sizing: border-box;
+      overflow-x: hidden;
+    }
+
     .ml-container {
-      max-width: 1420px;
+      max-width: 1380px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
-      gap: 1.4rem;
-    }
-    .ml-hero-header {
-      background: linear-gradient(135deg, #090d16 0%, #1e1b4b 100%);
-      color: #ffffff;
-      border-radius: 12px;
-      padding: 1.6rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 1.5rem;
-      flex-wrap: wrap;
-      border: 1px solid rgba(197, 168, 128, 0.35);
-      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
-    }
-    .hero-left { max-width: 780px; }
-    .eyebrow-row {
-      display: flex;
-      gap: 0.6rem;
-      align-items: center;
-      margin-bottom: 0.65rem;
-      flex-wrap: wrap;
-    }
-    .eyebrow-pill {
-      background: rgba(197, 168, 128, 0.22);
-      color: #fde68a;
-      border: 1px solid rgba(197, 168, 128, 0.5);
-      font-size: 0.7rem;
-      font-weight: 800;
-      padding: 0.22rem 0.65rem;
-      border-radius: 999px;
-    }
-    .sklearn-pill {
-      background: rgba(124, 58, 237, 0.3);
-      color: #ddd6fe;
-      border: 1px solid rgba(167, 139, 250, 0.45);
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 0.22rem 0.65rem;
-      border-radius: 999px;
-    }
-    .hero-title {
-      font-size: 1.65rem;
-      font-weight: 800;
-      margin: 0 0 0.45rem;
-    }
-    .hero-subtitle {
-      margin: 0;
-      font-size: 0.88rem;
-      color: #cbd5e1;
-      line-height: 1.5;
-    }
-    .hero-right {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 0.8rem;
-    }
-    .nav-links-bar {
-      display: flex;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-    }
-    .btn-nav-outline, .btn-nav-gold {
-      text-decoration: none;
-      font-size: 0.8rem;
-      font-weight: 700;
-      padding: 0.5rem 0.95rem;
-      border-radius: 8px;
-    }
-    .btn-nav-outline {
-      color: #e2e8f0;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      background: rgba(255, 255, 255, 0.06);
-    }
-    .btn-nav-gold {
-      background: #c5a880;
-      color: #0f172a;
-    }
-    .tenant-switch-mini {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      background: rgba(15, 23, 42, 0.6);
-      padding: 0.4rem 0.65rem;
-      border-radius: 8px;
-      border: 1px solid rgba(148, 163, 184, 0.25);
-    }
-    .tenant-switch-mini .lbl {
-      font-size: 0.68rem;
-      font-weight: 800;
-      color: #94a3b8;
-    }
-    .t-btn {
-      font-size: 0.72rem;
-      font-weight: 700;
-      padding: 0.28rem 0.6rem;
-      border-radius: 6px;
-      border: 1px solid rgba(148, 163, 184, 0.3);
-      background: transparent;
-      color: #cbd5e1;
-      cursor: pointer;
-    }
-    .t-btn.active {
-      background: #10b981;
-      border-color: #10b981;
-      color: #052e16;
-    }
-    .t-btn.urban.active {
-      background: #f59e0b;
-      border-color: #f59e0b;
-      color: #451a03;
+      gap: 1.25rem;
+      width: 100%;
+      box-sizing: border-box;
     }
 
-    /* Hyperparameters bar */
-    .hyperparams-bar {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 1rem 1.35rem;
+    /* --------------------------------------------------------------------------
+       1. ENCABEZADO MODERNO Y ELEGANTE (FONDO CLARO CON ALTO CONTRASTE)
+       -------------------------------------------------------------------------- */
+    .ml-hero-header {
+      background: #FFFFFF;
+      border: 1px solid #E5E9F0;
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
       display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1.25rem;
+      box-shadow: 0 2px 8px rgba(23, 36, 58, 0.03);
+      flex-wrap: wrap;
+    }
+
+    .hero-main {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      min-width: 280px;
+    }
+
+    .header-icon-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: #17243A;
+      color: #C6A56B;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 3px 8px rgba(23, 36, 58, 0.15);
+    }
+
+    .header-titles {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .header-title {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #17243A;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+    }
+
+    .header-subtitle {
+      margin: 0;
+      font-size: 0.85rem;
+      color: #64748B;
+      line-height: 1.35;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+    }
+
+    .tenant-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #F8F9FC;
+      border: 1px solid #E5E9F0;
+      padding: 0.4rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      color: #202938;
+      max-width: 280px;
+    }
+
+    .tenant-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #087F6D;
+      flex-shrink: 0;
+    }
+
+    .tenant-name {
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 150px;
+    }
+
+    .tenant-plan-tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #E5E9F0;
+      color: #17243A;
+      letter-spacing: 0.04em;
+    }
+
+    .tenant-plan-tag.vip {
+      background: #FBF7F0;
+      color: #9A7738;
+      border: 1px solid #E8DAC2;
+    }
+
+    .header-nav-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-nav-subtle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.85rem;
+      background: #FFFFFF;
+      border: 1px solid #E5E9F0;
+      border-radius: 8px;
+      color: #202938;
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+
+    .btn-nav-subtle:hover {
+      background: #F8F9FC;
+      border-color: #CBD5E1;
+      color: #17243A;
+    }
+
+    .btn-nav-accent {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.85rem;
+      background: #17243A;
+      border: 1px solid #17243A;
+      border-radius: 8px;
+      color: #FFFFFF;
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+
+    .btn-nav-accent:hover {
+      background: #0F1826;
+      border-color: #0F1826;
+      box-shadow: 0 2px 6px rgba(23, 36, 58, 0.15);
+    }
+
+    /* --------------------------------------------------------------------------
+       2. BARRA DE HIPERPARÁMETROS Y ENTRENAMIENTO
+       -------------------------------------------------------------------------- */
+    .hyperparams-bar {
+      background: #FFFFFF;
+      border: 1px solid #E5E9F0;
+      border-radius: 14px;
+      padding: 1.15rem 1.35rem;
+      display: flex;
+      justify-content: space-between;
       align-items: flex-end;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      box-shadow: 0 2px 10px rgba(23, 36, 58, 0.03);
+    }
+
+    .params-inputs-row {
+      display: flex;
+      align-items: center;
       gap: 1rem;
       flex-wrap: wrap;
-      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
     }
+
     .param-group {
       display: flex;
       flex-direction: column;
       gap: 0.3rem;
     }
+
     .param-group label {
       font-size: 0.72rem;
-      font-weight: 800;
-      color: #475569;
+      font-weight: 700;
+      color: #64748B;
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
+
     .param-select {
-      padding: 0.52rem 0.8rem;
+      padding: 0.45rem 0.75rem;
       border-radius: 8px;
-      border: 1px solid #cbd5e1;
-      font-size: 0.84rem;
+      border: 1px solid #E5E9F0;
+      font-size: 0.82rem;
       font-weight: 600;
-      color: #0f172a;
-      background: #f8fafc;
+      color: #202938;
+      background: #F8F9FC;
+      outline: none;
+      transition: all 0.15s ease;
+      cursor: pointer;
     }
+
+    .param-select:focus {
+      border-color: #C6A56B;
+      background: #FFFFFF;
+      box-shadow: 0 0 0 3px rgba(198, 165, 107, 0.15);
+    }
+
     .train-buttons-group {
-      margin-left: auto;
       display: flex;
-      gap: 0.55rem;
+      align-items: center;
+      gap: 0.5rem;
       flex-wrap: wrap;
     }
-    .btn-train-secondary, .btn-train-all {
-      padding: 0.58rem 1rem;
+
+    .btn-train-subtle {
+      padding: 0.5rem 0.85rem;
       border-radius: 8px;
-      font-size: 0.82rem;
-      font-weight: 700;
+      border: 1px solid #E5E9F0;
+      background: #FFFFFF;
+      color: #202938;
+      font-size: 0.78rem;
+      font-weight: 600;
       cursor: pointer;
-      border: 1px solid transparent;
+      transition: all 0.15s ease;
     }
-    .btn-train-secondary {
-      background: #f1f5f9;
-      border-color: #cbd5e1;
-      color: #1e293b;
+
+    .btn-train-subtle:hover:not(:disabled) {
+      background: #F8F9FC;
+      border-color: #CBD5E1;
+      color: #17243A;
     }
-    .btn-train-secondary:hover:not(:disabled) { background: #e2e8f0; }
-    .btn-train-all {
-      background: #1e3a8a;
-      color: #ffffff;
+
+    .btn-train-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.55rem 1.15rem;
+      border-radius: 8px;
+      border: none;
+      background: #17243A;
+      color: #FFFFFF;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
     }
-    .btn-train-all:hover:not(:disabled) { background: #1d4ed8; }
-    .btn-train-all:disabled, .btn-train-secondary:disabled {
-      opacity: 0.55;
+
+    .btn-train-primary:hover:not(:disabled) {
+      background: #0F1826;
+      box-shadow: 0 3px 8px rgba(23, 36, 58, 0.18);
+    }
+
+    .btn-train-primary:disabled, .btn-train-subtle:disabled {
+      opacity: 0.6;
       cursor: not-allowed;
     }
 
-    .ml-error-banner {
-      background: #fffbeb;
-      border: 1px solid #f59e0b;
-      border-left: 6px solid #d97706;
-      color: #78350f;
-      padding: 0.95rem 1.2rem;
-      border-radius: 10px;
-      font-size: 0.86rem;
+    .spinner-sm {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #FFFFFF;
+      border-radius: 50%;
+      animation: spin 0.7s infinite linear;
     }
 
-    /* Paradigm Sections */
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* --------------------------------------------------------------------------
+       3. ALERTAS DE ERROR O PLAN
+       -------------------------------------------------------------------------- */
+    .ml-error-banner {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      background: #FFFBEB;
+      border: 1px solid #FDE68A;
+      border-radius: 10px;
+      padding: 0.85rem 1.15rem;
+      color: #92400E;
+    }
+
+    .error-icon-box {
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .error-heading {
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .error-msg {
+      margin: 0.15rem 0 0;
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+
+    /* --------------------------------------------------------------------------
+       4. SECCIONES DE PARADIGMAS (SUPERVISADO / NO SUPERVISADO)
+       -------------------------------------------------------------------------- */
     .paradigm-section {
+      background: #FFFFFF;
+      border: 1px solid #E5E9F0;
+      border-radius: 14px;
+      padding: 1.35rem 1.5rem;
+      box-shadow: 0 2px 10px rgba(23, 36, 58, 0.03);
       display: flex;
       flex-direction: column;
-      gap: 1.1rem;
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 1.4rem;
-      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+      gap: 1.25rem;
     }
+
     .paradigm-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 0.75rem;
-      padding-bottom: 0.8rem;
-      border-bottom: 1px solid #e2e8f0;
-    }
-    .paradigm-header h2 {
-      margin: 0.3rem 0 0;
-      font-size: 1.2rem;
-      font-weight: 800;
-    }
-    .paradigm-tag {
-      display: inline-block;
-      font-size: 0.68rem;
-      font-weight: 800;
-      padding: 0.2rem 0.6rem;
-      border-radius: 999px;
-      letter-spacing: 0.06em;
-    }
-    .paradigm-tag.supervised { background: #dbeafe; color: #1e40af; }
-    .paradigm-tag.unsupervised { background: #ede9fe; color: #5b21b6; }
-    .target-tag {
-      font-size: 0.8rem;
-      color: #475569;
-    }
-    .target-tag code {
-      background: #f1f5f9;
-      padding: 0.15rem 0.45rem;
-      border-radius: 4px;
-      font-weight: 700;
-      color: #0f172a;
+      padding-bottom: 0.9rem;
+      border-bottom: 1px solid #F1F5F9;
     }
 
-    /* Metrics Trio */
+    .paradigm-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .paradigm-tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 4px;
+      width: fit-content;
+    }
+
+    .paradigm-tag.supervised {
+      background: #F4EBE1;
+      color: #8C6D48;
+    }
+
+    .paradigm-tag.unsupervised {
+      background: #EBF3F5;
+      color: #2B6E7F;
+    }
+
+    .paradigm-name {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #17243A;
+    }
+
+    .model-id {
+      font-size: 0.8rem;
+      color: #94A3B8;
+      font-weight: 500;
+    }
+
+    .target-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.78rem;
+      color: #64748B;
+    }
+
+    .target-lbl {
+      font-weight: 600;
+    }
+
+    .target-pill {
+      background: #F8F9FC;
+      border: 1px solid #E5E9F0;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      color: #17243A;
+      font-size: 0.75rem;
+    }
+
+    /* --------------------------------------------------------------------------
+       5. TARJETAS DE MÉTRICAS (R², MAE, RMSE / SILHOUETTE, WCSS, CLIENTES)
+       -------------------------------------------------------------------------- */
     .metrics-trio-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 1rem;
     }
+
     @media (max-width: 900px) {
       .metrics-trio-grid { grid-template-columns: 1fr; }
     }
+
     .metric-card {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
+      background: #FFFFFF;
+      border: 1px solid #E5E9F0;
       border-radius: 10px;
-      padding: 1rem 1.15rem;
+      padding: 1.05rem 1.15rem;
+      box-shadow: 0 1px 4px rgba(23, 36, 58, 0.02);
+      transition: all 0.15s ease;
     }
-    .metric-card.highlight-r2 {
-      background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%);
-      border-color: #93c5fd;
+
+    .metric-card:hover {
+      border-color: #C6A56B;
+      transform: translateY(-1px);
     }
-    .metric-card.highlight-sil {
-      background: linear-gradient(135deg, #f5f3ff 0%, #f8fafc 100%);
-      border-color: #c4b5fd;
-    }
+
     .m-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.45rem;
-    }
-    .m-name {
-      font-size: 0.7rem;
-      font-weight: 800;
-      color: #475569;
-      letter-spacing: 0.04em;
-    }
-    .m-status-pill {
-      font-size: 0.65rem;
-      font-weight: 800;
-      padding: 0.16rem 0.5rem;
-      border-radius: 999px;
-      background: #fee2e2;
-      color: #991b1b;
-    }
-    .m-status-pill.ok {
-      background: #dcfce7;
-      color: #166534;
-    }
-    .m-unit {
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: #64748b;
-    }
-    .m-value {
-      font-size: 1.85rem;
-      font-weight: 800;
-      color: #0f172a;
-      font-variant-numeric: tabular-nums;
-    }
-    .m-foot {
-      font-size: 0.75rem;
-      color: #64748b;
-      margin-top: 0.25rem;
+      gap: 0.4rem;
+      margin-bottom: 0.4rem;
     }
 
-    /* Visuals Grid */
+    .m-name {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #64748B;
+      letter-spacing: 0.04em;
+    }
+
+    .m-status-pill {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #FEF3C7;
+      color: #92400E;
+    }
+
+    .m-status-pill.ok {
+      background: #E6F5F2;
+      color: #087F6D;
+    }
+
+    .m-unit {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: #94A3B8;
+    }
+
+    .m-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #17243A;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.15;
+    }
+
+    .m-foot {
+      font-size: 0.74rem;
+      color: #94A3B8;
+      margin-top: 0.35rem;
+      line-height: 1.35;
+    }
+
+    /* --------------------------------------------------------------------------
+       6. GRÁFICOS Y VISUALIZACIONES
+       -------------------------------------------------------------------------- */
     .sup-visuals-grid {
       display: grid;
       grid-template-columns: minmax(0, 1.8fr) minmax(280px, 1fr);
       gap: 1rem;
     }
+
     @media (max-width: 980px) {
       .sup-visuals-grid { grid-template-columns: 1fr; }
     }
-    .chart-card, .projection-table-card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
+
+    .chart-card {
+      background: #FFFFFF;
+      border: 1px solid #E5E9F0;
       border-radius: 10px;
-      padding: 1rem 1.15rem;
+      padding: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
     }
+
     .chart-card-head {
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 0.5rem;
-      margin-bottom: 0.75rem;
     }
-    .chart-card-head h3 {
+
+    .chart-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .hover-demanda-tooltip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: #F4EBE1;
+      border: 1px solid #E6D8C8;
+      border-radius: 6px;
+      padding: 3px 9px;
+      font-size: 0.74rem;
+      color: #17243A;
+      animation: fadeInTooltip 0.15s ease-out;
+    }
+
+    @keyframes fadeInTooltip {
+      from { opacity: 0; transform: translateY(-2px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hover-demanda-tooltip .h-sample {
+      font-weight: 700;
+      color: #8C6D48;
+    }
+
+    .hover-demanda-tooltip .h-real {
+      color: #17243A;
+    }
+
+    .hover-demanda-tooltip .h-pred {
+      color: #8C6D48;
+    }
+
+    .hover-demanda-tooltip .h-sep {
+      color: #CBD5E1;
+    }
+
+    .hover-demanda-tooltip .h-diff {
+      font-weight: 700;
+      font-size: 0.7rem;
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    .hover-demanda-tooltip .h-diff.diff-up {
+      background: #DCFCE7;
+      color: #166534;
+    }
+
+    .hover-demanda-tooltip .h-diff.diff-down {
+      background: #FEE2E2;
+      color: #991B1B;
+    }
+
+    .chart-point {
+      cursor: pointer;
+      transition: r 0.15s ease, filter 0.15s ease;
+    }
+
+    .chart-point:hover {
+      filter: drop-shadow(0 2px 4px rgba(23, 36, 58, 0.25));
+    }
+
+    .card-title {
       margin: 0;
       font-size: 0.92rem;
-      font-weight: 800;
-      color: #0f172a;
+      font-weight: 700;
+      color: #17243A;
     }
+
     .sub-note {
       font-size: 0.74rem;
-      color: #64748b;
+      color: #94A3B8;
     }
+
     .legend-inline {
       display: flex;
-      gap: 0.85rem;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #334155;
+      gap: 0.75rem;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: #475569;
     }
+
     .lg-dot {
       display: inline-block;
-      width: 9px;
-      height: 9px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      margin-right: 4px;
+      margin-right: 3px;
     }
-    .lg-dot.real { background: #0f172a; }
-    .lg-dot.pred { background: #2563eb; }
+
+    .lg-dot.real { background: #17243A; }
+    .lg-dot.pred { background: #C6A56B; }
+
+    .chart-svg-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+
     .svg-chart {
       width: 100%;
       height: auto;
       display: block;
+      min-width: 280px;
     }
 
-    /* Feature Importance */
+    /* Feature bars */
     .feature-bars {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
-      margin-top: 0.5rem;
     }
+
     .feat-lbl-line {
       display: flex;
       justify-content: space-between;
-      font-size: 0.78rem;
-      font-weight: 700;
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: #202938;
       margin-bottom: 0.25rem;
     }
+
+    .feat-pct {
+      color: #C6A56B;
+      font-weight: 700;
+    }
+
     .feat-track {
-      height: 9px;
-      background: #f1f5f9;
+      height: 7px;
+      background: #F1F5F9;
       border-radius: 999px;
       overflow: hidden;
     }
+
     .feat-fill {
       height: 100%;
-      background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+      background: #17243A;
       border-radius: 999px;
+      transition: width 0.4s ease;
     }
 
-    /* Clusters Cards */
+    /* --------------------------------------------------------------------------
+       7. TABLAS CON ENCABEZADOS EN COLOR PIEL / NUDE (ALTA LEGIBILIDAD)
+       -------------------------------------------------------------------------- */
+    .projection-table-card {
+      background: #FFFFFF;
+      border: 1px solid #E5E9F0;
+      border-radius: 12px;
+      padding: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .table-interactive-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+    }
+
+    .toolbar-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .toolbar-actions-block {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+
+    /* Filtros tipo píldora */
+    .filter-pills-row {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: #F8F9FC;
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid #E5E9F0;
+    }
+
+    .filter-pill {
+      background: transparent;
+      border: none;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #64748B;
+      padding: 0.3rem 0.65rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .filter-pill:hover {
+      color: #17243A;
+    }
+
+    .filter-pill.is-active {
+      background: #FFFFFF;
+      color: #17243A;
+      font-weight: 700;
+      box-shadow: 0 1px 3px rgba(23, 36, 58, 0.08);
+    }
+
+    .filter-pill.pill-risk.is-active {
+      color: #B91C1C;
+    }
+
+    .filter-pill.pill-safe.is-active {
+      color: #087F6D;
+    }
+
+    /* Buscador compacto */
+    .search-mini-box {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: #F8F9FC;
+      border: 1px solid #E5E9F0;
+      border-radius: 8px;
+      padding: 0.35rem 0.65rem;
+      color: #64748B;
+    }
+
+    .search-mini-box input {
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 0.78rem;
+      color: #202938;
+      width: 140px;
+    }
+
+    .search-mini-box input::placeholder {
+      color: #94A3B8;
+    }
+
+    .table-responsive-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border: 1px solid #E5E9F0;
+      border-radius: 8px;
+      background: #FFFFFF;
+    }
+
+    .saas-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      text-align: left;
+    }
+
+    /* ENCABEZADOS EN COLOR PIEL / NUDE ELEGANTE (CONTRASTE MÁXIMO) */
+    .skin-tone-table thead th {
+      background: #F4EBE1;          /* Color piel / nude cálido */
+      color: #17243A;               /* Azul noche oscuro, contraste óptimo */
+      font-size: 0.73rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.75rem 1rem;
+      border-bottom: 2px solid #E2D3C2;
+      white-space: nowrap;
+    }
+
+    .saas-table tbody td {
+      padding: 0.7rem 1rem;
+      color: #202938;
+      border-bottom: 1px solid #F1F5F9;
+      white-space: nowrap;
+    }
+
+    .saas-table tbody tr:nth-child(even) {
+      background: #FAFBFC;
+    }
+
+    .interactive-row {
+      transition: background 0.15s ease;
+    }
+
+    .interactive-row:hover {
+      background: #FAF5EE !important; /* Toque suave de color piel en hover */
+    }
+
+    .saas-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .cell-bold {
+      font-weight: 600;
+      color: #17243A;
+    }
+
+    .col-center {
+      text-align: center !important;
+    }
+
+    .cell-right {
+      text-align: right !important;
+    }
+
+    .font-numeric {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .font-highlight {
+      font-weight: 700;
+      color: #17243A;
+    }
+
+    .negative-stock {
+      color: #DC2626;
+      font-weight: 700;
+    }
+
+    .size-badge {
+      background: #F1F5F9;
+      color: #17243A;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      border: 1px solid #E2E8F0;
+    }
+
+    .risk-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      letter-spacing: 0.02em;
+    }
+
+    .risk-high {
+      background: #FEE2E2;
+      color: #991B1B;
+    }
+
+    .risk-med {
+      background: #FEF3C7;
+      color: #92400E;
+    }
+
+    .risk-low {
+      background: #DCFCE7;
+      color: #166534;
+    }
+
+    .empty-table-cell {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: #94A3B8;
+      font-size: 0.82rem;
+    }
+
+    /* --------------------------------------------------------------------------
+       8. PERFILES DE CLUSTERS RFM
+       -------------------------------------------------------------------------- */
     .clusters-cards-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 1rem;
     }
+
     .cluster-profile-card {
-      background: #fafafa;
-      border: 1px solid #e2e8f0;
+      background: #FFFFFF;
+      border: 1px solid #E5E9F0;
       border-top-width: 4px;
       border-radius: 10px;
-      padding: 1rem 1.1rem;
+      padding: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      box-shadow: 0 1px 4px rgba(23, 36, 58, 0.02);
     }
+
     .cl-head {
       display: flex;
       align-items: center;
-      gap: 0.45rem;
-      margin-bottom: 0.75rem;
+      gap: 0.5rem;
     }
+
     .cl-dot {
-      width: 10px;
-      height: 10px;
+      width: 9px;
+      height: 9px;
       border-radius: 50%;
+      flex-shrink: 0;
     }
+
     .cl-title {
-      font-weight: 800;
-      font-size: 0.9rem;
-      color: #0f172a;
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: #17243A;
     }
+
     .cl-count {
       margin-left: auto;
       font-size: 0.72rem;
-      font-weight: 800;
-      background: #e2e8f0;
-      padding: 0.15rem 0.5rem;
+      font-weight: 700;
+      background: #F8F9FC;
+      border: 1px solid #E5E9F0;
+      color: #64748B;
+      padding: 2px 7px;
       border-radius: 999px;
     }
+
     .cl-kpis {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 0.5rem;
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
+      gap: 0.4rem;
+      background: #F8F9FC;
+      border: 1px solid #E5E9F0;
       border-radius: 8px;
-      padding: 0.6rem;
-      margin-bottom: 0.75rem;
-    }
-    .k-lbl {
-      display: block;
-      font-size: 0.66rem;
-      color: #64748b;
-      font-weight: 700;
-    }
-    .k-val {
-      font-size: 0.82rem;
-      font-weight: 800;
-      color: #0f172a;
-    }
-    .cl-action {
-      margin: 0;
-      font-size: 0.79rem;
-      color: #334155;
-      line-height: 1.45;
+      padding: 0.6rem 0.5rem;
     }
 
-    /* Tables */
-    .table-wrap {
-      overflow-x: auto;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
+    .kpi-mini {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      text-align: center;
     }
-    .ml-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.82rem;
+
+    .k-lbl {
+      font-size: 0.65rem;
+      color: #64748B;
+      font-weight: 600;
     }
-    .ml-table thead th {
-      background: #0f172a;
-      color: #ffffff;
-      padding: 0.65rem 0.85rem;
-      text-align: left;
-      font-size: 0.72rem;
-      letter-spacing: 0.04em;
+
+    .k-val {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #17243A;
     }
-    .ml-table tbody tr:nth-child(even) { background: #f8fafc; }
-    .ml-table td {
-      padding: 0.6rem 0.85rem;
-      border-top: 1px solid #e2e8f0;
+
+    .cl-action-box {
+      font-size: 0.78rem;
+      color: #475569;
+      line-height: 1.45;
+      background: #FAF8F5;
+      border: 1px solid #F0E6D8;
+      border-radius: 6px;
+      padding: 0.6rem 0.75rem;
     }
-    .ml-table th.num, .ml-table td.num {
-      text-align: right;
-      font-variant-numeric: tabular-nums;
+
+    .action-tag {
+      color: #8C6D48;
+      display: block;
+      margin-bottom: 0.2rem;
     }
-    .bold { font-weight: 700; }
-    .highlight-val { font-weight: 800; color: #1d4ed8; }
-    .size-badge {
-      background: #e2e8f0;
-      padding: 0.12rem 0.45rem;
-      border-radius: 4px;
-      font-weight: 800;
-      font-size: 0.72rem;
+
+    .action-body {
+      margin: 0;
     }
-    .risk-pill {
-      font-size: 0.7rem;
-      font-weight: 800;
-      padding: 0.2rem 0.55rem;
-      border-radius: 999px;
-    }
-    .risk-high { background: #fee2e2; color: #991b1b; }
-    .risk-med { background: #fef3c7; color: #92400e; }
-    .risk-low { background: #dcfce7; color: #166534; }
+
+    /* Modelos persistidos badges */
     .paradigm-mini {
       font-size: 0.68rem;
-      font-weight: 800;
-      padding: 0.16rem 0.48rem;
+      font-weight: 700;
+      padding: 2px 6px;
       border-radius: 4px;
-      background: #ede9fe;
-      color: #5b21b6;
+      background: #EBF3F5;
+      color: #2B6E7F;
     }
+
     .paradigm-mini.sup {
-      background: #dbeafe;
-      color: #1e40af;
+      background: #F4EBE1;
+      color: #8C6D48;
     }
+
     .active-dot-pill {
-      font-size: 0.7rem;
-      font-weight: 800;
-      color: #059669;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #087F6D;
+      background: #E6F5F2;
+      padding: 2px 7px;
+      border-radius: 999px;
+    }
+
+    .dot-online {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #087F6D;
+    }
+
+    /* --------------------------------------------------------------------------
+       9. RESPONSIVE BREAKPOINTS
+       -------------------------------------------------------------------------- */
+    @media (max-width: 767px) {
+      .ml-page-shell {
+        padding: 0.75rem 0.75rem 2rem;
+      }
+      .ml-hero-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.85rem;
+        padding: 1rem;
+      }
+      .header-controls {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+      }
+      .tenant-status-pill {
+        width: 100%;
+        max-width: 100%;
+        justify-content: space-between;
+      }
+      .header-nav-group {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.4rem;
+      }
+      .btn-nav-subtle, .btn-nav-accent {
+        justify-content: center;
+      }
+      .params-inputs-row {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .train-buttons-group {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .btn-train-primary, .btn-train-subtle {
+        justify-content: center;
+      }
+      .toolbar-actions-block {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .search-mini-box input {
+        width: 100%;
+      }
     }
   `]
 })
 export class MlDashboardComponent implements OnInit {
   private readonly mlService = inject(FashionAiMlService);
-  private readonly authService = inject(AuthService);
+  readonly authService = inject(AuthService);
 
   readonly activeTenantId = signal<number>(1);
   algoritmoDemanda = 'RandomForestRegressor';
@@ -1001,6 +1758,52 @@ export class MlDashboardComponent implements OnInit {
   readonly rfmModel = signal<MLRFMTrainResponse | null>(null);
   readonly persistedModels = signal<ModeloMLPersistedItem[]>([]);
 
+  // Estado hover para gráfico interactivo de Demanda Real vs Predicción
+  readonly hoveredDemanda = signal<any | null>(null);
+
+  // Escala y coordenadas del Eje Y
+  readonly demandaMaxVal = computed(() => {
+    const serie = this.demandaModel()?.serie_comparativa || [];
+    if (!serie.length) return 20;
+    return Math.max(
+      ...serie.map(s => Math.max(s.demanda_real, s.demanda_predicha)),
+      10
+    );
+  });
+
+  readonly demandaMidVal = computed(() => {
+    return Math.round(this.demandaMaxVal() / 2);
+  });
+
+  // Filtros interactivos para la tabla de pronóstico de stock
+  readonly filtroRiesgo = signal<'TODOS' | 'RIESGO' | 'OPTIMO'>('TODOS');
+  readonly busquedaPrenda = signal<string>('');
+
+  readonly proyeccionesFiltradas = computed(() => {
+    const list = this.demandaModel()?.proyecciones_stock || [];
+    const filtro = this.filtroRiesgo();
+    const query = this.busquedaPrenda().toLowerCase().trim();
+
+    return list.filter(item => {
+      const matchQuery = !query ||
+        item.prenda.toLowerCase().includes(query) ||
+        item.sucursal.toLowerCase().includes(query) ||
+        item.talla.toLowerCase().includes(query);
+
+      if (!matchQuery) return false;
+
+      if (filtro === 'RIESGO') {
+        const r = (item.riesgo_quiebre || '').toUpperCase();
+        return r.includes('ALTO') || r.includes('CRIT') || item.stock_actual <= 0;
+      }
+      if (filtro === 'OPTIMO') {
+        const r = (item.riesgo_quiebre || '').toUpperCase();
+        return r.includes('OPTIMO') || r.includes('BAJO_RIESGO');
+      }
+      return true;
+    });
+  });
+
   // Coordenadas SVG para serie Real vs Predicho
   readonly demandaCoords = computed(() => {
     const serie = this.demandaModel()?.serie_comparativa || [];
@@ -1011,8 +1814,8 @@ export class MlDashboardComponent implements OnInit {
     );
     const left = 55;
     const right = 610;
-    const top = 28;
-    const bottom = 182;
+    const top = 25;
+    const bottom = 185;
     const step = serie.length > 1 ? (right - left) / (serie.length - 1) : 0;
 
     return serie.map((pt, idx) => ({
@@ -1045,7 +1848,7 @@ export class MlDashboardComponent implements OnInit {
       ...p,
       cx: Math.round(68 + (p.frecuencia_compras / (maxF * 1.08)) * 530),
       cy: Math.round(188 - (p.monto_total_bs / (maxM * 1.08)) * 160),
-      color: colorMap.get(p.cluster) || '#2563eb'
+      color: colorMap.get(p.cluster) || '#C6A56B'
     }));
   });
 
@@ -1075,7 +1878,7 @@ export class MlDashboardComponent implements OnInit {
     const tId = this.authService.currentTenant().empresaId || 1;
     this.activeTenantId.set(tId);
     this.cargarModelosPersistidos();
-    if (tId === 1) {
+    if (this.authService.currentTenant().permiteIa !== false) {
       this.entrenarPipelineCompleto();
     }
   }
@@ -1164,5 +1967,17 @@ export class MlDashboardComponent implements OnInit {
     if (upper.includes('ALTO') || upper.includes('CRIT')) return 'risk-high';
     if (upper.includes('MOD') || upper.includes('MED')) return 'risk-med';
     return 'risk-low';
+  }
+
+  formatRiskLabel(riesgo: string): string {
+    const upper = (riesgo || '').toUpperCase();
+    if (upper.includes('ALTO') || upper.includes('CRIT')) return 'Alto Riesgo';
+    if (upper.includes('MOD') || upper.includes('MED')) return 'Riesgo Moderado';
+    return 'Stock Óptimo';
+  }
+
+  formatStockQty(qty: number): string {
+    if (qty <= 0) return '0 uds. (Agotado)';
+    return `${qty} uds.`;
   }
 }

@@ -66,6 +66,7 @@ class SuscripcionDetalleResponse(BaseModel):
     permite_ia: bool
     permite_offline: bool
     dias_restantes: int
+    access_token: Optional[str] = None
 
 
 class EmpresaCreate(BaseModel):
