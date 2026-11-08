@@ -7,6 +7,7 @@
       </a>
 
       <nav class="nav-menu" [class.open]="mobileMenuOpen">
+        <a (click)="scrollToSection('showroom-nichos')" class="nav-item cursor-pointer">Nichos de Moda</a>
         <a (click)="scrollToSection('planes-saas')" class="nav-item cursor-pointer">Planes & Precios</a>
         <a (click)="scrollToSection('caracteristicas-saas')" class="nav-item cursor-pointer">Solución SaaS</a>
         <a (click)="scrollToSection('piezas-ar')" class="nav-item cursor-pointer">Probador Virtual AR</a>
@@ -46,7 +47,7 @@
                 La plataforma SaaS integral para <span class="bold-line">cadenas y boutiques de moda</span>
               </h1>
               <p class="main-description">
-                Administra inventario multisucursal, ventas en punto físico con sincronización offline, probadores virtuales inteligentes por IA y predicciones de demanda en una sola nube multitenant.
+                Crea tu propia tienda física y online personalizada. Administra inventario multisucursal, punto de venta con modo offline, probadores virtuales con IA y predicciones de demanda en una sola nube multitenant.
               </p>
             </div>
 
@@ -56,13 +57,13 @@
                 <span class="material-symbols-outlined">loyalty</span>
                 <span>Ver Planes y Precios</span>
               </button>
-              <button type="button" class="btn-secondary-action" routerLink="/saas">
-                <span>Registrar Boutique</span>
-                <span class="material-symbols-outlined">arrow_forward</span>
+              <button type="button" class="btn-secondary-action" (click)="scrollToSection('showroom-nichos')">
+                <span class="material-symbols-outlined">play_circle</span>
+                <span>Ver Nichos en Video</span>
               </button>
               <button type="button" class="btn-outline-action" routerLink="/catalogo">
                 <span class="material-symbols-outlined">storefront</span>
-                <span>Ver Catálogo en Vivo</span>
+                <span>Explorar Catálogo Demo</span>
               </button>
             </div>
 
@@ -74,7 +75,7 @@
               </div>
               <div class="indicator-item">
                 <p class="indicator-val">&lt; 80<span class="unit">ms</span></p>
-                <p class="indicator-label">FastAPI Async API</p>
+                <p class="indicator-label">FastAPI Async Engine</p>
               </div>
               <div class="indicator-item">
                 <p class="indicator-val">Offline<span class="unit">+</span></p>
@@ -110,6 +111,78 @@
       </div>
     </section>
 
+    <!-- SECTION: SHOWROOM DE NICHOS CON VIDEO EN LOOP (Elegante, Urbana, Zapatillas) -->
+    <section class="video-showroom-section" id="showroom-nichos">
+      <div class="section-wrapper">
+        <div class="showroom-header">
+          <span class="section-pretitle">VERSATILIDAD TOTAL DE CATÁLOGO</span>
+          <h2 class="section-title">
+            Una plataforma adaptable a <span class="font-medium">cualquier nicho de moda</span>
+          </h2>
+          <p class="showroom-subtext">
+            Desde ateliers de alta costura hasta marcas de streetwear urbano y cadenas de sneakers. FashionStore SaaS personaliza las tallas, fichas técnicas y probadores para el tipo exacto de prendas de tu cliente.
+          </p>
+
+          <!-- Category Selector Tabs -->
+          <div class="niche-tabs">
+            @for (cat of videoCategories; track cat.id) {
+              <button
+                type="button"
+                class="niche-tab-btn"
+                [class.active]="activeVideoCategory === cat.id"
+                (click)="setVideoCategory(cat.id)"
+              >
+                <span class="material-symbols-outlined tab-icon">{{ cat.icon }}</span>
+                <span>{{ cat.label }}</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Cinema Video Display Box -->
+        <div class="video-cinema-card">
+          <div class="video-container">
+            <video
+              [src]="currentVideoCategory.videoSrc"
+              autoplay
+              muted
+              loop
+              playsinline
+              class="showcase-video"
+            ></video>
+            <div class="video-overlay-gradient"></div>
+
+            <!-- Floating Video HUD Info -->
+            <div class="video-hud">
+              <div class="hud-top">
+                <span class="hud-tag">{{ currentVideoCategory.tag }}</span>
+                <span class="hud-badge">
+                  <span class="rec-dot"></span>
+                  <span>{{ currentVideoCategory.badgeText }}</span>
+                </span>
+              </div>
+
+              <div class="hud-bottom">
+                <h3 class="hud-title">{{ currentVideoCategory.headline }}</h3>
+                <p class="hud-desc">{{ currentVideoCategory.description }}</p>
+
+                <div class="hud-actions">
+                  <button type="button" class="btn-hud-primary" (click)="scrollToSection('planes-saas')">
+                    <span>Ver Planes para este Nicho</span>
+                    <span class="material-symbols-outlined">arrow_downward</span>
+                  </button>
+                  <button type="button" class="btn-hud-secondary" routerLink="/catalogo">
+                    <span>Ver Demo en Catálogo</span>
+                    <span class="material-symbols-outlined">launch</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- SECTION: PLANES DE SUSCRIPCIÓN SAAS (CU01 - PRICING GRID) -->
     <section class="pricing-section" id="planes-saas">
       <div class="section-wrapper">
@@ -121,7 +194,7 @@
             Planes diseñados para cada etapa de tu marca
           </h2>
           <p class="pricing-subtext">
-            Desde boutiques emergentes hasta grandes firmas de retail con franquicias y múltiples puntos de venta. Facturación mensual en dólares, sin contratos de permanencia obligatoria.
+            Desde boutiques emergentes hasta grandes firmas de retail con franquicias y múltiples puntos de venta. Facturación mensual transparente en dólares, sin contratos de permanencia obligatoria.
           </p>
         </div>
 
@@ -368,6 +441,7 @@
       </div>
 
       <div class="footer-links">
+        <a (click)="scrollToSection('showroom-nichos')" class="cursor-pointer">Nichos de Moda</a>
         <a (click)="scrollToSection('planes-saas')" class="cursor-pointer">Planes de Suscripción</a>
         <a routerLink="/saas">Administración SaaS</a>
         <a routerLink="/catalogo">Catálogo de Prendas</a>

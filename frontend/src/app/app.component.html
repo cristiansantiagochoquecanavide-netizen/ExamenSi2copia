@@ -1,4 +1,5 @@
 <div class="app-layout">
+  @if (!isLandingRoute()) {
   <header class="navbar">
     <div class="brand-zone">
       <!-- Botón Menú Hamburguesa para Móvil y Tablet (<= 992px) -->
@@ -296,14 +297,17 @@
       }
     </div>
   </header>
+  }
 
-  <main class="main-content">
+  <main class="main-content" [class.no-navbar]="isLandingRoute()">
     <router-outlet></router-outlet>
   </main>
 
-  <!-- CU20: Floating Chatbot Concierge Widget -->
-  <app-chatbot-widget />
+  @if (!isLandingRoute()) {
+    <!-- CU20: Floating Chatbot Concierge Widget -->
+    <app-chatbot-widget />
 
-  <!-- CU21 / CU16: Toast Flotante de Promociones y Descuentos -->
-  <app-promo-toast />
+    <!-- CU21 / CU16: Toast Flotante de Promociones y Descuentos -->
+    <app-promo-toast />
+  }
 </div>

@@ -887,3 +887,9 @@
 }
 .btn-toast-dismiss:hover { color: #ffffff; }
 
+
+
+/* Sin navbar en Landing Page */
+.main-content.no-navbar {
+  padding: 0 !important;
+}

@@ -49,6 +49,11 @@ export class AppComponent {
     this.openMobileDropdown.update(curr => curr === name ? null : name);
   }
 
+  isLandingRoute(): boolean {
+    const url = this.router.url.split('?')[0];
+    return url === '/' || url === '' || url === '/landing';
+  }
+
   isModuleActive(prefix: string): boolean {
     return this.router.url.startsWith(prefix);
   }

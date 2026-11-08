@@ -15,6 +15,17 @@ export interface ArPiece {
   wishlist?: boolean;
 }
 
+export interface VideoShowcaseCategory {
+  id: string;
+  label: string;
+  tag: string;
+  headline: string;
+  description: string;
+  videoSrc: string;
+  badgeText: string;
+  icon: string;
+}
+
 @Component({
   selector: 'app-landing-page',
   standalone: true,
@@ -25,6 +36,42 @@ export interface ArPiece {
 export class LandingPageComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly saasService = inject(SaasService);
+
+  // Categorías de demostración con video en loop (Elegante, Urbana, Calzado)
+  activeVideoCategory = 'elegante';
+
+  readonly videoCategories: VideoShowcaseCategory[] = [
+    {
+      id: 'elegante',
+      label: 'Sastrería & Elegante',
+      tag: 'ALTA COSTURA & VESTIDOS',
+      headline: 'Boutiques de Alta Costura & Sastrería Fina',
+      description: 'Ideal para ateliers y firmas de alta costura que requieren simulación virtual milimétrica de caída textil, drapeado 3D y probadores virtuales de lujo.',
+      videoSrc: 'assets/videos/runway_elegante.mp4',
+      badgeText: 'Draping 3D & Seda / Lana',
+      icon: 'diamond'
+    },
+    {
+      id: 'urbana',
+      label: 'Streetwear & Urbana',
+      tag: 'STREETWEAR & CASUAL',
+      headline: 'Marcas de Moda Urbana & Streetwear Contemporáneo',
+      description: 'Diseñado para tiendas de alto tráfico: cobro rápido en punto de venta físico, sincronización offline para ferias y pop-up stores, y difusión en redes sociales.',
+      videoSrc: 'assets/videos/moda_urbana.mp4',
+      badgeText: 'POS Offline & Colecciones Flash',
+      icon: 'local_fire_department'
+    },
+    {
+      id: 'calzado',
+      label: 'Sneakers & Calzado',
+      tag: 'SNEAKERS & CALZADO',
+      headline: 'Boutiques de Calzado, Zapatillas & Accesorios',
+      description: 'Gestión avanzada de stock multialmacén por talle y color, reservas previas en probadores físicos y predicción analítica de demanda con Machine Learning.',
+      videoSrc: 'assets/videos/calzado_sneakers.mp4',
+      badgeText: 'Matriz de Tallas & Predicción ML',
+      icon: 'steps'
+    }
+  ];
 
   // Planes de Suscripción SaaS (CU01)
   planes: PlanSuscripcionModel[] = [
@@ -136,6 +183,14 @@ export class LandingPageComponent implements OnInit {
         this.cargandoPlanes = false;
       }
     });
+  }
+
+  setVideoCategory(catId: string): void {
+    this.activeVideoCategory = catId;
+  }
+
+  get currentVideoCategory(): VideoShowcaseCategory {
+    return this.videoCategories.find(c => c.id === this.activeVideoCategory) || this.videoCategories[0];
   }
 
   getPlanFeatures(plan: PlanSuscripcionModel): { icon: string; text: string; included: boolean }[] {
