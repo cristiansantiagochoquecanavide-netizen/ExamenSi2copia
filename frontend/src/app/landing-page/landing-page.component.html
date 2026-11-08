@@ -73,10 +73,17 @@
       <div class="section-wrapper">
         <div class="marquee-header">
           <div class="header-content">
-            <h2 class="marquee-title">La pasarela interactiva de tu marca</h2>
+            <h2 class="marquee-title">Ellos ya lo hicieron, ¿Tú qué esperas?</h2>
             <p class="marquee-desc">
-              Probador virtual en alta definición y simulación física de telas. Diseñado para que tus clientes descubran la caída y textura de cada diseño antes de comprar.
+              Boutiques de autor, marcas urbanas y cadenas de calzado ya digitalizaron sus puntos de venta y probadores virtuales con AtelierOS.
             </p>
+            <div class="marquee-cta-row">
+              <button type="button" class="btn-marquee-plans" (click)="scrollToSection('planes-saas')">
+                <span class="material-symbols-outlined">loyalty</span>
+                <span>Explorar Planes</span>
+                <span class="material-symbols-outlined arrow-icon">arrow_forward</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -113,8 +120,8 @@
                 <div class="card-bottom">
                   <span class="card-price">${{ piece.price }}</span>
                   <span class="card-ar-action">
-                    <span class="material-symbols-outlined">view_in_ar</span>
-                    <span>Probar 3D</span>
+                    <span class="material-symbols-outlined">storefront</span>
+                    <span>Ver en {{ piece.storeName }}</span>
                   </span>
                 </div>
               </div>
@@ -150,13 +157,79 @@
                 <div class="card-bottom">
                   <span class="card-price">${{ piece.price }}</span>
                   <span class="card-ar-action">
-                    <span class="material-symbols-outlined">view_in_ar</span>
-                    <span>Probar 3D</span>
+                    <span class="material-symbols-outlined">storefront</span>
+                    <span>Ver en {{ piece.storeName }}</span>
                   </span>
                 </div>
               </div>
             </article>
           }
+        </div>
+      </div>
+    </section>
+
+        <!-- SECCIÓN: LA HISTORIA Y MISIÓN DE ATELIEROS -->
+    <section class="story-atelier-section" id="historia-atelier">
+      <div class="section-wrapper">
+        <div class="story-card-wrapper">
+          <div class="story-header">
+            <span class="story-pretitle">NUESTRA HISTORIA &bull; EL PROPÓSITO DE ATELIEROS</span>
+            <h2 class="story-title">De la frustración del retail tradicional a un sistema que hace crecer tu marca</h2>
+          </div>
+
+          <div class="story-narrative-grid">
+            <div class="story-col story-origin">
+              <h3 class="story-col-title">
+                <span class="material-symbols-outlined origin-icon">lightbulb</span>
+                El Problema: Por qué nació AtelierOS
+              </h3>
+              <p class="story-p">
+                Durante años, las tiendas de moda estuvieron atrapadas entre dos mundos rotos: por un lado, softwares de inventario grises y anticuados que colapsan ante cualquier corte de internet; por el otro, tiendas online estándar donde el cliente compra a ciegas y devuelve más del 30% de sus pedidos por problemas de talle y caída.
+              </p>
+              <p class="story-p">
+                Vimos a dueños de boutiques talentosos perder horas cuadrando stocks a mano entre su local físico y su Instagram. Supimos que el sector no necesitaba otro e-commerce genérico: <strong>necesitaba un sistema operativo propio</strong>.
+              </p>
+            </div>
+
+            <div class="story-col story-mission">
+              <h3 class="story-col-title">
+                <span class="material-symbols-outlined mission-icon">rocket_launch</span>
+                Cómo ayudamos a tu negocio a escalar
+              </h3>
+              <p class="story-p">
+                AtelierOS nació para poner la tecnología de las marcas más grandes del mundo en manos de cualquier boutique o diseñador independiente:
+              </p>
+              <ul class="growth-pillars">
+                <li>
+                  <span class="material-symbols-outlined pillar-check">check_circle</span>
+                  <div class="pillar-text">
+                    <strong>Probador Virtual 3D VTON:</strong> Tus clientes se prueban la ropa en pantalla, aumentando la conversión de compra y reduciendo devoluciones casi a cero.
+                  </div>
+                </li>
+                <li>
+                  <span class="material-symbols-outlined pillar-check">check_circle</span>
+                  <div class="pillar-text">
+                    <strong>Punto de Venta Offline Blindado:</strong> Si se corta internet en tu centro comercial o pop-up store, tus cajas siguen cobrando y emitiendo tickets sin frenar el flujo de clientes.
+                  </div>
+                </li>
+                <li>
+                  <span class="material-symbols-outlined pillar-check">check_circle</span>
+                  <div class="pillar-text">
+                    <strong>Control Multialmacén en Milisegundos:</strong> Cada venta en tu local descuenta inmediatamente el inventario en la web, eliminando ventas dobles y errores humanos.
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="story-quote-banner">
+            <div class="quote-text">
+              “AtelierOS no es un costo de software; es el motor que te permite abrir 5 sucursales más sin multiplicar tus dolores de cabeza.”
+            </div>
+            <div class="quote-author">
+              <span>Arquitectura Cloud Multitenant &bull; Diseñado exclusivamente para la Industria Textil</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>

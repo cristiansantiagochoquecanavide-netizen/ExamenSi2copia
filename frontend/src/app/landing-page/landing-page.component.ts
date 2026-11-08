@@ -13,6 +13,7 @@ export interface ArPiece {
   isArReady: boolean;
   drapeDetail: string;
   wishlist?: boolean;
+  storeName?: string;
 }
 
 @Component({
@@ -83,7 +84,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
       price: 149,
       imageUrl: 'assets/images/models/bad_gyal_chinatown_denim.jpg',
       isArReady: true,
-      drapeDetail: 'Calce holgado tiro bajo con caída recta sobre zapatilla urbana.'
+      drapeDetail: 'Calce holgado tiro bajo con caída recta sobre zapatilla urbana.',
+      storeName: 'Kith Studio'
     },
     {
       id: 'model-02',
@@ -93,7 +95,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
       price: 489,
       imageUrl: 'assets/images/models/bad_gyal_fur_coat.jpg?v=2',
       isArReady: true,
-      drapeDetail: 'Silueta envolvente con cuello esmoquin y forro de satén acolchado.'
+      drapeDetail: 'Silueta envolvente con cuello esmoquin y forro de satén acolchado.',
+      storeName: 'Maison Riviera'
     },
     {
       id: 'model-03',
@@ -103,7 +106,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
       price: 380,
       imageUrl: 'assets/images/models/quevedo_gq_sherpa.jpg',
       isArReady: true,
-      drapeDetail: 'Corte boxy estructurado con solapas altas y hebillas metálicas.'
+      drapeDetail: 'Corte boxy estructurado con solapas altas y hebillas metálicas.',
+      storeName: 'Harbor & Co.'
     },
     {
       id: 'model-04',
@@ -113,7 +117,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
       price: 620,
       imageUrl: 'assets/images/models/vestido_corset_rosa.jpg?v=2',
       isArReady: true,
-      drapeDetail: 'Entallado de silueta reloj de arena con soporte anatómico interior.'
+      drapeDetail: 'Entallado de silueta reloj de arena con soporte anatómico interior.',
+      storeName: 'Aura Atelier'
     },
     {
       id: 'model-05',
@@ -123,7 +128,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
       price: 175,
       imageUrl: 'assets/images/models/bad_gyal_y2k_ripped_denim.jpg',
       isArReady: true,
-      drapeDetail: 'Cintura baja con bota flare acampanada y desgastes artesanales.'
+      drapeDetail: 'Cintura baja con bota flare acampanada y desgastes artesanales.',
+      storeName: 'Rebel District'
     },
     {
       id: 'model-06',
@@ -133,7 +139,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
       price: 540,
       imageUrl: 'assets/images/models/bad_gyal_glitter_dress.jpg',
       isArReady: true,
-      drapeDetail: 'Drapeado fluido con espalda totalmente descubierta y caída cascada.'
+      drapeDetail: 'Drapeado fluido con espalda totalmente descubierta y caída cascada.',
+      storeName: 'Velvet Night'
     },
     {
       id: 'model-07',
@@ -143,7 +150,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
       price: 130,
       imageUrl: 'assets/images/models/baggy_denim_essential.jpg',
       isArReady: true,
-      drapeDetail: 'Corte balloon relajado con tiro medio y botamanga ancha.'
+      drapeDetail: 'Corte balloon relajado con tiro medio y botamanga ancha.',
+      storeName: 'Raw Canvas'
     },
     {
       id: 'model-08',
@@ -153,7 +161,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
       price: 310,
       imageUrl: 'assets/images/models/kylie_jenner_poplin_shirt.jpg',
       isArReady: true,
-      drapeDetail: 'Pinzas de entalle corsetero en torso y cuello clásico italiano.'
+      drapeDetail: 'Pinzas de entalle corsetero en torso y cuello clásico italiano.',
+      storeName: 'Sartoria Nova'
     },
     {
       id: 'model-09',
@@ -163,7 +172,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
       price: 140,
       imageUrl: 'assets/images/models/oversized_streetwear_denim.jpg',
       isArReady: true,
-      drapeDetail: 'Silueta ultra-oversized skater con pretina caída y bolsillos cargo.'
+      drapeDetail: 'Silueta ultra-oversized skater con pretina caída y bolsillos cargo.',
+      storeName: 'Downtown Lab'
     },
     {
       id: 'model-10',
@@ -173,7 +183,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
       price: 750,
       imageUrl: 'assets/images/models/rauw_alejandro_camel_suit.jpg',
       isArReady: true,
-      drapeDetail: 'Hombreras extendidas estilo 90s con caída fluida de pantalón pinzado.'
+      drapeDetail: 'Hombreras extendidas estilo 90s con caída fluida de pantalón pinzado.',
+      storeName: 'Milano Tailors'
     },
     {
       id: 'model-11',
@@ -183,7 +194,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
       price: 220,
       imageUrl: 'assets/images/models/athleisure_biker_sneakers.jpg',
       isArReady: true,
-      drapeDetail: 'Compresión media transpirable con zapatilla amortiguada para asfalto.'
+      drapeDetail: 'Compresión media transpirable con zapatilla amortiguada para asfalto.',
+      storeName: 'Pulse Athletics'
     },
     {
       id: 'model-12',
@@ -193,7 +205,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
       price: 260,
       imageUrl: 'assets/images/models/varsity_sport_brown.jpg',
       isArReady: true,
-      drapeDetail: 'Chaqueta universitaria con broches de presión y short deportivo high-waist.'
+      drapeDetail: 'Chaqueta universitaria con broches de presión y short deportivo high-waist.',
+      storeName: 'Varsity Club'
     },
     {
       id: 'model-13',
@@ -203,7 +216,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
       price: 195,
       imageUrl: 'assets/images/models/gym_training_gray_set.jpg',
       isArReady: true,
-      drapeDetail: 'Ajuste de segunda piel termoactivo con chaqueta bomber ligera.'
+      drapeDetail: 'Ajuste de segunda piel termoactivo con chaqueta bomber ligera.',
+      storeName: 'AeroFit Studio'
     },
     {
       id: 'model-14',
@@ -213,7 +227,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
       price: 290,
       imageUrl: 'assets/images/models/sydney_sweeney_double_denim.jpg',
       isArReady: true,
-      drapeDetail: 'Campera boxy con hombros caídos y pantalón palazzo de tiro alto.'
+      drapeDetail: 'Campera boxy con hombros caídos y pantalón palazzo de tiro alto.',
+      storeName: 'Indigo Society'
     },
     {
       id: 'model-15',
@@ -223,7 +238,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
       price: 420,
       imageUrl: 'assets/images/models/sydney_sweeney_satin_dress.jpg',
       isArReady: true,
-      drapeDetail: 'Corte al bies con caída fluida diagonal y escote drapeado suave.'
+      drapeDetail: 'Corte al bies con caída fluida diagonal y escote drapeado suave.',
+      storeName: 'Étoile Couture'
     }
   ];
 

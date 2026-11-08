@@ -2489,3 +2489,207 @@
     transform: translateX(-50%);
   }
 }
+
+/* MARQUEE PLANS CTA BUTTON */
+.marquee-cta-row {
+  margin-top: 1.5rem;
+
+  .btn-marquee-plans {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    background: #000000;
+    color: #ffffff;
+    border: 1px solid #000000;
+    padding: 0.85rem 1.75rem;
+    border-radius: 9999px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.25s ease;
+
+    .arrow-icon {
+      font-size: 1.15rem;
+      transition: transform 0.2s ease;
+    }
+
+    &:hover {
+      background: #262626;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+      transform: translateY(-2px);
+
+      .arrow-icon {
+        transform: translateX(4px);
+      }
+    }
+  }
+}
+
+/* =========================================================
+   STORY & MISSION SECTION (ATELIEROS EMPOWERMENT)
+   ========================================================= */
+.story-atelier-section {
+  padding: 6rem 0 6.5rem;
+  background: #fafafa;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+  .story-card-wrapper {
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+
+  .story-header {
+    text-align: center;
+    max-width: 760px;
+    margin: 0 auto 3.5rem auto;
+
+    .story-pretitle {
+      font-size: 0.78rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #64748b;
+      font-weight: 800;
+      display: block;
+      margin-bottom: 0.75rem;
+    }
+
+    .story-title {
+      font-size: clamp(2rem, 3.2vw, 2.6rem);
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+      line-height: 1.22;
+      margin: 0;
+    }
+  }
+
+  .story-narrative-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3.5rem;
+    margin-bottom: 3.5rem;
+
+    .story-col {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 2.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+
+      .story-col-title {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0 0 1.25rem 0;
+        line-height: 1.3;
+
+        .origin-icon {
+          color: #f59e0b;
+          font-size: 1.5rem;
+        }
+
+        .mission-icon {
+          color: #1a73e8;
+          font-size: 1.5rem;
+        }
+      }
+
+      .story-p {
+        font-size: 0.98rem;
+        color: #475569;
+        line-height: 1.7;
+        margin: 0 0 1.25rem 0;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        strong {
+          color: #0f172a;
+        }
+      }
+
+      .growth-pillars {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 1.15rem;
+
+        li {
+          display: flex;
+          align-items: flex-start;
+          gap: 0.75rem;
+
+          .pillar-check {
+            font-size: 1.35rem;
+            color: #10b981;
+            flex-shrink: 0;
+            margin-top: 2px;
+          }
+
+          .pillar-text {
+            font-size: 0.92rem;
+            color: #475569;
+            line-height: 1.5;
+
+            strong {
+              color: #0f172a;
+              font-weight: 700;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .story-quote-banner {
+    background: #0f172a;
+    color: #ffffff;
+    border-radius: 20px;
+    padding: 2.5rem 3rem;
+    text-align: center;
+    box-shadow: 0 12px 30px -8px rgba(15, 23, 42, 0.25);
+
+    .quote-text {
+      font-size: 1.25rem;
+      font-weight: 600;
+      font-style: italic;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      color: #f8fafc;
+    }
+
+    .quote-author {
+      font-size: 0.8rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: #94a3b8;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .story-atelier-section {
+    .story-narrative-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .story-quote-banner {
+      padding: 2rem 1.5rem;
+
+      .quote-text {
+        font-size: 1.05rem;
+      }
+    }
+  }
+}
