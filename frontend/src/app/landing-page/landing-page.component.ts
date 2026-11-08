@@ -71,6 +71,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
   cargandoPlanes = false;
 
   readonly Math = Math;
+  isMarqueePaused = false;
 
   // Carrusel Showroom Multimodelo (15 Modelos Reales)
   curatedPieces: ArPiece[] = [
@@ -251,12 +252,21 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
   sessionConfirmed = false;
   mobileMenuOpen = false;
 
+  getCategoryBadgeClass(cat: string): string {
+    const c = cat.toLowerCase();
+    if (c.includes('street')) return 'pill-street';
+    if (c.includes('costura') || c.includes('vestido') || c.includes('gala')) return 'pill-couture';
+    if (c.includes('masculina') || c.includes('sastrería')) return 'pill-men';
+    if (c.includes('sport') || c.includes('athleisure') || c.includes('calzado')) return 'pill-sport';
+    return '';
+  }
+
   ngOnInit(): void {
     this.cargarPlanes();
   }
 
   ngAfterViewInit(): void {
-    this.iniciarScrollObserver();
+    // Scroll observer removed
     this.asegurarVideosSilenciados();
   }
 

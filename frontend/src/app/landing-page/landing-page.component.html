@@ -7,10 +7,7 @@
       </a>
 
       <nav class="nav-menu" [class.open]="mobileMenuOpen">
-        <a (click)="scrollToSection('story-elegante')" class="nav-item cursor-pointer">Alta Costura</a>
-        <a (click)="scrollToSection('story-urbano')" class="nav-item cursor-pointer">Streetwear</a>
-        <a (click)="scrollToSection('story-running')" class="nav-item cursor-pointer">Sneakers</a>
-        <a (click)="scrollToSection('piezas-ar')" class="nav-item cursor-pointer">Showroom 15 Modelos</a>
+        <a (click)="scrollToSection('carrusel-modelos')" class="nav-item cursor-pointer">Colección 15 Modelos</a>
         <a (click)="scrollToSection('planes-saas')" class="nav-item cursor-pointer">Planes & Precios</a>
         <a routerLink="/catalogo" class="nav-item">Catálogo Demo</a>
       </nav>
@@ -58,9 +55,9 @@
                 <span class="material-symbols-outlined">loyalty</span>
                 <span>Ver Planes para tu Tienda</span>
               </button>
-              <button type="button" class="btn-secondary-action" (click)="scrollToSection('story-elegante')">
-                <span class="material-symbols-outlined">expand_circle_down</span>
-                <span>Explorar Nichos</span>
+              <button type="button" class="btn-secondary-action" (click)="scrollToSection('carrusel-modelos')">
+                <span class="material-symbols-outlined">view_carousel</span>
+                <span>Ver 15 Modelos</span>
               </button>
               <button type="button" class="btn-outline-action" routerLink="/catalogo">
                 <span class="material-symbols-outlined">storefront</span>
@@ -112,286 +109,42 @@
     </section>
 
     <!-- ================================================================= -->
-    <!-- SCROLL STORY 01: ALTA COSTURA, ABRIGO ELEGANTE Y VESTIDO NEGRO   -->
+    <!-- SHOWROOM INFINITO: CARRUSEL CONTINUO HACIA LA IZQUIERDA (15 FOTOS) -->
     <!-- ================================================================= -->
-    <section class="story-section story-elegante" id="story-elegante">
+    <section class="marquee-showroom-section" id="carrusel-modelos">
       <div class="section-wrapper">
-        <div class="story-grid">
-          <!-- Video Frame Column -->
-          <div class="story-media-col">
-            <div class="story-video-card">
-              <video
-                src="assets/videos/runway_elegante.mp4?v=2"
-                autoplay
-                muted
-                loop
-                playsinline
-                [muted]="true"
-                class="story-video"
-              ></video>
-              <div class="story-video-overlay"></div>
-
-              <!-- Live HUD Telemetry -->
-              <div class="story-hud-pill top-pill">
-                <span class="material-symbols-outlined hud-icon">diamond</span>
-                <span>ALTA COSTURA &bull; VESTIDO NEGRO & ABRIGO ESCULTURAL</span>
-              </div>
-              <div class="story-hud-pill bottom-pill">
-                <span class="pulse-dot-gold"></span>
-                <span>SIMULACIÓN EN ESPEJO: DRAPING 3D ACTIVO</span>
-              </div>
-            </div>
+        <div class="marquee-header">
+          <div class="header-content">
+            <span class="marquee-pretitle">LOOKBOOK SAAS EN VIVO &bull; 15 MODELOS REALES</span>
+            <h2 class="marquee-title">Catálogo Multimarca en Movimiento Continuo</h2>
+            <p class="marquee-desc">
+              Así lucirán las prendas de las boutiques y marcas que contraten tu plataforma. Pasa el cursor para pausar la rotación o pulsa sobre cualquier modelo para abrir el <strong>Probador Virtual 3D</strong>.
+            </p>
           </div>
 
-          <!-- Editorial Narrative Column -->
-          <div class="story-content-col">
-            <span class="story-kicker gold-kicker">01 / NICHO ALTA COSTURA & ATELIER</span>
-            <h2 class="story-title">
-              La experiencia frente al espejo: <span class="highlight-gold">Elegancia & Caída Milimétrica</span>
-            </h2>
-            <p class="story-lead">
-              Una cliente probándose un abrigo elegante sobre un vestido negro frente al espejo del probador, apreciando la textura, los hombros estructurados y la caída natural de la seda.
-            </p>
-            <p class="story-desc">
-              FashionStore SaaS transforma tu boutique de lujo con probadores inteligentes, simulación virtual de talla basada en medidas biométricas y reserva privada de citas con estilistas virtuales asistidos por IA.
-            </p>
-
-            <!-- Feature Badges -->
-            <div class="story-chips">
-              <div class="story-chip">
-                <span class="material-symbols-outlined">view_in_ar</span>
-                <span>CU09 Probador Virtual 3D</span>
-              </div>
-              <div class="story-chip">
-                <span class="material-symbols-outlined">straighten</span>
-                <span>Ajuste Biométrico por Talla</span>
-              </div>
-              <div class="story-chip">
-                <span class="material-symbols-outlined">smart_toy</span>
-                <span>CU18 IA Concierge de Estilo</span>
-              </div>
-            </div>
-
-            <div class="story-cta-row">
-              <button type="button" class="btn-story-action btn-gold" (click)="scrollToSection('planes-saas')">
-                <span>Ver Planes para Boutiques Elegantes</span>
-                <span class="material-symbols-outlined">arrow_forward</span>
-              </button>
-            </div>
+          <div class="marquee-badge-pill">
+            <span class="pulse-dot"></span>
+            <span>ROTACIÓN CONTINUA 60 FPS &bull; PAUSA AL PASAR EL CURSOR</span>
           </div>
         </div>
       </div>
-    </section>
 
-    <!-- ================================================================= -->
-    <!-- SCROLL STORY 02: STREETWEAR & MODA URBANA CASUAL CONTEMPORÁNEA   -->
-    <!-- ================================================================= -->
-    <section class="story-section story-urbano" id="story-urbano">
-      <div class="section-wrapper">
-        <div class="story-grid reverse-grid">
-          <!-- Editorial Narrative Column -->
-          <div class="story-content-col">
-            <span class="story-kicker cyan-kicker">02 / NICHO STREETWEAR & CASUAL</span>
-            <h2 class="story-title">
-              La actitud de la calle: <span class="highlight-cyan">Moda Urbana & Ventas Instantáneas</span>
-            </h2>
-            <p class="story-lead">
-              Bad Gyal presumiendo con total seguridad su outfit urbano con polera blanca y pantalón jeans mientras mira a la cámara con actitud vanguardista en la ciudad.
-            </p>
-            <p class="story-desc">
-              Las marcas urbanas se mueven rápido. Con FashionStore SaaS cobrás en tu local físico o en pop-up stores incluso sin internet gracias a nuestro punto de venta PWA con sincronización offline automática y difusión masiva en redes.
-            </p>
-
-            <!-- Feature Badges -->
-            <div class="story-chips">
-              <div class="story-chip">
-                <span class="material-symbols-outlined">wifi_off</span>
-                <span>CU24/25 POS con Modo Offline PWA</span>
-              </div>
-              <div class="story-chip">
-                <span class="material-symbols-outlined">bolt</span>
-                <span>Cobro Rápido en Caja (&lt; 2 seg)</span>
-              </div>
-              <div class="story-chip">
-                <span class="material-symbols-outlined">campaign</span>
-                <span>CU16 Campañas de Difusión Flash</span>
-              </div>
-            </div>
-
-            <div class="story-cta-row">
-              <button type="button" class="btn-story-action btn-cyan" (click)="scrollToSection('planes-saas')">
-                <span>Ver Planes para Tiendas Urbanas</span>
-                <span class="material-symbols-outlined">arrow_forward</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Video Frame Column -->
-          <div class="story-media-col">
-            <div class="story-video-card cyan-border">
-              <video
-                src="assets/videos/moda_urbana.mp4?v=3"
-                autoplay
-                muted
-                loop
-                playsinline
-                [muted]="true"
-                class="story-video"
-              ></video>
-              <div class="story-video-overlay cyan-overlay"></div>
-
-              <!-- Live HUD Telemetry -->
-              <div class="story-hud-pill top-pill cyan-pill">
-                <span class="material-symbols-outlined hud-icon">local_fire_department</span>
-                <span>STREETWEAR &bull; TOP BLANCO & PANTALÓN JEANS</span>
-              </div>
-              <div class="story-hud-pill bottom-pill cyan-pill">
-                <span class="pulse-dot-cyan"></span>
-                <span>PUNTO DE VENTA PWA OFFLINE: 100% DISPONIBLE</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ================================================================= -->
-    <!-- SCROLL STORY 03: SNEAKERS & CALZADO DEPORTIVO / RUNNING EN PARQUE -->
-    <!-- ================================================================= -->
-    <section class="story-section story-sport" id="story-running">
-      <div class="section-wrapper">
-        <div class="story-grid">
-          <!-- Video Frame Column -->
-          <div class="story-media-col">
-            <div class="story-video-card emerald-border">
-              <video
-                src="assets/videos/calzado_sneakers.mp4?v=2"
-                autoplay
-                muted
-                loop
-                playsinline
-                [muted]="true"
-                class="story-video"
-              ></video>
-              <div class="story-video-overlay emerald-overlay"></div>
-
-              <!-- Live HUD Telemetry -->
-              <div class="story-hud-pill top-pill emerald-pill">
-                <span class="material-symbols-outlined hud-icon">directions_run</span>
-                <span>SNEAKERS & RUNNING &bull; AJUSTE DE CALZADO & AUDÍFONOS</span>
-              </div>
-              <div class="story-hud-pill bottom-pill emerald-pill">
-                <span class="pulse-dot-emerald"></span>
-                <span>CONTROL MULTITALLA & PREDICCIÓN ML DE STOCK</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Editorial Narrative Column -->
-          <div class="story-content-col">
-            <span class="story-kicker emerald-kicker">03 / NICHO SNEAKERS & PERFORMANCE</span>
-            <h2 class="story-title">
-              Listos para el asfalto: <span class="highlight-emerald">Calzado Deportivo & Stock Multitalla</span>
-            </h2>
-            <p class="story-lead">
-              Enfoque en unos zapatos de running de alto rendimiento siendo atados y ajustados por un chico listo para salir a correr por el parque con sus audífonos puestos.
-            </p>
-            <p class="story-desc">
-              El calzado exige precisión absoluta de stock por cada medio punto de talla y color. FashionStore SaaS administra matrices complejas de inventario multialmacén, control de traspasos entre sucursales y predicciones con Machine Learning para anticipar quiebres de stock.
-            </p>
-
-            <!-- Feature Badges -->
-            <div class="story-chips">
-              <div class="story-chip">
-                <span class="material-symbols-outlined">inventory_2</span>
-                <span>CU03 Stock por Tallas 36 al 46</span>
-              </div>
-              <div class="story-chip">
-                <span class="material-symbols-outlined">trending_up</span>
-                <span>CU22 Predicciones de Demanda ML</span>
-              </div>
-              <div class="story-chip">
-                <span class="material-symbols-outlined">alt_route</span>
-                <span>CU13 Traspasos entre Sucursales</span>
-              </div>
-            </div>
-
-            <div class="story-cta-row">
-              <button type="button" class="btn-story-action btn-emerald" (click)="scrollToSection('planes-saas')">
-                <span>Ver Planes para Tiendas de Calzado</span>
-                <span class="material-symbols-outlined">arrow_forward</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-        <!-- ================================================================= -->
-    <!-- SECTION: SHOWROOM EDITORIAL - CARRUSEL DE 15 MODELOS (CU09)       -->
-    <!-- ================================================================= -->
-    <section class="curated-section" id="piezas-ar">
-      <div class="section-wrapper">
-        <div class="curated-header">
-          <div class="curated-title-group">
-            <span class="section-pretitle">CATÁLOGO EDITORIAL MULTIMARCA &bull; 15 LOOKS</span>
-            <h2 class="section-title">Inspiración Real para la Tienda de tu Marca</h2>
-            <p class="curated-subtitle">
-              Desde alta costura de atelier y sastrería hasta streetwear Y2K y calzado deportivo. Cada prenda está lista para probador virtual 3D, control de stock multitalle y ventas omnicanal.
-            </p>
-          </div>
-
-          <div class="carousel-nav-group">
-            <div class="carousel-counter-badge">
-              <span>Mostrando <strong>{{ carouselOffset + 1 }} - {{ Math.min(carouselOffset + visibleItems, filteredPieces.length) }}</strong> de {{ filteredPieces.length }}</span>
-            </div>
-            <div class="carousel-nav">
-              <button type="button" class="nav-circle-btn" aria-label="Anterior" (click)="prevSlide()">
-                <span class="material-symbols-outlined">arrow_back</span>
-              </button>
-              <button type="button" class="nav-circle-btn" aria-label="Siguiente" (click)="nextSlide()">
-                <span class="material-symbols-outlined">arrow_forward</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Filtros de Nicho de Moda -->
-        <div class="niche-filter-row">
-          <button type="button" class="niche-filter-btn" [class.active]="selectedNiche === 'TODOS'" (click)="setNiche('TODOS')">
-            <span>Todos los Looks</span>
-            <span class="filter-count">15</span>
-          </button>
-          <button type="button" class="niche-filter-btn" [class.active]="selectedNiche === 'Streetwear'" (click)="setNiche('Streetwear')">
-            <span class="material-symbols-outlined filter-icon">local_fire_department</span>
-            <span>Streetwear & Denim</span>
-          </button>
-          <button type="button" class="niche-filter-btn" [class.active]="selectedNiche === 'Alta Costura'" (click)="setNiche('Alta Costura')">
-            <span class="material-symbols-outlined filter-icon">diamond</span>
-            <span>Alta Costura & Gala</span>
-          </button>
-          <button type="button" class="niche-filter-btn" [class.active]="selectedNiche === 'Moda Masculina'" (click)="setNiche('Moda Masculina')">
-            <span class="material-symbols-outlined filter-icon">man</span>
-            <span>Sastrería & Menswear</span>
-          </button>
-          <button type="button" class="niche-filter-btn" [class.active]="selectedNiche === 'Athleisure'" (click)="setNiche('Athleisure')">
-            <span class="material-symbols-outlined filter-icon">directions_run</span>
-            <span>Athleisure & Sneakers</span>
-          </button>
-        </div>
-
-        <!-- Grilla del Carrusel -->
-        <div class="curated-grid">
-          @for (piece of visiblePieces; track piece.id) {
-            <article class="ar-card">
-              <div class="ar-card-media">
-                <img [src]="piece.imageUrl" [alt]="piece.name" class="ar-card-img" />
-                <span class="ar-pill">{{ piece.category }}</span>
+      <!-- Marquee Ticker Viewport con máscara degradada -->
+      <div class="marquee-viewport" (mouseenter)="isMarqueePaused = true" (mouseleave)="isMarqueePaused = false">
+        <div class="marquee-track" [class.paused]="isMarqueePaused">
+          <!-- Primera pasada de 15 modelos -->
+          @for (piece of curatedPieces; track piece.id) {
+            <article class="marquee-card" (click)="openArModal(piece)">
+              <div class="card-media">
+                <img [src]="piece.imageUrl" [alt]="piece.name" class="card-img" loading="eager" />
+                <span class="card-niche-pill" [ngClass]="getCategoryBadgeClass(piece.category)">
+                  {{ piece.category }}
+                </span>
                 <button
                   type="button"
-                  class="wishlist-btn"
+                  class="card-fav-btn"
                   [class.active]="piece.wishlist"
-                  (click)="toggleWishlist(piece)"
+                  (click)="toggleWishlist(piece); $event.stopPropagation()"
                   aria-label="Favorito"
                 >
                   <span class="material-symbols-outlined">
@@ -400,27 +153,62 @@
                 </button>
               </div>
 
-              <div class="ar-card-body">
-                <div class="ar-card-info">
-                  <h3 class="ar-card-title">{{ piece.name }}</h3>
-                  <p class="ar-card-material">{{ piece.material }}</p>
+              <div class="card-info">
+                <div class="info-meta">
+                  <h3 class="card-name">{{ piece.name }}</h3>
+                  <p class="card-material">{{ piece.material }}</p>
                 </div>
-                <span class="ar-card-price">${{ piece.price }}</span>
+                <div class="card-bottom">
+                  <span class="card-price">${{ piece.price }}</span>
+                  <span class="card-ar-action">
+                    <span class="material-symbols-outlined">view_in_ar</span>
+                    <span>Probar 3D</span>
+                  </span>
+                </div>
+              </div>
+            </article>
+          }
+
+          <!-- Segunda pasada idéntica (clon) para bucle infinito perfecto -->
+          @for (piece of curatedPieces; track 'clone-' + piece.id) {
+            <article class="marquee-card" (click)="openArModal(piece)">
+              <div class="card-media">
+                <img [src]="piece.imageUrl" [alt]="piece.name" class="card-img" loading="eager" />
+                <span class="card-niche-pill" [ngClass]="getCategoryBadgeClass(piece.category)">
+                  {{ piece.category }}
+                </span>
+                <button
+                  type="button"
+                  class="card-fav-btn"
+                  [class.active]="piece.wishlist"
+                  (click)="toggleWishlist(piece); $event.stopPropagation()"
+                  aria-label="Favorito"
+                >
+                  <span class="material-symbols-outlined">
+                    {{ piece.wishlist ? 'favorite' : 'favorite_border' }}
+                  </span>
+                </button>
               </div>
 
-              <button type="button" class="ar-try-btn" (click)="openArModal(piece)">
-                <span class="material-symbols-outlined">view_in_ar</span>
-                <span>Probar en 3D / AR</span>
-              </button>
+              <div class="card-info">
+                <div class="info-meta">
+                  <h3 class="card-name">{{ piece.name }}</h3>
+                  <p class="card-material">{{ piece.material }}</p>
+                </div>
+                <div class="card-bottom">
+                  <span class="card-price">${{ piece.price }}</span>
+                  <span class="card-ar-action">
+                    <span class="material-symbols-outlined">view_in_ar</span>
+                    <span>Probar 3D</span>
+                  </span>
+                </div>
+              </div>
             </article>
           }
         </div>
       </div>
     </section>
 
-    <!-- ================================================================= -->
-    <!-- SECTION: PLANES DE SUSCRIPCIÓN SAAS (CU01 - PRICING GRID)         -->
-    <!-- ================================================================= -->
     <section class="pricing-section" id="planes-saas">
       <div class="section-wrapper">
         <div class="pricing-header">
@@ -546,10 +334,7 @@
       </div>
 
       <div class="footer-links">
-        <a (click)="scrollToSection('story-elegante')" class="cursor-pointer">Alta Costura</a>
-        <a (click)="scrollToSection('story-urbano')" class="cursor-pointer">Streetwear</a>
-        <a (click)="scrollToSection('story-running')" class="cursor-pointer">Sneakers</a>
-        <a (click)="scrollToSection('piezas-ar')" class="cursor-pointer">Showroom 15 Modelos</a>
+        <a (click)="scrollToSection('carrusel-modelos')" class="cursor-pointer">Colección 15 Modelos</a>
         <a (click)="scrollToSection('planes-saas')" class="cursor-pointer">Planes de Suscripción</a>
         <a routerLink="/saas">Administración SaaS</a>
         <a routerLink="/catalogo">Catálogo de Prendas</a>
