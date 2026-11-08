@@ -10,6 +10,7 @@
         <a (click)="scrollToSection('story-elegante')" class="nav-item cursor-pointer">Alta Costura</a>
         <a (click)="scrollToSection('story-urbano')" class="nav-item cursor-pointer">Streetwear</a>
         <a (click)="scrollToSection('story-running')" class="nav-item cursor-pointer">Sneakers</a>
+        <a (click)="scrollToSection('piezas-ar')" class="nav-item cursor-pointer">Showroom 15 Modelos</a>
         <a (click)="scrollToSection('planes-saas')" class="nav-item cursor-pointer">Planes & Precios</a>
         <a routerLink="/catalogo" class="nav-item">Catálogo Demo</a>
       </nav>
@@ -326,6 +327,97 @@
       </div>
     </section>
 
+        <!-- ================================================================= -->
+    <!-- SECTION: SHOWROOM EDITORIAL - CARRUSEL DE 15 MODELOS (CU09)       -->
+    <!-- ================================================================= -->
+    <section class="curated-section" id="piezas-ar">
+      <div class="section-wrapper">
+        <div class="curated-header">
+          <div class="curated-title-group">
+            <span class="section-pretitle">CATÁLOGO EDITORIAL MULTIMARCA &bull; 15 LOOKS</span>
+            <h2 class="section-title">Inspiración Real para la Tienda de tu Marca</h2>
+            <p class="curated-subtitle">
+              Desde alta costura de atelier y sastrería hasta streetwear Y2K y calzado deportivo. Cada prenda está lista para probador virtual 3D, control de stock multitalle y ventas omnicanal.
+            </p>
+          </div>
+
+          <div class="carousel-nav-group">
+            <div class="carousel-counter-badge">
+              <span>Mostrando <strong>{{ carouselOffset + 1 }} - {{ Math.min(carouselOffset + visibleItems, filteredPieces.length) }}</strong> de {{ filteredPieces.length }}</span>
+            </div>
+            <div class="carousel-nav">
+              <button type="button" class="nav-circle-btn" aria-label="Anterior" (click)="prevSlide()">
+                <span class="material-symbols-outlined">arrow_back</span>
+              </button>
+              <button type="button" class="nav-circle-btn" aria-label="Siguiente" (click)="nextSlide()">
+                <span class="material-symbols-outlined">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filtros de Nicho de Moda -->
+        <div class="niche-filter-row">
+          <button type="button" class="niche-filter-btn" [class.active]="selectedNiche === 'TODOS'" (click)="setNiche('TODOS')">
+            <span>Todos los Looks</span>
+            <span class="filter-count">15</span>
+          </button>
+          <button type="button" class="niche-filter-btn" [class.active]="selectedNiche === 'Streetwear'" (click)="setNiche('Streetwear')">
+            <span class="material-symbols-outlined filter-icon">local_fire_department</span>
+            <span>Streetwear & Denim</span>
+          </button>
+          <button type="button" class="niche-filter-btn" [class.active]="selectedNiche === 'Alta Costura'" (click)="setNiche('Alta Costura')">
+            <span class="material-symbols-outlined filter-icon">diamond</span>
+            <span>Alta Costura & Gala</span>
+          </button>
+          <button type="button" class="niche-filter-btn" [class.active]="selectedNiche === 'Moda Masculina'" (click)="setNiche('Moda Masculina')">
+            <span class="material-symbols-outlined filter-icon">man</span>
+            <span>Sastrería & Menswear</span>
+          </button>
+          <button type="button" class="niche-filter-btn" [class.active]="selectedNiche === 'Athleisure'" (click)="setNiche('Athleisure')">
+            <span class="material-symbols-outlined filter-icon">directions_run</span>
+            <span>Athleisure & Sneakers</span>
+          </button>
+        </div>
+
+        <!-- Grilla del Carrusel -->
+        <div class="curated-grid">
+          @for (piece of visiblePieces; track piece.id) {
+            <article class="ar-card">
+              <div class="ar-card-media">
+                <img [src]="piece.imageUrl" [alt]="piece.name" class="ar-card-img" />
+                <span class="ar-pill">{{ piece.category }}</span>
+                <button
+                  type="button"
+                  class="wishlist-btn"
+                  [class.active]="piece.wishlist"
+                  (click)="toggleWishlist(piece)"
+                  aria-label="Favorito"
+                >
+                  <span class="material-symbols-outlined">
+                    {{ piece.wishlist ? 'favorite' : 'favorite_border' }}
+                  </span>
+                </button>
+              </div>
+
+              <div class="ar-card-body">
+                <div class="ar-card-info">
+                  <h3 class="ar-card-title">{{ piece.name }}</h3>
+                  <p class="ar-card-material">{{ piece.material }}</p>
+                </div>
+                <span class="ar-card-price">${{ piece.price }}</span>
+              </div>
+
+              <button type="button" class="ar-try-btn" (click)="openArModal(piece)">
+                <span class="material-symbols-outlined">view_in_ar</span>
+                <span>Probar en 3D / AR</span>
+              </button>
+            </article>
+          }
+        </div>
+      </div>
+    </section>
+
     <!-- ================================================================= -->
     <!-- SECTION: PLANES DE SUSCRIPCIÓN SAAS (CU01 - PRICING GRID)         -->
     <!-- ================================================================= -->
@@ -457,6 +549,7 @@
         <a (click)="scrollToSection('story-elegante')" class="cursor-pointer">Alta Costura</a>
         <a (click)="scrollToSection('story-urbano')" class="cursor-pointer">Streetwear</a>
         <a (click)="scrollToSection('story-running')" class="cursor-pointer">Sneakers</a>
+        <a (click)="scrollToSection('piezas-ar')" class="cursor-pointer">Showroom 15 Modelos</a>
         <a (click)="scrollToSection('planes-saas')" class="cursor-pointer">Planes de Suscripción</a>
         <a routerLink="/saas">Administración SaaS</a>
         <a routerLink="/catalogo">Catálogo de Prendas</a>

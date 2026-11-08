@@ -70,52 +70,179 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   cargandoPlanes = false;
 
-  // Carrusel de piezas de exhibición / probador virtual
+  readonly Math = Math;
+
+  // Carrusel Showroom Multimodelo (15 Modelos Reales)
   curatedPieces: ArPiece[] = [
     {
-      id: 'ar-01',
-      name: "Americana Estructurada 'Noir'",
+      id: 'model-01',
+      name: 'Bad Gyal Streetwear Denim',
+      category: 'Streetwear',
+      material: 'Algodón peinado & Denim 14oz',
+      price: 149,
+      imageUrl: 'assets/images/models/bad_gyal_chinatown_denim.jpg',
+      isArReady: true,
+      drapeDetail: 'Calce holgado tiro bajo con caída recta sobre zapatilla urbana.'
+    },
+    {
+      id: 'model-02',
+      name: 'Bad Gyal Arctic Faux Fur',
+      category: 'Alta Costura',
+      material: 'Piel sintética ártica premium & satén',
+      price: 489,
+      imageUrl: 'assets/images/models/bad_gyal_fur_coat.jpg',
+      isArReady: true,
+      drapeDetail: 'Silueta envolvente con cuello esmoquin y forro de satén acolchado.'
+    },
+    {
+      id: 'model-03',
+      name: 'Quevedo GQ Aviator Sherpa',
+      category: 'Moda Masculina',
+      material: 'Cuero napa vacuno & Cuello borrego',
+      price: 380,
+      imageUrl: 'assets/images/models/quevedo_gq_sherpa.jpg',
+      isArReady: true,
+      drapeDetail: 'Corte boxy estructurado con solapas altas y hebillas metálicas.'
+    },
+    {
+      id: 'model-04',
+      name: 'Corset Escultural Rosa Atelier',
+      category: 'Alta Costura',
+      material: 'Crepé de seda & Ballenas flexibles',
+      price: 620,
+      imageUrl: 'assets/images/models/vestido_corset_rosa.jpg',
+      isArReady: true,
+      drapeDetail: 'Entallado de silueta reloj de arena con soporte anatómico interior.'
+    },
+    {
+      id: 'model-05',
+      name: 'Bad Gyal Y2K Ripped Flare',
+      category: 'Streetwear',
+      material: 'Denim vintage con roturas láser',
+      price: 175,
+      imageUrl: 'assets/images/models/bad_gyal_y2k_ripped_denim.jpg',
+      isArReady: true,
+      drapeDetail: 'Cintura baja con bota flare acampanada y desgastes artesanales.'
+    },
+    {
+      id: 'model-06',
+      name: 'Bad Gyal Glitter Naked Dress',
+      category: 'Alta Costura',
+      material: 'Malla metálica & Cristales checos',
+      price: 540,
+      imageUrl: 'assets/images/models/bad_gyal_glitter_dress.jpg',
+      isArReady: true,
+      drapeDetail: 'Drapeado fluido con espalda totalmente descubierta y caída cascada.'
+    },
+    {
+      id: 'model-07',
+      name: 'Baggy Denim Essential Fit',
+      category: 'Streetwear',
+      material: 'Denim orgánico lavado piedra',
+      price: 130,
+      imageUrl: 'assets/images/models/baggy_denim_essential.jpg',
+      isArReady: true,
+      drapeDetail: 'Corte balloon relajado con tiro medio y botamanga ancha.'
+    },
+    {
+      id: 'model-08',
+      name: 'Kylie Jenner Tailored Poplin',
       category: 'Sastrería',
-      material: 'Lana virgen peinada',
-      price: 1450,
-      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCjogABFmF-uQcsPi0fwzb-TM1aNyfo4jx_DcHcGWFAyRHy9BeBIHVF1x9fOg6yXorHEqoTnUhBz7_OXxD57ul0tliA5s6jf6HFntNsWdNbeoXdoPC92uS4O7cyrvT-jiDLdWPQoip-KHiH6krNhlzxoLFSYQNiEdoKoAOogXBafrYbea7sFh26XnsGi85-wOW86ssJLEQIEFVUS-I45D7j5mNNia18pMSCeyk6C-LI-17U1P_kpQID3QN4Eq39BN78BZBSUUZTTmY',
+      material: 'Popelina egipcia & Visón sintético',
+      price: 310,
+      imageUrl: 'assets/images/models/kylie_jenner_poplin_shirt.jpg',
       isArReady: true,
-      drapeDetail: 'Calce arquitectónico de hombros y caída rígida de solapa.'
+      drapeDetail: 'Pinzas de entalle corsetero en torso y cuello clásico italiano.'
     },
     {
-      id: 'ar-02',
-      name: 'Vestido Plisado Arquitectura',
-      category: 'Vestidos',
-      material: 'Seda orgánica fluida',
-      price: 1890,
-      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB_-DsqBg_7ZHJgYu4abo4zwYWxhm7yVVEcojwFOhCX4qDzqc9IJyHtUEGpE5JbhbfEqyajp6tjLlwB2onotO_ofssuABRw_26DEoCO6_DkAXGyHwloXO_-NBUOlb17Pz699E8OlV3UYl0NofZIKe7VXA6ejKsTfP3XLYndWyutUZDYEF7MEOOphDgcTM9bX-asITaBkqXWY611jLuCByRPyN1lh15dBYxnYlYdVckBBunebS-L0y6nM1wCpkCv72psCaYH6EPUT4A',
+      id: 'model-09',
+      name: 'Oversized Streetwear Denim Look',
+      category: 'Streetwear',
+      material: 'Denim pesado 100% algodón',
+      price: 140,
+      imageUrl: 'assets/images/models/oversized_streetwear_denim.jpg',
       isArReady: true,
-      drapeDetail: 'Micro-plisados dinámicos que reaccionan a giros corporales.'
+      drapeDetail: 'Silueta ultra-oversized skater con pretina caída y bolsillos cargo.'
     },
     {
-      id: 'ar-03',
-      name: 'Trench Escultural Modular',
-      category: 'Abrigos',
-      material: 'Gabardina técnica mate',
-      price: 2100,
-      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA07pWbLVRPZIJtdvG-AEQcYW5ktkihmu3zhyC01hNxdcLlJqZCqEo3iQmawzpa6Q-RU8z5yLsqgzqNc6iffM2WAreLFGpXL27o8lbvsSBB6rliNmWrCOXFafXoOPw_ohSongZuyavdZX4LVL04r5_diUp1lRwAIdeBZhIKXd3CzwrvQf34e5Vhx3uXWeDpgfeDDg85cuOT9E_mFEoL5T5oKRwD43Y-32Ary5XYEcEzKFGaJblkbv5fOun2XSptlBjEP35PMi4s8pU',
+      id: 'model-10',
+      name: 'Rauw Alejandro Camel Tailoring',
+      category: 'Moda Masculina',
+      material: 'Lana tropical tono camello',
+      price: 750,
+      imageUrl: 'assets/images/models/rauw_alejandro_camel_suit.jpg',
       isArReady: true,
-      drapeDetail: 'Membrana impermeable de tensión adaptativa.'
+      drapeDetail: 'Hombreras extendidas estilo 90s con caída fluida de pantalón pinzado.'
     },
     {
-      id: 'ar-04',
-      name: 'Abrigo Sculptural No. 04',
-      category: 'Abrigos',
-      material: 'Lana cashmere pura estructurada',
-      price: 2450,
-      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBYol-RVh89k_pIiGjtDbYZnKU1ssCufEXp08ssdCj-Q5w-hiKcQ09SnDzNLRK3HsWx20FT27gy94Gaqqo0BkQx_R52PwoXbvF18KP4YJmCIY1YnOc0odUGboz8BnJAbhJ7xkk3X7EyVIR4Hug472eBiKURodPK4zitOH7Zo8dkY3dVJFLSQXjYLKD5uMpIlaU8Wz2eJoAGgsfHzk9bVKdF0yPOHskqbKQOLxaAkKRmOSZ0D5QVXWJEk5iX4rFXb_1Q8xzU8oS8qrE',
+      id: 'model-11',
+      name: 'Athleisure Biker & Chunky Sneaker',
+      category: 'Athleisure',
+      material: 'Microfibra elástica & Suela EVA multicapa',
+      price: 220,
+      imageUrl: 'assets/images/models/athleisure_biker_sneakers.jpg',
       isArReady: true,
-      drapeDetail: 'Silueta cocoon con cuello envolvente de alta densidad.'
+      drapeDetail: 'Compresión media transpirable con zapatilla amortiguada para asfalto.'
+    },
+    {
+      id: 'model-12',
+      name: 'Varsity Sport Basketball Edition',
+      category: 'Athleisure',
+      material: 'Algodón peinado & Felpa francesa',
+      price: 260,
+      imageUrl: 'assets/images/models/varsity_sport_brown.jpg',
+      isArReady: true,
+      drapeDetail: 'Chaqueta universitaria con broches de presión y short deportivo high-waist.'
+    },
+    {
+      id: 'model-13',
+      name: 'Gym Training Pro Monochrome',
+      category: 'Athleisure',
+      material: 'Poliamida seamless 4-way stretch',
+      price: 195,
+      imageUrl: 'assets/images/models/gym_training_gray_set.jpg',
+      isArReady: true,
+      drapeDetail: 'Ajuste de segunda piel termoactivo con chaqueta bomber ligera.'
+    },
+    {
+      id: 'model-14',
+      name: 'Sydney Sweeney Double Denim Boxy',
+      category: 'Streetwear',
+      material: 'Denim añejo índigo puro',
+      price: 290,
+      imageUrl: 'assets/images/models/sydney_sweeney_double_denim.jpg',
+      isArReady: true,
+      drapeDetail: 'Campera boxy con hombros caídos y pantalón palazzo de tiro alto.'
+    },
+    {
+      id: 'model-15',
+      name: 'Sydney Sweeney Silk Slip Dress',
+      category: 'Alta Costura',
+      material: 'Satén de seda natural celeste',
+      price: 420,
+      imageUrl: 'assets/images/models/sydney_sweeney_satin_dress.jpg',
+      isArReady: true,
+      drapeDetail: 'Corte al bies con caída fluida diagonal y escote drapeado suave.'
     }
   ];
 
+  selectedNiche: string = 'TODOS';
   carouselOffset = 0;
   readonly visibleItems = 3;
+
+  get filteredPieces(): ArPiece[] {
+    if (this.selectedNiche === 'TODOS') {
+      return this.curatedPieces;
+    }
+    return this.curatedPieces.filter(p => 
+      p.category.toLowerCase().includes(this.selectedNiche.toLowerCase())
+    );
+  }
+
+  setNiche(niche: string): void {
+    this.selectedNiche = niche;
+    this.carouselOffset = 0;
+  }
 
   // Modales interactivos
   selectedArPiece: ArPiece | null = null;
@@ -262,7 +389,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   nextSlide(): void {
-    const maxOffset = Math.max(0, this.curatedPieces.length - this.visibleItems);
+    const list = this.filteredPieces;
+    const maxOffset = Math.max(0, list.length - this.visibleItems);
     if (this.carouselOffset < maxOffset) {
       this.carouselOffset++;
     } else {
@@ -271,7 +399,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   prevSlide(): void {
-    const maxOffset = Math.max(0, this.curatedPieces.length - this.visibleItems);
+    const list = this.filteredPieces;
+    const maxOffset = Math.max(0, list.length - this.visibleItems);
     if (this.carouselOffset > 0) {
       this.carouselOffset--;
     } else {
@@ -280,7 +409,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get visiblePieces(): ArPiece[] {
-    return this.curatedPieces.slice(this.carouselOffset, this.carouselOffset + this.visibleItems);
+    return this.filteredPieces.slice(this.carouselOffset, this.carouselOffset + this.visibleItems);
   }
 
   openArModal(piece?: ArPiece): void {
