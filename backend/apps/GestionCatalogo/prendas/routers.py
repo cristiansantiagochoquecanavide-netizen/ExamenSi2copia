@@ -10,7 +10,7 @@ from apps.core.database import get_db
 from apps.UsuariosSeguridad.models import Usuario
 from apps.core.tenant import get_optional_tenant_context, TenantContext
 from apps.UsuariosSeguridad.routers import get_current_user, get_optional_current_user, require_permissions
-from apps.GestionCatalogo.schemas import (
+from .schemas import (
     CategoriaCreate, CategoriaUpdate, CategoriaResponse,
     TallaCreate, TallaUpdate, TallaResponse,
     ColorCreate, ColorUpdate, ColorResponse,
@@ -21,8 +21,8 @@ from apps.GestionCatalogo.schemas import (
     CalificacionCreate, CalificacionUpdate, CalificacionResponse, ListadoCalificacionesResponse,
     VtonTryOnResponse
 )
-from apps.GestionCatalogo.services import ParametrosModaService, PrendaService, StockService, CalificacionService
-from apps.GestionCatalogo.vton_service import VtonService
+from .services import ParametrosModaService, PrendaService, StockService, CalificacionService
+from apps.GestionCatalogo.vton.vton_service import VtonService
 
 
 router = APIRouter(prefix="/catalogo", tags=["Cat?logo & Moda"])
@@ -281,7 +281,7 @@ async def remove_background_prenda(
 
     - `force=true` re-processes even if a cached nobg PNG exists.
     """
-    from apps.GestionCatalogo.bg_removal import (
+    from apps.GestionCatalogo.vton.bg_removal import (
         process_image_file,
         build_nobg_url,
         NOBG_DIR,
@@ -359,7 +359,7 @@ async def virtual_try_on(
     3. Amolda la prenda con compensación de iluminación, escala y sombras de contacto.
     4. Retorna la imagen resultante del usuario vistiendo la prenda.
     """
-    from apps.GestionCatalogo.vton_service import VtonService
+    from apps.GestionCatalogo.vton.vton_service import VtonService
 
     foto_bytes = await foto_usuario.read()
     if not foto_bytes:
@@ -545,8 +545,8 @@ async def virtual_try_on(
 # ROL: Vendedor / Sistema (Angular PWA & Flutter Offline)
 # CAPA MVC: [CONTROLADOR / ENDPOINT DE SINCRONIZACIÓN OFFLINE]
 # ==========================================================================
-from apps.GestionCatalogo.schemas import PrendaSyncItem
-from apps.GestionCatalogo.services import CatalogoSyncService
+from .schemas import PrendaSyncItem
+from .services import CatalogoSyncService
 
 @router.get("/sincronizar-local", response_model=List[PrendaSyncItem], summary="Descargar Catálogo Local para Offline (CU08)")
 async def sincronizar_catalogo_local(
@@ -567,8 +567,8 @@ async def sincronizar_catalogo_local(
 # ROL: Administrador del Tenant / Encargado de Marketing
 # CAPA MVC: [CONTROLADOR / ENDPOINTS DE DIFUSIÓN OMNICANAL]
 # ==========================================================================
-from apps.GestionCatalogo.schemas import DifusionCatalogoCreate, DifusionCatalogoResponse
-from apps.GestionCatalogo.services import DifusionCatalogoService
+from .schemas import DifusionCatalogoCreate, DifusionCatalogoResponse
+from .services import DifusionCatalogoService
 
 @router.post(
     "/difundir",

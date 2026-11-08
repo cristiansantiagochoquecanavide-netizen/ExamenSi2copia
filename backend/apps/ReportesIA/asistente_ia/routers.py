@@ -4,10 +4,10 @@ from fastapi import APIRouter, Depends, Query, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.core.database import get_db
-from apps.ReportesIA.schemas import (
+from .schemas import (
     DashboardReporteResponse, ConsultaVozRequest, AnalisisVozResponse
 )
-from apps.ReportesIA.services import ReportesService
+from .services import ReportesService
 
 router = APIRouter(prefix="/reportes", tags=["Reportes & Dashboard (IA) - CU22"])
 

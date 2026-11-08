@@ -8,8 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from apps.core.database import get_db
 from apps.UsuariosSeguridad.models import Usuario
 from apps.UsuariosSeguridad.routers import get_current_user, get_optional_current_user, require_permissions
-from apps.GestionVentas.services import VentasService
-from apps.GestionVentas.schemas import (
+from .services import VentasService
+from .schemas import (
     VentasStatusResponse, VentaPOSCreate, VentaResponse,
     DevolucionCreate, DevolucionResponse, VentaParaDevolucionResponse,
     PagoResponse, PagoElectronicoCreate, ConfirmarPagoRequest,

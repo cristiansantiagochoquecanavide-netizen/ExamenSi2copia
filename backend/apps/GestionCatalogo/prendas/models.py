@@ -196,7 +196,7 @@ class CalificacionPrenda(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     prenda: Mapped["Prenda"] = relationship("Prenda", back_populates="calificaciones")
-    usuario: Mapped["apps.UsuariosSeguridad.models.Usuario"] = relationship("apps.UsuariosSeguridad.models.Usuario", lazy="selectin")
+    usuario: Mapped["Usuario"] = relationship("Usuario", lazy="selectin")
 
 # ----------------- CU09: DIFUSIÓN DE NOVEDADES DE CATÁLOGO -----------------
 # ==========================================================================

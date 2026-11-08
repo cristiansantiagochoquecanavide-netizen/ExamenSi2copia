@@ -4,8 +4,8 @@ from sqlalchemy import select, and_, or_, desc, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from apps.GestionInventario.models import Ciudad, Sucursal
-from apps.GestionInventario.schemas import CiudadCreate, CiudadUpdate, SucursalCreate, SucursalUpdate
+from .models import Ciudad, Sucursal
+from .schemas import CiudadCreate, CiudadUpdate, SucursalCreate, SucursalUpdate
 from apps.UsuariosSeguridad.models import Usuario
 from apps.UsuariosSeguridad.services import AuditoriaService
 
@@ -246,8 +246,8 @@ class SucursalService:
 # ==============================================================================
 from decimal import Decimal
 from datetime import date
-from apps.GestionInventario.models import Proveedor, RecepcionMercaderia, DetalleRecepcionMercaderia
-from apps.GestionInventario.schemas import (
+from .models import Proveedor, RecepcionMercaderia, DetalleRecepcionMercaderia
+from .schemas import (
     ProveedorCreate, ProveedorUpdate, RecepcionMercaderiaCreate
 )
 from apps.GestionCatalogo.models import PrendaVariante, InventarioStock, MovimientoInventario
@@ -508,8 +508,8 @@ class RecepcionMercaderiaService:
 # CU9: TRANSFERENCIA DE STOCK ENTRE SUCURSALES (KARDEX & REBALANCEO)
 # ==============================================================================
 from datetime import datetime, timezone
-from apps.GestionInventario.models import TransferenciaStock, DetalleTransferenciaStock
-from apps.GestionInventario.schemas import TransferenciaStockCreate
+from .models import TransferenciaStock, DetalleTransferenciaStock
+from .schemas import TransferenciaStockCreate
 
 
 class TransferenciaStockService:
@@ -879,7 +879,7 @@ class TraspasoService:
         """
         CU11: Consultar Disponibilidad de Inventario Multi-sucursal con aislamiento tenant.
         """
-        from apps.GestionInventario.models import Sucursal
+        from .models import Sucursal
         from apps.GestionCatalogo.models import InventarioStock
 
         query = select(Sucursal).where(Sucursal.activo == True)
@@ -943,7 +943,8 @@ class TraspasoService:
         - Descuenta stock en origen y fija estado en 'EN_TRANSITO'.
         """
         import uuid
-        from apps.GestionInventario.models import Sucursal, TraspasoInventario, DetalleTraspaso
+        from .models import Sucursal
+        from apps.GestionSaas.planes.models import TraspasoInventario, DetalleTraspaso
         from apps.GestionCatalogo.models import InventarioStock, MovimientoInventario
 
         if data.sucursal_origen_id == data.sucursal_destino_id:
@@ -1045,7 +1046,7 @@ class TraspasoService:
         - Suma las cantidades al stock de destino.
         - Actualiza el estado a 'RECEPCIONADO'.
         """
-        from apps.GestionInventario.models import TraspasoInventario, DetalleTraspaso
+        from apps.GestionSaas.planes.models import TraspasoInventario, DetalleTraspaso
         from apps.GestionCatalogo.models import InventarioStock, MovimientoInventario
 
         res = await db.execute(

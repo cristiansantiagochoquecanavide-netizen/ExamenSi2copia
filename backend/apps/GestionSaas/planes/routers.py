@@ -6,14 +6,14 @@ from apps.core.database import get_db
 from apps.core.tenant import (
     TenantContext, get_current_tenant_context, get_optional_tenant_context
 )
-from apps.GestionSaas.schemas import (
+from .schemas import (
     PlanCreate, PlanUpdate, PlanResponse, EmpresaCreate, EmpresaResponse,
     CambiarPlanRequest, SuscripcionDetalleResponse,
     SucursalTenantCreate, SucursalTenantResponse,
     GuiaMedidasProductoResponse, GuiaMedidaCreate, GuiaMedidaItem,
     PoliticaGarantiaResponse, PoliticaGarantiaUpdate
 )
-from apps.GestionSaas.services import (
+from .services import (
     PlanService, EmpresaService, SuscripcionService, SucursalTenantService,
     GuiaMedidasService, PoliticaGarantiaService
 )

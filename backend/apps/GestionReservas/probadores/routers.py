@@ -8,8 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from apps.core.database import get_db
 from apps.UsuariosSeguridad.models import Usuario
 from apps.UsuariosSeguridad.routers import get_current_user, get_optional_current_user, require_permissions
-from apps.GestionReservas.services import ReservasService
-from apps.GestionReservas.schemas import (
+from .services import ReservasService
+from .schemas import (
     ReservasStatusResponse, ReservaCreate, ReservaResponse, ReservaCancelarRequest,
     AsignarProbadorRequest, FinalizarPruebaRequest, ReservaExpirarRequest,
     ReservaTrazabilidadResponse

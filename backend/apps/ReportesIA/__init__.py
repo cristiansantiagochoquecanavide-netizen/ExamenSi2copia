@@ -1,8 +1,4 @@
-# ==============================================================================
-# SUBSISTEMA: ReportesIA (Namespace Modular)
-# ==============================================================================
-from .asistente_ia.routers import ia_router, ml_router
-from .asistente_ia.services import *
-from .asistente_ia.schemas import *
-from .exportacion.export_service import *
-from .predicciones_ml.ml_service import *
+from .asistente_ia.routers import router as ia_router
+
+router = ia_router
+ml_router = None

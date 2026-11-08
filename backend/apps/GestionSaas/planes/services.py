@@ -7,10 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from apps.core.tenant import TenantContext, verify_tenant_access
-from apps.GestionSaas.models import (
+from .models import (
     PlanSuscripcion, Empresa, Suscripcion, GuiaMedida, PoliticaGarantia
 )
-from apps.GestionSaas.schemas import (
+from .schemas import (
     PlanCreate, PlanUpdate, CambiarPlanRequest,
     EmpresaCreate, SucursalTenantCreate, GuiaMedidaCreate, PoliticaGarantiaUpdate
 )
@@ -613,7 +613,7 @@ class SuscripcionService:
             try:
                 from apps.core.security import create_access_token
                 from apps.UsuariosSeguridad.models import Usuario, Rol
-                from apps.GestionSaas.models import Empresa
+                from .models import Empresa
                 from sqlalchemy.orm import selectinload
 
                 u_res = await db.execute(

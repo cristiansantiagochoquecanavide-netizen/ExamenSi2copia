@@ -16,9 +16,9 @@ from apps.UsuariosSeguridad.models import Usuario
 from apps.UsuariosSeguridad.services import AuditoriaService
 from apps.GestionInventario.models import Sucursal
 from apps.GestionCatalogo.models import PrendaVariante, InventarioStock, MovimientoInventario
-from apps.GestionReservas.models import Reserva, DetalleReserva
+from .models import Reserva, DetalleReserva
 from apps.GestionVentas.models import Venta, DetalleVenta, Pago
-from apps.GestionReservas.schemas import (
+from .schemas import (
     ReservaCreate, ReservaResponse, DetalleReservaResponse, ReservaCancelarRequest,
     AsignarProbadorRequest, FinalizarPruebaRequest, ReservaExpirarRequest
 )

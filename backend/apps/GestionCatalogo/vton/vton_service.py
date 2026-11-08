@@ -26,7 +26,7 @@ except ImportError:
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from apps.GestionCatalogo.models import Prenda, PrendaMultimedia
-from apps.GestionCatalogo.bg_removal import process_image_file, UPLOAD_DIR
+from .bg_removal import process_image_file, UPLOAD_DIR
 
 logger = logging.getLogger(__name__)
 

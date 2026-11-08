@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from apps.core.database import get_db
 from apps.UsuariosSeguridad.models import Usuario
 from apps.UsuariosSeguridad.routers import get_current_user, require_permissions
-from apps.GestionInventario.schemas import (
+from .schemas import (
     CiudadCreate, CiudadUpdate, CiudadResponse,
     SucursalCreate, SucursalUpdate, SucursalResponse,
     AsignarEncargadoRequest, MensajeInventarioResponse,
@@ -14,7 +14,7 @@ from apps.GestionInventario.schemas import (
     TransferenciaStockCreate, TransferenciaStockResponse,
     RecibirTransferenciaRequest, CancelarTransferenciaRequest
 )
-from apps.GestionInventario.services import (
+from .services import (
     CiudadService, SucursalService, ProveedorService, RecepcionMercaderiaService,
     TransferenciaStockService
 )
@@ -268,10 +268,10 @@ async def cancelar_transferencia(
 from fastapi import Query
 from apps.core.tenant import get_optional_tenant_context, TenantContext
 from apps.UsuariosSeguridad.routers import get_optional_current_user
-from apps.GestionInventario.schemas import (
+from .schemas import (
     StockSucursalItem, TraspasoCreateRequest, RecepcionTraspasoRequest, TraspasoActionResponse
 )
-from apps.GestionInventario.services import TraspasoService
+from .services import TraspasoService
 
 
 # ==========================================================================

@@ -9,10 +9,10 @@ from sqlalchemy.orm import selectinload
 
 from apps.core.config import settings
 from apps.core.security import hash_password, verify_password, create_access_token
-from apps.UsuariosSeguridad.models import (
+from .models import (
     Usuario, Rol, Permiso, TokenBlacklist, RecuperacionPassword, BitacoraAuditoria
 )
-from apps.UsuariosSeguridad.schemas import (
+from .schemas import (
     LoginRequest, SolicitarRecuperacionRequest, RestablecerPasswordRequest,
     RolCreate, RolUpdate, ClienteRegistroRequest, PersonalRegistroRequest,
     UsuarioUpdate, CambiarEstadoRequest

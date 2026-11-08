@@ -98,7 +98,8 @@ if notificaciones_router:
 if sincronizacion_router:
     app.include_router(sincronizacion_router, prefix=settings.API_V1_STR)
 app.include_router(ia_router, prefix=settings.API_V1_STR)
-app.include_router(ml_router, prefix=settings.API_V1_STR)
+if ml_router:
+    app.include_router(ml_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/", tags=["Root"])

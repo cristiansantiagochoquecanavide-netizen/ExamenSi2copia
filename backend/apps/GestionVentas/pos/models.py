@@ -31,9 +31,9 @@ class Venta(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
-    sucursal: Mapped["apps.GestionInventario.models.Sucursal"] = relationship("apps.GestionInventario.models.Sucursal", lazy="selectin")
-    cajero: Mapped["apps.UsuariosSeguridad.models.Usuario"] = relationship("apps.UsuariosSeguridad.models.Usuario", foreign_keys=[usuario_id], lazy="selectin")
-    cliente: Mapped[Optional["apps.UsuariosSeguridad.models.Usuario"]] = relationship("apps.UsuariosSeguridad.models.Usuario", foreign_keys=[cliente_id], lazy="selectin")
+    sucursal: Mapped["Sucursal"] = relationship("Sucursal", lazy="selectin")
+    cajero: Mapped["Usuario"] = relationship("Usuario", foreign_keys=[usuario_id], lazy="selectin")
+    cliente: Mapped[Optional["Usuario"]] = relationship("Usuario", foreign_keys=[cliente_id], lazy="selectin")
     detalles: Mapped[List["DetalleVenta"]] = relationship("DetalleVenta", back_populates="venta", cascade="all, delete-orphan", lazy="selectin")
     pagos: Mapped[List["Pago"]] = relationship("Pago", back_populates="venta", cascade="all, delete-orphan", lazy="selectin")
     devoluciones: Mapped[List["Devolucion"]] = relationship("Devolucion", back_populates="venta", cascade="all, delete-orphan", lazy="selectin")
@@ -52,7 +52,7 @@ class DetalleVenta(Base):
     subtotal: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
 
     venta: Mapped["Venta"] = relationship("Venta", back_populates="detalles")
-    variante: Mapped["apps.GestionCatalogo.models.PrendaVariante"] = relationship("apps.GestionCatalogo.models.PrendaVariante", lazy="selectin")
+    variante: Mapped["PrendaVariante"] = relationship("PrendaVariante", lazy="selectin")
 
 
 class Pago(Base):
@@ -95,8 +95,8 @@ class Devolucion(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     venta: Mapped["Venta"] = relationship("Venta", back_populates="devoluciones")
-    sucursal: Mapped["apps.GestionInventario.models.Sucursal"] = relationship("apps.GestionInventario.models.Sucursal", lazy="selectin")
-    cajero: Mapped["apps.UsuariosSeguridad.models.Usuario"] = relationship("apps.UsuariosSeguridad.models.Usuario", foreign_keys=[usuario_id], lazy="selectin")
+    sucursal: Mapped["Sucursal"] = relationship("Sucursal", lazy="selectin")
+    cajero: Mapped["Usuario"] = relationship("Usuario", foreign_keys=[usuario_id], lazy="selectin")
     detalles: Mapped[List["DetalleDevolucion"]] = relationship("DetalleDevolucion", back_populates="devolucion", cascade="all, delete-orphan", lazy="selectin")
 
 
@@ -118,11 +118,11 @@ class DetalleDevolucion(Base):
     diferencia_linea: Mapped[Decimal] = mapped_column(Numeric(12, 2), default=Decimal("0.00"), nullable=False)
 
     devolucion: Mapped["Devolucion"] = relationship("Devolucion", back_populates="detalles")
-    variante_devuelta: Mapped["apps.GestionCatalogo.models.PrendaVariante"] = relationship(
-        "apps.GestionCatalogo.models.PrendaVariante", foreign_keys=[variante_devuelta_id], lazy="selectin"
+    variante_devuelta: Mapped["PrendaVariante"] = relationship(
+        "PrendaVariante", foreign_keys=[variante_devuelta_id], lazy="selectin"
     )
-    variante_cambio: Mapped[Optional["apps.GestionCatalogo.models.PrendaVariante"]] = relationship(
-        "apps.GestionCatalogo.models.PrendaVariante", foreign_keys=[variante_cambio_id], lazy="selectin"
+    variante_cambio: Mapped[Optional["PrendaVariante"]] = relationship(
+        "PrendaVariante", foreign_keys=[variante_cambio_id], lazy="selectin"
     )
 
 
@@ -155,8 +155,8 @@ class EnvioPedido(Base):
 
     # Relaciones
     venta: Mapped["Venta"] = relationship("Venta", back_populates="envio")
-    sucursal_recojo: Mapped[Optional["apps.GestionInventario.models.Sucursal"]] = relationship(
-        "apps.GestionInventario.models.Sucursal", foreign_keys=[sucursal_recojo_id], lazy="selectin"
+    sucursal_recojo: Mapped[Optional["Sucursal"]] = relationship(
+        "Sucursal", foreign_keys=[sucursal_recojo_id], lazy="selectin"
     )
 
 
@@ -188,11 +188,11 @@ class Promocion(Base):
     )
 
     # Relaciones
-    categoria: Mapped[Optional["apps.GestionCatalogo.models.Categoria"]] = relationship(
-        "apps.GestionCatalogo.models.Categoria", lazy="selectin"
+    categoria: Mapped[Optional["Categoria"]] = relationship(
+        "Categoria", lazy="selectin"
     )
-    sucursal: Mapped[Optional["apps.GestionInventario.models.Sucursal"]] = relationship(
-        "apps.GestionInventario.models.Sucursal", lazy="selectin"
+    sucursal: Mapped[Optional["Sucursal"]] = relationship(
+        "Sucursal", lazy="selectin"
     )
     usos: Mapped[List["UsoPromocion"]] = relationship("UsoPromocion", back_populates="promocion", cascade="all, delete-orphan")
 
@@ -210,7 +210,7 @@ class UsoPromocion(Base):
     # Relaciones
     promocion: Mapped["Promocion"] = relationship("Promocion", back_populates="usos")
     venta: Mapped["Venta"] = relationship("Venta", backref="usos_promocion")
-    usuario: Mapped[Optional["apps.UsuariosSeguridad.models.Usuario"]] = relationship("apps.UsuariosSeguridad.models.Usuario", lazy="selectin")
+    usuario: Mapped[Optional["Usuario"]] = relationship("Usuario", lazy="selectin")
 
 
 

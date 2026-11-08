@@ -5,11 +5,11 @@ from sqlalchemy import select, and_, or_, desc, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from apps.GestionCatalogo.models import (
+from .models import (
     Categoria, Talla, Color, Temporada, Prenda, PrendaMultimedia, PrendaVariante,
     InventarioStock, MovimientoInventario, CalificacionPrenda, DifusionCatalogo
 )
-from apps.GestionCatalogo.schemas import (
+from .schemas import (
     CategoriaCreate, CategoriaUpdate, TallaCreate, TallaUpdate,
     ColorCreate, ColorUpdate, TemporadaCreate, TemporadaUpdate,
     PrendaCreate, PrendaUpdate, PrendaMultimediaCreate, AjusteInventarioRequest,
@@ -1139,7 +1139,7 @@ class CatalogoSyncService:
         CU08: Provee volcado estructurado consumido por IndexedDB (Angular PWA)
         y SQLite (Flutter) con tabla de medidas anatómicas en centímetros.
         """
-        from apps.GestionCatalogo.models import Prenda, PrendaVariante, Categoria, Talla, Color, InventarioStock
+        from .models import Prenda, PrendaVariante, Categoria, Talla, Color, InventarioStock
         from apps.GestionSaas.models import GuiaMedida
         
         # Medidas anatómicas estándar según talla si la prenda no cuenta con ficha personalizada

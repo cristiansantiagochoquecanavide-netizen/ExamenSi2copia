@@ -14,11 +14,11 @@ import qrcode
 import qrcode.image.svg
 import stripe
 from apps.core.config import settings
-from apps.GestionVentas.models import (
+from .models import (
     Venta, DetalleVenta, Pago, Devolucion, DetalleDevolucion, EnvioPedido,
     Promocion, UsoPromocion
 )
-from apps.GestionVentas.schemas import (
+from .schemas import (
     VentaPOSCreate, DevolucionCreate, VentaParaDevolucionResponse, VentaParaDevolucionItem,
     PagoElectronicoCreate, ConfirmarPagoRequest, QRGenerarResponse, WebhookPagoPayload,
     VentaOnlineCheckoutRequest, ActualizarEstadoEnvioRequest,

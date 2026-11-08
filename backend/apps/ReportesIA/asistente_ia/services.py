@@ -10,7 +10,7 @@ from sqlalchemy import select, and_, or_, desc, func
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from apps.ReportesIA.schemas import (
+from .schemas import (
     KPISummaryResponse, SalesVelocityPoint, InventoryAlertItem, RecentOrderRow,
     TopProductItem, DashboardReporteResponse, AnalisisVozResponse,
     FinancialIndicatorResponse, ComparativeTrendPoint, InventoryStackedItem,

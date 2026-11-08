@@ -7,14 +7,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from apps.core.config import settings
 from apps.core.database import get_db
 from apps.core.security import decode_access_token
-from apps.UsuariosSeguridad.models import Usuario
-from apps.UsuariosSeguridad.schemas import (
+from .models import Usuario
+from .schemas import (
     LoginRequest, TokenResponse, SolicitarRecuperacionRequest, RestablecerPasswordRequest,
     MensajeResponse, RolCreate, RolUpdate, RolResponse, PermisoResponse,
     ClienteRegistroRequest, PersonalRegistroRequest, UsuarioUpdate,
     CambiarEstadoRequest, UsuarioResponse, BitacoraAuditoriaResponse
 )
-from apps.UsuariosSeguridad.services import AuthService, RolService, UsuarioService, AuditoriaService
+from .services import AuthService, RolService, UsuarioService, AuditoriaService
 
 router = APIRouter(prefix="/usuarios", tags=["Usuarios & Autenticaci?n"])
 
