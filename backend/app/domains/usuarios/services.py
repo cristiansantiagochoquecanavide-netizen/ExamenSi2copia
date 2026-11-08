@@ -130,6 +130,7 @@ class AuthService:
 
         # Obtener datos del tenant (empresa) y suscripcion activa
         empresa_id = getattr(usuario, "empresa_id", None) or 1
+        nombre_empresa = "Elegance Boutique S.R.L." if empresa_id == 1 else "Urban Style Trend Bolivia"
         subdominio = "elegance" if empresa_id == 1 else "urbanstyle"
         plan_codigo = "INTERMEDIO" if empresa_id == 1 else "BASICO"
         permite_offline = True if empresa_id == 1 else False
@@ -139,7 +140,7 @@ class AuthService:
             try:
                 from app.domains.saas.models import Empresa, Suscripcion, PlanSuscripcion
                 sub_res = await db.execute(
-                    select(Empresa.subdominio, PlanSuscripcion.codigo, PlanSuscripcion.permite_offline, PlanSuscripcion.permite_ia)
+                    select(Empresa.razon_social, Empresa.subdominio, PlanSuscripcion.codigo, PlanSuscripcion.permite_offline, PlanSuscripcion.permite_ia)
                     .join(Suscripcion, Suscripcion.empresa_id == Empresa.id)
                     .join(PlanSuscripcion, Suscripcion.plan_id == PlanSuscripcion.id)
                     .where(Empresa.id == usuario.empresa_id, Suscripcion.estado == 'ACTIVA')
@@ -147,15 +148,17 @@ class AuthService:
                 )
                 empresa_info = sub_res.first()
                 if empresa_info:
-                    subdominio = empresa_info[0]
-                    plan_codigo = empresa_info[1]
-                    permite_offline = bool(empresa_info[2])
-                    permite_ia = bool(empresa_info[3])
+                    nombre_empresa = empresa_info[0]
+                    subdominio = empresa_info[1]
+                    plan_codigo = empresa_info[2]
+                    permite_offline = bool(empresa_info[3])
+                    permite_ia = bool(empresa_info[4])
                 else:
-                    emp_res = await db.execute(select(Empresa.subdominio).where(Empresa.id == usuario.empresa_id))
+                    emp_res = await db.execute(select(Empresa.razon_social, Empresa.subdominio).where(Empresa.id == usuario.empresa_id))
                     emp_row = emp_res.first()
                     if emp_row:
-                        subdominio = emp_row[0]
+                        nombre_empresa = emp_row[0]
+                        subdominio = emp_row[1]
             except Exception:
                 pass
 
@@ -165,6 +168,7 @@ class AuthService:
             "rol": usuario.rol.nombre if usuario.rol else "CLIENTE",
             "sucursal_id": usuario.sucursal_id,
             "empresa_id": empresa_id,
+            "nombre_empresa": nombre_empresa,
             "subdominio": subdominio,
             "plan_codigo": plan_codigo,
             "permite_offline": permite_offline,

@@ -189,7 +189,7 @@ import { SaasService, PlanSuscripcionModel, PoliticaGarantiaModel, SucursalTenan
               </div>
               <div class="info-group">
                 <label>NIT CORPORATIVO</label>
-                <div class="info-value">{{ authService.currentTenant().empresaId === 2 ? '9876543210' : '1029384756' }}</div>
+                <div class="info-value">{{ authService.currentUser()?.ci_nit || (authService.currentTenant().empresaId === 2 ? '9876543210' : '1029384756') }}</div>
               </div>
               <div class="info-group">
                 <label>SUBDOMINIO MULTITENANT</label>
@@ -199,7 +199,7 @@ import { SaasService, PlanSuscripcionModel, PoliticaGarantiaModel, SucursalTenan
               </div>
               <div class="info-group">
                 <label>EMAIL DE CONTACTO</label>
-                <div class="info-value">{{ authService.currentTenant().empresaId === 2 ? 'gerencia@urbanstyle.bo' : 'contacto@eleganceboutique.com' }}</div>
+                <div class="info-value">{{ authService.currentUser()?.email || (authService.currentTenant().empresaId === 2 ? 'gerencia@urbanstyle.bo' : 'contacto@eleganceboutique.com') }}</div>
               </div>
               <div class="info-group">
                 <label>ESTADO DE SUSCRIPCIÓN</label>
@@ -1434,6 +1434,15 @@ export class SaasPageComponent implements OnInit {
 
     this.saasService.cambiarPlan(targetPlan.id).subscribe({
       next: (res) => {
+        if (res.access_token) {
+          this.authService.updateToken(res.access_token);
+        } else {
+          this.authService.updateTenantInfo({
+            planCodigo: res.plan_codigo,
+            permiteIa: res.permite_ia,
+            permiteOffline: res.permite_offline
+          });
+        }
         this.isAlertError.set(false);
         this.alertMessage.set(`¡Migración exitosa! Tu empresa ahora opera bajo el Plan ${res.plan_nombre} (${res.plan_codigo}) con límite de ${res.limite_sucursales} sucursales.`);
         this.cargarDatos();

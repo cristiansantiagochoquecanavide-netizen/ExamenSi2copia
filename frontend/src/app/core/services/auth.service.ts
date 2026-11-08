@@ -92,7 +92,7 @@ export class AuthService {
           const empId = payload.empresa_id || (payload.email && payload.email.includes('urban') ? 2 : 1);
           const sub = payload.subdominio || (empId === 2 ? 'urbanstyle' : 'elegance');
           const plan = payload.plan_codigo || (empId === 2 ? 'BASICO' : 'INTERMEDIO');
-          const nom = empId === 2 ? 'Urban Style Trend Bolivia' : 'Elegance Boutique S.R.L.';
+          const nom = payload.nombre_empresa || (empId === 2 ? 'Urban Style Trend Bolivia' : (empId === 1 ? 'Elegance Boutique S.R.L.' : `Empresa #${empId}`));
           return {
             empresaId: empId,
             subdominio: sub,
@@ -132,6 +132,19 @@ export class AuthService {
     this.currentUser.set(authResult.usuario);
     this.isAuthenticated.set(true);
     this.currentTenant.set(this.extractTenantFromToken());
+  }
+
+  updateToken(newToken: string): void {
+    localStorage.setItem(this.TOKEN_KEY, newToken);
+    this.currentTenant.set(this.extractTenantFromToken());
+  }
+
+  updateTenantInfo(tenantInfo: Partial<TenantInfo>): void {
+    const current = this.currentTenant();
+    this.currentTenant.set({
+      ...current,
+      ...tenantInfo
+    });
   }
 
   private clearSession(): void {

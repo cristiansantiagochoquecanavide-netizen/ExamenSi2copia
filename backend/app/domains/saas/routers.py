@@ -100,7 +100,7 @@ async def cambiar_plan_suscripcion(
     Si el tenant intenta hacer downgrade a un plan cuyo límite es inferior a sus sucursales activas actuales,
     el backend bloquea la operación con HTTP 400.
     """
-    return await SuscripcionService.cambiar_plan(db, tenant.empresa_id, data.nuevo_plan_id)
+    return await SuscripcionService.cambiar_plan(db, tenant.empresa_id, data.nuevo_plan_id, user_id=tenant.user_id)
 
 
 # ------------------------------------------------------------------------------
