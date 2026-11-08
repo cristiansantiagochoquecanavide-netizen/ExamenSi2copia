@@ -36,9 +36,9 @@ services:
           print('==> Error: Timed out waiting for PostgreSQL.')
           exit(1)
       EOF
-        python init_db.py &&
-        python seed.py &&
-        exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
+        python seeders/init_db.py &&
+        python seeders/seed.py &&
+        exec uvicorn main:app --host 0.0.0.0 --port 8000 --workers 2
       "
     volumes: []  # No source mounts in production
 

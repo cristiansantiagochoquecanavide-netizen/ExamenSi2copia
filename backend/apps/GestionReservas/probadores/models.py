@@ -38,9 +38,9 @@ class Reserva(Base):
     )
 
     # Relaciones
-    cliente: Mapped["app.domains.usuarios.models.Usuario"] = relationship("app.domains.usuarios.models.Usuario", foreign_keys=[cliente_id], lazy="selectin")
-    atendido_por: Mapped[Optional["app.domains.usuarios.models.Usuario"]] = relationship("app.domains.usuarios.models.Usuario", foreign_keys=[atendido_por_id], lazy="selectin")
-    sucursal: Mapped["app.domains.inventario.models.Sucursal"] = relationship("app.domains.inventario.models.Sucursal", foreign_keys=[sucursal_id], lazy="selectin")
+    cliente: Mapped["apps.UsuariosSeguridad.models.Usuario"] = relationship("apps.UsuariosSeguridad.models.Usuario", foreign_keys=[cliente_id], lazy="selectin")
+    atendido_por: Mapped[Optional["apps.UsuariosSeguridad.models.Usuario"]] = relationship("apps.UsuariosSeguridad.models.Usuario", foreign_keys=[atendido_por_id], lazy="selectin")
+    sucursal: Mapped["apps.GestionInventario.models.Sucursal"] = relationship("apps.GestionInventario.models.Sucursal", foreign_keys=[sucursal_id], lazy="selectin")
     detalles: Mapped[List["DetalleReserva"]] = relationship("DetalleReserva", back_populates="reserva", cascade="all, delete-orphan", lazy="selectin")
 
 
@@ -58,4 +58,4 @@ class DetalleReserva(Base):
 
     # Relaciones
     reserva: Mapped["Reserva"] = relationship("Reserva", back_populates="detalles")
-    variante: Mapped["app.domains.catalogo.models.PrendaVariante"] = relationship("app.domains.catalogo.models.PrendaVariante", foreign_keys=[variante_id], lazy="selectin")
+    variante: Mapped["apps.GestionCatalogo.models.PrendaVariante"] = relationship("apps.GestionCatalogo.models.PrendaVariante", foreign_keys=[variante_id], lazy="selectin")

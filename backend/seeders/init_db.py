@@ -4,14 +4,14 @@ import asyncio
 from sqlalchemy import text
 from apps.core.database import Base, engine
 # Importar todos los modelos para registrar las tablas en Base.metadata
-import app.domains.usuarios.models
-import app.domains.inventario.models
-import app.domains.catalogo.models
-import app.domains.ventas.models
-import app.domains.reservas.models
-import app.domains.ia_asistente.models
-import app.domains.notificaciones.models
-import app.domains.saas.models
+import apps.UsuariosSeguridad.models
+import apps.GestionInventario.models
+import apps.GestionCatalogo.models
+import apps.GestionVentas.models
+import apps.GestionReservas.models
+import apps.asistente.models
+# notificaciones
+import apps.GestionSaas.models
 
 MIGRATION_STATEMENTS = [
     # Inyectar empresa_id y columnas SaaS en tablas existentes

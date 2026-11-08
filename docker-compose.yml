@@ -43,10 +43,11 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./backend/app:/app/app
-      - ./backend/init_db.py:/app/init_db.py
-      - ./backend/seed.py:/app/seed.py
-      - ./backend/database-schema.sql:/app/database-schema.sql
+      - ./backend/apps:/app/apps
+      - ./backend/main.py:/app/main.py
+      - ./backend/seeders:/app/seeders
+      - ./backend/static:/app/static
+      - ./backend/entrypoint.sh:/app/entrypoint.sh
 
   frontend:
     build:

@@ -77,7 +77,7 @@ class RecepcionMercaderia(Base):
 
     proveedor: Mapped["Proveedor"] = relationship("Proveedor", back_populates="recepciones", lazy="selectin")
     sucursal: Mapped["Sucursal"] = relationship("Sucursal", back_populates="recepciones", lazy="selectin")
-    usuario: Mapped["Usuario"] = relationship("app.domains.usuarios.models.Usuario", lazy="selectin")
+    usuario: Mapped["Usuario"] = relationship("apps.UsuariosSeguridad.models.Usuario", lazy="selectin")
     detalles: Mapped[List["DetalleRecepcionMercaderia"]] = relationship("DetalleRecepcionMercaderia", back_populates="recepcion", cascade="all, delete-orphan", lazy="selectin")
 
 
@@ -92,7 +92,7 @@ class DetalleRecepcionMercaderia(Base):
     subtotal: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
 
     recepcion: Mapped["RecepcionMercaderia"] = relationship("RecepcionMercaderia", back_populates="detalles")
-    variante: Mapped["PrendaVariante"] = relationship("app.domains.catalogo.models.PrendaVariante", lazy="selectin")
+    variante: Mapped["PrendaVariante"] = relationship("apps.GestionCatalogo.models.PrendaVariante", lazy="selectin")
 
 
 # ----------------- CU9: TRANSFERENCIA DE STOCK ENTRE SUCURSALES -----------------
@@ -120,8 +120,8 @@ class TransferenciaStock(Base):
 
     sucursal_origen: Mapped["Sucursal"] = relationship("Sucursal", foreign_keys=[sucursal_origen_id], lazy="selectin")
     sucursal_destino: Mapped["Sucursal"] = relationship("Sucursal", foreign_keys=[sucursal_destino_id], lazy="selectin")
-    usuario_envia: Mapped["Usuario"] = relationship("app.domains.usuarios.models.Usuario", foreign_keys=[usuario_envia_id], lazy="selectin")
-    usuario_recibe: Mapped[Optional["Usuario"]] = relationship("app.domains.usuarios.models.Usuario", foreign_keys=[usuario_recibe_id], lazy="selectin")
+    usuario_envia: Mapped["Usuario"] = relationship("apps.UsuariosSeguridad.models.Usuario", foreign_keys=[usuario_envia_id], lazy="selectin")
+    usuario_recibe: Mapped[Optional["Usuario"]] = relationship("apps.UsuariosSeguridad.models.Usuario", foreign_keys=[usuario_recibe_id], lazy="selectin")
     detalles: Mapped[List["DetalleTransferenciaStock"]] = relationship("DetalleTransferenciaStock", back_populates="transferencia", cascade="all, delete-orphan", lazy="selectin")
 
 
@@ -134,7 +134,7 @@ class DetalleTransferenciaStock(Base):
     cantidad: Mapped[int] = mapped_column(Integer, nullable=False)
 
     transferencia: Mapped["TransferenciaStock"] = relationship("TransferenciaStock", back_populates="detalles")
-    variante: Mapped["PrendaVariante"] = relationship("app.domains.catalogo.models.PrendaVariante", lazy="selectin")
+    variante: Mapped["PrendaVariante"] = relationship("apps.GestionCatalogo.models.PrendaVariante", lazy="selectin")
 
 
 # ----------------- REUTILIZACIÓN MODELOS MÓDULO 9 (CU12, CU13) -----------------

@@ -29,7 +29,7 @@ class PreferenciaEstiloUsuario(Base):
     )
 
     # Relaciones
-    usuario: Mapped["app.domains.usuarios.models.Usuario"] = relationship("app.domains.usuarios.models.Usuario", lazy="selectin")
+    usuario: Mapped["apps.UsuariosSeguridad.models.Usuario"] = relationship("apps.UsuariosSeguridad.models.Usuario", lazy="selectin")
 
 
 class InteraccionRecomendacion(Base):
@@ -44,8 +44,8 @@ class InteraccionRecomendacion(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # Relaciones
-    usuario: Mapped[Optional["app.domains.usuarios.models.Usuario"]] = relationship("app.domains.usuarios.models.Usuario", lazy="selectin")
-    prenda: Mapped["app.domains.catalogo.models.Prenda"] = relationship("app.domains.catalogo.models.Prenda", lazy="selectin")
+    usuario: Mapped[Optional["apps.UsuariosSeguridad.models.Usuario"]] = relationship("apps.UsuariosSeguridad.models.Usuario", lazy="selectin")
+    prenda: Mapped["apps.GestionCatalogo.models.Prenda"] = relationship("apps.GestionCatalogo.models.Prenda", lazy="selectin")
 
 
 class SesionChatIA(Base):
@@ -64,7 +64,7 @@ class SesionChatIA(Base):
     )
 
     # Relaciones
-    usuario: Mapped[Optional["app.domains.usuarios.models.Usuario"]] = relationship("app.domains.usuarios.models.Usuario", lazy="selectin")
+    usuario: Mapped[Optional["apps.UsuariosSeguridad.models.Usuario"]] = relationship("apps.UsuariosSeguridad.models.Usuario", lazy="selectin")
     mensajes: Mapped[List["MensajeChatIA"]] = relationship("MensajeChatIA", back_populates="sesion", cascade="all, delete-orphan", lazy="selectin", order_by="MensajeChatIA.created_at")
 
 

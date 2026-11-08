@@ -6,7 +6,7 @@ from decimal import Decimal
 from sqlalchemy import select
 from apps.core.database import async_session_factory
 from apps.core.security import hash_password
-import app.domains.inventario.models
+import apps.GestionInventario.models
 from apps.UsuariosSeguridad.models import Usuario, Rol
 from apps.GestionCatalogo.models import Prenda, PrendaVariante, CalificacionPrenda
 from apps.GestionVentas.models import Venta, DetalleVenta, Pago
