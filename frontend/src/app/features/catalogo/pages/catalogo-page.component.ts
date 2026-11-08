@@ -1,3 +1,21 @@
+// ==============================================================================
+// CASOS DE USO:
+// - CU07: CONSULTAR Y FILTRAR CATÁLOGO MULTIDIMENSIONAL / PROBADOR V-TON
+// - CU08: DESCARGAR Y ALMACENAR CATÁLOGO EN MEMORIA LOCAL (OFFLINE SYNC)
+// - CU18: CALIFICACIONES Y RESEÑAS DE PRENDAS POR COMPRADOR
+// ROL: Visitante / Cliente / Cajero
+// CAPA MVC: [VISTA & VIEWCONTROLLER ANGULAR]
+// ==============================================================================
+
+// ==============================================================================
+// CASOS DE USO:
+// - CU07: CONSULTAR Y FILTRAR CATÁLOGO MULTIDIMENSIONAL / PROBADOR V-TON
+// - CU08: DESCARGAR Y ALMACENAR CATÁLOGO EN MEMORIA LOCAL (OFFLINE SYNC)
+// - CU18: CALIFICACIONES Y RESEÑAS DE PRENDAS POR COMPRADOR
+// ROL: Visitante / Cliente / Cajero
+// CAPA MVC: [VISTA & VIEWCONTROLLER ANGULAR]
+// ==============================================================================
+
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';

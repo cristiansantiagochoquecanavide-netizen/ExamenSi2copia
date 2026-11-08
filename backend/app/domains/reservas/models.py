@@ -9,6 +9,10 @@ from sqlalchemy.orm import relationship, Mapped, mapped_column
 from app.core.database import Base
 
 
+# ==========================================================================
+# CASO DE USO: CU14 & CU25 - RESERVAS Y TRAZABILIDAD DE PRENDAS EN PROBADOR
+# CAPA MVC: [MODELO DE BASE DE DATOS / ENTIDAD ORM RESERVA]
+# ==========================================================================
 class Reserva(Base):
     __tablename__ = "reservas"
 

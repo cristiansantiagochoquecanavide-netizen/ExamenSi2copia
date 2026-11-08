@@ -40,6 +40,10 @@ class Permiso(Base):
     descripcion: Mapped[str] = mapped_column(String(255), nullable=True)
 
 
+# ==========================================================================
+# CASO DE USO: CU05 - AUTENTICAR USUARIO Y ESTABLECER CONTEXTO DE TENANT
+# CAPA MVC: [MODELO DE BASE DE DATOS / ENTIDAD ORM USUARIO]
+# ==========================================================================
 class Usuario(Base):
     __tablename__ = "usuarios"
 
@@ -62,6 +66,10 @@ class Usuario(Base):
     rol: Mapped["Rol"] = relationship("Rol", back_populates="usuarios", lazy="selectin")
 
 
+# ==========================================================================
+# LISTA NEGRA DE TOKENS JWT REVOCADOS (LOGOUT / INVALIDACIÓN)
+# CAPA MVC: [MODELO DE BASE DE DATOS / ENTIDAD ORM TOKEN REVOCADO]
+# ==========================================================================
 class TokenBlacklist(Base):
     __tablename__ = "token_blacklist"
 

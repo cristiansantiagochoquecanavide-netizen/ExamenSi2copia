@@ -1,3 +1,9 @@
+// ==============================================================================
+// CASO DE USO: CU20 - PROCESAR PAGOS DIGITALES Y MONITOREO DE PASARELAS
+// ROL: Cliente / Cajero
+// CAPA MVC: [VISTA & VIEWCONTROLLER ANGULAR]
+// ==============================================================================
+
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';

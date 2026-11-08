@@ -1,3 +1,21 @@
+// ==============================================================================
+// CASOS DE USO:
+// - CU01: ADMINISTRAR PLANES DE SUSCRIPCIÓN
+// - CU02: REGISTRAR EMPRESA CONTRATANTE (TENANT)
+// - CU03: GESTIONAR SUSCRIPCIÓN Y ESTADO DE CUENTA
+// ROL: Superadministrador SaaS / Admin Tenant
+// CAPA MVC: [VISTA & VIEWCONTROLLER ANGULAR]
+// ==============================================================================
+
+// ==============================================================================
+// CASOS DE USO:
+// - CU01: ADMINISTRAR PLANES DE SUSCRIPCIÓN
+// - CU02: REGISTRAR EMPRESA CONTRATANTE (TENANT)
+// - CU03: GESTIONAR SUSCRIPCIÓN Y ESTADO DE CUENTA
+// ROL: Superadministrador SaaS / Admin Tenant
+// CAPA MVC: [VISTA & VIEWCONTROLLER ANGULAR]
+// ==============================================================================
+
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';

@@ -3,6 +3,7 @@ import { Router, RouterOutlet, RouterLink, RouterLinkActive, NavigationEnd } fro
 import { CommonModule } from '@angular/common';
 import { filter } from 'rxjs';
 import { AuthService } from './core/services/auth.service';
+import { ToastService } from './core/services/toast.service';
 import { LocalOfflineStorageService } from './core/services/local-offline-storage.service';
 import { CartService } from './features/ventas/services/cart.service';
 import { ChatbotWidgetComponent } from './features/ia-asistente/components/chatbot-widget.component';
@@ -20,6 +21,7 @@ export class AppComponent {
   title = 'FashionStore';
   readonly authService = inject(AuthService);
   readonly offlineService = inject(LocalOfflineStorageService);
+  readonly toastService = inject(ToastService);
   readonly cartService = inject(CartService);
   readonly router = inject(Router);
 
@@ -63,13 +65,13 @@ export class AppComponent {
     this.offlineService.sincronizarLoteOffline().subscribe({
       next: (res) => {
         if (res && res.total_recibidos > 0) {
-          alert(`Sincronización Completada: ${res.procesados_exitosamente} transacciones asentadas en PostgreSQL, ${res.duplicados_idempotentes} duplicados ignorados por idempotencia, ${res.conflictos_stock} discrepancias registradas en conflicto_inventario.`);
+          this.toastService.success(`Sincronización Completada: ${res.procesados_exitosamente} transacciones asentadas, ${res.duplicados_idempotentes} duplicados ignorados, ${res.conflictos_stock} discrepancias.`);
         } else {
-          alert('No existen operaciones comerciales offline pendientes en la cola local.');
+          this.toastService.info('No existen operaciones offline pendientes en la cola local.');
         }
       },
       error: (err) => {
-        alert('Error al comunicarse con el servidor central: ' + (err.message || err));
+        this.toastService.error('Error al comunicarse con el servidor central: ' + (err.message || err));
       }
     });
   }

@@ -19,6 +19,10 @@ class Ciudad(Base):
     sucursales: Mapped[List["Sucursal"]] = relationship("Sucursal", back_populates="ciudad")
 
 
+# ==========================================================================
+# CASO DE USO: CU04 - ADMINISTRAR SUCURSALES
+# CAPA MVC: [MODELO DE BASE DE DATOS / ENTIDAD ORM SUCURSAL]
+# ==========================================================================
 class Sucursal(Base):
     __tablename__ = "sucursales"
 
@@ -92,6 +96,10 @@ class DetalleRecepcionMercaderia(Base):
 
 
 # ----------------- CU9: TRANSFERENCIA DE STOCK ENTRE SUCURSALES -----------------
+# ==========================================================================
+# CASO DE USO: CU12 & CU13 - TRASPASO DE INVENTARIO ENTRE TIENDAS
+# CAPA MVC: [MODELO DE BASE DE DATOS / ENTIDAD ORM TRASPASO]
+# ==========================================================================
 class TransferenciaStock(Base):
     __tablename__ = "transferencias_stock"
 

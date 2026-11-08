@@ -176,6 +176,11 @@ async def eliminar_temporada(
     return MensajeCatalogoResponse(mensaje="Temporada eliminada exitosamente")
 
 # ----------------- CU6: PRENDAS DE VESTIR -----------------
+# ==========================================================================
+# CASO DE USO: CU06 - ADMINISTRAR CATÁLOGO DE PRENDAS Y GUÍA DE MEDIDAS
+# ROL: Administrador del Tenant / Encargado de Tienda
+# CAPA MVC: [CONTROLADOR / ENDPOINTS CATÁLOGO]
+# ==========================================================================
 @router.get("/prendas", response_model=List[PrendaResponse], summary="Consultar Catalogo de Prendas (CU6)")
 async def listar_prendas(
     categoria_id: Optional[int] = None,
@@ -441,6 +446,11 @@ async def consultar_stock_sucursal(sucursal_id: int, db: AsyncSession = Depends(
 
 
 # ----------------- CU18: CALIFICACIONES Y RESEÑAS -----------------
+# ==========================================================================
+# CASO DE USO: CU18 - CALIFICACIONES Y RESEÑAS DE PRENDAS POR COMPRADOR
+# ROL: Cliente Verificado
+# CAPA MVC: [CONTROLADOR / ENDPOINTS RESEÑAS]
+# ==========================================================================
 @router.get("/prendas/{prenda_id}/calificaciones", response_model=ListadoCalificacionesResponse, summary="Listar Calificaciones y Métricas (CU18)")
 async def listar_calificaciones_prenda(
     prenda_id: int,
@@ -530,7 +540,11 @@ async def virtual_try_on(
 
 
 
-# ----------------- CU08: CATÁLOGO LOCAL SYNC PARA CLIENTES OFFLINE -----------------
+# ==========================================================================
+# CASO DE USO: CU08 - DESCARGAR Y ALMACENAR CATÁLOGO EN MEMORIA LOCAL
+# ROL: Vendedor / Sistema (Angular PWA & Flutter Offline)
+# CAPA MVC: [CONTROLADOR / ENDPOINT DE SINCRONIZACIÓN OFFLINE]
+# ==========================================================================
 from app.domains.catalogo.schemas import PrendaSyncItem
 from app.domains.catalogo.services import CatalogoSyncService
 
@@ -548,7 +562,11 @@ async def sincronizar_catalogo_local(
     empresa_id = tenant_ctx.empresa_id if tenant_ctx else None
     return await CatalogoSyncService.sincronizar_catalogo_local(db, empresa_id)
 
-# ----------------- CU09: DIFUNDIR NOVEDADES DE CATÁLOGO A CLIENTES -----------------
+# ==========================================================================
+# CASO DE USO: CU09 - DIFUNDIR NOVEDADES DE CATÁLOGO A CLIENTES
+# ROL: Administrador del Tenant / Encargado de Marketing
+# CAPA MVC: [CONTROLADOR / ENDPOINTS DE DIFUSIÓN OMNICANAL]
+# ==========================================================================
 from app.domains.catalogo.schemas import DifusionCatalogoCreate, DifusionCatalogoResponse
 from app.domains.catalogo.services import DifusionCatalogoService
 

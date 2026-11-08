@@ -1,8 +1,15 @@
+// ==============================================================================
+// CASO DE USO: CU09 - DIFUNDIR NOVEDADES DE CATÁLOGO A CLIENTES
+// ROL: Encargado de Marketing / Admin Tenant
+// CAPA MVC: [VISTA & VIEWCONTROLLER ANGULAR]
+// ==============================================================================
+
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { CatalogoService } from '../services/catalogo.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { DifusionCatalogoCreate, DifusionCatalogoResponse } from '../models/catalogo.models';
 
 @Component({
@@ -862,6 +869,7 @@ import { DifusionCatalogoCreate, DifusionCatalogoResponse } from '../models/cata
 })
 export class CatalogoDifusionPageComponent implements OnInit {
   private readonly catalogoService = inject(CatalogoService);
+  private readonly toast = inject(ToastService);
 
   formTitulo = 'Lanzamiento Exclusivo Colección Alta Costura Verano 2026';
   formSegmento = 'VIP';
@@ -976,7 +984,7 @@ export class CatalogoDifusionPageComponent implements OnInit {
 
   dispararDifusion(): void {
     if (!this.formTitulo.trim() || !this.formMensaje.trim()) {
-      alert('Por favor ingrese un título y el cuerpo del mensaje.');
+      this.toast.warning('Por favor ingrese un título y el cuerpo del mensaje.');
       return;
     }
 
@@ -991,7 +999,7 @@ export class CatalogoDifusionPageComponent implements OnInit {
 
     this.catalogoService.difundirNovedades(payload).subscribe({
       next: (nueva) => {
-        alert(`¡Campaña difundida con éxito!\nSe dispararon ${nueva.total_destinatarios} mensajes por canal ${nueva.canal_envio}.`);
+        this.toast.success(`Se dispararon ${nueva.total_destinatarios} mensajes por canal ${nueva.canal_envio}.`, '¡Campaña Difundida con Éxito!');
         this.difusionesHistorial.update(list => [nueva, ...list]);
         this.enviando.set(false);
       },
@@ -1010,7 +1018,7 @@ export class CatalogoDifusionPageComponent implements OnInit {
           fecha_envio: new Date().toISOString(),
           created_at: new Date().toISOString()
         };
-        alert(`¡Campaña difundida con éxito (Simulación en Vivo)!\nSe enviaron ${nuevaSimulada.total_destinatarios} mensajes vía ${nuevaSimulada.canal_envio} con tasa de apertura del ${nuevaSimulada.tasa_apertura_estimada}%.`);
+        this.toast.success(`Se enviaron ${nuevaSimulada.total_destinatarios} mensajes vía ${nuevaSimulada.canal_envio} con tasa de apertura estimada del ${nuevaSimulada.tasa_apertura_estimada}%.`, '¡Campaña Difundida (Simulación)!');
         this.difusionesHistorial.update(list => [nuevaSimulada, ...list]);
         this.enviando.set(false);
       }

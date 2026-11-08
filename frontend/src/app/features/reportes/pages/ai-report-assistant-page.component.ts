@@ -1,3 +1,19 @@
+// ==============================================================================
+// CASOS DE USO:
+// - CU21: CONSULTAR REPORTES POR LENGUAJE NATURAL (TEXTO / VOZ CON GEMINI)
+// - CU22: EXPORTAR REPORTES DINÁMICOS DE IA (PDF PLATYPUS / EXCEL OPENPYXL)
+// ROL: Administrador del Tenant
+// CAPA MVC: [VISTA & VIEWCONTROLLER ANGULAR]
+// ==============================================================================
+
+// ==============================================================================
+// CASOS DE USO:
+// - CU21: CONSULTAR REPORTES POR LENGUAJE NATURAL (TEXTO / VOZ CON GEMINI)
+// - CU22: EXPORTAR REPORTES DINÁMICOS DE IA (PDF PLATYPUS / EXCEL OPENPYXL)
+// ROL: Administrador del Tenant
+// CAPA MVC: [VISTA & VIEWCONTROLLER ANGULAR]
+// ==============================================================================
+
 import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';

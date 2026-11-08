@@ -1,3 +1,27 @@
+// ==============================================================================
+// CASOS DE USO:
+// - CU04: ADMINISTRAR SUCURSALES CON CONTROL DE LÍMITES
+// - CU10: ADMINISTRAR EXISTENCIAS DE INVENTARIO POR SUCURSAL
+// - CU11: CONSULTAR DISPONIBILIDAD DE INVENTARIO MULTI-SUCURSAL
+// - CU12: SOLICITAR Y DESPACHAR TRASPASO DE INVENTARIO
+// - CU13: CONFIRMAR RECEPCIÓN DE TRASPASO EN DESTINO
+// - CU17: RESOLVER CONFLICTOS DE CONSISTENCIA DE INVENTARIO
+// ROL: Encargado de Sucursal / Admin Tenant
+// CAPA MVC: [VISTA & VIEWCONTROLLER ANGULAR]
+// ==============================================================================
+
+// ==============================================================================
+// CASOS DE USO:
+// - CU04: ADMINISTRAR SUCURSALES CON CONTROL DE LÍMITES
+// - CU10: ADMINISTRAR EXISTENCIAS DE INVENTARIO POR SUCURSAL
+// - CU11: CONSULTAR DISPONIBILIDAD DE INVENTARIO MULTI-SUCURSAL
+// - CU12: SOLICITAR Y DESPACHAR TRASPASO DE INVENTARIO
+// - CU13: CONFIRMAR RECEPCIÓN DE TRASPASO EN DESTINO
+// - CU17: RESOLVER CONFLICTOS DE CONSISTENCIA DE INVENTARIO
+// ROL: Encargado de Sucursal / Admin Tenant
+// CAPA MVC: [VISTA & VIEWCONTROLLER ANGULAR]
+// ==============================================================================
+
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';

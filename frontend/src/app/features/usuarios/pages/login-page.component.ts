@@ -1,3 +1,9 @@
+// ==============================================================================
+// CASO DE USO: CU05 - AUTENTICAR USUARIO Y ESTABLECER CONTEXTO DE TENANT
+// ROL: Todos los Usuarios (Cliente, Cajero, Admin, Superadmin)
+// CAPA MVC: [VISTA & VIEWCONTROLLER ANGULAR]
+// ==============================================================================
+
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';

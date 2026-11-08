@@ -16,6 +16,11 @@ from app.domains.sincronizacion.services import SincronizacionService
 router = APIRouter(prefix="/sincronizacion", tags=["Sincronización Offline & Idempotencia (CU16 - CU17)"])
 
 
+# ==============================================================================
+# CASO DE USO: CU16 - SINCRONIZAR OPERACIONES COMERCIALES OFFLINE
+# ROL: Sistema / Cajero
+# CAPA MVC: [CONTROLADOR / ENDPOINT DE SINCRONIZACIÓN POR LOTES]
+# ==============================================================================
 @router.post(
     "/offline",
     response_model=SincronizacionBatchResponse,
@@ -43,6 +48,11 @@ async def sincronizar_lote_offline(
     )
 
 
+# ==============================================================================
+# CASO DE USO: CU17 - RESOLVER CONFLICTOS DE CONSISTENCIA DE INVENTARIO
+# ROL: Administrador del Tenant / Encargado de Sucursal
+# CAPA MVC: [CONTROLADOR / ENDPOINTS ARBITRAJE Y RESOLUCIÓN DE CONFLICTOS]
+# ==============================================================================
 @router.get(
     "/conflictos",
     response_model=List[ConflictoInventarioResponse],

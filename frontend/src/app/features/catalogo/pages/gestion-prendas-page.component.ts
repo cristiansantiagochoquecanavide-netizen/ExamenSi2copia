@@ -1,3 +1,9 @@
+// ==============================================================================
+// CASO DE USO: CU06 - ADMINISTRAR CATÁLOGO DE PRENDAS Y GUÍA DE MEDIDAS
+// ROL: Administrador del Tenant / Encargado de Tienda
+// CAPA MVC: [VISTA & VIEWCONTROLLER ANGULAR]
+// ==============================================================================
+
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';

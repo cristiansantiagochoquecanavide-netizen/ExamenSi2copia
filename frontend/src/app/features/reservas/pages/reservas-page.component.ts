@@ -1,3 +1,9 @@
+// ==============================================================================
+// CASO DE USO: CU14 - REGISTRAR RESERVA PARA ENSAYO EN TIENDA / PROBADOR
+// ROL: Cliente / Vendedor
+// CAPA MVC: [VISTA & VIEWCONTROLLER ANGULAR]
+// ==============================================================================
+
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';

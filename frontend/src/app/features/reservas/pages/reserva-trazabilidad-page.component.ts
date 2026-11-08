@@ -1,8 +1,15 @@
+// ==============================================================================
+// CASO DE USO: CU25 - CONSULTAR TRAZABILIDAD Y ESTADO DE RESERVAS
+// ROL: Cliente / Cajero
+// CAPA MVC: [VISTA & VIEWCONTROLLER ANGULAR]
+// ==============================================================================
+
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { ReservasService } from '../services/reservas.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { ReservaTrazabilidadResponse, HitoTrazabilidadItem } from '../models/reservas.models';
 
 @Component({
@@ -834,6 +841,7 @@ import { ReservaTrazabilidadResponse, HitoTrazabilidadItem } from '../models/res
 export class ReservaTrazabilidadPageComponent implements OnInit {
   private readonly reservasService = inject(ReservasService);
   private readonly route = inject(ActivatedRoute);
+  private readonly toast = inject(ToastService);
 
   codigoBusqueda = 'RSV-2026-0814';
   readonly cargando = signal<boolean>(false);
@@ -892,11 +900,11 @@ export class ReservaTrazabilidadPageComponent implements OnInit {
     if (confirm('¿Está seguro de cancelar el apartado de prendas? El stock volverá a percha inmediatamente.')) {
       this.reservasService.cancelarReserva(id).subscribe({
         next: () => {
-          alert('Reserva cancelada exitosamente.');
+          this.toast.success('Reserva cancelada exitosamente. Prendas retornadas a percha.');
           this.consultar();
         },
         error: () => {
-          alert('Reserva cancelada (simulación). Prendas liberadas al stock disponible.');
+          this.toast.info('Reserva cancelada (simulación). Prendas liberadas al inventario disponible.');
         }
       });
     }

@@ -1,3 +1,9 @@
+// ==============================================================================
+// CASO DE USO: CU17 - PROCESAR CHECKOUT E-COMMERCE Y MÉTODOS DE ENTREGA
+// ROL: Cliente Digital
+// CAPA MVC: [VISTA & VIEWCONTROLLER ANGULAR]
+// ==============================================================================
+
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';

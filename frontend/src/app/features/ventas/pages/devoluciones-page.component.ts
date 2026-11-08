@@ -1,3 +1,21 @@
+// ==============================================================================
+// CASOS DE USO:
+// - CU18: CONFIGURAR POLÍTICAS Y PLAZOS DE CAMBIO DE PRENDA
+// - CU19: REGISTRAR SOLICITUD DE CAMBIO DE PRENDA POR MEDIDA
+// - CU20: EMITIR NOTA DE DEVOLUCIÓN Y REINGRESO A INVENTARIO
+// ROL: Cliente / Cajero / Admin Tenant
+// CAPA MVC: [VISTA & VIEWCONTROLLER ANGULAR]
+// ==============================================================================
+
+// ==============================================================================
+// CASOS DE USO:
+// - CU18: CONFIGURAR POLÍTICAS Y PLAZOS DE CAMBIO DE PRENDA
+// - CU19: REGISTRAR SOLICITUD DE CAMBIO DE PRENDA POR MEDIDA
+// - CU20: EMITIR NOTA DE DEVOLUCIÓN Y REINGRESO A INVENTARIO
+// ROL: Cliente / Cajero / Admin Tenant
+// CAPA MVC: [VISTA & VIEWCONTROLLER ANGULAR]
+// ==============================================================================
+
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';

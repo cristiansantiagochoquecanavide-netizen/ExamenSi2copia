@@ -9,6 +9,10 @@ from app.core.database import Base
 
 
 # ----------------- MODULO 7: PLATAFORMA SAAS Y PLANES DE SUSCRIPCIÓN -----------------
+# ==========================================================================
+# CASO DE USO: CU01 - ADMINISTRAR PLANES DE SUSCRIPCIÓN
+# CAPA MVC: [MODELO DE BASE DE DATOS / ENTIDAD ORM]
+# ==========================================================================
 class PlanSuscripcion(Base):
     __tablename__ = "plan_suscripcion"
 
@@ -26,6 +30,10 @@ class PlanSuscripcion(Base):
     suscripciones: Mapped[List["Suscripcion"]] = relationship("Suscripcion", back_populates="plan")
 
 
+# ==========================================================================
+# CASO DE USO: CU02 - REGISTRAR EMPRESA CONTRATANTE (TENANT)
+# CAPA MVC: [MODELO DE BASE DE DATOS / ENTIDAD ORM]
+# ==========================================================================
 class Empresa(Base):
     __tablename__ = "empresa"
 
@@ -43,6 +51,10 @@ class Empresa(Base):
     politica_garantia: Mapped[Optional["PoliticaGarantia"]] = relationship("PoliticaGarantia", back_populates="empresa", uselist=False, cascade="all, delete-orphan")
 
 
+# ==========================================================================
+# CASO DE USO: CU03 - GESTIONAR SUSCRIPCIÓN Y ESTADO DE CUENTA
+# CAPA MVC: [MODELO DE BASE DE DATOS / ENTIDAD ORM]
+# ==========================================================================
 class Suscripcion(Base):
     __tablename__ = "suscripcion"
 
@@ -61,6 +73,10 @@ class Suscripcion(Base):
 
 
 # ----------------- MODULO 8: GUÍA ANATÓMICA Y POLÍTICAS DE GARANTÍA -----------------
+# ==========================================================================
+# CASO DE USO: CU06 - GUÍA DE MEDIDAS Y TABLA DE TALLES
+# CAPA MVC: [MODELO DE BASE DE DATOS / ENTIDAD ORM]
+# ==========================================================================
 class GuiaMedida(Base):
     __tablename__ = "guia_medida"
     __table_args__ = (
@@ -78,6 +94,10 @@ class GuiaMedida(Base):
     observacion_calce: Mapped[Optional[str]] = mapped_column(String(150), nullable=True)
 
 
+# ==========================================================================
+# CASO DE USO: CU18 - CONFIGURAR POLÍTICAS Y PLAZOS DE CAMBIO DE PRENDA
+# CAPA MVC: [MODELO DE BASE DE DATOS / ENTIDAD ORM]
+# ==========================================================================
 class PoliticaGarantia(Base):
     __tablename__ = "politica_garantia"
 

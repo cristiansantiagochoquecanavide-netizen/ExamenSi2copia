@@ -99,7 +99,11 @@ def require_permissions(*required_permissions: str):
     return permission_checker
 
 
-# ----------------- CU1: AUTENTICACION, LOGIN Y SESION -----------------
+# ==========================================================================
+# CASO DE USO: CU05 - AUTENTICAR USUARIO Y ESTABLECER CONTEXTO DE TENANT
+# ROL: Usuario / Administrador del Tenant / Superadmin
+# CAPA MVC: [CONTROLADOR / ENDPOINTS DE AUTENTICACIÓN]
+# ==========================================================================
 @router.post("/auth/login", response_model=TokenResponse, summary="Iniciar Sesion (CU1)")
 async def login(data: LoginRequest, request: Request, db: AsyncSession = Depends(get_db)):
     ip = request.client.host if request.client else None
@@ -138,7 +142,11 @@ async def get_me(current_user: Usuario = Depends(get_current_user)):
     return current_user
 
 
-# ----------------- CU2: GESTION DE ROLES Y PERMISOS (RBAC) -----------------
+# ==========================================================================
+# ADMINISTRACIÓN DE SEGURIDAD Y CONTROL DE ACCESO BASADO EN ROLES (RBAC)
+# ROL: Administrador
+# CAPA MVC: [CONTROLADOR / ENDPOINTS RBAC]
+# ==========================================================================
 @router.get("/roles", response_model=List[RolResponse], summary="Listar Roles (CU2)")
 async def listar_roles(
     current_user: Usuario = Depends(require_permissions("usuarios:read", "roles:read")),
@@ -264,7 +272,11 @@ async def cambiar_estado_usuario(
     return await UsuarioService.cambiar_estado(db, user_id, data, current_user, ip)
 
 
-# ----------------- CU7: CONSULTAR BITACORA DE AUDITORIA -----------------
+# ==========================================================================
+# BITÁCORA DE AUDITORÍA Y TRAZABILIDAD MULTITENANT
+# ROL: Administrador / Auditor
+# CAPA MVC: [CONTROLADOR / ENDPOINTS DE AUDITORÍA]
+# ==========================================================================
 @router.get("/auditoria/logs", response_model=List[BitacoraAuditoriaResponse], summary="Consultar Bitacora de Auditoria (CU7)")
 async def consultar_bitacora(
     fecha_inicio: Optional[datetime] = None,

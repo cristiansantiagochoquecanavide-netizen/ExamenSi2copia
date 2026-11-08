@@ -22,6 +22,11 @@ from app.domains.inventario.services import (
 router = APIRouter(prefix="/inventario", tags=["Inventario & Sucursales"])
 
 # ----------------- CU4: CIUDADES -----------------
+# ==========================================================================
+# CASO DE USO: CU04 - ADMINISTRAR SUCURSALES Y CIUDADES
+# ROL: Administrador del Tenant
+# CAPA MVC: [CONTROLADOR / ENDPOINTS CIUDADES]
+# ==========================================================================
 @router.get("/ciudades", response_model=List[CiudadResponse], summary="Listar Ciudades (CU4)")
 async def listar_ciudades(activo_solo: bool = False, db: AsyncSession = Depends(get_db)):
     return await CiudadService.listar(db, activo_solo)
@@ -197,6 +202,11 @@ async def obtener_recepcion(recepcion_id: int, db: AsyncSession = Depends(get_db
 
 
 # ----------------- CU9: TRANSFERENCIA DE STOCK ENTRE SUCURSALES -----------------
+# ==========================================================================
+# CASO DE USO: CU12 - SOLICITAR Y DESPACHAR TRASPASO DE INVENTARIO
+# ROL: Encargado de Sucursal
+# CAPA MVC: [CONTROLADOR / ENDPOINTS TRANSFERENCIAS]
+# ==========================================================================
 @router.get("/transferencias", response_model=List[TransferenciaStockResponse], summary="Listar Transferencias de Stock (CU9)")
 async def listar_transferencias(
     sucursal_id: Optional[int] = None,
@@ -264,6 +274,11 @@ from app.domains.inventario.schemas import (
 from app.domains.inventario.services import TraspasoService
 
 
+# ==========================================================================
+# CASO DE USO: CU11 - CONSULTAR DISPONIBILIDAD DE INVENTARIO MULTI-SUCURSAL
+# ROL: Vendedor / Cliente / Encargado de Sucursal
+# CAPA MVC: [CONTROLADOR / ENDPOINT DE CONSULTA DE STOCK]
+# ==========================================================================
 @router.get("/sucursales-stock", response_model=List[StockSucursalItem], summary="Consultar Stock Multi-sucursal (CU11)")
 async def consultar_stock_multisucursal(
     variante_id: int = Query(..., description="ID de la variante textil a consultar"),
@@ -297,6 +312,11 @@ async def solicitar_y_despachar_traspaso(
     return await TraspasoService.solicitar_y_despachar_traspaso(db, traspaso, current_user, ip)
 
 
+# ==========================================================================
+# CASO DE USO: CU13 - CONFIRMAR RECEPCIÓN DE TRASPASO EN DESTINO
+# ROL: Encargado de Sucursal Destino
+# CAPA MVC: [CONTROLADOR / ENDPOINT RECEPCIÓN DE TRASPASO]
+# ==========================================================================
 @router.post("/traspasos/{traspaso_id}/recepcionar", summary="Confirmar Recepción de Traspaso Fase 2 (CU13)")
 async def confirmar_recepcion_traspaso(
     traspaso_id: int,

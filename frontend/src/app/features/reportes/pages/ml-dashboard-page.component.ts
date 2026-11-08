@@ -1,8 +1,25 @@
+// ==============================================================================
+// CASOS DE USO:
+// - CU23: ENTRENAR Y EVALUAR MODELOS DE MACHINE LEARNING (SCIKIT-LEARN)
+// - CU24: VISUALIZAR DASHBOARD ANALÍTICO Y PREDICCIONES DE STOCK A 7 DÍAS
+// ROL: Superadmin Tenant / Admin Tenant
+// CAPA MVC: [VISTA & VIEWCONTROLLER ANGULAR]
+// ==============================================================================
+
+// ==============================================================================
+// CASOS DE USO:
+// - CU23: ENTRENAR Y EVALUAR MODELOS DE MACHINE LEARNING (SCIKIT-LEARN)
+// - CU24: VISUALIZAR DASHBOARD ANALÍTICO Y PREDICCIONES DE STOCK A 7 DÍAS
+// ROL: Superadmin Tenant / Admin Tenant
+// CAPA MVC: [VISTA & VIEWCONTROLLER ANGULAR]
+// ==============================================================================
+
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
 import {
   FashionAiMlService,
   MLDemandaTrainResponse,
@@ -2634,6 +2651,7 @@ import {
 export class MlDashboardComponent implements OnInit {
   private readonly mlService = inject(FashionAiMlService);
   readonly authService = inject(AuthService);
+  readonly toast = inject(ToastService);
 
   readonly vistaActiva = signal<'CU24_PREDICCIONES' | 'CU23_ENTRENAMIENTO'>('CU24_PREDICCIONES');
   readonly activeTenantId = signal<number>(1);
@@ -2938,7 +2956,7 @@ export class MlDashboardComponent implements OnInit {
   }
 
   solicitarTraslado(item: ProyeccionStockDetalladaItem): void {
-    alert(`[CU12 - Traslado de Emergencia] Solicitud generada para SKU ${item.sku} en ${item.sucursal_nombre}. Se apartarán 5 unidades desde otra sucursal.`);
+    this.toast.info(`Solicitud generada para SKU ${item.sku} en ${item.sucursal_nombre}. Se apartarán 5 unidades desde otra sucursal.`, 'Traslado de Emergencia CU12');
   }
 
   // =========================================================================

@@ -41,7 +41,24 @@
           <span>FASHION</span><span class="brand-word-gap"></span><span>STORE</span>
         </span>
       </a>
+      <!-- Floating Haute Couture Toast System -->
+  @if (toastService.toasts().length > 0) {
+    <div class="luxury-toast-container">
+      @for (t of toastService.toasts(); track t.id) {
+        <div class="luxury-toast" [ngClass]="'toast-' + t.tipo">
+          <div class="toast-indicator"></div>
+          <div class="toast-content">
+            <div class="toast-head">
+              <span class="toast-title">{{ t.titulo }}</span>
+              <button type="button" class="btn-toast-dismiss" (click)="toastService.dismiss(t.id)" aria-label="Cerrar">&times;</button>
+            </div>
+            <p class="toast-msg">{{ t.mensaje }}</p>
+          </div>
+        </div>
+      }
     </div>
+  }
+</div>
 
     <!-- Backdrop oscuro para móvil -->
     @if (isMobileMenuOpen()) {

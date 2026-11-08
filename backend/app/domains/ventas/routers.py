@@ -41,7 +41,11 @@ async def get_domain_status(db: AsyncSession = Depends(get_db)):
     )
 
 
-# ----------------- CU10: PUNTO DE VENTA (POS) -----------------
+# ==========================================================================
+# CASO DE USO: CU15 - REGISTRAR VENTA DE CONTADO OFFLINE / PUNTO DE VENTA POS
+# ROL: Cajero / Vendedor
+# CAPA MVC: [CONTROLADOR / ENDPOINTS TERMINAL POS]
+# ==========================================================================
 @router.post(
     "/pos",
     response_model=VentaResponse,
@@ -121,7 +125,11 @@ async def listar_devoluciones(
     return await VentasService.listar_devoluciones(db, sucursal_id, tipo, limit, offset)
 
 
-# ----------------- CU19 & CU20: NOTAS DE DEVOLUCIÓN POR CAMBIO DE TALLA (RN06, RN07, RN08) -----------------
+# ==========================================================================
+# CASO DE USO: CU19 & CU20 - DEVOLUCIONES, REEMBOLSOS Y CAMBIO DE TALLA (RN06-RN08)
+# ROL: Cliente / Cajero
+# CAPA MVC: [CONTROLADOR / ENDPOINTS DEVOLUCIONES]
+# ==========================================================================ÓN POR CAMBIO DE TALLA (RN06, RN07, RN08) -----------------
 @router.get(
     "/devoluciones/notas-lista",
     response_model=List[NotaDevolucionFormalResponse],
@@ -264,7 +272,11 @@ async def obtener_pago(
     return await VentasService.obtener_pago_por_id(db, pago_id)
 
 
-# ----------------- CU15: CARRITO & CHECKOUT E-COMMERCE -----------------
+# ==========================================================================
+# CASO DE USO: CU17 - PROCESAR CHECKOUT E-COMMERCE Y MÉTODOS DE ENTREGA
+# ROL: Cliente Digital
+# CAPA MVC: [CONTROLADOR / ENDPOINTS CHECKOUT ONLINE]
+# ==========================================================================
 @router.post(
     "/checkout-online",
     response_model=VentaResponse,

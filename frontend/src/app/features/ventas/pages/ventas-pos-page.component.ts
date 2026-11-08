@@ -1,3 +1,9 @@
+// ==============================================================================
+// CASO DE USO: CU15 - REGISTRAR VENTA DE CONTADO OFFLINE (PUNTO DE VENTA POS)
+// ROL: Cajero / Vendedor
+// CAPA MVC: [VISTA & VIEWCONTROLLER ANGULAR]
+// ==============================================================================
+
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';

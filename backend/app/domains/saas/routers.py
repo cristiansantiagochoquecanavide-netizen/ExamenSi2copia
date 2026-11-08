@@ -25,6 +25,11 @@ router = APIRouter(tags=["SaaS Multitenant, Sucursales, Guía de Medidas y Garan
 # 1. MÓDULO SAAS Y PLANES DE SUSCRIPCIÓN
 # ------------------------------------------------------------------------------
 
+# ==========================================================================
+# CASO DE USO: CU01 - ADMINISTRAR PLANES DE SUSCRIPCIÓN
+# ROL: Superadministrador SaaS
+# CAPA MVC: [CONTROLADOR / ENDPOINTS REST]
+# ==========================================================================
 @router.get("/planes", response_model=List[PlanResponse], summary="Listar Planes de Suscripción (CU01)")
 async def listar_planes(db: AsyncSession = Depends(get_db)):
     """
@@ -53,6 +58,11 @@ async def actualizar_plan(plan_id: int, data: PlanUpdate, db: AsyncSession = Dep
     return await PlanService.actualizar_plan(db, plan_id, data)
 
 
+# ==========================================================================
+# CASO DE USO: CU02 - REGISTRAR EMPRESA CONTRATANTE (TENANT)
+# ROL: Superadministrador SaaS
+# CAPA MVC: [CONTROLADOR / ENDPOINT REST]
+# ==========================================================================
 @router.post("/empresas", response_model=EmpresaResponse, status_code=status.HTTP_201_CREATED, summary="Registrar Empresa / Tenant (CU02)")
 async def crear_empresa(data: EmpresaCreate, db: AsyncSession = Depends(get_db)):
     """
@@ -66,6 +76,11 @@ async def crear_empresa(data: EmpresaCreate, db: AsyncSession = Depends(get_db))
 # 1.1 GESTIÓN DE SUSCRIPCIÓN Y ESTADO DE CUENTA (CU03)
 # ------------------------------------------------------------------------------
 
+# ==========================================================================
+# CASO DE USO: CU03 - GESTIONAR SUSCRIPCIÓN Y ESTADO DE CUENTA
+# ROL: Administrador del Tenant
+# CAPA MVC: [CONTROLADOR / ENDPOINT REST]
+# ==========================================================================
 @router.get("/suscripciones/mi-suscripcion", response_model=SuscripcionDetalleResponse, summary="Consultar Estado de Cuenta y Suscripción (CU03)")
 async def consultar_mi_suscripcion(
     tenant: TenantContext = Depends(get_current_tenant_context),
@@ -107,6 +122,11 @@ async def cambiar_plan_suscripcion(
 # 2. MÓDULO DE SUCURSALES CON CONTROL DE LÍMITES POR PLAN
 # ------------------------------------------------------------------------------
 
+# ==========================================================================
+# CASO DE USO: CU04 - ADMINISTRAR SUCURSALES CON CONTROL DE LÍMITES
+# ROL: Administrador del Tenant
+# CAPA MVC: [CONTROLADOR / ENDPOINT REST]
+# ==========================================================================
 @router.get("/sucursales", response_model=List[SucursalTenantResponse], summary="Listar Sucursales del Tenant (CU04)")
 async def listar_sucursales_tenant(
     tenant: TenantContext = Depends(get_current_tenant_context),

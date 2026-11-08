@@ -58,6 +58,10 @@ class Temporada(Base):
 
 
 # ----------------- CU6: PRENDAS, MULTIMEDIA AR Y CONTROL DE INVENTARIO -----------------
+# ==========================================================================
+# CASO DE USO: CU06 - ADMINISTRAR CATÁLOGO DE PRENDAS
+# CAPA MVC: [MODELO DE BASE DE DATOS / ENTIDAD ORM PRENDA]
+# ==========================================================================
 class Prenda(Base):
     __tablename__ = "prendas"
 
@@ -168,6 +172,10 @@ class MovimientoInventario(Base):
 
 
 # ----------------- CU18: CALIFICACIONES Y RESEÑAS DE PRENDAS -----------------
+# ==========================================================================
+# CASO DE USO: CU18 - CALIFICACIONES Y RESEÑAS DE PRENDAS
+# CAPA MVC: [MODELO DE BASE DE DATOS / ENTIDAD ORM RESEÑAS]
+# ==========================================================================
 class CalificacionPrenda(Base):
     __tablename__ = "calificaciones_prenda"
     __table_args__ = (
@@ -191,6 +199,10 @@ class CalificacionPrenda(Base):
     usuario: Mapped["app.domains.usuarios.models.Usuario"] = relationship("app.domains.usuarios.models.Usuario", lazy="selectin")
 
 # ----------------- CU09: DIFUSIÓN DE NOVEDADES DE CATÁLOGO -----------------
+# ==========================================================================
+# CASO DE USO: CU09 - DIFUSIÓN DE NOVEDADES DE CATÁLOGO A CLIENTES
+# CAPA MVC: [MODELO DE BASE DE DATOS / ENTIDAD ORM CAMPAÑA DIFUSIÓN]
+# ==========================================================================
 class DifusionCatalogo(Base):
     __tablename__ = "difusion_catalogo"
 

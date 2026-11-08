@@ -37,6 +37,11 @@ async def get_domain_status(db: AsyncSession = Depends(get_db)):
 
 
 # ----------------- CU13: RESERVAR PRENDAS PARA PROBADOR -----------------
+# ==========================================================================
+# CASO DE USO: CU14 - REGISTRAR RESERVA PARA ENSAYO EN TIENDA / PROBADOR
+# ROL: Cliente / Vendedor
+# CAPA MVC: [CONTROLADOR / ENDPOINTS DE RESERVAS]
+# ==========================================================================
 @router.post(
     "",
     response_model=ReservaResponse,
@@ -184,7 +189,11 @@ async def marcar_expirada(
     ip = request.client.host if request.client else None
     return await ReservasService.marcar_expirada(db, reserva_id, data, current_user, ip)
 
-# ----------------- CU25: CONSULTAR TRAZABILIDAD Y ESTADO DE RESERVAS -----------------
+# ==========================================================================
+# CASO DE USO: CU25 - CONSULTAR TRAZABILIDAD Y ESTADO DE RESERVAS
+# ROL: Cliente / Cajero
+# CAPA MVC: [CONTROLADOR / ENDPOINT TRAZABILIDAD CICLO DE VIDA]
+# ==========================================================================
 @router.get(
     "/{identificador}/trazabilidad",
     response_model=ReservaTrazabilidadResponse,
