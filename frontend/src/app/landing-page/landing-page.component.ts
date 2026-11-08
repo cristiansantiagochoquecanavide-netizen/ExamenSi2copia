@@ -77,7 +77,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
   curatedPieces: ArPiece[] = [
     {
       id: 'model-01',
-      name: 'Bad Gyal Streetwear Denim',
+      name: 'Conjunto Denim Urbano & Crop Top',
       category: 'Streetwear',
       material: 'Algodón peinado & Denim 14oz',
       price: 149,
@@ -87,17 +87,17 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
     },
     {
       id: 'model-02',
-      name: 'Bad Gyal Arctic Faux Fur',
+      name: 'Abrigo de Piel Sintética Ártica',
       category: 'Alta Costura',
       material: 'Piel sintética ártica premium & satén',
       price: 489,
-      imageUrl: 'assets/images/models/bad_gyal_fur_coat.jpg',
+      imageUrl: 'assets/images/models/bad_gyal_fur_coat.jpg?v=2',
       isArReady: true,
       drapeDetail: 'Silueta envolvente con cuello esmoquin y forro de satén acolchado.'
     },
     {
       id: 'model-03',
-      name: 'Quevedo GQ Aviator Sherpa',
+      name: 'Chaqueta Aviador Cuero & Sherpa',
       category: 'Moda Masculina',
       material: 'Cuero napa vacuno & Cuello borrego',
       price: 380,
@@ -107,17 +107,17 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
     },
     {
       id: 'model-04',
-      name: 'Corset Escultural Rosa Atelier',
+      name: 'Vestido Corsetero Escultural Rosa',
       category: 'Alta Costura',
       material: 'Crepé de seda & Ballenas flexibles',
       price: 620,
-      imageUrl: 'assets/images/models/vestido_corset_rosa.jpg',
+      imageUrl: 'assets/images/models/vestido_corset_rosa.jpg?v=2',
       isArReady: true,
       drapeDetail: 'Entallado de silueta reloj de arena con soporte anatómico interior.'
     },
     {
       id: 'model-05',
-      name: 'Bad Gyal Y2K Ripped Flare',
+      name: 'Jeans Flare Desgastados Y2K',
       category: 'Streetwear',
       material: 'Denim vintage con roturas láser',
       price: 175,
@@ -127,7 +127,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
     },
     {
       id: 'model-06',
-      name: 'Bad Gyal Glitter Naked Dress',
+      name: 'Vestido Red Glitter Espalda Abierta',
       category: 'Alta Costura',
       material: 'Malla metálica & Cristales checos',
       price: 540,
@@ -137,7 +137,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
     },
     {
       id: 'model-07',
-      name: 'Baggy Denim Essential Fit',
+      name: 'Jeans Baggy Skate & Musculosa',
       category: 'Streetwear',
       material: 'Denim orgánico lavado piedra',
       price: 130,
@@ -147,7 +147,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
     },
     {
       id: 'model-08',
-      name: 'Kylie Jenner Tailored Poplin',
+      name: 'Camisa Entallada Popelina & Estola',
       category: 'Sastrería',
       material: 'Popelina egipcia & Visón sintético',
       price: 310,
@@ -157,7 +157,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
     },
     {
       id: 'model-09',
-      name: 'Oversized Streetwear Denim Look',
+      name: 'Pantalón Denim Oversized Skater',
       category: 'Streetwear',
       material: 'Denim pesado 100% algodón',
       price: 140,
@@ -167,7 +167,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
     },
     {
       id: 'model-10',
-      name: 'Rauw Alejandro Camel Tailoring',
+      name: 'Traje Sastre Oversized Tono Arena',
       category: 'Moda Masculina',
       material: 'Lana tropical tono camello',
       price: 750,
@@ -177,7 +177,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
     },
     {
       id: 'model-11',
-      name: 'Athleisure Biker & Chunky Sneaker',
+      name: 'Conjunto Biker Seamless & Sneakers',
       category: 'Athleisure',
       material: 'Microfibra elástica & Suela EVA multicapa',
       price: 220,
@@ -187,7 +187,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
     },
     {
       id: 'model-12',
-      name: 'Varsity Sport Basketball Edition',
+      name: 'Chaqueta Bomber Varsity & Shorts',
       category: 'Athleisure',
       material: 'Algodón peinado & Felpa francesa',
       price: 260,
@@ -197,7 +197,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
     },
     {
       id: 'model-13',
-      name: 'Gym Training Pro Monochrome',
+      name: 'Conjunto Deportivo Monocromo Pro',
       category: 'Athleisure',
       material: 'Poliamida seamless 4-way stretch',
       price: 195,
@@ -207,7 +207,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
     },
     {
       id: 'model-14',
-      name: 'Sydney Sweeney Double Denim Boxy',
+      name: 'Total Look Denim Campera Boxy',
       category: 'Streetwear',
       material: 'Denim añejo índigo puro',
       price: 290,
@@ -217,7 +217,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
     },
     {
       id: 'model-15',
-      name: 'Sydney Sweeney Silk Slip Dress',
+      name: 'Vestido Lencero de Satén Celeste',
       category: 'Alta Costura',
       material: 'Satén de seda natural celeste',
       price: 420,
