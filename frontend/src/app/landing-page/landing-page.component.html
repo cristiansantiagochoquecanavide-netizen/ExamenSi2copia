@@ -350,7 +350,6 @@
       <div class="ar-modal-box" (click)="$event.stopPropagation()">
         <header class="modal-header">
           <div class="modal-title-group">
-            <span class="modal-pretitle">DEMO TECNOLÓGICA B2B &bull; SIMULACIÓN VTON 60 FPS</span>
             <h3 class="modal-title">{{ selectedArPiece.name }}</h3>
           </div>
           <button type="button" class="modal-close-btn" (click)="closeArModal()" aria-label="Cerrar modal">
@@ -361,14 +360,6 @@
         <div class="modal-body">
           <div class="modal-ar-preview">
             <img [src]="selectedArPiece.imageUrl" [alt]="selectedArPiece.name" class="modal-preview-img" />
-            <div class="ar-scanning-line"></div>
-            <div class="preview-client-tag">
-              <span class="material-symbols-outlined">visibility</span>
-              <span>Vista de tu cliente</span>
-            </div>
-            <div class="ar-telemetry-badge">
-              <span>MALLA BIOMÉTRICA: 99.8% FIT</span>
-            </div>
           </div>
 
           <div class="modal-ar-details">
