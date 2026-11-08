@@ -161,7 +161,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }, {
       root: null,
-      threshold: 0.35
+      threshold: 0.25
     });
 
     for (const item of sections) {
