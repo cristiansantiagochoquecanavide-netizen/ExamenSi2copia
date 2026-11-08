@@ -398,6 +398,13 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
     this.router.navigate(['/catalogo']);
   }
 
+  irAPlanesTienda(): void {
+    this.closeArModal();
+    setTimeout(() => {
+      this.scrollToSection('planes-saas');
+    }, 120);
+  }
+
   nextSlide(): void {
     const list = this.filteredPieces;
     const maxOffset = Math.max(0, list.length - this.visibleItems);
