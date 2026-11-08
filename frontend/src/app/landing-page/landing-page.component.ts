@@ -28,7 +28,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly elRef = inject(ElementRef);
 
   // Tema dinámico de color según scroll
-  currentTheme: 'theme-noir' | 'theme-urban' | 'theme-sport' | 'theme-light' = 'theme-noir';
+  currentTheme: 'theme-noir' | 'theme-urban' | 'theme-sport' | 'theme-light' = 'theme-light';
   private observer: IntersectionObserver | null = null;
 
   // Planes de Suscripción SaaS (CU01)
@@ -143,10 +143,10 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
     if (typeof IntersectionObserver === 'undefined') return;
 
     const sections = [
-      { id: 'hero-section', theme: 'theme-noir' as const },
-      { id: 'story-elegante', theme: 'theme-noir' as const },
-      { id: 'story-urbano', theme: 'theme-urban' as const },
-      { id: 'story-running', theme: 'theme-sport' as const },
+      { id: 'hero-section', theme: 'theme-light' as const },
+      { id: 'story-elegante', theme: 'theme-light' as const },
+      { id: 'story-urbano', theme: 'theme-light' as const },
+      { id: 'story-running', theme: 'theme-light' as const },
       { id: 'planes-saas', theme: 'theme-light' as const }
     ];
 
