@@ -1,1 +1,1 @@
-"""Módulo sincronizacion (CU16: Sincronización de Operaciones Offline)."""
+"""Módulo de Sincronización Offline e Idempotencia (CU16 - CU17)."""

@@ -4,6 +4,6 @@
 # CAPA MVC: [MODELO DE BASE DE DATOS / ORM]
 # ==============================================================================
 try:
-    from app.domains.sincronizacion.models import *
+    from apps.GestionVentas.sincronizacion.models import *
 except ImportError:
     pass

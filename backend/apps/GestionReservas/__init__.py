@@ -1,1 +1,1 @@
-"""Subsistema GestionReservas."""
+"""Dominio de Reservas en Tienda Fisica."""

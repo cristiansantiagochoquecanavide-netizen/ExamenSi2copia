@@ -4,6 +4,6 @@
 # CAPA MVC: [DTO / SCHEMAS PYDANTIC]
 # ==============================================================================
 try:
-    from app.domains.analitica_ia.schemas import *
+    from apps.ReportesIA.schemas import *
 except ImportError:
     pass

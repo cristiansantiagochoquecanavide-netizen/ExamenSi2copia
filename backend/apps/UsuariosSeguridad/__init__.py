@@ -1,1 +1,1 @@
-"""Subsistema UsuariosSeguridad."""
+"""Dominio de Usuarios y Autenticacion."""

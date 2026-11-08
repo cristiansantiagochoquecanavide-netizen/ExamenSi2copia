@@ -4,6 +4,6 @@
 # CAPA MVC: [CONTROLADOR / ROUTER FASTAPI]
 # ==============================================================================
 try:
-    from app.domains.sincronizacion.routers import *
+    from apps.GestionVentas.sincronizacion.routers import *
 except ImportError:
     pass

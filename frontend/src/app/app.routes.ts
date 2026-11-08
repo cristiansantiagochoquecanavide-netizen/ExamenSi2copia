@@ -8,39 +8,39 @@ export const routes: Routes = [
   },
   {
     path: 'login',
-    loadComponent: () => import('./features/usuarios/pages/login-page.component').then(m => m.LoginPageComponent)
+    loadComponent: () => import('./dashboard/seguridad-login/login-page.component').then(m => m.LoginPageComponent)
   },
   {
     path: 'saas',
-    loadComponent: () => import('./features/saas/pages/saas-page.component').then(m => m.SaasPageComponent)
+    loadComponent: () => import('./dashboard/planes-saas/saas-page.component').then(m => m.SaasPageComponent)
   },
   {
     path: 'usuarios',
-    loadChildren: () => import('./features/usuarios/usuarios.routes').then(m => m.USUARIOS_ROUTES)
+    loadChildren: () => import('./dashboard/usuarios/usuarios.routes').then(m => m.USUARIOS_ROUTES)
   },
   {
     path: 'catalogo',
-    loadChildren: () => import('./features/catalogo/catalogo.routes').then(m => m.CATALOGO_ROUTES)
+    loadChildren: () => import('./dashboard/catalogo-prendas/catalogo.routes').then(m => m.CATALOGO_ROUTES)
   },
   {
     path: 'inventario',
-    loadChildren: () => import('./features/inventario/inventario.routes').then(m => m.INVENTARIO_ROUTES)
+    loadChildren: () => import('./dashboard/inventario-stock/inventario.routes').then(m => m.INVENTARIO_ROUTES)
   },
   {
     path: 'reservas',
-    loadChildren: () => import('./features/reservas/reservas.routes').then(m => m.RESERVAS_ROUTES)
+    loadChildren: () => import('./dashboard/probadores-reservas/reservas.routes').then(m => m.RESERVAS_ROUTES)
   },
   {
     path: 'ventas',
-    loadChildren: () => import('./features/ventas/ventas.routes').then(m => m.VENTAS_ROUTES)
+    loadChildren: () => import('./dashboard/punto-venta-pos/ventas.routes').then(m => m.VENTAS_ROUTES)
   },
   {
     path: 'ia-asistente',
-    loadChildren: () => import('./features/ia-asistente/ia-asistente.routes').then(m => m.IA_ASISTENTE_ROUTES)
+    loadChildren: () => import('./dashboard/reportes-ia/ia-asistente.routes').then(m => m.IA_ASISTENTE_ROUTES)
   },
   {
     path: 'dashboard',
-    loadChildren: () => import('./features/reportes/reportes.routes').then(m => m.REPORTES_ROUTES)
+    loadChildren: () => import('./dashboard/reportes-ia/reportes.routes').then(m => m.REPORTES_ROUTES)
   },
   {
     path: 'ia-reportes',

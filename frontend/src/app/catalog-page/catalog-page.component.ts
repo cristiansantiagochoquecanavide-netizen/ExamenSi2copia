@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { CartService } from '../features/ventas/services/cart.service';
+import { CartService } from '../dashboard/punto-venta-pos/cart.service';
 
 export interface CatalogProduct {
   id: string;

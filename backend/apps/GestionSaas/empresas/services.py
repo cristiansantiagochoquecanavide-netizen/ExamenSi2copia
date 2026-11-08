@@ -4,6 +4,6 @@
 # CAPA MVC: [SERVICIO / LÓGICA DE NEGOCIO]
 # ==============================================================================
 try:
-    from app.domains.saas.services import *
+    from apps.GestionSaas.services import *
 except ImportError:
     pass

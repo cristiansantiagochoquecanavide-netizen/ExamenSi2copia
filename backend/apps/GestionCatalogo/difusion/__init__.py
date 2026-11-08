@@ -1,1 +1,1 @@
-"""Módulo difusion (CU09: Difusión de Novedades y Campañas Omnicanal)."""
+"""Dominio Notificaciones Push & Alertas (CU21)."""

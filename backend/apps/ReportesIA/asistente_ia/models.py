@@ -4,6 +4,6 @@
 # CAPA MVC: [MODELO DE BASE DE DATOS / ORM]
 # ==============================================================================
 try:
-    from app.domains.analitica_ia.models import *
+    from apps.ReportesIA.models import *
 except ImportError:
     pass

@@ -1,1 +1,1 @@
-"""Subsistema GestionVentas."""
+"""Dominio de Ventas y Pagos."""

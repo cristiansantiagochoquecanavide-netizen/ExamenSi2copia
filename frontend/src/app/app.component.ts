@@ -5,10 +5,10 @@ import { filter } from 'rxjs';
 import { AuthService } from './core/services/auth.service';
 import { ToastService } from './core/services/toast.service';
 import { LocalOfflineStorageService } from './core/services/local-offline-storage.service';
-import { CartService } from './features/ventas/services/cart.service';
-import { ChatbotWidgetComponent } from './features/ia-asistente/components/chatbot-widget.component';
-import { NotificationBellComponent } from './features/notificaciones/components/notification-bell.component';
-import { PromoToastComponent } from './features/notificaciones/components/promo-toast.component';
+import { CartService } from './dashboard/punto-venta-pos/cart.service';
+import { ChatbotWidgetComponent } from './dashboard/reportes-ia/chatbot-widget.component';
+import { NotificationBellComponent } from './dashboard/difusion-campanas/notification-bell.component';
+import { PromoToastComponent } from './dashboard/difusion-campanas/promo-toast.component';
 
 @Component({
   selector: 'app-root',

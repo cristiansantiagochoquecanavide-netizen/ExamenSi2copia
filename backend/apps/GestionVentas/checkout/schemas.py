@@ -4,6 +4,6 @@
 # CAPA MVC: [DTO / SCHEMAS PYDANTIC]
 # ==============================================================================
 try:
-    from app.domains.ventas.schemas import *
+    from apps.GestionVentas.schemas import *
 except ImportError:
     pass

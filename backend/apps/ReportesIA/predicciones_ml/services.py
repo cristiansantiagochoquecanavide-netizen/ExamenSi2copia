@@ -4,6 +4,6 @@
 # CAPA MVC: [SERVICIO / LÓGICA DE NEGOCIO]
 # ==============================================================================
 try:
-    from app.domains.analitica_ia.services import *
+    from apps.ReportesIA.services import *
 except ImportError:
     pass

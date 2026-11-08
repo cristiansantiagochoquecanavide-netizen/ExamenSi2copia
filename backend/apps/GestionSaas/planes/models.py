@@ -4,6 +4,6 @@
 # CAPA MVC: [MODELO DE BASE DE DATOS / ORM]
 # ==============================================================================
 try:
-    from app.domains.saas.models import *
+    from apps.GestionSaas.models import *
 except ImportError:
     pass

@@ -4,6 +4,6 @@
 # CAPA MVC: [CONTROLADOR / ROUTER FASTAPI]
 # ==============================================================================
 try:
-    from app.domains.analitica_ia.routers import *
+    from apps.ReportesIA.routers import *
 except ImportError:
     pass

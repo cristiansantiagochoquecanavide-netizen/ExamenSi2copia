@@ -4,6 +4,6 @@
 # CAPA MVC: [DTO / SCHEMAS PYDANTIC]
 # ==============================================================================
 try:
-    from app.domains.reservas.schemas import *
+    from apps.GestionReservas.schemas import *
 except ImportError:
     pass

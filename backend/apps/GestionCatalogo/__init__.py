@@ -1,1 +1,1 @@
-"""Subsistema GestionCatalogo."""
+"""Dominio de Catalogo de Moda."""

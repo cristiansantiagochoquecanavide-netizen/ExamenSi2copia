@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { LoginRequest, TokenResponse, UsuarioResponse } from '../../features/usuarios/models/usuarios.models';
+import { LoginRequest, TokenResponse, UsuarioResponse } from '../../dashboard/usuarios/usuarios.models';
 
 export interface TenantInfo {
   empresaId: number;

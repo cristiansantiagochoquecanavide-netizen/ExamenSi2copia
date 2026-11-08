@@ -1,1 +1,1 @@
-"""Subsistema GestionInventario."""
+"""Dominio de Inventario Omnicanal."""

@@ -4,6 +4,6 @@
 # CAPA MVC: [CONTROLADOR / ROUTER FASTAPI]
 # ==============================================================================
 try:
-    from app.domains.saas.routers import *
+    from apps.GestionSaas.routers import *
 except ImportError:
     pass

@@ -4,6 +4,6 @@
 # CAPA MVC: [SERVICIO / LÓGICA DE NEGOCIO]
 # ==============================================================================
 try:
-    from app.domains.reservas.services import *
+    from apps.GestionReservas.services import *
 except ImportError:
     pass
