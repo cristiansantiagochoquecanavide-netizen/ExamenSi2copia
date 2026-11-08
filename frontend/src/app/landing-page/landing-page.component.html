@@ -164,63 +164,51 @@
     <section class="pricing-section" id="planes-saas">
       <div class="section-wrapper">
         <div class="pricing-header">
-          <div class="pricing-badge-wrapper">
-            <span class="section-pretitle">PLANES & TARIFAS TRANSPARENTES</span>
+          <div class="gemini-header-icon">
+            <span class="material-symbols-outlined">auto_awesome</span>
           </div>
           <h2 class="section-title">
-            Elige el plan ideal para tu tienda o cadena de moda
+            Planes diseñados para cada etapa de tu marca
           </h2>
           <p class="pricing-subtext">
-            Sin contratos forzosos. Cada plan incluye tu propia base de datos aislada, panel de control administrativo y soporte para cualquier nicho textil o calzado.
+            Cancela cuando quieras. Sin contratos forzosos ni comisiones sobre tus ventas. Cada plan incluye base de datos propia.
           </p>
         </div>
 
-        <!-- Pricing Cards Grid -->
+        <!-- Pricing Cards Grid (Gemini Style) -->
         <div class="pricing-grid">
           @for (plan of planes; track plan.id) {
             <article class="pricing-card" [class.featured-card]="plan.codigo === 'INTERMEDIO'" [class.vip-card]="plan.codigo === 'VIP'">
-              <!-- Card Header -->
-              <div class="card-top">
-                @if (plan.codigo === 'INTERMEDIO') {
-                  <span class="popular-tag">MÁS POPULAR &bull; RECOMENDADO</span>
-                } @else if (plan.codigo === 'VIP') {
-                  <span class="vip-tag">ENTERPRISE &bull; CORPORATIVO</span>
-                } @else {
-                  <span class="standard-tag">PLAN INICIAL</span>
-                }
+              <!-- Card Top Group -->
+              <div class="card-top-group">
+                <div class="plan-badge-row">
+                  @if (plan.codigo === 'INTERMEDIO') {
+                    <span class="plan-tag tag-featured">RECOMENDADO</span>
+                  } @else if (plan.codigo === 'VIP') {
+                    <span class="plan-tag tag-vip">ENTERPRISE</span>
+                  } @else {
+                    <span class="plan-tag tag-standard">PLAN INICIAL</span>
+                  }
+                </div>
 
                 <h3 class="plan-name">{{ plan.nombre }}</h3>
                 <p class="plan-desc">{{ plan.descripcion }}</p>
 
-                <div class="price-container">
-                  <span class="currency">$</span>
-                  <span class="price-val">{{ plan.precio_mensual | number:'1.2-2' }}</span>
-                  <span class="period">/ mes</span>
-                </div>
-
                 <div class="branch-allowance">
-                  <span class="material-symbols-outlined branch-icon">store</span>
-                  <span>{{ plan.limite_sucursales > 100 ? 'Sucursales Ilimitadas' : 'Hasta ' + plan.limite_sucursales + ' sucursales físicas' }}</span>
+                  <span class="material-symbols-outlined branch-icon">storefront</span>
+                  <span>{{ plan.limite_sucursales > 100 ? 'Sucursales ilimitadas' : 'Hasta ' + plan.limite_sucursales + ' sucursales físicas' }}</span>
                 </div>
-              </div>
 
-              <!-- Feature List -->
-              <div class="features-list">
-                <p class="features-title">Incluye en este plan:</p>
-                <ul>
-                  @for (feat of getPlanFeatures(plan); track feat.text) {
-                    <li [class.disabled-feat]="!feat.included">
-                      <span class="material-symbols-outlined feat-check" [class.active-check]="feat.included">
-                        {{ feat.included ? 'check_circle' : 'cancel' }}
-                      </span>
-                      <span class="feat-label">{{ feat.text }}</span>
-                    </li>
-                  }
-                </ul>
-              </div>
+                <div class="price-container">
+                  <div class="price-row">
+                    <span class="currency">$</span>
+                    <span class="price-val">{{ plan.precio_mensual | number:'1.2-2' }}</span>
+                    <span class="period">al mes</span>
+                  </div>
+                  <p class="price-note">Facturación mensual sin permanencia</p>
+                </div>
 
-              <!-- Card Action Button -->
-              <div class="card-footer">
+                <!-- CTA BUTTON DIRECTLY UNDER PRICE (Gemini Style) -->
                 <button
                   type="button"
                   class="btn-plan-action"
@@ -228,15 +216,41 @@
                   [class.btn-vip]="plan.codigo === 'VIP'"
                   (click)="seleccionarPlan(plan)"
                 >
-                  <span>{{ plan.codigo === 'VIP' ? 'Suscribir Plan VIP' : 'Elegir ' + plan.nombre }}</span>
-                  <span class="material-symbols-outlined">arrow_forward</span>
+                  <span>{{ plan.codigo === 'VIP' ? 'Suscribir Plan Corporativo' : (plan.codigo === 'INTERMEDIO' ? 'Elegir Plan Recomendado' : 'Elegir Plan Inicial') }}</span>
+                  <span class="material-symbols-outlined btn-arrow">arrow_forward</span>
                 </button>
+              </div>
+
+              <div class="card-divider"></div>
+
+              <!-- Feature List with Clean Checkmarks & Descriptions -->
+              <div class="features-list">
+                <p class="features-header">
+                  <span class="material-symbols-outlined star-icon">auto_awesome</span>
+                  <span>{{ plan.codigo === 'VIP' ? 'Atelier Couture Suite' : (plan.codigo === 'INTERMEDIO' ? 'Atelier Pro & IA' : 'Atelier Core') }}</span>
+                </p>
+
+                <ul class="features-ul">
+                  @for (feat of getPlanFeatures(plan); track feat.text) {
+                    @if (feat.included) {
+                      <li class="feat-item">
+                        <span class="material-symbols-outlined feat-check">check</span>
+                        <div class="feat-text-group">
+                          <span class="feat-title">{{ feat.text }}</span>
+                          @if (feat.desc) {
+                            <span class="feat-desc">{{ feat.desc }}</span>
+                          }
+                        </div>
+                      </li>
+                    }
+                  }
+                </ul>
               </div>
             </article>
           }
         </div>
 
-        <!-- Trust & Security Banner -->
+        <!-- Trust & Security Strip -->
         <div class="trust-strip">
           <div class="trust-item">
             <span class="material-symbols-outlined">shield</span>

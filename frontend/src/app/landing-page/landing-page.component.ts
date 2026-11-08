@@ -336,48 +336,56 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  getPlanFeatures(plan: PlanSuscripcionModel): { icon: string; text: string; included: boolean }[] {
+  getPlanFeatures(plan: PlanSuscripcionModel): { icon: string; text: string; desc?: string; included: boolean }[] {
     const isVip = plan.codigo === 'VIP';
     
     return [
       {
         icon: 'storefront',
         text: plan.limite_sucursales > 100 ? 'Sucursales ilimitadas' : `Hasta ${plan.limite_sucursales} sucursales físicas`,
+        desc: 'Gestión centralizada de stock y cajas',
         included: true
       },
       {
         icon: 'point_of_sale',
         text: 'Punto de Venta POS & Catálogo digital',
+        desc: 'Cobro rápido y sincronización omnicanal',
         included: true
       },
       {
         icon: 'inventory_2',
         text: 'Control de inventario multialmacén',
+        desc: 'Existencias por talla, color y variantes',
         included: true
       },
       {
         icon: 'sync_problem',
         text: 'Sincronización móvil offline (PWA)',
+        desc: 'Tus cajas siguen cobrando sin internet',
         included: plan.permite_offline
       },
       {
         icon: 'smart_toy',
         text: 'Asistente IA Concierge de ventas',
+        desc: 'Sugerencias personalizadas de prendas',
         included: plan.permite_ia
       },
       {
         icon: 'styler',
-        text: 'Probador Virtual VTON con IA generativa',
+        text: 'Probador Virtual VTON 3D con IA',
+        desc: 'Simulación biométrica y caída de tela a 60 FPS',
         included: isVip
       },
       {
         icon: 'trending_up',
         text: 'Modelos predictivos Machine Learning',
+        desc: 'Pronósticos de demanda para optimizar compras',
         included: isVip
       },
       {
         icon: 'verified_user',
         text: 'Aislamiento Multitenant & Auditoría',
+        desc: 'Base de datos y datos fiscales 100% aislados',
         included: true
       }
     ];
