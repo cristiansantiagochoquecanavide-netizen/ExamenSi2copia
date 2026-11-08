@@ -12,14 +12,14 @@ from apps.core.config import settings
 from apps.core.tenant import TenantIsolationMiddleware
 
 # Routers de Subsistemas (apps/)
-from apps.UsuariosSeguridad.routers import router as usuarios_router
-from apps.GestionCatalogo.routers import router as catalogo_router
-from apps.GestionInventario.routers import router as inventario_router
-from apps.GestionReservas.routers import router as reservas_router
-from apps.GestionVentas.routers import router as ventas_router
+from apps.UsuariosSeguridad import router as usuarios_router
+from apps.GestionCatalogo import router as catalogo_router
+from apps.GestionInventario import router as inventario_router
+from apps.GestionReservas import router as reservas_router
+from apps.GestionVentas import router as ventas_router
 from apps.asistente.routers import router as ia_asistente_router
-from apps.GestionSaas.routers import router as saas_router
-from apps.ReportesIA.routers import ia_router, ml_router
+from apps.GestionSaas import router as saas_router
+from apps.ReportesIA import ia_router, ml_router
 
 try:
     from apps.GestionCatalogo.difusion.routers import router as notificaciones_router
