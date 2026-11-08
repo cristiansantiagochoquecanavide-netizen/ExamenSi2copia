@@ -20,10 +20,10 @@ else:
 EOF
 
 echo "==> [Docker Entrypoint] 1. Creando tablas en la base de datos..."
-python init_db.py
+python seeders/init_db.py
 
 echo "==> [Docker Entrypoint] 2. Ejecutando Seed Inicial de datos (Ciclo 1)..."
-python seed.py
+python seeders/seed.py
 
 echo "==> [Docker Entrypoint] 3. Iniciando servidor FastAPI con Uvicorn..."
 exec uvicorn main:app --host 0.0.0.0 --port 8000 --reload

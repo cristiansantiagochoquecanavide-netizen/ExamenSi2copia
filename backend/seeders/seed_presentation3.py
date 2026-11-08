@@ -1,3 +1,5 @@
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 #!/usr/bin/env python3
 """
 Script de Inicialización y Seeding de Datos para PRESENTACIÓN 3: IA Generativa y Machine Learning

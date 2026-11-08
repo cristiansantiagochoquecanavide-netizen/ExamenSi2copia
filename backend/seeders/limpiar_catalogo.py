@@ -1,3 +1,5 @@
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 """
 Script utilitario para vaciar prendas y registros transaccionales dependientes
 manteniendo usuarios, sucursales, roles, categorías, tallas y colores intactos.

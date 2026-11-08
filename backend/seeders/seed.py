@@ -1,3 +1,5 @@
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import asyncio
 import os
 import json
@@ -594,7 +596,7 @@ async def run_seed():
 
         # 6. PRENDAS (Catálogo real extraído de la base de datos de desarrollo)
         print("--> 6. Poblando catalogo de prendas reales desde catalogo_real.json...")
-        json_path = os.path.join(os.path.dirname(__file__), "catalogo_real.json")
+        json_path = os.path.join(os.path.dirname(__file__), os.path.join(os.path.dirname(__file__), "catalogo_real.json"))
         if os.path.exists(json_path):
             with open(json_path, "r", encoding="utf-8") as f:
                 prendas_seed_data = json.load(f)
