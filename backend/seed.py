@@ -5,20 +5,20 @@ from datetime import datetime, date, timezone
 from sqlalchemy import select, func, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import async_session_factory, engine
-from app.core.security import hash_password
+from apps.core.database import async_session_factory, engine
+from apps.core.security import hash_password
 
 # Modelos
-from app.domains.usuarios.models import Rol, Permiso, Usuario, BitacoraAuditoria
-from app.domains.inventario.models import Ciudad, Sucursal, Proveedor, RecepcionMercaderia, DetalleRecepcionMercaderia
-from app.domains.catalogo.models import (
+from apps.UsuariosSeguridad.models import Rol, Permiso, Usuario, BitacoraAuditoria
+from apps.GestionInventario.models import Ciudad, Sucursal, Proveedor, RecepcionMercaderia, DetalleRecepcionMercaderia
+from apps.GestionCatalogo.models import (
     Categoria, Talla, Color, Temporada, Prenda, PrendaMultimedia, PrendaVariante,
     InventarioStock, MovimientoInventario
 )
 
 async def seed_saas_multitenant(session: AsyncSession):
     print("--> Configurando Plataforma SaaS Multitenant, Planes y Tenants...")
-    from app.domains.saas.models import PlanSuscripcion, Empresa, Suscripcion, PoliticaGarantia, GuiaMedida
+    from apps.GestionSaas.models import PlanSuscripcion, Empresa, Suscripcion, PoliticaGarantia, GuiaMedida
     from decimal import Decimal
     from datetime import timedelta
 
@@ -149,7 +149,7 @@ async def run_seed():
         if not os.getenv("FORCE_SEED"):
             prenda_existente = (await session.execute(select(Prenda).where(Prenda.sku == "NOIR-6647"))).scalar_one_or_none()
             if prenda_existente:
-                from app.domains.saas.models import PlanSuscripcion
+                from apps.GestionSaas.models import PlanSuscripcion
                 plan_ex = (await session.execute(select(PlanSuscripcion).where(PlanSuscripcion.codigo == "BASICO"))).scalar_one_or_none()
                 if plan_ex:
                     print("--> [SEED] Base de datos y módulo SaaS ya sembrados previamente. Arranque instantáneo.")
@@ -757,7 +757,7 @@ async def run_seed():
 
         # 10. SAAS MULTITENANT (2DO PARCIAL - PRESENTACIÓN 1)
         print("--> 10. Configurando Plataforma SaaS Multitenant, Planes y Tenants...")
-        from app.domains.saas.models import PlanSuscripcion, Empresa, Suscripcion, PoliticaGarantia, GuiaMedida
+        from apps.GestionSaas.models import PlanSuscripcion, Empresa, Suscripcion, PoliticaGarantia, GuiaMedida
         from decimal import Decimal
         from datetime import timedelta
 

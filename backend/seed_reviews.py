@@ -2,12 +2,12 @@ import asyncio
 from datetime import datetime, timezone
 from decimal import Decimal
 from sqlalchemy import select
-from app.core.database import async_session_factory
-from app.core.security import hash_password
+from apps.core.database import async_session_factory
+from apps.core.security import hash_password
 import app.domains.inventario.models
-from app.domains.usuarios.models import Usuario, Rol
-from app.domains.catalogo.models import Prenda, PrendaVariante, CalificacionPrenda
-from app.domains.ventas.models import Venta, DetalleVenta, Pago
+from apps.UsuariosSeguridad.models import Usuario, Rol
+from apps.GestionCatalogo.models import Prenda, PrendaVariante, CalificacionPrenda
+from apps.GestionVentas.models import Venta, DetalleVenta, Pago
 
 async def seed_reviews():
     print("--- INICIANDO SEED DE RESENAS Y CALIFICACIONES (CU18) ---")

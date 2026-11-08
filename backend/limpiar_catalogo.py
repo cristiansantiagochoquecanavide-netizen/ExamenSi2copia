@@ -4,7 +4,7 @@ manteniendo usuarios, sucursales, roles, categorías, tallas y colores intactos.
 """
 import asyncio
 from sqlalchemy import text
-from app.core.database import async_session_factory, engine
+from apps.core.database import async_session_factory, engine
 
 async def limpiar_catalogo():
     print("--> Iniciando vaciado de prendas y registros transaccionales...")

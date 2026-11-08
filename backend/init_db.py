@@ -1,6 +1,6 @@
 import asyncio
 from sqlalchemy import text
-from app.core.database import Base, engine
+from apps.core.database import Base, engine
 # Importar todos los modelos para registrar las tablas en Base.metadata
 import app.domains.usuarios.models
 import app.domains.inventario.models
