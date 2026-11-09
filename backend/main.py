@@ -102,7 +102,7 @@ if ml_router:
     app.include_router(ml_router, prefix=settings.API_V1_STR)
 
 
-@app.get("/", tags=["Root"])
+@app.api_route("/", methods=["GET", "HEAD"], tags=["Root"])
 async def root():
     return {
         "system": settings.PROJECT_NAME,
@@ -110,4 +110,15 @@ async def root():
         "docs": "/docs",
         "status": "online",
         "architecture": "MVC Modular Subsystems (backend/apps/)"
+    }
+
+
+@app.api_route("/health", methods=["GET", "HEAD"], tags=["Health"])
+@app.api_route(f"{settings.API_V1_STR}/health", methods=["GET", "HEAD"], tags=["Health"])
+async def health_check():
+    return {
+        "status": "ok",
+        "health": "healthy",
+        "service": settings.PROJECT_NAME,
+        "version": settings.VERSION
     }
