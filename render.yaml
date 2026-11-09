@@ -53,7 +53,5 @@ services:
 # ======================================================================
 databases:
   - name: fashionstore-db
-    databaseName: fashionstore_db
-    user: postgres
     plan: free
     region: oregon
