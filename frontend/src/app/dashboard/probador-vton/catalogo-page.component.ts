@@ -62,9 +62,11 @@ import { SaasService } from '../../core/services/saas.service';
             <span class="gold-dot">&bull;</span>
             <span>CATÁLOGO DIGITAL CON AR</span>
           </div>
-          <h1 class="hero-title">Colección</h1>
+          <h1 class="hero-title">
+            {{ authService.currentTenant().empresaId === 2 ? 'Colección Velvet Night' : 'Colección' }}
+          </h1>
           <p class="hero-description">
-            Sastrería contemporánea, siluetas desestructuradas y tecnología de Realidad Aumentada (AR) con modelos 3D (.glb / .usdz) para probadores virtuales y control de inventario por sucursal.
+            {{ authService.currentTenant().empresaId === 2 ? 'Colección exclusiva de vestidos de autor, mallas metálicas, cristales reflectantes y siluetas de noche con probador virtual.' : 'Sastrería contemporánea, siluetas desestructuradas y tecnología de Realidad Aumentada (AR) con modelos 3D (.glb / .usdz) para probadores virtuales y control de inventario por sucursal.' }}
           </p>
           <div class="hero-ia-banner" (click)="irAEstilistaIA()">
             <span class="hero-ia-chip"><span class="material-symbols-outlined hero-ia-icon">auto_awesome</span> ATELIER IA</span>

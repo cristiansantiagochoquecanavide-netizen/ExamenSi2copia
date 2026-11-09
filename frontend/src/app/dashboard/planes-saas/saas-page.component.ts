@@ -49,7 +49,7 @@ import { SaasService, PlanSuscripcionModel, PoliticaGarantiaModel, SucursalTenan
           <div class="stat-card">
             <span class="stat-label">PLAN ACTUAL</span>
             <span class="stat-value gold">{{ authService.currentTenant().planCodigo }}</span>
-            <span class="stat-hint">Subdominio: {{ authService.currentTenant().subdominio }}.fashionstore.bo</span>
+            <span class="stat-hint">Subdominio: {{ authService.currentTenant().subdominio }}.atelieros.bo</span>
           </div>
           <div class="stat-card">
             <span class="stat-label">CUOTA SUCURSALES</span>
@@ -208,12 +208,12 @@ import { SaasService, PlanSuscripcionModel, PoliticaGarantiaModel, SucursalTenan
               </div>
               <div class="info-group">
                 <label>NIT CORPORATIVO</label>
-                <div class="info-value">{{ authService.currentUser()?.ci_nit || (authService.currentTenant().empresaId === 2 ? '9876543210' : '1029384756') }}</div>
+                <div class="info-value">{{ authService.currentUser()?.ci_nit || (authService.currentTenant().empresaId === 2 ? '884712023' : '1029384756') }}</div>
               </div>
               <div class="info-group">
                 <label>SUBDOMINIO MULTITENANT</label>
                 <div class="info-value badge-subdomain">
-                  https://{{ authService.currentTenant().subdominio }}.fashionstore.bo
+                  https://{{ authService.currentTenant().subdominio }}.atelieros.bo
                 </div>
               </div>
               <div class="info-group">

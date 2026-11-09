@@ -90,6 +90,22 @@
   flex-shrink: 0;
 }
 
+.brand-icon-svg.velvet-logo-svg {
+  width: 32px;
+  height: 32px;
+  filter: drop-shadow(0 2px 5px rgba(212, 175, 55, 0.4));
+}
+
+.brand-title.velvet-brand-title {
+  color: #1a052e;
+  font-family: 'Bodoni Moda', 'Playfair Display', 'Didot', Georgia, serif;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  background: linear-gradient(135deg, #180026 0%, #3e0b4a 55%, #c5a880 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .brand-title {
   font-family: 'Bodoni Moda', 'Playfair Display', 'Didot', Georgia, serif;
   font-size: 1.25rem;
