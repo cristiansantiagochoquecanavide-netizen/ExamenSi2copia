@@ -72,17 +72,7 @@ import { SaasService } from '../../core/services/saas.service';
             <span class="hero-ia-link">Probar Atelier Stylist &rarr;</span>
           </div>
 
-          <!-- CU08: BOTÓN DE SINCRONIZACIÓN OFFLINE INDEXEDDB -->
-          <div class="offline-sync-bar" style="margin-top: 14px; display: flex; align-items: center; justify-content: space-between; background: #18181b; padding: 10px 16px; border-radius: 8px; border: 1px solid #27272a;">
-            <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #d4d4d8;">
-              <span class="material-symbols-outlined" style="color: #fbbf24; font-size: 20px;">offline_pin</span>
-              <span><strong>Modo Offline PWA (CU08):</strong> Almacena catálogo con medidas anatómicas en IndexedDB para navegación sin internet.</span>
-            </div>
-            <button type="button" (click)="sincronizarCatalogoOffline()" [disabled]="isSyncingOffline()" style="background: #fbbf24; color: #000; border: none; padding: 6px 14px; font-weight: 700; font-size: 12px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-              <span class="material-symbols-outlined" style="font-size: 16px;">download</span>
-              <span>{{ isSyncingOffline() ? 'SINCRONIZANDO...' : 'DESCARGAR CATÁLOGO OFFLINE' }}</span>
-            </button>
-          </div>
+
         </div>
       </section>
 
@@ -179,17 +169,17 @@ import { SaasService } from '../../core/services/saas.service';
         </div>
         <div class="action-buttons-group">
           @if (authService.isStaff()) {
-            <button type="button" class="btn-action-gold" (click)="router.navigate(['/catalogo/gestion'])">
-              GESTIONAR PRENDAS
+            <button type="button" class="btn-action-gold" (click)="router.navigate(['/catalogo/gestion'])" title="Añadir o editar prendas del catálogo">
+              + GESTIONAR PRENDAS
             </button>
-            <button type="button" class="btn-action-outline" (click)="router.navigate(['/catalogo/gestion'])">
-              + AÑADIR PRENDA
-            </button>
-            <button type="button" class="btn-action-outline" (click)="openAjusteModal()">
-              AJUSTAR STOCK SUCURSAL
+            <button type="button" class="btn-action-outline" (click)="openAjusteModal()" title="Ajustar stock por sucursal física">
+              AJUSTAR STOCK
             </button>
           }
-          <button type="button" class="btn-refresh" (click)="loadPrendas()" [disabled]="isLoading()">
+          <button type="button" class="btn-action-outline" (click)="sincronizarCatalogoOffline()" [disabled]="isSyncingOffline()" title="Sincronizar catálogo en IndexedDB para navegación sin red">
+            {{ isSyncingOffline() ? 'SINCRONIZANDO...' : 'DESCARGAR OFFLINE' }}
+          </button>
+          <button type="button" class="btn-refresh" (click)="loadPrendas()" [disabled]="isLoading()" title="Recargar catálogo">
             &#x21bb; Actualizar
           </button>
         </div>

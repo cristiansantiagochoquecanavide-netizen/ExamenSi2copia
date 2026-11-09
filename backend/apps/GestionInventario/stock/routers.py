@@ -333,3 +333,34 @@ async def confirmar_recepcion_traspaso(
     """
     ip = request.client.host if request.client else None
     return await TraspasoService.confirmar_recepcion_traspaso(db, traspaso_id, recepcion, current_user, ip)
+
+
+# ==============================================================================
+# ALIASES DE COMPATIBILIDAD Y AUDITORÍA: CU12 / CU13 / CU17
+# ==============================================================================
+
+@router.get("/traspasos", summary="Listar Traspasos / Transferencias Multi-sucursal (CU12/CU13)")
+async def listar_traspasos_alias(
+    sucursal_id: Optional[int] = Query(None),
+    estado: Optional[str] = Query(None),
+    db: AsyncSession = Depends(get_db),
+    tenant_ctx: Optional[TenantContext] = Depends(get_optional_tenant_context),
+    current_user: Optional[Usuario] = Depends(get_optional_current_user)
+):
+    """Permite listar los traspasos y transferencias entre sucursales para auditoría y frontends."""
+    from apps.GestionInventario.services import TransferenciaStockService
+    empresa_id = (tenant_ctx.empresa_id if tenant_ctx else None) or (current_user.empresa_id if current_user else None)
+    return await TransferenciaStockService.listar(db, sucursal_id, estado, empresa_id)
+
+
+@router.get("/conflictos", summary="Listar Conflictos de Inventario Offline (CU17)")
+async def listar_conflictos_alias(
+    sucursal_id: Optional[int] = Query(None),
+    estado_resolucion: Optional[str] = Query(None),
+    current_user: Optional[Usuario] = Depends(get_optional_current_user),
+    tenant_ctx: Optional[TenantContext] = Depends(get_optional_tenant_context),
+    db: AsyncSession = Depends(get_db)
+):
+    """Permite consultar colisiones de inventario offline desde el router de inventario."""
+    from apps.GestionVentas.sincronizacion.routers import listar_conflictos_inventario
+    return await listar_conflictos_inventario(sucursal_id=sucursal_id, estado_resolucion=estado_resolucion, db=db)
