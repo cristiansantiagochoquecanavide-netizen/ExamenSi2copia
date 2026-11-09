@@ -6,10 +6,8 @@
         ATELIER<span class="os-pill">OS</span>
       </a>
 
-      <nav class="nav-menu" [class.open]="mobileMenuOpen">
-        <a (click)="scrollToSection('carrusel-modelos')" class="nav-item cursor-pointer">Colección 15 Modelos</a>
+      <nav class="nav-menu">
         <a (click)="scrollToSection('planes-saas')" class="nav-item cursor-pointer">Planes & Precios</a>
-        <a routerLink="/catalogo" class="nav-item">Catálogo Demo</a>
       </nav>
 
       <div class="nav-actions">
@@ -20,9 +18,6 @@
         <button type="button" class="btn-cta-nav" routerLink="/saas">
           <span>Registrar Empresa</span>
           <span class="material-symbols-outlined nav-arrow">arrow_forward</span>
-        </button>
-        <button type="button" class="mobile-toggle-btn" aria-label="Menú" (click)="toggleMobileMenu()">
-          <span class="material-symbols-outlined">{{ mobileMenuOpen ? 'close' : 'menu' }}</span>
         </button>
       </div>
     </div>
@@ -373,7 +368,7 @@
       </div>
 
       <div class="footer-links">
-        <a (click)="scrollToSection('carrusel-modelos')" class="cursor-pointer">Colección 15 Modelos</a>
+        <a (click)="scrollToSection('carrusel-modelos')" class="cursor-pointer">Marcas Asociadas</a>
         <a (click)="scrollToSection('planes-saas')" class="cursor-pointer">Planes de Suscripción</a>
         <a routerLink="/saas">Consola AtelierOS</a>
         <a routerLink="/catalogo">Catálogo de Prendas</a>
