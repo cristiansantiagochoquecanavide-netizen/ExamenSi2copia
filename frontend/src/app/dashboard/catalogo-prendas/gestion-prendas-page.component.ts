@@ -108,6 +108,7 @@ interface FotoLocal {
             (click)="selectedSector.set('MUJERES')">
             MUJER
           </button>
+          @if (authService.currentTenant().empresaId !== 2) {
           <button
             type="button"
             class="chip-btn"
@@ -122,6 +123,7 @@ interface FotoLocal {
             (click)="selectedSector.set('UNISEX')">
             UNISEX
           </button>
+          }
         </div>
 
         <!-- Category Dropdown -->
@@ -134,12 +136,14 @@ interface FotoLocal {
             <optgroup label="MUJERES">
               <option *ngFor="let cat of categoriasMujer()" [value]="cat.id">{{ cat.nombre }}</option>
             </optgroup>
+            @if (authService.currentTenant().empresaId !== 2) {
             <optgroup label="HOMBRES">
               <option *ngFor="let cat of categoriasHombre()" [value]="cat.id">{{ cat.nombre }}</option>
             </optgroup>
             <optgroup label="UNISEX">
               <option *ngFor="let cat of categoriasUnisex()" [value]="cat.id">{{ cat.nombre }}</option>
             </optgroup>
+            }
           </select>
         </div>
       </section>
@@ -512,6 +516,7 @@ interface FotoLocal {
                                 {{ cat.nombre }}
                               </option>
                             </optgroup>
+                            @if (authService.currentTenant().empresaId !== 2) {
                             <optgroup label="HOMBRES">
                               <option *ngFor="let cat of categoriasHombre()" [value]="cat.id">
                                 {{ cat.nombre }}
@@ -522,6 +527,7 @@ interface FotoLocal {
                                 {{ cat.nombre }}
                               </option>
                             </optgroup>
+                            }
                           </select>
                         </div>
 

@@ -97,6 +97,7 @@ import { SaasService } from '../../core/services/saas.service';
               (click)="seleccionarSector('MUJERES')">
               MUJER
             </button>
+            @if (authService.currentTenant().empresaId !== 2) {
             <button 
               type="button" 
               class="sector-pill" 
@@ -111,6 +112,7 @@ import { SaasService } from '../../core/services/saas.service';
               (click)="seleccionarSector('UNISEX')">
               UNISEX
             </button>
+            }
           </div>
 
           <!-- BUSCADOR A LA DERECHA (FIEL AL MODELO APROBADO) -->
@@ -4086,12 +4088,19 @@ export class CatalogoPageComponent implements OnInit {
   };
 
   categoriasDelSector = computed(() => {
+    const isVelvet = this.authService.currentTenant().empresaId === 2;
     const sector = this.selectedSector();
     const cats = this.categorias();
     const excluded = new Set(['abrigos', 'chaquetas', 'trajes']);
-    const sectorCats = sector === 'TODAS'
-      ? cats
-      : cats.filter(c => c.sector === sector || c.sector === 'UNISEX');
+    
+    let sectorCats: Categoria[];
+    if (isVelvet) {
+      sectorCats = cats.filter(c => c.sector === 'MUJERES');
+    } else if (sector === 'TODAS') {
+      sectorCats = cats;
+    } else {
+      sectorCats = cats.filter(c => c.sector === sector || c.sector === 'UNISEX');
+    }
 
     const seen = new Set<string>();
     return sectorCats.filter(c => {
@@ -4105,12 +4114,15 @@ export class CatalogoPageComponent implements OnInit {
 
   filteredPrendas = computed(() => {
     let list = this.prendas();
+    const isVelvet = this.authService.currentTenant().empresaId === 2;
     const sector = this.selectedSector();
     const catId = this.selectedCategoriaId();
     const query = this.searchTermActive();
 
     // 1. Filtrar por Sector (Audiencia / Departamento)
-    if (sector !== 'TODAS') {
+    if (isVelvet) {
+      list = list.filter(p => p.categoria?.sector === 'MUJERES');
+    } else if (sector !== 'TODAS') {
       list = list.filter(p => p.categoria?.sector === sector || p.categoria?.sector === 'UNISEX');
     }
 
