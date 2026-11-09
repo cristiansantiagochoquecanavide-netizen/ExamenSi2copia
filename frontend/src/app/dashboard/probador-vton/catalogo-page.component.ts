@@ -211,7 +211,10 @@ import { SaasService } from '../../core/services/saas.service';
         <div class="alert-box">
           <span class="alert-title">ERROR DE CONEXIÓN CON EL BACKEND</span>
           <p class="alert-desc">{{ errorMessage() }}</p>
-          <button type="button" class="btn-retry" (click)="loadPrendas()">Reintentar conexión</button>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button type="button" class="btn-retry" (click)="loadPrendas()">Reintentar conexión</button>
+            <button type="button" class="btn-retry" style="border-color: #2563eb; color: #2563eb;" (click)="changeBackendUrl()">⚙️ Configurar URL Backend</button>
+          </div>
         </div>
       }
 
@@ -4192,6 +4195,25 @@ export class CatalogoPageComponent implements OnInit {
   ngOnInit(): void {
     this.loadPrendas();
     this.loadMetadata();
+  }
+
+  changeBackendUrl(): void {
+    const current = localStorage.getItem('API_URL') || 'https://fashionstore-backend-48fs.onrender.com/api/v1';
+    const input = window.prompt(
+      'Ingrese la URL de su Backend en Render (ej: https://fashionstore-backend-xxxx.onrender.com/api/v1):',
+      current
+    );
+    if (input && input.trim()) {
+      let url = input.trim();
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+      if (!url.endsWith('/api/v1')) {
+        url = url.replace(/\/+$/, '') + '/api/v1';
+      }
+      localStorage.setItem('API_URL', url);
+      window.location.reload();
+    }
   }
 
   loadPrendas(): void {

@@ -84,6 +84,11 @@ import { SaasService, PlanSuscripcionModel } from '../../core/services/saas.serv
                 <span class="material-symbols-outlined error-icon">error</span>
                 <span class="error-text">{{ errorMessage() }}</span>
               </div>
+              <div style="margin-top: 0.5rem; margin-bottom: 0.75rem; text-align: center;">
+                <button type="button" style="background: transparent; border: 1px dashed #cbd5e1; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.75rem; color: #475569; cursor: pointer;" (click)="changeBackendUrl()">
+                  ⚙️ Configurar URL Backend (Render)
+                </button>
+              </div>
             }
 
             <!-- Formulario de Inicio de Sesión -->
@@ -987,9 +992,31 @@ export class LoginPageComponent implements OnInit {
       },
       error: (err) => {
         this.isLoading.set(false);
-        const detail = err.error?.detail || 'Error al autenticar. Verifique sus credenciales.';
+        const currentUrl = localStorage.getItem('API_URL') || 'https://fashionstore-backend-48fs.onrender.com/api/v1';
+        const detail = err.status === 0
+          ? `No se pudo conectar con el backend (${currentUrl}). Verifique que el servicio esté activo en Render o configure la URL correcta.`
+          : (err.error?.detail || 'Error al autenticar. Verifique sus credenciales.');
         this.errorMessage.set(detail);
       }
     });
+  }
+
+  changeBackendUrl(): void {
+    const current = localStorage.getItem('API_URL') || 'https://fashionstore-backend-48fs.onrender.com/api/v1';
+    const input = window.prompt(
+      'Ingrese la URL de su Backend en Render (ej: https://fashionstore-backend-xxxx.onrender.com/api/v1):',
+      current
+    );
+    if (input && input.trim()) {
+      let url = input.trim();
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+      if (!url.endsWith('/api/v1')) {
+        url = url.replace(/\/+$/, '') + '/api/v1';
+      }
+      localStorage.setItem('API_URL', url);
+      window.location.reload();
+    }
   }
 }
