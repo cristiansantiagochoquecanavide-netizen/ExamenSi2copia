@@ -70,10 +70,10 @@ import { SaasService, PlanSuscripcionModel } from '../../core/services/saas.serv
                 <span class="demo-text">Probá las vistas web/móvil según cada rol:</span>
               </div>
               <div class="demo-role-buttons">
-                <button type="button" class="btn-role-chip" (click)="fillRole('ADMIN')">Admin</button>
-                <button type="button" class="btn-role-chip" (click)="fillRole('ENCARGADO')">Encargado</button>
-                <button type="button" class="btn-role-chip" (click)="fillRole('CAJERO')">Cajero</button>
-                <button type="button" class="btn-role-chip" (click)="fillRole('CLIENTE')">Cliente</button>
+                <button type="button" class="btn-role-chip" (click)="fillRole('ADMIN')">AdminFashion</button>
+                <button type="button" class="btn-role-chip" (click)="fillRole('ENCARGADO')">EncargadoFashion</button>
+                <button type="button" class="btn-role-chip" (click)="fillRole('CAJERO')">CajeroFashion</button>
+                <button type="button" class="btn-role-chip" (click)="fillRole('CLIENTE')">ClienteFashion</button>
                 <button type="button" class="btn-role-chip tenant-chip" (click)="fillRole('TENANT2')">Tenant 2 (Urban)</button>
               </div>
             </div>
@@ -958,7 +958,7 @@ export class LoginPageComponent implements OnInit {
       this.email = 'AdminFashion@gmail.com';
       this.password = 'Admin123';
     } else if (role === 'ENCARGADO') {
-      this.email = 'EncargadoSucursal@gmail.com';
+      this.email = 'EncargadoFashion@gmail.com';
       this.password = 'Encargado123';
     } else if (role === 'CAJERO') {
       this.email = 'CajeroFashion@gmail.com';
