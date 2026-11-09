@@ -282,7 +282,7 @@
         <span class="cart-badge">{{ (cartService.count$ | async) || 0 }}</span>
       </a>
       @if (authService.isAuthenticated()) {
-        <a routerLink="/saas" class="tenant-badge-pill" [class.tenant-urban]="authService.currentTenant().empresaId === 2" title="Empresa Tenant Activa y Plan de Suscripción (Clic para gestionar)">
+        <a routerLink="/saas" class="tenant-badge-pill" [class.tenant-velvet]="authService.currentTenant().empresaId === 2" title="Empresa Tenant Activa y Plan de Suscripción (Clic para gestionar)">
           <span class="material-symbols-outlined tenant-pill-icon">business</span>
           <span class="tenant-pill-name">{{ authService.currentTenant().nombreEmpresa }}</span>
           <span class="tenant-pill-plan">{{ authService.currentTenant().planCodigo }}</span>

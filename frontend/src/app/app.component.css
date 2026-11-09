@@ -708,13 +708,15 @@
   background: #f1f5f9;
   border-color: #94a3b8;
 }
+.tenant-badge-pill.tenant-velvet,
 .tenant-badge-pill.tenant-urban {
-  background: #f0fdf4;
-  border-color: #86efac;
-  color: #14532d;
+  background: #faf5ff;
+  border-color: #d8b4fe;
+  color: #581c87;
 }
+.tenant-badge-pill.tenant-velvet:hover,
 .tenant-badge-pill.tenant-urban:hover {
-  background: #dcfce7;
+  background: #f3e8ff;
 }
 .tenant-pill-icon {
   font-size: 15px;
@@ -723,8 +725,9 @@
   align-items: center;
   color: #475569;
 }
+.tenant-badge-pill.tenant-velvet .tenant-pill-icon,
 .tenant-badge-pill.tenant-urban .tenant-pill-icon {
-  color: #166534;
+  color: #7e22ce;
 }
 .tenant-pill-name {
   max-width: 120px;
@@ -741,8 +744,9 @@
   border-radius: 4px;
   letter-spacing: 0.05em;
 }
+.tenant-badge-pill.tenant-velvet .tenant-pill-plan,
 .tenant-badge-pill.tenant-urban .tenant-pill-plan {
-  background: #166534;
+  background: #7e22ce;
 }
 .saas-header-btn {
   background: #f8fafc;

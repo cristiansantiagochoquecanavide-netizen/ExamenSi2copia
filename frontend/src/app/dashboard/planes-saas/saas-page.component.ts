@@ -218,7 +218,7 @@ import { SaasService, PlanSuscripcionModel, PoliticaGarantiaModel, SucursalTenan
               </div>
               <div class="info-group">
                 <label>EMAIL DE CONTACTO</label>
-                <div class="info-value">{{ authService.currentUser()?.email || (authService.currentTenant().empresaId === 2 ? 'gerencia@urbanstyle.bo' : 'contacto@eleganceboutique.com') }}</div>
+                <div class="info-value">{{ authService.currentUser()?.email || (authService.currentTenant().empresaId === 2 ? 'VelvetNight@gmail.com' : 'AdminFashion@gmail.com') }}</div>
               </div>
               <div class="info-group">
                 <label>ESTADO DE SUSCRIPCIÓN</label>

@@ -74,7 +74,7 @@ import { SaasService, PlanSuscripcionModel } from '../../core/services/saas.serv
                 <button type="button" class="btn-role-chip" (click)="fillRole('ENCARGADO')">EncargadoFashion</button>
                 <button type="button" class="btn-role-chip" (click)="fillRole('CAJERO')">CajeroFashion</button>
                 <button type="button" class="btn-role-chip" (click)="fillRole('CLIENTE')">ClienteFashion</button>
-                <button type="button" class="btn-role-chip tenant-chip" (click)="fillRole('TENANT2')">Tenant 2 (Urban)</button>
+                <button type="button" class="btn-role-chip tenant-chip" (click)="fillRole('VELVET')">Velvet Night</button>
               </div>
             </div>
 
@@ -953,7 +953,7 @@ export class LoginPageComponent implements OnInit {
     });
   }
 
-  fillRole(role: 'ADMIN' | 'ENCARGADO' | 'CAJERO' | 'CLIENTE' | 'TENANT2'): void {
+  fillRole(role: 'ADMIN' | 'ENCARGADO' | 'CAJERO' | 'CLIENTE' | 'VELVET'): void {
     if (role === 'ADMIN') {
       this.email = 'AdminFashion@gmail.com';
       this.password = 'Admin123';
@@ -963,9 +963,9 @@ export class LoginPageComponent implements OnInit {
     } else if (role === 'CAJERO') {
       this.email = 'CajeroFashion@gmail.com';
       this.password = 'Cajero123';
-    } else if (role === 'TENANT2') {
-      this.email = 'gerencia@urbanstyle.bo';
-      this.password = 'Password123!';
+    } else if (role === 'VELVET') {
+      this.email = 'VelvetNight@gmail.com';
+      this.password = 'Velvet123';
     } else {
       this.email = 'ClienteFashion@gmail.com';
       this.password = 'Cliente123';
