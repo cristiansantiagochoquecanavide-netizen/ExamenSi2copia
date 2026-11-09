@@ -73,11 +73,7 @@
         <button type="button" class="btn-close-mobile-nav" (click)="closeMobileMenu()" aria-label="Cerrar menú">&times;</button>
       </div>
 
-      <!-- Enlace directo al Landing Page de AtelierOS -->
-      <a routerLink="/" class="client-nav-link landing-header-link" (click)="closeMobileMenu()" title="Ver Landing Page de AtelierOS">
-        <span class="material-symbols-outlined nav-icon">public</span>
-        <span>Landing</span>
-      </a>
+
 
       <!-- 1. VISTA EXCLUSIVA PARA CLIENTE / VISITANTE -->
       @if (authService.isCliente()) {
@@ -255,8 +251,8 @@
       }
             <!-- MÓDULO 2DO PARCIAL: SAAS & PLANES MULTITENANT (Sólo Administrador) -->
         @if (authService.isAdmin()) {
-          <a routerLink="/saas" class="client-nav-link saas-header-btn" routerLinkActive="active" (click)="closeMobileMenu()">
-            <span class="material-symbols-outlined nav-icon">grid_view</span> SaaS
+          <a routerLink="/saas" class="client-nav-link saas-header-btn" routerLinkActive="active" (click)="closeMobileMenu()" title="Planes de Suscripción y Límites">
+            <span class="material-symbols-outlined nav-icon">workspace_premium</span> Planes
           </a>
         }
       </nav>

@@ -162,11 +162,7 @@ import { SaasService } from '../../core/services/saas.service';
       </section>
 
       <!-- Status Bar & Actions -->
-      <div class="status-strip">
-        <div class="status-left">
-          <span class="status-pulse"></span>
-          <span class="status-label">CATÁLOGO CON AR &bull; SINCRONIZADO</span>
-        </div>
+      <div class="status-strip" style="justify-content: flex-end;">
         <div class="action-buttons-group">
           @if (authService.isStaff()) {
             <button type="button" class="btn-action-gold" (click)="router.navigate(['/catalogo/gestion'])" title="Añadir o editar prendas del catálogo">
@@ -4090,6 +4086,7 @@ export class CatalogoPageComponent implements OnInit {
   categoriasDelSector = computed(() => {
     const sector = this.selectedSector();
     const cats = this.categorias();
+    const excluded = new Set(['abrigos', 'chaquetas', 'trajes']);
     const sectorCats = sector === 'TODAS'
       ? cats
       : cats.filter(c => c.sector === sector || c.sector === 'UNISEX');
@@ -4097,6 +4094,7 @@ export class CatalogoPageComponent implements OnInit {
     const seen = new Set<string>();
     return sectorCats.filter(c => {
       const key = c.nombre.trim().toLowerCase();
+      if (excluded.has(key)) return false;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
