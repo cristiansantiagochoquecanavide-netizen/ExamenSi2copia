@@ -15,7 +15,7 @@
         <span class="hamburger-bar"></span>
       </button>
 
-      <a routerLink="/catalogo" class="logo-link" (click)="closeMobileMenu()" title="FashionStore Haute Couture">
+      <a routerLink="/" class="logo-link" (click)="closeMobileMenu()" title="Ir al Landing de AtelierOS">
         <!-- Isotipo Fiel a la Etiqueta Textil Stitch: Diamante Brillante Tallado con Bisel Oro -->
         <svg class="brand-icon-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
           <!-- Borde exterior dorado biselado de alta costura -->
@@ -72,6 +72,12 @@
         <span class="mobile-nav-title">MENÚ PRINCIPAL</span>
         <button type="button" class="btn-close-mobile-nav" (click)="closeMobileMenu()" aria-label="Cerrar menú">&times;</button>
       </div>
+
+      <!-- Enlace directo al Landing Page de AtelierOS -->
+      <a routerLink="/" class="client-nav-link landing-header-link" (click)="closeMobileMenu()" title="Ver Landing Page de AtelierOS">
+        <span class="material-symbols-outlined nav-icon">public</span>
+        <span>Landing</span>
+      </a>
 
       <!-- 1. VISTA EXCLUSIVA PARA CLIENTE / VISITANTE -->
       @if (authService.isCliente()) {
