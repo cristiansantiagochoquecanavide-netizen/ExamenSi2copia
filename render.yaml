@@ -4,9 +4,9 @@ services:
   # ====================================================================
   - type: web
     name: fashionstore-backend
-    env: docker
-    dockerfilePath: backend/Dockerfile
-    dockerContext: backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
     plan: free
     region: oregon
     healthCheckPath: /health
@@ -37,8 +37,9 @@ services:
   # ====================================================================
   # 2. FashionStore Frontend (Angular 19 PWA - Static Site CDN)
   # ====================================================================
-  - type: static
+  - type: web
     name: fashionstore-frontend
+    runtime: static
     rootDir: frontend
     buildCommand: npm install --include=dev && npm run build
     staticPublishPath: dist/fashionstore-frontend/browser
