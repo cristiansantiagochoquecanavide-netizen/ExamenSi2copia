@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator
 
 
 class Settings(BaseSettings):
@@ -33,6 +34,23 @@ class Settings(BaseSettings):
         case_sensitive=True,
         extra="allow"
     )
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def assemble_db_connection(cls, v: str | None) -> str:
+        if isinstance(v, str) and v.strip():
+            url = v.strip()
+            # Render / Heroku / Supabase proveen postgres:// o postgresql://
+            # SQLAlchemy 2.0 con asyncpg requiere postgresql+asyncpg://
+            if url.startswith("postgres://"):
+                url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+            elif url.startswith("postgresql://") and not url.startswith("postgresql+asyncpg://"):
+                url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+            # asyncpg requiere ssl en lugar de sslmode=require
+            if "sslmode=require" in url:
+                url = url.replace("sslmode=require", "ssl=require")
+            return url
+        return "postgresql+asyncpg://postgres:postgres@localhost:5432/fashionstore_db"
 
 
 settings = Settings()
