@@ -17,6 +17,7 @@
 // ==============================================================================
 
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
@@ -1338,8 +1339,18 @@ export class SaasPageComponent implements OnInit {
     admin_password: 'Password123!'
   };
 
+  private readonly route = inject(ActivatedRoute);
+
   ngOnInit(): void {
     this.cargarDatos();
+    const qp = this.route.snapshot.queryParams;
+    if (qp['registrar'] === 'true' || qp['planId']) {
+      this.activeTab.set('EMPRESA');
+      if (qp['planId']) {
+        this.nuevaEmpresa.plan_id = +qp['planId'];
+      }
+      this.showCrearEmpresaModal.set(true);
+    }
   }
 
   cargarDatos(): void {

@@ -408,7 +408,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   seleccionarPlan(plan: PlanSuscripcionModel): void {
-    this.router.navigate(['/saas'], { queryParams: { planId: plan.id, codigo: plan.codigo } });
+    this.router.navigate(['/login'], { queryParams: { registrar: 'true', planId: plan.id, codigo: plan.codigo } });
   }
 
   scrollToSection(sectionId: string): void {

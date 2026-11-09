@@ -51,7 +51,7 @@ export class AppComponent {
 
   isLandingRoute(): boolean {
     const url = this.router.url.split('?')[0];
-    return url === '/' || url === '' || url === '/landing';
+    return url === '/' || url === '' || url === '/landing' || url === '/login';
   }
 
   isModuleActive(prefix: string): boolean {

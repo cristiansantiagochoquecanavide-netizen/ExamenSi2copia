@@ -13,7 +13,7 @@
           <span class="material-symbols-outlined nav-icon">person</span>
           <span>Ingreso Boutique</span>
         </button>
-        <button type="button" class="btn-cta-nav" routerLink="/saas">
+        <button type="button" class="btn-cta-nav" routerLink="/login" [queryParams]="{ registrar: 'true' }">
           <span>Registrar Empresa</span>
           <span class="material-symbols-outlined nav-arrow">arrow_forward</span>
         </button>
@@ -344,7 +344,7 @@
             <p class="vip-desc">Registra tu empresa en menos de dos minutos y comienza a utilizar el punto de venta, inventario e inteligencia artificial.</p>
           </div>
           <div class="vip-actions">
-            <button type="button" class="btn-vip" routerLink="/saas">
+            <button type="button" class="btn-vip" routerLink="/login" [queryParams]="{ registrar: 'true', planId: 3 }">
               Registrar Mi Empresa
             </button>
             <button type="button" class="btn-vip-secondary" (click)="scrollToSection('planes-saas')">
