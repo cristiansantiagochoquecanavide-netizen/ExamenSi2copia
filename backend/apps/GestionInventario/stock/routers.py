@@ -4,7 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.core.database import get_db
 from apps.UsuariosSeguridad.models import Usuario
-from apps.UsuariosSeguridad.routers import get_current_user, require_permissions
+from apps.UsuariosSeguridad.routers import get_current_user, get_optional_current_user, require_permissions
+from apps.core.tenant import get_optional_tenant_context, TenantContext
 from .schemas import (
     CiudadCreate, CiudadUpdate, CiudadResponse,
     SucursalCreate, SucursalUpdate, SucursalResponse,
@@ -78,9 +79,12 @@ async def listar_sucursales(
     ciudad_id: Optional[int] = None,
     encargado_id: Optional[int] = None,
     activo_solo: bool = False,
+    tenant_ctx: Optional[TenantContext] = Depends(get_optional_tenant_context),
+    current_user: Optional[Usuario] = Depends(get_optional_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    return await SucursalService.listar(db, ciudad_id, encargado_id, activo_solo)
+    empresa_id = (tenant_ctx.empresa_id if tenant_ctx else None) or (current_user.empresa_id if current_user else None)
+    return await SucursalService.listar(db, ciudad_id, encargado_id, activo_solo, empresa_id)
 
 
 @router.post("/sucursales", response_model=SucursalResponse, status_code=status.HTTP_201_CREATED, summary="Registrar Sucursal (CU4)")
@@ -213,9 +217,12 @@ async def listar_transferencias(
     estado: Optional[str] = None,
     limit: int = 50,
     offset: int = 0,
+    tenant_ctx: Optional[TenantContext] = Depends(get_optional_tenant_context),
+    current_user: Optional[Usuario] = Depends(get_optional_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    return await TransferenciaStockService.listar(db, sucursal_id, estado, limit, offset)
+    empresa_id = (tenant_ctx.empresa_id if tenant_ctx else None) or (current_user.empresa_id if current_user else None)
+    return await TransferenciaStockService.listar(db, sucursal_id, estado, limit, offset, empresa_id)
 
 
 @router.post("/transferencias", response_model=TransferenciaStockResponse, status_code=status.HTTP_201_CREATED, summary="Registrar Transferencia de Stock (CU9)")

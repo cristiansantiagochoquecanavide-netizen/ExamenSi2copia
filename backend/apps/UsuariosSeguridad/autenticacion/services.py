@@ -489,12 +489,21 @@ class UsuarioService:
         sucursal_id: Optional[int] = None,
         estado: Optional[str] = None,
         limit: int = 50,
-        offset: int = 0
+        offset: int = 0,
+        empresa_id: Optional[int] = None
     ) -> List[Usuario]:
         query = select(Usuario).options(selectinload(Usuario.rol).selectinload(Rol.permisos))
         filters = []
-        if tipo_usuario:
+        if empresa_id:
+            if tipo_usuario == "PERSONAL":
+                filters.append(Usuario.empresa_id == empresa_id)
+            elif tipo_usuario == "CLIENTE":
+                filters.append(Usuario.tipo_usuario == "CLIENTE")
+            else:
+                filters.append(or_(Usuario.empresa_id == empresa_id, Usuario.tipo_usuario == "CLIENTE"))
+        elif tipo_usuario:
             filters.append(Usuario.tipo_usuario == tipo_usuario)
+
         if rol_id:
             filters.append(Usuario.rol_id == rol_id)
         if sucursal_id:

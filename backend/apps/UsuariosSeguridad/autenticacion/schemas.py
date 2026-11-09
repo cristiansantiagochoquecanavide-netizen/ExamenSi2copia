@@ -91,6 +91,7 @@ class UsuarioResponse(BaseSchema):
     estado: str
     rol_id: int
     sucursal_id: Optional[int] = None
+    empresa_id: Optional[int] = None
     created_at: datetime
     rol: Optional[RolResponse] = None
 

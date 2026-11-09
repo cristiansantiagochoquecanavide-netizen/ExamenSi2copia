@@ -236,7 +236,8 @@ async def listar_usuarios(
     current_user: Usuario = Depends(require_permissions("usuarios:read")),
     db: AsyncSession = Depends(get_db)
 ):
-    return await UsuarioService.listar(db, tipo_usuario, rol_id, sucursal_id, estado, limit, offset)
+    empresa_id = getattr(current_user, "empresa_id", None)
+    return await UsuarioService.listar(db, tipo_usuario, rol_id, sucursal_id, estado, limit, offset, empresa_id)
 
 
 @router.get("/{user_id}", response_model=UsuarioResponse, summary="Obtener Detalle de Usuario (CU3)")

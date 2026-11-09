@@ -84,7 +84,8 @@ class SucursalService:
         db: AsyncSession,
         ciudad_id: Optional[int] = None,
         encargado_id: Optional[int] = None,
-        activo_solo: bool = False
+        activo_solo: bool = False,
+        empresa_id: Optional[int] = None
     ) -> List[Sucursal]:
         query = select(Sucursal).options(selectinload(Sucursal.ciudad))
         filters = []
@@ -94,6 +95,8 @@ class SucursalService:
             filters.append(Sucursal.encargado_id == encargado_id)
         if activo_solo:
             filters.append(Sucursal.activo == True)
+        if empresa_id:
+            filters.append(Sucursal.empresa_id == empresa_id)
         if filters:
             query = query.where(and_(*filters))
         result = await db.execute(query.order_by(Sucursal.nombre))
@@ -519,7 +522,8 @@ class TransferenciaStockService:
         sucursal_id: Optional[int] = None,
         estado: Optional[str] = None,
         limit: int = 50,
-        offset: int = 0
+        offset: int = 0,
+        empresa_id: Optional[int] = None
     ) -> List[TransferenciaStock]:
         query = select(TransferenciaStock).options(
             selectinload(TransferenciaStock.sucursal_origen),
@@ -530,6 +534,8 @@ class TransferenciaStockService:
             selectinload(TransferenciaStock.detalles).selectinload(DetalleTransferenciaStock.variante).selectinload(PrendaVariante.talla),
             selectinload(TransferenciaStock.detalles).selectinload(DetalleTransferenciaStock.variante).selectinload(PrendaVariante.color)
         )
+        if empresa_id:
+            query = query.join(Sucursal, TransferenciaStock.sucursal_origen_id == Sucursal.id).where(Sucursal.empresa_id == empresa_id)
         if sucursal_id:
             query = query.where(
                 or_(

@@ -31,6 +31,7 @@ export interface UsuarioResponse {
   estado: string;       // ACTIVO, INACTIVO, BLOQUEADO
   rol_id: number;
   sucursal_id?: number;
+  empresa_id?: number;
   created_at: string;
   rol?: RolResponse;
 }

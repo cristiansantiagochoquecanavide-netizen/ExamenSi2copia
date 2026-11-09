@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { AuthService } from '../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InventarioService } from '../inventario-stock/inventario.service';
@@ -1503,6 +1504,7 @@ interface LineaTransferenciaForm {
 export class TransferenciasPageComponent implements OnInit {
   private readonly inventarioService = inject(InventarioService);
   private readonly catalogoService = inject(CatalogoService);
+  readonly authService = inject(AuthService);
 
   // State Signals
   readonly transferencias = signal<TransferenciaStockResponse[]>([]);

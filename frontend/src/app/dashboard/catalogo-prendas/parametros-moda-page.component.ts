@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../core/services/auth.service';
 import { CatalogoService } from './catalogo.service';
 import {
   Categoria, CategoriaCreate,
@@ -37,7 +38,7 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
               [class.active]="activeTab() === 'CATEGORIAS'"
               (click)="activeTab.set('CATEGORIAS')"
             >
-              CATEGORÍAS ({{ categorias().length }})
+              CATEGORÍAS ({{ categoriasFiltradas().length }})
             </button>
             <button 
               type="button"
@@ -119,7 +120,7 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
                   </tr>
                 </thead>
                 <tbody>
-                  @for (cat of categorias(); track cat.id) {
+                  @for (cat of categoriasFiltradas(); track cat.id) {
                     <tr>
                       <td class="col-id">#{{ cat.id }}</td>
                       <td class="col-strong">{{ cat.nombre }}</td>
@@ -319,9 +320,11 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
               <div class="form-group">
                 <label>Sector de Vestimenta *</label>
                 <select [(ngModel)]="nuevaCategoria.sector" name="sector" required>
-                  <option value="UNISEX">UNISEX</option>
                   <option value="MUJERES">MUJERES</option>
-                  <option value="HOMBRES">HOMBRES</option>
+                  @if (authService.currentTenant().empresaId !== 2) {
+                    <option value="UNISEX">UNISEX</option>
+                    <option value="HOMBRES">HOMBRES</option>
+                  }
                 </select>
               </div>
               <div class="form-group">
@@ -980,6 +983,16 @@ type TabType = 'CATEGORIAS' | 'TALLAS' | 'COLORES' | 'TEMPORADAS';
 })
 export class ParametrosModaPageComponent implements OnInit {
   private readonly catalogoService = inject(CatalogoService);
+  readonly authService = inject(AuthService);
+
+  categoriasFiltradas = computed(() => {
+    const list = this.categorias();
+    const isVelvet = this.authService.currentTenant().empresaId === 2;
+    if (isVelvet) {
+      return list.filter(c => c.sector === 'MUJERES');
+    }
+    return list;
+  });
 
   activeTab = signal<TabType>('CATEGORIAS');
   isLoading = signal<boolean>(false);

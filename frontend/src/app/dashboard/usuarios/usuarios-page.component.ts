@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { AuthService } from '../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsuariosService } from './usuarios.service';
@@ -34,7 +35,7 @@ import { Sucursal } from '../inventario-stock/inventario.models';
               [class.active]="filtroTipo() === 'TODOS'"
               (click)="filtroTipo.set('TODOS')"
             >
-              TODOS ({{ usuarios().length }})
+              TODOS ({{ usuariosFiltrados().length }})
             </button>
             <button
               type="button"
@@ -922,6 +923,7 @@ export class UsuariosPageComponent implements OnInit {
   private readonly usuariosService = inject(UsuariosService);
   private readonly rolesService = inject(RolesService);
   private readonly inventarioService = inject(InventarioService);
+  readonly authService = inject(AuthService);
 
   readonly usuarios = signal<UsuarioResponse[]>([]);
   readonly roles = signal<RolResponse[]>([]);
@@ -968,8 +970,14 @@ export class UsuariosPageComponent implements OnInit {
   editSucursalId: number | null = null;
 
   readonly usuariosFiltrados = computed(() => {
-    const list = this.usuarios();
+    let list = this.usuarios();
     const filtro = this.filtroTipo();
+    const isVelvet = this.authService.currentTenant().empresaId === 2;
+    if (isVelvet) {
+      list = list.filter(u => u.empresa_id === 2 || u.tipo_usuario === 'CLIENTE');
+    } else {
+      list = list.filter(u => u.empresa_id === 1 || u.tipo_usuario === 'CLIENTE' || !u.empresa_id);
+    }
     if (filtro === 'TODOS') return list;
     return list.filter(u => u.tipo_usuario === filtro);
   });
