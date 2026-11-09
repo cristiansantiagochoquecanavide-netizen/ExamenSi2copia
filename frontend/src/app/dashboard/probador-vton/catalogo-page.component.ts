@@ -4198,7 +4198,7 @@ export class CatalogoPageComponent implements OnInit {
   }
 
   changeBackendUrl(): void {
-    const current = localStorage.getItem('API_URL') || 'https://fashionstore-backend-48fs.onrender.com/api/v1';
+    const current = localStorage.getItem('API_URL') || 'https://fashionstore-backend-ggxx.onrender.com/api/v1';
     const input = window.prompt(
       'Ingrese la URL de su Backend en Render (ej: https://fashionstore-backend-xxxx.onrender.com/api/v1):',
       current

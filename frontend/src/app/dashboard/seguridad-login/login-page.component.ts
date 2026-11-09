@@ -992,7 +992,7 @@ export class LoginPageComponent implements OnInit {
       },
       error: (err) => {
         this.isLoading.set(false);
-        const currentUrl = localStorage.getItem('API_URL') || 'https://fashionstore-backend-48fs.onrender.com/api/v1';
+        const currentUrl = localStorage.getItem('API_URL') || 'https://fashionstore-backend-ggxx.onrender.com/api/v1';
         const detail = err.status === 0
           ? `No se pudo conectar con el backend (${currentUrl}). Verifique que el servicio esté activo en Render o configure la URL correcta.`
           : (err.error?.detail || 'Error al autenticar. Verifique sus credenciales.');
@@ -1002,7 +1002,7 @@ export class LoginPageComponent implements OnInit {
   }
 
   changeBackendUrl(): void {
-    const current = localStorage.getItem('API_URL') || 'https://fashionstore-backend-48fs.onrender.com/api/v1';
+    const current = localStorage.getItem('API_URL') || 'https://fashionstore-backend-ggxx.onrender.com/api/v1';
     const input = window.prompt(
       'Ingrese la URL de su Backend en Render (ej: https://fashionstore-backend-xxxx.onrender.com/api/v1):',
       current

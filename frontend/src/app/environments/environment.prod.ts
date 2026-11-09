@@ -5,6 +5,6 @@ export const environment = {
       const custom = (window as any).__API_URL__ || localStorage.getItem('API_URL');
       if (custom) return custom;
     }
-    return 'https://fashionstore-backend-48fs.onrender.com/api/v1';
+    return 'https://fashionstore-backend-ggxx.onrender.com/api/v1';
   }
 };
