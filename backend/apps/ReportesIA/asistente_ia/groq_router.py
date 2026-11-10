@@ -92,7 +92,7 @@ def _validate_sql(sql: str) -> str:
         raise HTTPException(status_code=400, detail="La consulta intenta acceder a tablas no autorizadas.")
     tenant_aliases = {
         alias.lower() for table, alias in refs
-        if table.lower() in {"ventas", "prendas"}
+        if table.lower() in {"ventas", "prendas", "sucursales"}
     }
     filtered_aliases = {alias.lower() for alias in TENANT_FILTER.findall(candidate)}
     if not re.search(r"\bwhere\b", candidate, re.I) or not tenant_aliases or not tenant_aliases.issubset(filtered_aliases):
@@ -131,9 +131,16 @@ async def consultar_ia(
             "Solo puedes producir una consulta PostgreSQL SELECT sobre estas tablas y columnas: "
             "ventas v (id, empresa_id, sucursal_id, cliente_id, total, estado, canal_venta, created_at), "
             "detalles_venta dv (venta_id, variante_id, cantidad, precio_unitario, subtotal), "
-            "prenda_variantes pv (id, prenda_id, talla, color), prendas p (id, empresa_id, nombre, categoria_id, precio_base), "
-            "sucursales s (id, nombre), inventario_stock i (variante_id, sucursal_id, cantidad_disponible). "
-            "Debes filtrar por empresa en cada tabla que tenga ese campo: ventas y prendas, "
+            "prenda_variantes pv (id, prenda_id, talla_id, color_id), "
+            "prendas p (id, empresa_id, nombre, categoria_id, precio_base), "
+            "sucursales s (id, empresa_id, nombre), "
+            "inventario_stock i (variante_id, sucursal_id, cantidad_disponible, cantidad_reservada, stock_minimo). "
+            "No inventes columnas; talla_id y color_id son IDs, no nombres. "
+            "Para stock crítico o bajo, une inventario_stock con prenda_variantes, prendas y sucursales, "
+            "filtra cantidad_disponible <= stock_minimo y muestra el nivel como CRITICO cuando "
+            "cantidad_disponible <= 2, en otro caso BAJO. inventario_stock no tiene empresa_id: "
+            "limita sus filas mediante prendas p.empresa_id = :tenant_id. "
+            "Debes filtrar por empresa en cada tabla que tenga ese campo: ventas, prendas y sucursales, "
             "usando alias.empresa_id = :tenant_id. Puedes partir de cualquiera de ellas. "
             "Puedes agregar JOIN y un LIMIT de hasta 100. No escribas Markdown ni comentarios."
         )},
