@@ -19,7 +19,7 @@ from apps.core.tenant import TenantContext, get_current_tenant_context
 
 router = APIRouter(prefix="/ia", tags=["IA Generativa (Groq) - CU21"])
 
-SAFE_TABLES = {"ventas", "detalles_venta", "prenda_variantes", "prendas", "sucursales", "inventario_stock"}
+SAFE_TABLES = {"ventas", "detalles_venta", "prenda_variantes", "prendas", "sucursales", "inventario_stock", "usuarios"}
 SAFE_FUNCTIONS = {"count", "sum", "avg", "min", "max", "round", "coalesce", "date_trunc", "extract"}
 DEPRECATED_GROQ_MODELS = {"llama-3.3-70b-versatile": "openai/gpt-oss-120b"}
 TABLE_REF = re.compile(r"\b(?:from|join)\s+([a-z_][a-z0-9_]*)\s+(?:as\s+)?([a-z_][a-z0-9_]*)", re.I)
@@ -92,7 +92,7 @@ def _validate_sql(sql: str) -> str:
         raise HTTPException(status_code=400, detail="La consulta intenta acceder a tablas no autorizadas.")
     tenant_aliases = {
         alias.lower() for table, alias in refs
-        if table.lower() in {"ventas", "prendas", "sucursales"}
+        if table.lower() in {"ventas", "prendas", "sucursales", "usuarios"}
     }
     filtered_aliases = {alias.lower() for alias in TENANT_FILTER.findall(candidate)}
     if not re.search(r"\bwhere\b", candidate, re.I) or not tenant_aliases or not tenant_aliases.issubset(filtered_aliases):
@@ -134,13 +134,17 @@ async def consultar_ia(
             "prenda_variantes pv (id, prenda_id, talla_id, color_id), "
             "prendas p (id, empresa_id, nombre, categoria_id, precio_base), "
             "sucursales s (id, empresa_id, nombre), "
-            "inventario_stock i (variante_id, sucursal_id, cantidad_disponible, cantidad_reservada, stock_minimo). "
+            "inventario_stock i (variante_id, sucursal_id, cantidad_disponible, cantidad_reservada, stock_minimo), "
+            "usuarios u (id, empresa_id, nombre, apellido, tipo_usuario, estado). "
             "No inventes columnas; talla_id y color_id son IDs, no nombres. "
             "Para stock crítico o bajo, une inventario_stock con prenda_variantes, prendas y sucursales, "
             "filtra cantidad_disponible <= stock_minimo y muestra el nivel como CRITICO cuando "
             "cantidad_disponible <= 2, en otro caso BAJO. inventario_stock no tiene empresa_id: "
             "limita sus filas mediante prendas p.empresa_id = :tenant_id. "
-            "Debes filtrar por empresa en cada tabla que tenga ese campo: ventas, prendas y sucursales, "
+            "Para informes de clientes, une ventas v con usuarios u por v.cliente_id = u.id, "
+            "selecciona u.id, u.nombre y u.apellido, y filtra u.tipo_usuario = 'CLIENTE'. "
+            "Filtra por empresa en ambas tablas usando v.empresa_id = :tenant_id y u.empresa_id = :tenant_id. "
+            "Debes filtrar por empresa en cada tabla que tenga ese campo: ventas, prendas, sucursales y usuarios, "
             "usando alias.empresa_id = :tenant_id. Puedes partir de cualquiera de ellas. "
             "Puedes agregar JOIN y un LIMIT de hasta 100. No escribas Markdown ni comentarios."
         )},
