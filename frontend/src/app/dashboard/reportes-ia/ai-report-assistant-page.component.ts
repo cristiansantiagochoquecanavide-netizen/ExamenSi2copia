@@ -1684,7 +1684,11 @@ export class AiReportAssistantComponent implements OnInit, OnDestroy {
         this.errorStatus.set(err.status || 403);
         this.errorBanner.set(
           err?.error?.detail ||
-            'No tiene autorización para exportar este reporte (403 Forbidden).'
+            (err?.status === 404
+              ? 'No se encontró la ruta o el reporte que intentas exportar.'
+              : err?.status === 403
+                ? 'No tienes permiso para exportar este reporte.'
+                : 'No se pudo generar la exportación. Inténtalo de nuevo.')
         );
       }
     });

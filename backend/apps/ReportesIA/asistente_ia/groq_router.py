@@ -6,12 +6,13 @@ from decimal import Decimal
 from typing import Any
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from pydantic import BaseModel, Field
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.GestionSaas.planes.models import Empresa, ReporteGenerativoIA
+from apps.ReportesIA.exportacion.export_service import ReportExportService
 from apps.core.config import settings
 from apps.core.database import get_db
 from apps.core.tenant import TenantContext, get_current_tenant_context
@@ -240,3 +241,86 @@ async def detalle_reporte_ia(
         "motor_ia": f"Groq ({_active_groq_model()})",
         "fecha_consulta": report.fecha_consulta.isoformat(),
     }
+
+
+async def _exportar_reporte_ia(
+    reporte_id: int,
+    formato: str,
+    tenant: TenantContext,
+    db: AsyncSession,
+) -> Response:
+    if not tenant.permite_ia:
+        raise HTTPException(status_code=403, detail="Su plan actual no cuenta con exportación de reportes de IA.")
+
+    report = (await db.execute(select(ReporteGenerativoIA).where(
+        ReporteGenerativoIA.id == reporte_id,
+        ReporteGenerativoIA.empresa_id == tenant.empresa_id,
+    ))).scalar_one_or_none()
+    if not report:
+        raise HTTPException(status_code=404, detail="Reporte no encontrado para esta empresa.")
+
+    company = (await db.execute(select(Empresa).where(Empresa.id == tenant.empresa_id))).scalar_one_or_none()
+    if not company:
+        raise HTTPException(status_code=404, detail="No se encontró la empresa del reporte.")
+
+    try:
+        sql = _validate_sql(report.sql_generado or "")
+        result = await db.execute(text(sql), {"tenant_id": tenant.empresa_id})
+        columns = list(result.keys())
+        rows = [
+            {key: _json_value(value) for key, value in row._mapping.items()}
+            for row in result.fetchall()
+        ]
+    except HTTPException:
+        raise
+    except Exception as exc:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail="No fue posible reconstruir los datos del reporte para exportarlo.") from exc
+
+    report_data = {
+        "reporte_id": report.id,
+        "prompt_consulta": report.prompt_consulta,
+        "tipo_entrada": report.tipo_entrada,
+        "respuesta_resumen": report.respuesta_resumen or "",
+        "columnas": columns,
+        "datos_tabulares": rows,
+    }
+    company_data = {
+        "id": company.id,
+        "razon_social": company.razon_social,
+        "nit": company.nit,
+        "direccion_fiscal": company.direccion_fiscal,
+    }
+
+    if formato == "PDF":
+        content = ReportExportService.generar_pdf(report_data, company_data).getvalue()
+        media_type = "application/pdf"
+        extension = "pdf"
+    else:
+        content = ReportExportService.generar_excel(report_data, company_data).getvalue()
+        media_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        extension = "xlsx"
+
+    return Response(
+        content=content,
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="Reporte_IA_{report.id}.{extension}"'},
+    )
+
+
+@router.get("/reportes/{reporte_id}/exportar/pdf", summary="Exportar un reporte de IA como PDF")
+async def exportar_reporte_ia_pdf(
+    reporte_id: int,
+    tenant: TenantContext = Depends(get_current_tenant_context),
+    db: AsyncSession = Depends(get_db),
+):
+    return await _exportar_reporte_ia(reporte_id, "PDF", tenant, db)
+
+
+@router.get("/reportes/{reporte_id}/exportar/excel", summary="Exportar un reporte de IA como Excel")
+async def exportar_reporte_ia_excel(
+    reporte_id: int,
+    tenant: TenantContext = Depends(get_current_tenant_context),
+    db: AsyncSession = Depends(get_db),
+):
+    return await _exportar_reporte_ia(reporte_id, "EXCEL", tenant, db)
