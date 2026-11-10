@@ -71,9 +71,17 @@ async def _groq_chat(messages: list[dict[str, str]], *, json_mode: bool = False)
 
 
 def _validate_sql(sql: str) -> str:
-    candidate = sql.strip().removeprefix("````sql").removeprefix("```sql").removesuffix("```").strip()
+    candidate = sql.strip()
+    # Models sometimes wrap SQL in a Markdown fence or end a single SELECT
+    # with a semicolon. Normalize those harmless wrappers before validation.
+    candidate = re.sub(r"^```(?:sql)?\s*", "", candidate, flags=re.I)
+    candidate = re.sub(r"\s*```$", "", candidate)
+    candidate = candidate.strip()
+    candidate = re.sub(r";+\s*$", "", candidate).strip()
     if not candidate or not re.match(r"^select\b", candidate, re.I):
         raise HTTPException(status_code=400, detail="La consulta generada no es un SELECT válido.")
+    # A statement separator anywhere inside the query, or SQL comments, remain
+    # forbidden. A final semicolon was removed above as normal SQL punctuation.
     if ";" in candidate or "--" in candidate or "/*" in candidate or "*/" in candidate:
         raise HTTPException(status_code=400, detail="La consulta generada contiene sintaxis no permitida.")
     if re.search(r"\b(with|union|intersect|except|insert|update|delete|drop|alter|truncate|grant|revoke|copy|call|execute|or)\b", candidate, re.I):
