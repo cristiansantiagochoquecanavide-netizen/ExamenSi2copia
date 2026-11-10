@@ -1,6 +1,6 @@
 # ==============================================================================
 # SUBSISTEMA: ReportesIA -> asistente_ia
-# CASO DE USO: CU21 - Consultas por Lenguaje Natural con Gemini
+# CASO DE USO: CU21 - Consultas por Lenguaje Natural con Groq
 # CAPA MVC: [MODELO DE BASE DE DATOS / ORM]
 # ==============================================================================
 try:

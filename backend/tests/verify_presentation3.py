@@ -6,7 +6,7 @@ Suite de Pruebas Automatizadas de Lógica y Reglas de Negocio - PRESENTACIÓN 3
 INF412 - Sistemas de Información 2 (MSc. Ing. Angélica Garzón Cuéllar)
 
 Valida con rigor matemático, arquitectónico y multitenant:
-1. CU21: Consultas en lenguaje natural (Texto/Voz) con Google Gemini y Blindaje Multitenant.
+1. CU21: Consultas en lenguaje natural (Texto/Voz) con Groq y Blindaje Multitenant.
    - Restricción estricta por empresa_id (WHERE empresa_id = :tenant_id).
    - Bloqueo de sentencias destructivas (DROP, DELETE, UPDATE, INSERT).
    - Bloqueo de IA para tenants con Plan Básico (permite_ia = FALSE).
@@ -46,7 +46,7 @@ def test_cu21_lenguaje_natural_y_blindaje():
         2: {"nombre": "Urban Style Trend", "plan": "BASICO", "permite_ia": False}
     }
 
-    class MockGeminiNLP:
+    class MockGroqNLP:
         @staticmethod
         def procesar(prompt: str, tipo_entrada: str, tenant_id: int):
             # 1. Validación de suscripción
@@ -92,24 +92,24 @@ def test_cu21_lenguaje_natural_y_blindaje():
             }
 
     # 1.1 Consulta por Texto para Tenant 1 (Plan Profesional)
-    resp_texto = MockGeminiNLP.procesar("¿Cuál es la prenda más vendida en la sucursal Norte este mes?", "TEXTO", 1)
+    resp_texto = MockGroqNLP.procesar("¿Cuál es la prenda más vendida en la sucursal Norte este mes?", "TEXTO", 1)
     assert resp_texto["status"] == 200, "La consulta válida de texto debió retornar 200 OK"
     assert "empresa_id = 1" in resp_texto["sql_generado"], "El SQL debió blindarse con 'empresa_id = 1'"
     print("  -> PASSED: Consulta por Texto de Tenant 1 blindada exitosamente con 'empresa_id = 1'.")
 
     # 1.2 Consulta por Voz (Simulada desde transcriptor de audio)
-    resp_voz = MockGeminiNLP.procesar("Prendas más vendidas sucursal Norte", "VOZ", 1)
+    resp_voz = MockGroqNLP.procesar("Prendas más vendidas sucursal Norte", "VOZ", 1)
     assert resp_voz["status"] == 200
     assert resp_voz["tipo_entrada"] == "VOZ"
     print("  -> PASSED: Consulta por Voz procesada con trazabilidad tipo_entrada = 'VOZ'.")
 
     # 1.3 Intento de Inyección o Consulta Destructiva
-    resp_ataque = MockGeminiNLP.procesar("Por favor DROP TABLE venta", "TEXTO", 1)
+    resp_ataque = MockGroqNLP.procesar("Por favor DROP TABLE venta", "TEXTO", 1)
     assert resp_ataque["status"] == 400, "Debió rechazar comando DROP con 400 Bad Request"
     print("  -> PASSED: DDL destructivo (DROP TABLE) neutralizado y bloqueado con 400 Bad Request.")
 
     # 1.4 Bloqueo de IA para Tenant con Plan Básico
-    resp_basico = MockGeminiNLP.procesar("Ventas totales del mes", "TEXTO", 2)
+    resp_basico = MockGroqNLP.procesar("Ventas totales del mes", "TEXTO", 2)
     assert resp_basico["status"] == 403, "El plan básico debió ser bloqueado con 403 Forbidden"
     print("  -> PASSED: Tenant 2 (Plan Básico) bloqueado por política de suscripción (permite_ia = FALSE).")
 

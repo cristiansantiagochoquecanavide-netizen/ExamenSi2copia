@@ -66,7 +66,7 @@ backend/
 │   │   └── routers.py / views.py       # Endpoints /ventas, /devoluciones, /politicas
 │   │
 │   ├── ReportesIA/                     # Subsistema Analítico, IA Generativa y Machine Learning
-│   │   ├── asistente_ia/               # CU21: Consultas por Lenguaje Natural Texto/Voz (Gemini)
+│   │   ├── asistente_ia/               # CU21: Consultas por Lenguaje Natural Texto/Voz (Groq)
 │   │   ├── exportacion/                # CU22: Exportación Dinámica a PDF (Platypus) y Excel (OpenPyXL)
 │   │   ├── predicciones_ml/            # CU23 & CU24: Modelos ML y Dashboard Predictivo de Quiebres
 │   │   ├── models.py                   # Modelos analíticos, checkpoints de entrenamiento

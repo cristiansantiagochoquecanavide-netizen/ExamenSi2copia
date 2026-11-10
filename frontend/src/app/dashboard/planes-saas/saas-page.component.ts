@@ -68,7 +68,7 @@ import { SaasService, PlanSuscripcionModel, PoliticaGarantiaModel, SucursalTenan
             <span class="stat-value" [class.success]="authService.currentTenant().permiteIa" [class.muted]="!authService.currentTenant().permiteIa">
               {{ authService.currentTenant().permiteIa ? 'ACTIVA' : 'NO INCLUIDA' }}
             </span>
-            <span class="stat-hint">Google Gemini &amp; ML</span>
+            <span class="stat-hint">Groq &amp; ML</span>
           </div>
         </div>
       </header>
@@ -155,7 +155,7 @@ import { SaasService, PlanSuscripcionModel, PoliticaGarantiaModel, SucursalTenan
                   </div>
                   <div class="feature-item">
                     <span class="material-symbols-outlined feature-check" [class.disabled]="!plan.permite_ia">{{ plan.permite_ia ? 'check' : 'close' }}</span>
-                    <span>Asistente con IA Generativa (Google Gemini)</span>
+                    <span>Asistente con IA Generativa (Groq)</span>
                   </div>
                   <div class="feature-item">
                     <span class="material-symbols-outlined feature-check">check</span>

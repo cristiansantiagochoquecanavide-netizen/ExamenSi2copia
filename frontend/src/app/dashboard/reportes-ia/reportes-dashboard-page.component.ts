@@ -125,7 +125,7 @@ import {
         <section class="p3-shortcut-banner" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); color: #ffffff; padding: 1rem 1.4rem; border-radius: 12px; border: 1px solid rgba(197, 168, 128, 0.4);">
           <div style="display: flex; flex-direction: column; gap: 0.2rem;">
             <span style="font-size: 0.68rem; font-weight: 800; letter-spacing: 0.08em; color: #fde68a;">PRESENTACIÓN 3 &bull; INTELIGENCIA ARTIFICIAL &amp; ANALÍTICA PREDICTIVA</span>
-            <span style="font-size: 0.9rem; color: #e2e8f0;">Acceda al motor Text-to-SQL con Google Gemini, exportación ejecutiva PDF/Excel y modelos de Machine Learning multitenant.</span>
+            <span style="font-size: 0.9rem; color: #e2e8f0;">Acceda al motor Text-to-SQL con Groq, exportación ejecutiva PDF/Excel y modelos de Machine Learning multitenant.</span>
           </div>
           <div style="display: flex; gap: 0.65rem; flex-wrap: wrap;">
             <a routerLink="/dashboard/ia-reportes" style="text-decoration: none; background: #ffffff; color: #0f172a; font-size: 0.8rem; font-weight: 800; padding: 0.55rem 1rem; border-radius: 8px;">

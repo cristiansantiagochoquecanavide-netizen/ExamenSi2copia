@@ -199,7 +199,7 @@ export class FashionAiMlService {
   }
 
   // =========================================================================
-  // CU21: CONSULTAS EN LENGUAJE NATURAL (TEXTO / VOZ) CON GEMINI
+  // CU21: CONSULTAS EN LENGUAJE NATURAL (TEXTO / VOZ) CON GROQ
   // =========================================================================
 
   consultarIA(

@@ -20,6 +20,7 @@ from apps.GestionVentas import router as ventas_router
 from apps.asistente.routers import router as ia_asistente_router
 from apps.GestionSaas import router as saas_router
 from apps.ReportesIA import ia_router, ml_router
+from apps.ReportesIA.asistente_ia.groq_router import router as groq_ia_router
 
 try:
     from apps.GestionCatalogo.difusion.routers import router as notificaciones_router
@@ -98,6 +99,7 @@ if notificaciones_router:
 if sincronizacion_router:
     app.include_router(sincronizacion_router, prefix=settings.API_V1_STR)
 app.include_router(ia_router, prefix=settings.API_V1_STR)
+app.include_router(groq_ia_router, prefix=settings.API_V1_STR)
 if ml_router:
     app.include_router(ml_router, prefix=settings.API_V1_STR)
 

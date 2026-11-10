@@ -27,7 +27,7 @@ class _ReportesScreenState extends State<ReportesScreen> {
   String _selectedRango = '30D';
   Map<String, dynamic>? _dashboardData;
 
-  // Presentación 3 - CU21 (Consultas Lenguaje Natural Texto/Voz con Gemini)
+  // Presentación 3 - CU21 (Consultas Lenguaje Natural Texto/Voz con Groq)
   Map<String, dynamic>? _iaReportResult;
   String? _iaErrorBanner;
   int _iaErrorCode = 0;
@@ -204,8 +204,8 @@ class _ReportesScreenState extends State<ReportesScreen> {
     });
   }
 
-  /// CU21: Consulta en Lenguaje Natural (Texto/Voz) con Google Gemini + SQLSecurityAuditor
-  Future<void> _consultarGeminiNLQ(String query, {String tipoEntrada = 'TEXTO'}) async {
+  /// CU21: Consulta en Lenguaje Natural (Texto/Voz) con Groq + SQLSecurityAuditor
+  Future<void> _consultarGroqNLQ(String query, {String tipoEntrada = 'TEXTO'}) async {
     final cleanQuery = query.trim();
     if (cleanQuery.isEmpty) return;
 
@@ -242,16 +242,16 @@ class _ReportesScreenState extends State<ReportesScreen> {
           _isAnalyzingVoice = false;
         });
       } else {
-        _mostrarFallbackGemini(cleanQuery, tipoEntrada);
+        _mostrarFallbackGroq(cleanQuery, tipoEntrada);
       }
     } catch (_) {
       if (mounted) {
-        _mostrarFallbackGemini(cleanQuery, tipoEntrada);
+        _mostrarFallbackGroq(cleanQuery, tipoEntrada);
       }
     }
   }
 
-  void _mostrarFallbackGemini(String query, String tipoEntrada) {
+  void _mostrarFallbackGroq(String query, String tipoEntrada) {
     setState(() {
       _iaReportResult = {
         'reporte_id': 1,
@@ -371,7 +371,7 @@ class _ReportesScreenState extends State<ReportesScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'PRESENTACIÓN 3 • GEMINI NLQ & ML',
+                            'PRESENTACIÓN 3 • GROQ NLQ & ML',
                             style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                   letterSpacing: 1.6,
                                   color: AppTheme.subtleColor,
@@ -443,8 +443,8 @@ class _ReportesScreenState extends State<ReportesScreen> {
                   ),
                   const SizedBox(height: 18),
 
-                  // Consola CU21: Lenguaje Natural (Texto y Voz) con Google Gemini
-                  _buildGeminiNLQConsoleCard(),
+                  // Consola CU21: Lenguaje Natural (Texto y Voz) con Groq
+                  _buildGroqNLQConsoleCard(),
                   const SizedBox(height: 14),
 
                   if (_iaErrorBanner != null) ...[
@@ -499,7 +499,7 @@ class _ReportesScreenState extends State<ReportesScreen> {
                           SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              'Google Gemini traduciendo a SQL seguro (WHERE empresa_id = :tenant)...',
+                              'Groq traduciendo a SQL seguro (WHERE empresa_id = :tenant)...',
                               style: TextStyle(color: Color(0xFFE9C349), fontSize: 12),
                             ),
                           ),
@@ -508,7 +508,7 @@ class _ReportesScreenState extends State<ReportesScreen> {
                     ),
 
                   if (_iaReportResult != null && !_isAnalyzingVoice) ...[
-                    _buildGeminiNLQResultCard(),
+                    _buildGroqNLQResultCard(),
                     const SizedBox(height: 20),
                   ],
 
@@ -530,7 +530,7 @@ class _ReportesScreenState extends State<ReportesScreen> {
     );
   }
 
-  Widget _buildGeminiNLQConsoleCard() {
+  Widget _buildGroqNLQConsoleCard() {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -547,7 +547,7 @@ class _ReportesScreenState extends State<ReportesScreen> {
               SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'ASISTENTE EJECUTIVO GEMINI NLQ (CU21 • TEXTO / VOZ)',
+                  'ASISTENTE EJECUTIVO GROQ NLQ (CU21 • TEXTO / VOZ)',
                   style: TextStyle(
                     color: Color(0xFFE9C349),
                     fontSize: 10.5,
@@ -576,7 +576,7 @@ class _ReportesScreenState extends State<ReportesScreen> {
                       borderSide: const BorderSide(color: Color(0xFF374151)),
                     ),
                   ),
-                  onSubmitted: (val) => _consultarGeminiNLQ(val, tipoEntrada: 'TEXTO'),
+                  onSubmitted: (val) => _consultarGroqNLQ(val, tipoEntrada: 'TEXTO'),
                 ),
               ),
               const SizedBox(width: 6),
@@ -588,7 +588,7 @@ class _ReportesScreenState extends State<ReportesScreen> {
                 ),
                 onPressed: _isAnalyzingVoice
                     ? null
-                    : () => _consultarGeminiNLQ(_nlqController.text, tipoEntrada: 'VOZ'),
+                    : () => _consultarGroqNLQ(_nlqController.text, tipoEntrada: 'VOZ'),
                 icon: const Icon(Icons.mic, size: 18),
               ),
               const SizedBox(width: 4),
@@ -600,7 +600,7 @@ class _ReportesScreenState extends State<ReportesScreen> {
                 ),
                 onPressed: _isAnalyzingVoice
                     ? null
-                    : () => _consultarGeminiNLQ(_nlqController.text, tipoEntrada: 'TEXTO'),
+                    : () => _consultarGroqNLQ(_nlqController.text, tipoEntrada: 'TEXTO'),
                 child: const Text(
                   'SQL IA',
                   style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
@@ -620,7 +620,7 @@ class _ReportesScreenState extends State<ReportesScreen> {
                   style: const TextStyle(color: Colors.white, fontSize: 10.5),
                 ),
                 side: const BorderSide(color: Color(0xFF3B4559)),
-                onPressed: () => _consultarGeminiNLQ(
+                onPressed: () => _consultarGroqNLQ(
                   p['query']!,
                   tipoEntrada: p['canal'] ?? 'TEXTO',
                 ),
@@ -632,7 +632,7 @@ class _ReportesScreenState extends State<ReportesScreen> {
     );
   }
 
-  Widget _buildGeminiNLQResultCard() {
+  Widget _buildGroqNLQResultCard() {
     final rep = _iaReportResult!;
     final rows = (rep['datos_tabulares'] as List<dynamic>?) ?? [];
     final cols = (rep['columnas'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
