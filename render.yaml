@@ -32,7 +32,7 @@ services:
       - key: GROQ_API_KEY
         sync: false
       - key: GROQ_MODEL
-        value: llama-3.3-70b-versatile
+        value: openai/gpt-oss-120b
 
   # ====================================================================
   # 2. FashionStore Frontend (Angular 19 PWA - Static Site CDN)

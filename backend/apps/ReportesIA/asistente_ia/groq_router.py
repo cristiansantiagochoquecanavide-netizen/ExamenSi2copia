@@ -20,6 +20,7 @@ router = APIRouter(prefix="/ia", tags=["IA Generativa (Groq) - CU21"])
 
 SAFE_TABLES = {"ventas", "detalles_venta", "prenda_variantes", "prendas", "sucursales", "inventario_stock"}
 SAFE_FUNCTIONS = {"count", "sum", "avg", "min", "max", "round", "coalesce", "date_trunc", "extract"}
+DEPRECATED_GROQ_MODELS = {"llama-3.3-70b-versatile": "openai/gpt-oss-120b"}
 TABLE_REF = re.compile(r"\b(?:from|join)\s+([a-z_][a-z0-9_]*)\s+(?:as\s+)?([a-z_][a-z0-9_]*)", re.I)
 TENANT_FILTER = re.compile(r"\b([a-z_][a-z0-9_]*)\s*\.\s*empresa_id\s*=\s*:tenant_id\b", re.I)
 
@@ -29,11 +30,16 @@ class ConsultaIARequest(BaseModel):
     tipo_entrada: str = "TEXTO"
 
 
+def _active_groq_model() -> str:
+    configured_model = settings.GROQ_MODEL.strip()
+    return DEPRECATED_GROQ_MODELS.get(configured_model, configured_model)
+
+
 async def _groq_chat(messages: list[dict[str, str]], *, json_mode: bool = False) -> str:
     if not settings.GROQ_API_KEY:
         raise HTTPException(status_code=503, detail="La integración de Groq no está configurada.")
     payload: dict[str, Any] = {
-        "model": settings.GROQ_MODEL,
+        "model": _active_groq_model(),
         "messages": messages,
         "temperature": 0.1,
         "max_tokens": 1200,
@@ -49,8 +55,19 @@ async def _groq_chat(messages: list[dict[str, str]], *, json_mode: bool = False)
             )
             response.raise_for_status()
             return response.json()["choices"][0]["message"]["content"]
-    except (httpx.HTTPError, KeyError, IndexError, TypeError) as exc:
-        raise HTTPException(status_code=502, detail="No se pudo obtener respuesta del servicio Groq.") from exc
+    except httpx.HTTPStatusError as exc:
+        error_messages = {
+            401: "Groq rechazó la API key configurada.",
+            403: "Groq no autorizó el modelo para esta API key.",
+            404: "Groq no reconoce el modelo configurado.",
+            429: "Groq alcanzó el límite de solicitudes o cuota de esta API key.",
+        }
+        detail = error_messages.get(exc.response.status_code, f"Groq respondió con HTTP {exc.response.status_code}.")
+        raise HTTPException(status_code=502, detail=detail) from exc
+    except httpx.RequestError as exc:
+        raise HTTPException(status_code=502, detail="No se pudo conectar con la API de Groq.") from exc
+    except (KeyError, IndexError, TypeError) as exc:
+        raise HTTPException(status_code=502, detail="Groq devolvió una respuesta con formato inesperado.") from exc
 
 
 def _validate_sql(sql: str) -> str:
@@ -156,7 +173,7 @@ async def consultar_ia(
         "columnas": columns,
         "datos_tabulares": rows,
         "formato_exportacion": report.formato_exportacion,
-        "motor_ia": f"Groq ({settings.GROQ_MODEL})",
+        "motor_ia": f"Groq ({_active_groq_model()})",
         "fecha_consulta": report.fecha_consulta.isoformat(),
     }
 
@@ -212,6 +229,6 @@ async def detalle_reporte_ia(
         "columnas": [],
         "datos_tabulares": [],
         "formato_exportacion": report.formato_exportacion,
-        "motor_ia": f"Groq ({settings.GROQ_MODEL})",
+        "motor_ia": f"Groq ({_active_groq_model()})",
         "fecha_consulta": report.fecha_consulta.isoformat(),
     }
