@@ -510,7 +510,7 @@ import {
               </svg>
             </div>
             <div class="error-text">
-              <strong class="error-heading">Acceso no disponible en el plan actual:</strong>
+              <strong class="error-heading">{{ errorStatus() === 403 ? 'Acceso no disponible en el plan actual:' : 'No se pudo completar la operación de Machine Learning:' }}</strong>
               <p class="error-msg">{{ errorBanner() }}</p>
             </div>
           </section>
@@ -3028,10 +3028,14 @@ export class MlDashboardComponent implements OnInit {
   private manejarError(err: any): void {
     this.isTraining.set(false);
     this.errorStatus.set(err.status || 403);
-    this.errorBanner.set(
-      err?.error?.detail ||
-      'Su plan de suscripción actual no habilita entrenamiento analítico de Machine Learning.'
-    );
+    if (err?.status === 404) {
+      this.errorBanner.set('El backend desplegado no encontró la ruta de Machine Learning. Verifica que el último despliegue del backend haya finalizado.');
+      return;
+    }
+    this.errorBanner.set(err?.error?.detail ||
+      (err?.status === 403
+        ? 'Su plan actual no habilita entrenamiento analítico de Machine Learning.'
+        : 'Ocurrió un error al entrenar o consultar los modelos de Machine Learning.'));
   }
 
   getRiskClass(riesgo: string): string {
