@@ -4,7 +4,7 @@ import asyncio
 import os
 import json
 from datetime import datetime, date, timezone
-from sqlalchemy import select, func, text
+from sqlalchemy import select, func, text, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.core.database import async_session_factory, engine
@@ -111,7 +111,14 @@ async def seed_saas_multitenant(session: AsyncSession):
             session.add(u_urban)
 
     # Sucursal base para Tenant 2 (Urban Style)
-    suc_urban = (await session.execute(select(Sucursal).where(Sucursal.empresa_id == emp2.id))).scalar_one_or_none()
+    suc_urban = (await session.execute(
+        select(Sucursal).where(
+            or_(
+                Sucursal.empresa_id == emp2.id,
+                Sucursal.nombre == "Sucursal Calacoto Urban"
+            )
+        )
+    )).scalar_one_or_none()
     if not suc_urban:
         suc_urban = Sucursal(
             empresa_id=emp2.id,
@@ -124,6 +131,8 @@ async def seed_saas_multitenant(session: AsyncSession):
             activo=True
         )
         session.add(suc_urban)
+    else:
+        suc_urban.empresa_id = emp2.id
 
     # Asociar usuarios, sucursales y prendas base a Tenant 1 (Elegance)
     usr_update = await session.execute(select(Usuario).where(Usuario.empresa_id == None))
@@ -850,7 +859,14 @@ async def run_seed():
             session.add(u_urban)
 
     # Sucursal base para Tenant 2 (Urban Style)
-    suc_urban = (await session.execute(select(Sucursal).where(Sucursal.empresa_id == emp2.id))).scalar_one_or_none()
+    suc_urban = (await session.execute(
+        select(Sucursal).where(
+            or_(
+                Sucursal.empresa_id == emp2.id,
+                Sucursal.nombre == "Sucursal Calacoto Urban"
+            )
+        )
+    )).scalar_one_or_none()
     if not suc_urban:
         suc_urban = Sucursal(
             empresa_id=emp2.id,
@@ -863,6 +879,8 @@ async def run_seed():
             activo=True
         )
         session.add(suc_urban)
+    else:
+        suc_urban.empresa_id = emp2.id
 
     # Asociar usuarios, sucursales y prendas base a Tenant 1 (Elegance)
         usr_update = await session.execute(select(Usuario).where(Usuario.empresa_id == None))

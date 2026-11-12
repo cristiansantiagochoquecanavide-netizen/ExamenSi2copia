@@ -43,6 +43,64 @@ def _deterministic_sql_and_summary(prompt: str) -> tuple[str, str]:
     elif "calacoto" in p or "sur" in p:
         sucursal_filter = " AND s.nombre ILIKE '%Calacoto%'"
 
+    # 1. Diagnóstico de Stock e Inventario Crítico (Máxima prioridad para capturar consultas con 'prendas' o 'tiendas')
+    if any(k in p for k in ("stock", "inventario", "agotad", "crític", "critic", "existencia", "quiebre")):
+        sql = (
+            "SELECT p.nombre AS prenda, t.codigo AS talla, col.nombre AS color, "
+            "s.nombre AS sucursal, i.cantidad_disponible AS stock_actual, i.stock_minimo, "
+            "CASE WHEN i.cantidad_disponible <= 2 THEN 'CRITICO' ELSE 'BAJO' END AS nivel_alerta "
+            "FROM inventario_stock i "
+            "JOIN prenda_variantes pv ON i.variante_id = pv.id "
+            "JOIN prendas p ON pv.prenda_id = p.id "
+            "JOIN tallas t ON pv.talla_id = t.id "
+            "JOIN colores col ON pv.color_id = col.id "
+            "JOIN sucursales s ON i.sucursal_id = s.id "
+            f"WHERE p.empresa_id = :tenant_id AND s.empresa_id = :tenant_id AND i.cantidad_disponible <= i.stock_minimo{sucursal_filter} "
+            "ORDER BY i.cantidad_disponible ASC LIMIT 15"
+        )
+        return sql, "Diagnóstico de variantes con stock crítico o bajo por sucursal."
+
+    # 2. Clientes VIP y Fidelidad (Prioridad alta para no ser capturado por la palabra 'top')
+    if any(k in p for k in ("cliente", "vip", "frecuente", "comprador", "fidelidad")):
+        sql = (
+            "SELECT u.id, u.nombre, u.apellido, COUNT(v.id) AS frecuencia_compras, "
+            "ROUND(SUM(v.total), 2) AS monto_total_bs, TO_CHAR(MAX(v.created_at), 'YYYY-MM-DD') AS ultima_compra "
+            "FROM ventas v "
+            "JOIN usuarios u ON v.cliente_id = u.id "
+            "WHERE v.empresa_id = :tenant_id AND u.empresa_id = :tenant_id AND v.estado = 'PAGADA' "
+            "GROUP BY u.id, u.nombre, u.apellido "
+            "ORDER BY monto_total_bs DESC LIMIT 12"
+        )
+        return sql, "Ranking de clientes VIP según monto acumulado y frecuencia de compra."
+
+    # 3. Métodos de Pago y Canales
+    if any(k in p for k in ("metodo", "método", "pago", "efectivo", "qr", "tarjeta", "canal")):
+        sql = (
+            "SELECT COALESCE(pg.metodo_pago, 'EFECTIVO') AS metodo_pago, v.canal_venta, "
+            "COUNT(v.id) AS transacciones, ROUND(SUM(v.total), 2) AS monto_recaudado_bs "
+            "FROM ventas v "
+            "LEFT JOIN pagos pg ON pg.venta_id = v.id "
+            "WHERE v.empresa_id = :tenant_id AND v.estado = 'PAGADA' "
+            "GROUP BY COALESCE(pg.metodo_pago, 'EFECTIVO'), v.canal_venta "
+            "ORDER BY monto_recaudado_bs DESC LIMIT 10"
+        )
+        return sql, "Distribución de ingresos por método de pago y canal de venta."
+
+    # 4. Desempeño y Facturación por Sucursal
+    if any(k in p for k in ("sucursal", "tienda", "ciudad", "comparar", "rendimiento")):
+        sql = (
+            "SELECT s.nombre AS sucursal, COUNT(v.id) AS total_pedidos, "
+            "COALESCE(ROUND(SUM(v.total), 2), 0.00) AS total_ventas_bs, "
+            "COALESCE(ROUND(AVG(v.total), 2), 0.00) AS ticket_promedio_bs "
+            "FROM sucursales s "
+            "LEFT JOIN ventas v ON s.id = v.sucursal_id AND v.empresa_id = :tenant_id AND v.estado = 'PAGADA' "
+            "WHERE s.empresa_id = :tenant_id "
+            "GROUP BY s.nombre "
+            "ORDER BY total_ventas_bs DESC LIMIT 10"
+        )
+        return sql, "Desempeño comercial y facturación consolidada por sucursal."
+
+    # 5. Productos y Prendas más vendidas / Rotación
     if any(k in p for k in ("prenda", "producto", "más vendid", "mas vendid", "top", "estrella", "rotación", "rotacion")):
         sql = (
             "SELECT p.nombre AS producto, t.codigo AS talla, s.nombre AS sucursal, "
@@ -58,59 +116,6 @@ def _deterministic_sql_and_summary(prompt: str) -> tuple[str, str]:
             "ORDER BY total_unidades DESC, ingresos_bs DESC LIMIT 10"
         )
         return sql, "Ranking de productos más vendidos agrupados por sucursal y talla."
-
-    if any(k in p for k in ("sucursal", "tienda", "ciudad", "comparar", "rendimiento")):
-        sql = (
-            "SELECT s.nombre AS sucursal, COUNT(v.id) AS total_pedidos, "
-            "COALESCE(ROUND(SUM(v.total), 2), 0.00) AS total_ventas_bs, "
-            "COALESCE(ROUND(AVG(v.total), 2), 0.00) AS ticket_promedio_bs "
-            "FROM sucursales s "
-            "LEFT JOIN ventas v ON s.id = v.sucursal_id AND v.empresa_id = :tenant_id AND v.estado = 'PAGADA' "
-            "WHERE s.empresa_id = :tenant_id "
-            "GROUP BY s.nombre "
-            "ORDER BY total_ventas_bs DESC LIMIT 10"
-        )
-        return sql, "Desempeño comercial y facturación consolidada por sucursal."
-
-    if any(k in p for k in ("stock", "inventario", "agotad", "crític", "critic", "existencia", "quiebre")):
-        sql = (
-            "SELECT p.nombre AS prenda, t.codigo AS talla, col.nombre AS color, "
-            "s.nombre AS sucursal, i.cantidad_disponible AS stock_actual, i.stock_minimo, "
-            "CASE WHEN i.cantidad_disponible <= 2 THEN 'CRITICO' ELSE 'BAJO' END AS nivel_alerta "
-            "FROM inventario_stock i "
-            "JOIN prenda_variantes pv ON i.variante_id = pv.id "
-            "JOIN prendas p ON pv.prenda_id = p.id "
-            "JOIN tallas t ON pv.talla_id = t.id "
-            "JOIN colores col ON pv.color_id = col.id "
-            "JOIN sucursales s ON i.sucursal_id = s.id "
-            "WHERE p.empresa_id = :tenant_id AND s.empresa_id = :tenant_id AND i.cantidad_disponible <= i.stock_minimo "
-            "ORDER BY i.cantidad_disponible ASC LIMIT 15"
-        )
-        return sql, "Diagnóstico de variantes con stock crítico o bajo por sucursal."
-
-    if any(k in p for k in ("cliente", "vip", "frecuente", "comprador", "fidelidad")):
-        sql = (
-            "SELECT u.id, u.nombre, u.apellido, COUNT(v.id) AS frecuencia_compras, "
-            "ROUND(SUM(v.total), 2) AS monto_total_bs, TO_CHAR(MAX(v.created_at), 'YYYY-MM-DD') AS ultima_compra "
-            "FROM ventas v "
-            "JOIN usuarios u ON v.cliente_id = u.id "
-            "WHERE v.empresa_id = :tenant_id AND u.empresa_id = :tenant_id AND v.estado = 'PAGADA' "
-            "GROUP BY u.id, u.nombre, u.apellido "
-            "ORDER BY monto_total_bs DESC LIMIT 12"
-        )
-        return sql, "Ranking de clientes VIP según monto acumulado y frecuencia de compra."
-
-    if any(k in p for k in ("metodo", "método", "pago", "efectivo", "qr", "tarjeta", "canal")):
-        sql = (
-            "SELECT COALESCE(pg.metodo_pago, 'EFECTIVO') AS metodo_pago, v.canal_venta, "
-            "COUNT(v.id) AS transacciones, ROUND(SUM(v.total), 2) AS monto_recaudado_bs "
-            "FROM ventas v "
-            "LEFT JOIN pagos pg ON pg.venta_id = v.id "
-            "WHERE v.empresa_id = :tenant_id AND v.estado = 'PAGADA' "
-            "GROUP BY COALESCE(pg.metodo_pago, 'EFECTIVO'), v.canal_venta "
-            "ORDER BY monto_recaudado_bs DESC LIMIT 10"
-        )
-        return sql, "Distribución de ingresos por método de pago y canal de venta."
 
     sql = (
         "SELECT v.id AS venta_id, s.nombre AS sucursal, v.canal_venta, "
@@ -128,6 +133,16 @@ def _synthesize_local_summary(prompt: str, rows: list[dict[str, Any]], company_n
     if not rows:
         return f"No se encontraron registros para la consulta \"{prompt}\" en {company_name}."
     top = rows[0]
+    if "frecuencia_compras" in top or "monto_total_bs" in top:
+        top_name = f"{top.get('nombre', '')} {top.get('apellido', '')}".strip()
+        top_monto = float(top.get('monto_total_bs') or 0.0)
+        top_frec = top.get('frecuencia_compras') or 0
+        total_acumulado = sum(float(r.get('monto_total_bs') or 0.0) for r in rows)
+        return (
+            f"Segmentación de Clientes VIP ({company_name}): El cliente con mayor consumo es '{top_name}' "
+            f"con {top_frec} compras registradas y un gasto acumulado de Bs. {top_monto:,.2f}. "
+            f"Se identificaron {len(rows)} clientes frecuentes con un total consolidado de Bs. {total_acumulado:,.2f}."
+        )
     if "producto" in top and "total_unidades" in top:
         total_u = sum(int(r.get("total_unidades") or 0) for r in rows)
         total_bs = sum(float(r.get("ingresos_bs") or 0.0) for r in rows)
@@ -151,9 +166,10 @@ def _synthesize_local_summary(prompt: str, rows: list[dict[str, Any]], company_n
             f"Total consolidado: Bs. {global_bs:,.2f}."
         )
     if "stock_actual" in top or "cantidad_disponible" in top:
+        criticos = [r for r in rows if r.get('nivel_alerta') == 'CRITICO' or (r.get('stock_actual') or 0) <= 2]
         return (
-            f"Diagnóstico de Inventario ({company_name}): Se identificaron {len(rows)} variantes en nivel de alerta "
-            f"para reposición prioritaria."
+            f"Diagnóstico de Inventario ({company_name}): Se detectaron {len(rows)} variantes en umbral de alerta bajo "
+            f"con {len(criticos)} ítems en estado CRÍTICO (≤ 2 unidades) en '{top.get('sucursal', 'sucursales')}', requiriendo reposición o traspaso urgente."
         )
     return f"Análisis completado para {company_name}: se recuperaron {len(rows)} registros analíticos."
 

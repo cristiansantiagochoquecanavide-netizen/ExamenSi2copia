@@ -47,4 +47,4 @@ python seeders/seed.py || echo "==> [Aviso] seed reporto advertencia, continuand
 
 PORT="${PORT:-8000}"
 echo "==> [Docker Entrypoint] 3. Iniciando servidor FastAPI con Uvicorn en puerto $PORT..."
-exec uvicorn main:app --host 0.0.0.0 --port "$PORT"
+exec uvicorn main:app --host 0.0.0.0 --port "$PORT" --reload
