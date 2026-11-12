@@ -86,21 +86,7 @@ def _deterministic_sql_and_summary(prompt: str) -> tuple[str, str]:
         )
         return sql, "Distribución de ingresos por método de pago y canal de venta."
 
-    # 4. Desempeño y Facturación por Sucursal
-    if any(k in p for k in ("sucursal", "tienda", "ciudad", "comparar", "rendimiento")):
-        sql = (
-            "SELECT s.nombre AS sucursal, COUNT(v.id) AS total_pedidos, "
-            "COALESCE(ROUND(SUM(v.total), 2), 0.00) AS total_ventas_bs, "
-            "COALESCE(ROUND(AVG(v.total), 2), 0.00) AS ticket_promedio_bs "
-            "FROM sucursales s "
-            "LEFT JOIN ventas v ON s.id = v.sucursal_id AND v.empresa_id = :tenant_id AND v.estado = 'PAGADA' "
-            "WHERE s.empresa_id = :tenant_id "
-            "GROUP BY s.nombre "
-            "ORDER BY total_ventas_bs DESC LIMIT 10"
-        )
-        return sql, "Desempeño comercial y facturación consolidada por sucursal."
-
-    # 5. Productos y Prendas más vendidas / Rotación
+    # 4. Productos y Prendas más vendidas / Rotación (antes de sucursal general para consultas que combinan productos + sucursal)
     if any(k in p for k in ("prenda", "producto", "más vendid", "mas vendid", "top", "estrella", "rotación", "rotacion")):
         sql = (
             "SELECT p.nombre AS producto, t.codigo AS talla, s.nombre AS sucursal, "
@@ -116,6 +102,20 @@ def _deterministic_sql_and_summary(prompt: str) -> tuple[str, str]:
             "ORDER BY total_unidades DESC, ingresos_bs DESC LIMIT 10"
         )
         return sql, "Ranking de productos más vendidos agrupados por sucursal y talla."
+
+    # 5. Desempeño y Facturación por Sucursal
+    if any(k in p for k in ("sucursal", "tienda", "ciudad", "comparar", "rendimiento")):
+        sql = (
+            "SELECT s.nombre AS sucursal, COUNT(v.id) AS total_pedidos, "
+            "COALESCE(ROUND(SUM(v.total), 2), 0.00) AS total_ventas_bs, "
+            "COALESCE(ROUND(AVG(v.total), 2), 0.00) AS ticket_promedio_bs "
+            "FROM sucursales s "
+            "LEFT JOIN ventas v ON s.id = v.sucursal_id AND v.empresa_id = :tenant_id AND v.estado = 'PAGADA' "
+            "WHERE s.empresa_id = :tenant_id "
+            "GROUP BY s.nombre "
+            "ORDER BY total_ventas_bs DESC LIMIT 10"
+        )
+        return sql, "Desempeño comercial y facturación consolidada por sucursal."
 
     sql = (
         "SELECT v.id AS venta_id, s.nombre AS sucursal, v.canal_venta, "
@@ -227,15 +227,16 @@ def _validate_sql(sql: str) -> str:
     candidate = re.sub(r"\s*```$", "", candidate)
     candidate = candidate.strip()
     candidate = re.sub(r";+\s*$", "", candidate).strip()
-    if not candidate or not re.match(r"^select\b", candidate, re.I):
+    if not candidate or not re.match(r"^(?:select|with)\b", candidate, re.I):
         raise HTTPException(status_code=400, detail="La consulta generada no es un SELECT válido.")
     # A statement separator anywhere inside the query, or SQL comments, remain
     # forbidden. A final semicolon was removed above as normal SQL punctuation.
     if ";" in candidate or "--" in candidate or "/*" in candidate or "*/" in candidate:
         raise HTTPException(status_code=400, detail="La consulta generada contiene sintaxis no permitida.")
-    if re.search(r"\b(with|union|intersect|except|insert|update|delete|drop|alter|truncate|grant|revoke|copy|call|execute|or)\b", candidate, re.I):
+    if re.search(r"\b(union|intersect|except|insert|update|delete|drop|alter|truncate|grant|revoke|copy|call|execute)\b", candidate, re.I):
         raise HTTPException(status_code=400, detail="La consulta generada contiene operaciones no permitidas.")
-    refs = TABLE_REF.findall(candidate)
+    cte_names = {m.lower() for m in re.findall(r"\b(?:with|,)\s*([a-z_][a-z0-9_]*)\s+as\s*\(", candidate, re.I)}
+    refs = [(t, a) for t, a in TABLE_REF.findall(candidate) if t.lower() not in cte_names]
     if not refs or any(table.lower() not in SAFE_TABLES for table, _alias in refs):
         raise HTTPException(status_code=400, detail="La consulta intenta acceder a tablas no autorizadas.")
     tenant_aliases = {
@@ -245,8 +246,14 @@ def _validate_sql(sql: str) -> str:
     filtered_aliases = {alias.lower() for alias in TENANT_FILTER.findall(candidate)}
     if not re.search(r"\bwhere\b", candidate, re.I) or not tenant_aliases or not filtered_aliases.intersection(tenant_aliases):
         raise HTTPException(status_code=400, detail="La consulta no incluye el filtro obligatorio del tenant.")
+    SQL_SYNTAX_PARENS = {"over", "filter", "within", "in", "exists", "values", "as"}
     functions = re.findall(r"\b([a-z_][a-z0-9_]*)\s*\(", candidate, re.I)
-    if any(function.lower() not in SAFE_FUNCTIONS for function in functions):
+    if any(
+        function.lower() not in SAFE_FUNCTIONS
+        and function.lower() not in SQL_SYNTAX_PARENS
+        and function.lower() not in cte_names
+        for function in functions
+    ):
         raise HTTPException(status_code=400, detail="La consulta contiene funciones no autorizadas.")
     if not re.search(r"\blimit\s+\d+\b", candidate, re.I):
         candidate += " LIMIT 100"
@@ -310,7 +317,7 @@ async def consultar_ia(
                     "Filtra por empresa en ambas tablas usando v.empresa_id = :tenant_id y u.empresa_id = :tenant_id. "
                     "Debes filtrar por empresa en cada tabla que tenga ese campo: ventas, prendas, sucursales y usuarios, "
                     "usando alias.empresa_id = :tenant_id. Puedes partir de cualquiera de ellas. "
-                    "Puedes agregar JOIN y un LIMIT de hasta 100. No escribas Markdown ni comentarios."
+                    "Usa una única sentencia SELECT con GROUP BY y ORDER BY (sin subconsultas ni CTE WITH) y un LIMIT de hasta 100. No escribas Markdown ni comentarios."
                 )},
                 {"role": "user", "content": payload.prompt.strip()},
             ], json_mode=True)
