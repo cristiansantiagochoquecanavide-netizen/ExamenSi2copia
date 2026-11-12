@@ -27,10 +27,11 @@ try:
 except ImportError:
     notificaciones_router = None
 
-try:
-    from apps.GestionVentas.sincronizacion.routers import router as sincronizacion_router
-except ImportError:
-    sincronizacion_router = None
+# CU16 es parte del flujo de ventas y debe estar disponible en todas las
+# instancias del backend. No ocultar errores de importación: hacerlo dejaba
+# que la API arrancara sin registrar /api/v1/sincronizacion/offline y los
+# clientes recibían un 404 al sincronizar.
+from apps.GestionVentas.sincronizacion.routers import router as sincronizacion_router
 
 
 @asynccontextmanager
@@ -96,8 +97,7 @@ app.include_router(ventas_router, prefix=settings.API_V1_STR)
 app.include_router(ia_asistente_router, prefix=settings.API_V1_STR)
 if notificaciones_router:
     app.include_router(notificaciones_router, prefix=settings.API_V1_STR)
-if sincronizacion_router:
-    app.include_router(sincronizacion_router, prefix=settings.API_V1_STR)
+app.include_router(sincronizacion_router, prefix=settings.API_V1_STR)
 app.include_router(ia_router, prefix=settings.API_V1_STR)
 app.include_router(groq_ia_router, prefix=settings.API_V1_STR)
 if ml_router:
