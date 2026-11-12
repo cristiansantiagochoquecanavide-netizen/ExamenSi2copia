@@ -40,6 +40,8 @@ services:
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
       STRIPE_CURRENCY: ${STRIPE_CURRENCY:-bob}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GROQ_MODEL: ${GROQ_MODEL:-openai/gpt-oss-120b}
     ports:
       - "8000:8000"
     volumes:
@@ -47,7 +49,6 @@ services:
       - ./backend/main.py:/app/main.py
       - ./backend/seeders:/app/seeders
       - ./backend/static:/app/static
-      - ./backend/entrypoint.sh:/app/entrypoint.sh
 
   frontend:
     build:

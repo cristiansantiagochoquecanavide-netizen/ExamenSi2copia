@@ -155,7 +155,7 @@ async def obtener_dashboard(
     demand = next((m for m in models if m.tipo_aprendizaje == "SUPERVISADO_REGRESION" and m.activo), None)
     rfm = next((m for m in models if m.tipo_aprendizaje == "NO_SUPERVISADO_CLUSTERING" and m.activo), None)
     projections = await service.obtener_proyecciones_stock(tenant.empresa_id)
-    items = projections["items"]
+    items = [_serialize_projection(item) for item in projections["items"]]
     return {
         "empresa_id": tenant.empresa_id,
         "precision_r2_demanda": float(demand.precision_metrica or 0) if demand else 0,
