@@ -284,7 +284,7 @@ import {
                         <thead>
                           <tr>
                             @for (col of rep.columnas; track col) {
-                              <th [class.cell-right]="isNumericColumn(col, rep.datos_tabulares)">
+                              <th>
                                 {{ formatColHeader(col) }}
                               </th>
                             }
@@ -294,7 +294,7 @@ import {
                           @for (row of rep.datos_tabulares; track $index) {
                             <tr>
                               @for (col of rep.columnas; track col) {
-                                <td [class.cell-right]="isNumericColumn(col, rep.datos_tabulares)"
+                                <td [class.cell-right]="isCurrencyCol(col)"
                                     [class.cell-currency]="isCurrencyCol(col)">
                                   {{ formatCellValue(row[col], col) }}
                                 </td>
@@ -1107,26 +1107,43 @@ import {
     }
 
     .saas-table thead th {
-      background: #F8F9FC;
-      color: #475569;
-      font-size: 0.73rem;
+      background: #17243A;
+      color: #FFFFFF;
+      font-size: 0.78rem;
       font-weight: 700;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.03em;
       text-transform: uppercase;
-      padding: 0.75rem 1rem;
-      border-bottom: 1px solid #E5E9F0;
+      padding: 0.85rem 1rem;
+      border-right: 1px solid #2D3E56;
+      border-bottom: 1px solid #17243A;
+      text-align: left;
       white-space: nowrap;
+    }
+
+    .saas-table thead th:last-child {
+      border-right: none;
     }
 
     .saas-table tbody td {
-      padding: 0.75rem 1rem;
+      padding: 0.8rem 1rem;
       color: #202938;
-      border-bottom: 1px solid #F1F5F9;
-      white-space: nowrap;
+      border-right: 1px solid #E5E9F0;
+      border-bottom: 1px solid #E5E9F0;
+      vertical-align: middle;
+      white-space: normal;
+      line-height: 1.35;
+    }
+
+    .saas-table tbody td:first-child {
+      max-width: 240px;
+    }
+
+    .saas-table tbody td:last-child {
+      border-right: none;
     }
 
     .saas-table tbody tr:nth-child(even) {
-      background: #FAFBFC;
+      background: #F8FAFC;
     }
 
     .saas-table tbody tr:hover {
@@ -1140,11 +1157,13 @@ import {
     .cell-right {
       text-align: right !important;
       font-variant-numeric: tabular-nums;
+      white-space: nowrap !important;
     }
 
     .cell-currency {
       color: #17243A;
-      font-weight: 600;
+      font-weight: 500;
+      white-space: nowrap !important;
     }
 
     .empty-results-box {
@@ -1758,12 +1777,12 @@ export class AiReportAssistantComponent implements OnInit, OnDestroy {
     if (val === null || val === undefined) return '—';
     if (typeof val === 'number') {
       if (this.isCurrencyCol(col)) {
-        return `Bs. ${val.toLocaleString('es-BO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        return `Bs. ${val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
       }
       if (Number.isInteger(val)) {
-        return val.toLocaleString('es-BO');
+        return val.toLocaleString('en-US');
       }
-      return val.toLocaleString('es-BO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
     return String(val);
   }

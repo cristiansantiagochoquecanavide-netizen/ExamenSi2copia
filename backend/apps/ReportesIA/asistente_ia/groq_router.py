@@ -294,7 +294,23 @@ async def consultar_ia(
     initial_summary = ""
     used_groq = False
 
-    if settings.GROQ_API_KEY:
+    p_lower = payload.prompt.lower()
+    is_canonical_intent = any(
+        k in p_lower
+        for k in (
+            "stock", "inventario", "agotad", "crític", "critic", "existencia", "quiebre",
+            "cliente", "vip", "frecuente", "comprador", "fidelidad",
+            "metodo", "método", "pago", "efectivo", "qr", "tarjeta", "canal",
+            "prenda", "producto", "más vendid", "mas vendid", "top", "estrella", "rotación", "rotacion",
+            "sucursal", "tienda", "ciudad", "comparar", "rendimiento",
+        )
+    )
+
+    if is_canonical_intent:
+        raw_sql, initial_summary = _deterministic_sql_and_summary(payload.prompt)
+        sql = _validate_sql(raw_sql)
+
+    if not sql and settings.GROQ_API_KEY:
         try:
             generated = await _groq_chat([
                 {"role": "system", "content": (
@@ -304,11 +320,17 @@ async def consultar_ia(
                     "detalles_venta dv (venta_id, variante_id, cantidad, precio_unitario, subtotal), "
                     "prenda_variantes pv (id, prenda_id, talla_id, color_id), "
                     "prendas p (id, empresa_id, nombre, categoria_id, precio_base), "
+                    "tallas t (id, codigo), "
+                    "colores col (id, nombre), "
                     "sucursales s (id, empresa_id, nombre), "
                     "inventario_stock i (variante_id, sucursal_id, cantidad_disponible, cantidad_reservada, stock_minimo), "
-                    "usuarios u (id, empresa_id, nombre, apellido, tipo_usuario, estado). "
-                    "No inventes columnas; talla_id y color_id son IDs, no nombres. "
-                    "Para stock crítico o bajo, une inventario_stock con prenda_variantes, prendas y sucursales, "
+                    "usuarios u (id, empresa_id, nombre, apellido, tipo_usuario, estado), "
+                    "pagos pg (id, venta_id, metodo_pago, monto). "
+                    "Para productos o prendas vendidas usa exactamente: "
+                    "SELECT p.nombre AS producto, t.codigo AS talla, s.nombre AS sucursal, "
+                    "SUM(dv.cantidad) AS total_unidades, ROUND(SUM(dv.subtotal), 2) AS ingresos_bs "
+                    "uniendo detalles_venta dv, prenda_variantes pv, prendas p, tallas t, ventas v y sucursales s. "
+                    "Para stock crítico o bajo, une inventario_stock con prenda_variantes, prendas, tallas, colores y sucursales, "
                     "filtra cantidad_disponible <= stock_minimo y muestra el nivel como CRITICO cuando "
                     "cantidad_disponible <= 2, en otro caso BAJO. inventario_stock no tiene empresa_id: "
                     "limita sus filas mediante prendas p.empresa_id = :tenant_id. "
@@ -317,7 +339,7 @@ async def consultar_ia(
                     "Filtra por empresa en ambas tablas usando v.empresa_id = :tenant_id y u.empresa_id = :tenant_id. "
                     "Debes filtrar por empresa en cada tabla que tenga ese campo: ventas, prendas, sucursales y usuarios, "
                     "usando alias.empresa_id = :tenant_id. Puedes partir de cualquiera de ellas. "
-                    "Usa una única sentencia SELECT con GROUP BY y ORDER BY (sin subconsultas ni CTE WITH) y un LIMIT de hasta 100. No escribas Markdown ni comentarios."
+                    "Usa una única sentencia SELECT con GROUP BY y ORDER BY y un LIMIT de hasta 100. No escribas Markdown ni comentarios."
                 )},
                 {"role": "user", "content": payload.prompt.strip()},
             ], json_mode=True)
@@ -344,18 +366,7 @@ async def consultar_ia(
         columns = list(result.keys())
         rows = [{key: _json_value(value) for key, value in row._mapping.items()} for row in result.fetchall()]
 
-    summary = ""
-    if rows and used_groq and settings.GROQ_API_KEY:
-        try:
-            summary = await _groq_chat([
-                {"role": "system", "content": "Resume en español los resultados analíticos con claridad. No inventes datos; si no hay filas, indícalo."},
-                {"role": "user", "content": json.dumps({"pregunta": payload.prompt, "resultados": rows[:100]}, ensure_ascii=False)},
-            ])
-        except Exception:
-            summary = ""
-
-    if not summary:
-        summary = _synthesize_local_summary(payload.prompt, rows, company_name) if rows else (initial_summary or "La consulta no encontró resultados para este período.")
+    summary = _synthesize_local_summary(payload.prompt, rows, company_name) if rows else (initial_summary or "La consulta no encontró resultados para este período.")
 
     report = ReporteGenerativoIA(
         empresa_id=tenant.empresa_id,
